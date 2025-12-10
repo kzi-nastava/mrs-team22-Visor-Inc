@@ -1,6 +1,6 @@
 # Visor Voom
 
-*Drive Smarter, Not Harder: Next-Level Ride-Sharing Management.*
+*Drive Smarter, Not Harder: Next-Level Ride-Sharing Management System.*
 
 ## Contributors
 
