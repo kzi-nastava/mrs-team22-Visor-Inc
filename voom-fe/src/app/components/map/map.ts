@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
-import { GeocodingService } from '../services/geocoding.service';
+import { GeocodingService } from '../../services/geocoding.service';
 
 @Component({
   selector: 'app-map',
