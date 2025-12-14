@@ -1,6 +1,6 @@
 import {Component, forwardRef, Input} from '@angular/core';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
-import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
+import {MatError, MatFormField, MatInput, MatLabel, MatSuffix} from '@angular/material/input';
 import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {Subject, takeUntil} from 'rxjs';
 
@@ -13,10 +13,16 @@ import {Subject, takeUntil} from 'rxjs';
     MatDatepickerToggle,
     MatDatepicker,
     MatError,
-    MatInput
+    MatInput,
+    MatSuffix
   ],
   templateUrl: './value-input-date.html',
   styleUrl: './value-input-date.css',
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => ValueInputDate),
+    multi: true
+  }]
 })
 export class ValueInputDate implements ControlValueAccessor{
 

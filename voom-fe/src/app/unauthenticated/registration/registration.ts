@@ -4,6 +4,8 @@ import {ValueInputString} from '../../shared/value-input/value-input-string/valu
 import {Router} from '@angular/router';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ROUTE_LOGIN} from '../login/login';
+import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
+import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -12,7 +14,13 @@ export const ROUTE_REGISTRATION = 'registration';
   imports: [
     MatButton,
     ValueInputString,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatStep,
+    MatStepLabel,
+    MatStepper,
+    MatStepperNext,
+    MatStepperPrevious,
+    ValueInputDate
   ],
   templateUrl: './registration.html',
   styleUrl: './registration.css',
@@ -28,6 +36,8 @@ export class Registration {
     firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+    birthDate: new FormControl<Date | null>(null, [Validators.required]),
+    phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
   });
 
   register() {

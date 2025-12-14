@@ -1,8 +1,8 @@
-<mat-form-field>
+<mat-form-field class="w-full">
   <mat-label>{{ label }}</mat-label>
   <input [matDatepicker]="picker" matInput>
-  <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
-  <mat-datepicker #picker></mat-datepicker>
+  <mat-datepicker-toggle [for]="picker" matIconSuffix/>
+  <mat-datepicker #picker/>
   <mat-error class="text-error">
     @for (error of getErrors(); track error) {
       {{ error }}

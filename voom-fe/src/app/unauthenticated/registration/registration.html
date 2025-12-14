@@ -1,19 +1,46 @@
-<div class="md:py-32">
+<div class="py-12">
   <div class="flex justify-center">
-    <div class="max-w-xl space-y-8">
-      <div class="w-96">
+    <div class="w-xl space-y-8">
+      <div class="w-xl grid justify-center">
         <img [attr.src]="'assets/images/logo.png'" alt="Voom Logo" class="w-96"/>
         <h1 class="text-xl text-center text-primary">Create new account</h1>
       </div>
-      <div class="flex flex-col space-y-8">
-        <app-value-input-string [label]="'Email'" [formControl]="form.controls.email"/>
-        <app-value-input-string [label]="'Password'" [formControl]="form.controls.password1" [hide]="true"/>
-        <app-value-input-string [label]="'Repeat Password'" [formControl]="form.controls.password2" [hide]="true"/>
-        <button matButton="filled" (click)="register()">Sign up</button>
-      </div>
-      <div class="flex justify-center space-x-2">
-        <h1 class="text-sm text-center text-primary">Already have an account?</h1>
-        <h1 class="text-sm text-secondary cursor-pointer" (click)="login()">Login</h1>
+      <div>
+        <mat-horizontal-stepper>
+          <mat-step>
+            <ng-template matStepLabel>Personal</ng-template>
+            <div class="flex flex-col space-y-6 py-8">
+              <app-value-input-string [label]="'First Name'" [formControl]="form.controls.firstName"/>
+              <app-value-input-string [label]="'Last Name'" [formControl]="form.controls.lastName"/>
+              <app-value-input-date [label]="'Birth Date'" [formControl]="form.controls.birthDate"/>
+              <button matButton="filled" matStepperNext>Next</button>
+            </div>
+            <div class="flex justify-center space-x-2">
+              <h1 class="text-sm text-center text-primary">Already have an account?</h1>
+              <h1 class="text-sm text-secondary cursor-pointer" (click)="login()">Login</h1>
+            </div>
+          </mat-step>
+          <mat-step>
+            <ng-template matStepLabel>Account</ng-template>
+            <div class="flex flex-col space-y-6 py-8">
+              <app-value-input-string [label]="'Email'" [formControl]="form.controls.email"/>
+              <app-value-input-string [label]="'Password'" [formControl]="form.controls.password1" [hide]="true"/>
+              <app-value-input-string [label]="'Repeat Password'" [formControl]="form.controls.password2" [hide]="true"/>
+              <div class="w-full space-x-4 flex ">
+                <button matButton="filled" class="w-full" matStepperPrevious>Previous</button>
+                <button matButton="filled" class="w-full"  matStepperNext>Next</button>
+              </div>
+            </div>
+          </mat-step>
+          <mat-step>
+            <ng-template matStepLabel>Contact</ng-template>
+            <div class="flex flex-col space-y-6 py-8">
+              <app-value-input-string [label]="'Phone Number'" [formControl]="form.controls.phoneNumber"/>
+              <app-value-input-string [label]="'Address'" [formControl]="form.controls.address"/>
+              <button matButton="filled" (click)="register()">Sign up</button>
+            </div>
+          </mat-step>
+        </mat-horizontal-stepper>
       </div>
     </div>
   </div>
