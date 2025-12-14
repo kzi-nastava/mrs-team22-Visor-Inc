@@ -7,6 +7,12 @@
 @use '@angular/material' as mat;
 @use 'tailwindcss';
 
+$primary: #4E3955;
+$secondary: #312b33;
+$tertiary: #b1b2b5;
+$violet: #bf00ff;
+$error: #ff0042;
+
 html {
   @include mat.theme((
     color: (
@@ -34,3 +40,15 @@ body {
   // Reset the user agent margin.
   margin: 0;
 }
+
+@include mat.form-field-overrides((
+  filled-container-color: transparent,
+  outlined-container-shape: var(--mat-sys-corner-extra-large),
+  outlined-outline-color: $primary,
+  outlined-outline-width: 2px,
+  outlined-label-text-color: $secondary,
+
+  outlined-focus-outline-color: $primary,
+  outlined-focus-outline-width: 2px,
+  outlined-focus-label-text-color: $secondary,
+));

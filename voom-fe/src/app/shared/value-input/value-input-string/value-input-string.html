@@ -1,0 +1,9 @@
+<mat-form-field class="w-full">
+  <mat-label>{{ label }}</mat-label>
+  <input matInput [type]="'text'" [formControl]="formControl"/>
+  <mat-error>
+    @for (error of getErrors(); track error) {
+      {{ error }}
+    }
+  </mat-error>
+</mat-form-field>

@@ -1,0 +1,9 @@
+<mat-form-field>
+  <mat-label>{{ label }}</mat-label>
+  <input matInput [matTimepicker]="picker">
+  <mat-timepicker-toggle matSuffix [for]="picker"></mat-timepicker-toggle>
+  <mat-timepicker #picker></mat-timepicker>
+  @for (error of getErrors(); track error) {
+    <mat-error class="text-[12px]">{{ error }}</mat-error>
+  }
+</mat-form-field>
