@@ -1,1 +1,20 @@
-<p>registration works!</p>
+<div class="md:py-32">
+  <div class="flex justify-center">
+    <div class="max-w-xl space-y-8">
+      <div class="w-96">
+        <img [attr.src]="'assets/images/logo.png'" alt="Voom Logo" class="w-96"/>
+        <h1 class="text-xl text-center text-primary">Create new account</h1>
+      </div>
+      <div class="flex flex-col space-y-8">
+        <app-value-input-string [label]="'Email'" [formControl]="form.controls.email"/>
+        <app-value-input-string [label]="'Password'" [formControl]="form.controls.password1" [hide]="true"/>
+        <app-value-input-string [label]="'Repeat Password'" [formControl]="form.controls.password2" [hide]="true"/>
+        <button matButton="filled" (click)="register()">Sign up</button>
+      </div>
+      <div class="flex justify-center space-x-2">
+        <h1 class="text-sm text-center text-primary">Already have an account?</h1>
+        <h1 class="text-sm text-secondary cursor-pointer" (click)="login()">Login</h1>
+      </div>
+    </div>
+  </div>
+</div>

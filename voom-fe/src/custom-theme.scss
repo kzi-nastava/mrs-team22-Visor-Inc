@@ -6,12 +6,12 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 @use 'tailwindcss';
+@use 'app/shared/scss/overrides';
 
-$primary: #4E3955;
-$secondary: #312b33;
+$primary: #0f1e52;
+$secondary: #4a68d2;
 $tertiary: #b1b2b5;
-$violet: #bf00ff;
-$error: #ff0042;
+$error: #7d0220;
 
 html {
   @include mat.theme((
@@ -46,9 +46,9 @@ body {
   outlined-container-shape: var(--mat-sys-corner-extra-large),
   outlined-outline-color: $primary,
   outlined-outline-width: 2px,
-  outlined-label-text-color: $secondary,
+  outlined-label-text-color: $primary,
 
   outlined-focus-outline-color: $primary,
   outlined-focus-outline-width: 2px,
-  outlined-focus-label-text-color: $secondary,
+  outlined-focus-label-text-color: $primary,
 ));

@@ -3,7 +3,9 @@
   <input [matDatepicker]="picker" matInput>
   <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
   <mat-datepicker #picker></mat-datepicker>
-  @for (error of getErrors(); track error) {
-    <mat-error class="text-[12px]">{{ error }}</mat-error>
-  }
+  <mat-error class="text-error">
+    @for (error of getErrors(); track error) {
+      {{ error }}
+    }
+  </mat-error>
 </mat-form-field>

@@ -1,5 +1,5 @@
-import {Component, Input} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {Component, forwardRef, Input} from '@angular/core';
+import {FormControl, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {MatTimepicker, MatTimepickerInput, MatTimepickerToggle} from '@angular/material/timepicker';
 
@@ -18,7 +18,7 @@ import {MatTimepicker, MatTimepickerInput, MatTimepickerToggle} from '@angular/m
   styleUrl: './value-input-time.css',
 })
 export class ValueInputTime {
-  @Input({ required: true }) formControl!: FormControl<string>;
+  formControl = new FormControl<string>('');
   @Input({ required: true }) label!: string;
 
   getErrors(): string[] {

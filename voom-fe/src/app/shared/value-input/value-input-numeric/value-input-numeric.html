@@ -1,7 +1,7 @@
 <mat-form-field class="w-full">
   <mat-label>{{ label }}</mat-label>
   <input matInput [type]="'text'" [formControl]="formControl" (blur)="formControl.updateValueAndValidity()" autocomplete="off"/>
-  <mat-error>
+  <mat-error class="text-error">
     @for (error of getErrors(); track error) {
       {{ error }}
     }

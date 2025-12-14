@@ -1,6 +1,20 @@
-<div class="py-32 space-y-4 flex-col flex justify-center">
-  <img src="/assets/images/logo.png" alt="Voom Logo" width="339" height="143"/>
-  <app-value-input-string [label]="'Username'" [formControl]="form.controls.email"/>
-  <app-value-input-string [label]="'Password'" [formControl]="form.controls.password"/>
-  <button matButton>Whatever button</button>
+<div class="md:py-32">
+  <div class="flex justify-center">
+    <div class="max-w-xl space-y-8">
+      <div class="w-96">
+        <img [attr.src]="'assets/images/logo.png'" alt="Voom Logo" class="w-96"/>
+        <h1 class="text-xl text-center text-primary">Sign in to continue</h1>
+      </div>
+      <div class="flex flex-col space-y-4">
+        <app-value-input-string [label]="'Email'" [formControl]="form.controls.email"/>
+        <app-value-input-string [label]="'Password'" [formControl]="form.controls.password" [hide]="true"/>
+        <h1 class="text-sm pb-4 text-center text-secondary cursor-pointer" (click)="forgotPassword()">Forgot password?</h1>
+        <button matButton="filled" (click)="login()">Sign in</button>
+      </div>
+      <div class="flex justify-center space-x-2">
+        <h1 class="text-sm text-center text-primary">Don't have an account?</h1>
+        <h1 class="text-sm text-secondary cursor-pointer" (click)="registration()">Register</h1>
+      </div>
+    </div>
+  </div>
 </div>
