@@ -29,19 +29,25 @@ export class Registration {
 
   private router = inject(Router);
 
-  form = new FormGroup({
+  personalForm = new FormGroup({
+    firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+    lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+    birthDate: new FormControl<Date | null>(null, [Validators.required]),
+  })
+
+  accountForm = new FormGroup({
     email: new FormControl<string>('', [Validators.required, Validators.email, Validators.maxLength(255)]),
     password1: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
     password2: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
-    firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+  })
+
+  contactForm = new FormGroup({
     address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    birthDate: new FormControl<Date | null>(null, [Validators.required]),
     phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
   });
 
   register() {
-    console.log(this.form.value);
+    console.log('register');
   }
 
   login() {

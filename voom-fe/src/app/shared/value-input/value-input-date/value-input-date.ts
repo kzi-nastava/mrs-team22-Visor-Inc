@@ -1,7 +1,7 @@
 import {Component, forwardRef, Input} from '@angular/core';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
 import {MatError, MatFormField, MatInput, MatLabel, MatSuffix} from '@angular/material/input';
-import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 import {Subject, takeUntil} from 'rxjs';
 
 @Component({
@@ -14,7 +14,8 @@ import {Subject, takeUntil} from 'rxjs';
     MatDatepicker,
     MatError,
     MatInput,
-    MatSuffix
+    MatSuffix,
+    ReactiveFormsModule
   ],
   templateUrl: './value-input-date.html',
   styleUrl: './value-input-date.css',
