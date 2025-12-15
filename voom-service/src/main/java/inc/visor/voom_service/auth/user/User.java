@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.model;
+package inc.visor.voom_service.auth.user;
 
 import inc.visor.voom_service.domain.model.Person;
 import jakarta.persistence.*;
