@@ -125,6 +125,103 @@
     </div>
 
   </div>
+  
+@if (userRole === 'Driver') {
+  <div class="mt-16">
+
+    <h3 class="text-xs font-semibold tracking-widest text-gray-500 mb-8">
+      DRIVER INFORMATION
+    </h3>
+
+    <div class="mb-10 text-sm text-gray-700">
+      Active hours (last 24h):
+      <span class="font-semibold ml-2">6.5h</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8">
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-700">
+          Vehicle model
+        </label>
+        <input
+          type="text"
+          value="Toyota Corolla"
+          class="w-full px-5 py-3 border border-gray-300 rounded-full text-sm
+                 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-700">
+          Vehicle type
+        </label>
+        <select
+          class="w-full px-5 py-3 border border-gray-300 rounded-full text-sm
+                 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option selected>Standard</option>
+          <option>Luxury</option>
+          <option>Van</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-700">
+          License plates
+        </label>
+        <input
+          type="text"
+          value="NS-123-AB"
+          class="w-full px-5 py-3 border border-gray-300 rounded-full text-sm
+                 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-700">
+          Number of seats
+        </label>
+        <input
+          type="number"
+          value="5"
+          class="w-full px-5 py-3 border border-gray-300 rounded-full text-sm
+                 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </div>
+
+    </div>
+
+    <div class="mt-10 flex flex-col gap-4">
+
+      <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+        <input
+          type="checkbox"
+          checked
+          class="w-5 h-5 rounded border-gray-300
+                 text-blue-900 focus:ring-blue-600"
+        />
+        Baby transport allowed
+      </label>
+
+      <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+        <input
+          type="checkbox"
+          class="w-5 h-5 rounded border-gray-300
+                 text-blue-900 focus:ring-blue-600"
+        />
+        Pets allowed
+      </label>
+
+    </div>
+
+    <div class="mt-8 text-xs text-gray-500 italic">
+      Changes made by drivers require administrator approval.
+    </div>
+
+  </div>
+}
+
 
 <div class="flex justify-center mt-14 ">
     <button

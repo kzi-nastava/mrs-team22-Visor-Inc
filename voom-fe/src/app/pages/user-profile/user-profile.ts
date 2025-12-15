@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -28,5 +28,7 @@ import { Footer } from '../../components/footer/footer';
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
+
+  userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
 
 }
