@@ -2,7 +2,7 @@ package inc.visor.voom_service.auth.dto;
 
 import java.util.Objects;
 
-public class ForgotPasswordRequestDto {
+public class ForgotPasswordDto {
 
     private String email;
 
@@ -24,7 +24,7 @@ public class ForgotPasswordRequestDto {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ForgotPasswordRequestDto that = (ForgotPasswordRequestDto) o;
+        ForgotPasswordDto that = (ForgotPasswordDto) o;
         return Objects.equals(email, that.email);
     }
 
