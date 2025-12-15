@@ -2,10 +2,13 @@ import { AfterViewInit, Component } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import { GeocodingService } from '../services/geocoding.service';
+import { RideForm } from '../ride-form/ride-form';
 
 @Component({
   selector: 'app-map',
-  imports: [],
+  imports: [
+    RideForm
+  ],
   templateUrl: './map.html',
   styleUrl: './map.css',
 })
