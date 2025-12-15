@@ -1,6 +1,6 @@
-package inc.visor.voom_service.auth.token;
+package inc.visor.voom_service.auth.token.model;
 
-import inc.visor.voom_service.auth.user.User;
+import inc.visor.voom_service.auth.user.model.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

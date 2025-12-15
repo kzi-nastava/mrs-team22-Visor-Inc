@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.service;
+package inc.visor.voom_service.auth.user.service;
 
 import org.springframework.stereotype.Service;
 

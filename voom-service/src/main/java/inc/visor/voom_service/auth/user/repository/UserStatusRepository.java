@@ -1,6 +1,6 @@
-package inc.visor.voom_service.auth.repository;
+package inc.visor.voom_service.auth.user.repository;
 
-import inc.visor.voom_service.auth.user.UserStatus;
+import inc.visor.voom_service.auth.user.model.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

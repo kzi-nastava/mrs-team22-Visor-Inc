@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.user;
+package inc.visor.voom_service.auth.user.model;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
