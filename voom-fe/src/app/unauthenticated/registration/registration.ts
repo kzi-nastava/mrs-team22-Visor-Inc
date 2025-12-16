@@ -6,6 +6,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ROUTE_LOGIN} from '../login/login';
 import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
 import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
+import {ROUTE_USER_PROFILE} from '../../authenticated/user/user-profile/user-profile';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -48,6 +49,7 @@ export class Registration {
 
   register() {
     console.log('register');
+    this.router.navigate([ROUTE_USER_PROFILE]);
   }
 
   login() {
