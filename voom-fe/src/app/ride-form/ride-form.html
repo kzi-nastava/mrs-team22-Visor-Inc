@@ -1,26 +1,45 @@
+<app-map (routeCalculated)="onRouteCalculated($event)"></app-map>
 <section class="max-w-4xl ml-auto mr-auto p-[50px]">
   <form class="flex items-center justify-center gap-[30px] ml-auto mr-auto max-w-7xl">
     <label for="pickupLocation" class="flex flex-col items-center">
       <div>Pickup Location</div>
-      <input type="text" name="pickupLocation" class="input-field" />
+      <input
+        type="text"
+        name="pickupLocation"
+        class="input-field"
+        [value]="sourceField()"
+        (input)="sourceField.set($any($event.target).value)"
+      />
     </label>
     <label for="dropoffLocation" class="flex flex-col items-center">
       <div>Dropoff Location</div>
-      <input type="text" name="dropoffLocation" class="input-field" />
+      <input
+        type="text"
+        name="dropoffLocation"
+        class="input-field"
+        [value]="destField()"
+        (input)="destField.set($any($event.target).value)"
+      />
     </label>
     <label for="vehicleType" class="flex flex-col items-center">
       <div>Vehicle Type</div>
-      <select name="vehicleType" id="" class="input-field">
-        <option value="standard">Standard</option>
-        <option value="luxury">Luxury</option>
-        <option value="van">Van</option>
+      <select
+        name="vehicleType"
+        id=""
+        class="input-field"
+        [value]="typeValue()"
+        (change)="onTypeChange($event)"
+      >
+        <option [value]="100" selected>Standard</option>
+        <option [value]="200">Luxury</option>
+        <option [value]="130">Van</option>
       </select>
     </label>
 
     <select name="pickupTime" id="" class="hidden"></select>
   </form>
 
-  <p class="text-xl text-center mt-[20px]">Enter pickup, dropoff and type to see your estimate</p>
+  <p class="text-xl text-center mt-[20px]">{{ estimateMsg() }}</p>
 
   <div class="cursor-pointer flex justify-center mt-[20px]">
     <a

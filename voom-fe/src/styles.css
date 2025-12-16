@@ -23,3 +23,8 @@ body {
 .input-field {
   @apply rounded-4xl border-[2px] border-[--primary-color] p-[10px] mt-[10px];
 }
+
+/* leaflet control .hide() api is not implemented correctly so this is the workaround */
+.leaflet-routing-alternatives-container {
+  display: none !important;
+}
