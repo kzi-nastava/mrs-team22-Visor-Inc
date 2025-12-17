@@ -1,0 +1,83 @@
+<app-header></app-header>
+<app-map></app-map>
+<section class="flex flex-col items-center w-full">
+  <form
+    class="pt-20 pl-20 pr-20 pb-10 flex max-w-[1200px] w-full ml-auto mr-auto justify-between items-center"
+  >
+    <app-value-input-string label="Pickup Location"></app-value-input-string>
+    <app-value-input-string label="Dropoff Location"></app-value-input-string>
+    <app-dropdown [options]="vehicleOptions" [(selected)]="selectedVehicle"> </app-dropdown>
+    <app-dropdown [options]="timeOptions" [(selected)]="selectedTime"> </app-dropdown>
+  </form>
+  <p class="text-center text-lg mb-10">Enter pickup, dropoff and type to see your estimate.</p>
+  <button matButton="filled" routerLink="/login">Sign in to Confirm Ride</button>
+</section>
+<section
+  class="how-it-works grid grid-cols-2 p-20 max-w-[1200px] mr-auto ml-auto content-center place-items-center"
+>
+  <h2 class="text-3xl font-bold mb-20 text-center col-span-2">How it Works?</h2>
+  <div class="text-section max-w-[300px]">
+    <h2 class="text-xl font-bold mb-5">Choose Your Pickup & Drop-off</h2>
+    <p>
+      Set where you’re starting and where you’re going. Use the map or search by address to quickly
+      select your pickup and destination. You’ll see the estimated route and distance instantly.
+    </p>
+  </div>
+  <img src="assets/images/home grid img1.png" alt="" />
+  <img src="assets/images/home grid img2.png" alt="" />
+  <div class="text-section max-w-[300px]">
+    <h2 class="text-xl font-bold mb-5">Add Stops Along the Way</h2>
+    <p>
+      Need to stop somewhere in between? Add additional waypoints to your route — whether it’s
+      picking someone up, making a quick stop, or changing plans mid-ride.
+    </p>
+  </div>
+  <div class="text-section max-w-[300px]">
+    <h2 class="text-xl font-bold mb-5">Get Matched With a Driver</h2>
+    <p>
+      Once your route is ready, nearby drivers are matched based on availability. You can track the
+      driver in real time and see exactly how the ride progresses on the map.
+    </p>
+  </div>
+  <img src="assets/images/home grid img3.png" alt="" />
+  <img src="assets/images/home grid img4.png" alt="" />
+  <div class="text-section max-w-[300px]">
+    <h2 class="text-xl font-bold mb-5">Pay After the Ride</h2>
+    <p>
+      No upfront payment. Once you reach your final destination, you pay directly in the car.
+      Simple, transparent, and hassle-free — you only pay for the ride you took.
+    </p>
+  </div>
+</section>
+<section class="p-20 bg-blue-200">
+  <h2 class="text-3xl font-bold mb-20 text-center col-span-2">Vehicle Types</h2>
+  <div class="grid grid-cols-3 max-w-[1200px] ml-auto mr-auto">
+    <div class="flex flex-col items-center">
+      <h3 class="text-center text-2xl mb-2">Standard</h3>
+      <p class="text-gray-400">100$</p>
+    </div>
+    <div class="flex flex-col items-center">
+      <h3 class="text-center text-2xl mb-2">Luxury</h3>
+      <p class="text-gray-400">200$</p>
+    </div>
+    <div class="flex flex-col items-center">
+      <h3 class="text-center text-2xl mb-2">Van</h3>
+      <p class="text-gray-400">130$</p>
+    </div>
+    <img src="assets/images/standard car illustration.png" alt="" />
+    <img src="assets/images/luxury car illustration.png" alt="" />
+    <img src="assets/images/van car illustration.png" alt="" />
+  </div>
+</section>
+
+<section class="p-30">
+  <h2 class="text-3xl font-bold mb-20 text-center col-span-2">
+    Want to get live notifications to make sure to not miss any rides? <br />
+    Download our Mobile App!
+  </h2>
+  <div class="flex max-w-[420px] mr-auto ml-auto justify-between">
+    <a href="#"><img src="assets/icons/google alt color.png" alt="" /></a>
+    <a href="#"><img src="assets/icons/app store alt fixed.png" alt="" /></a>
+  </div>
+</section>
+<app-footer></app-footer>
