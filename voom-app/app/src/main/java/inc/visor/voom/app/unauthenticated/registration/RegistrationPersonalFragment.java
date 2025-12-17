@@ -1,4 +1,4 @@
-package inc.visor.voom.app.unauthenticated;
+package inc.visor.voom.app.unauthenticated.registration;
 
 import android.annotation.SuppressLint;
 
@@ -7,24 +7,38 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import inc.visor.voom.app.databinding.FragmentRegistrationBinding;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.textfield.TextInputEditText;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import inc.visor.voom.app.R;
+import inc.visor.voom.app.databinding.FragmentRegistrationPersonalBinding;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class RegistrationFragment extends Fragment {
+public class RegistrationPersonalFragment extends Fragment {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,7 +120,7 @@ public class RegistrationFragment extends Fragment {
         }
     };
 
-    private FragmentRegistrationBinding binding;
+    private FragmentRegistrationPersonalBinding binding;
 
     @Nullable
     @Override
@@ -114,10 +128,15 @@ public class RegistrationFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentRegistrationBinding.inflate(inflater, container, false);
+        binding = FragmentRegistrationPersonalBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
+
+    RegistrationViewModel viewModel;
+    TextInputEditText firstNameInput;
+    TextInputEditText lastNameInput;
+    TextInputEditText birthDateInput;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -135,6 +154,91 @@ public class RegistrationFragment extends Fragment {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
+
+        firstNameInput = view.findViewById(R.id.first_name_input);
+        lastNameInput = view.findViewById(R.id.last_name_input);
+        birthDateInput = view.findViewById(R.id.birth_date_input);
+
+        viewModel = new ViewModelProvider(
+                requireParentFragment()
+        ).get(RegistrationViewModel.class);
+
+        setupFirstNameInput();
+        setupLastNameInput();
+        setupBirthDateInput();
+    }
+
+    private void setupFirstNameInput() {
+        firstNameInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String result = editable.toString();
+                if (!result.isEmpty()) {
+                    firstNameInput.setError(null);
+                } else {
+                    firstNameInput.setError("First name cannot be empty");
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setFirstName(charSequence.toString());
+            }
+        });
+    }
+
+    private void setupLastNameInput() {
+        lastNameInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String result = editable.toString();
+                if (!result.isEmpty()) {
+                    lastNameInput.setError(null);
+                } else {
+                    firstNameInput.setError("First name cannot be empty");
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setLastName(charSequence.toString());
+            }
+        });
+    }
+
+    private void setupBirthDateInput() {
+
+        final CalendarConstraints constraints = new CalendarConstraints.Builder()
+                .setEnd(Calendar.getInstance().getTimeInMillis()) // Limit to today
+                .build();
+
+        final MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Birth Date")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setCalendarConstraints(constraints)
+                .build();
+
+        birthDateInput.setOnClickListener(v -> {
+            datePicker.show(getParentFragmentManager(), "DATE_PICKER");
+        });
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            final Date birthDate = new Date(selection);
+            final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            birthDateInput.setText(sdf.format(birthDate));
+            viewModel.setBirthDate(birthDate);
+        });
     }
 
     @Override

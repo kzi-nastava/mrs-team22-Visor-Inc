@@ -16,6 +16,7 @@
     <string name="repeat_password">Repeat password</string>
     <string name="phone_number">Phone number</string>
     <string name="address">Address</string>
+    <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="signup">sign up</string>
     <string name="dummy_button">Dummy Button</string>

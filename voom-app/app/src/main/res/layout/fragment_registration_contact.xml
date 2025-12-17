@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.VoomApp.FullscreenContainer"
-    tools:context=".unauthenticated.RegistrationContactFragment">
+    tools:context=".unauthenticated.registration.RegistrationContactFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -53,6 +53,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/phone_number_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
@@ -75,6 +76,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/address_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
