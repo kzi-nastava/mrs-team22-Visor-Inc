@@ -1,4 +1,4 @@
-package inc.visor.voom.app.unauthenticated;
+package inc.visor.voom.app.unauthenticated.registration;
 
 import android.annotation.SuppressLint;
 
@@ -18,13 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import inc.visor.voom.app.databinding.FragmentRegistrationAccountBinding;
+import inc.visor.voom.app.databinding.FragmentRegistrationBinding;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class RegistrationAccountFragment extends Fragment {
+public class RegistrationFragment extends Fragment {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,7 +106,7 @@ public class RegistrationAccountFragment extends Fragment {
         }
     };
 
-    private FragmentRegistrationAccountBinding binding;
+    private FragmentRegistrationBinding binding;
 
     @Nullable
     @Override
@@ -114,7 +114,7 @@ public class RegistrationAccountFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentRegistrationAccountBinding.inflate(inflater, container, false);
+        binding = FragmentRegistrationBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }

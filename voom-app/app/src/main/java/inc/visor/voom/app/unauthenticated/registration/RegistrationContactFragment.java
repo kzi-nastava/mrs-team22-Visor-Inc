@@ -1,4 +1,4 @@
-package inc.visor.voom.app.unauthenticated;
+package inc.visor.voom.app.unauthenticated.registration;
 
 import android.annotation.SuppressLint;
 
@@ -7,24 +7,30 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import inc.visor.voom.app.databinding.FragmentRegistrationPersonalBinding;
+import com.google.android.material.textfield.TextInputEditText;
+
+import inc.visor.voom.app.R;
+import inc.visor.voom.app.databinding.FragmentRegistrationContactBinding;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class RegistrationPersonalFragment extends Fragment {
+public class RegistrationContactFragment extends Fragment {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,7 +112,7 @@ public class RegistrationPersonalFragment extends Fragment {
         }
     };
 
-    private FragmentRegistrationPersonalBinding binding;
+    private FragmentRegistrationContactBinding binding;
 
     @Nullable
     @Override
@@ -114,11 +120,15 @@ public class RegistrationPersonalFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentRegistrationPersonalBinding.inflate(inflater, container, false);
+        binding = FragmentRegistrationContactBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
 
+    RegistrationViewModel viewModel;
+    TextInputEditText phoneNumberInput;
+    TextInputEditText addressInput;
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -135,6 +145,69 @@ public class RegistrationPersonalFragment extends Fragment {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
+        
+        phoneNumberInput = view.findViewById(R.id.phone_number_input);
+        addressInput = view.findViewById(R.id.address_input);
+
+        viewModel = new ViewModelProvider(
+                requireParentFragment()
+        ).get(RegistrationViewModel.class);
+
+        setupPhoneNumberInput();
+        setupAddressInput();
+        
+    }
+
+    private void setupPhoneNumberInput() {
+        phoneNumberInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String phoneNumber = editable.toString();
+                if (phoneNumber.isEmpty()) {
+                    phoneNumberInput.setError("Email is required");
+                } else if (phoneNumber.length() < 10) {
+                    phoneNumberInput.setError("Phone number must be at least 10 numbers long");
+                } else {
+                    phoneNumberInput.setError(null);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setPhoneNumber(charSequence.toString());
+            }
+        });
+    }
+
+    private void setupAddressInput() {
+        addressInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String address = editable.toString();
+                if (address.isEmpty()) {
+                    addressInput.setError("Email is required");
+                } else if (address.length() < 10) {
+                    addressInput.setError("Phone number must be at least 10 numbers long");
+                } else {
+                    addressInput.setError(null);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setAddress(charSequence.toString());
+            }
+        });
     }
 
     @Override

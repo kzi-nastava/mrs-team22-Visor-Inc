@@ -1,4 +1,4 @@
-package inc.visor.voom.app.unauthenticated;
+package inc.visor.voom.app.unauthenticated.registration;
 
 import android.annotation.SuppressLint;
 
@@ -7,24 +7,30 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import inc.visor.voom.app.databinding.FragmentRegistrationContactBinding;
+import com.google.android.material.textfield.TextInputEditText;
+
+import inc.visor.voom.app.R;
+import inc.visor.voom.app.databinding.FragmentRegistrationAccountBinding;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class RegistrationContactFragment extends Fragment {
+public class RegistrationAccountFragment extends Fragment {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -106,7 +112,7 @@ public class RegistrationContactFragment extends Fragment {
         }
     };
 
-    private FragmentRegistrationContactBinding binding;
+    private FragmentRegistrationAccountBinding binding;
 
     @Nullable
     @Override
@@ -114,10 +120,15 @@ public class RegistrationContactFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentRegistrationContactBinding.inflate(inflater, container, false);
+        binding = FragmentRegistrationAccountBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
+
+    RegistrationViewModel viewModel;
+    TextInputEditText emailInput;
+    TextInputEditText passwordInput;
+    TextInputEditText repeatPasswordInput;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -135,7 +146,102 @@ public class RegistrationContactFragment extends Fragment {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
+
+        emailInput = view.findViewById(R.id.email_input);
+        passwordInput = view.findViewById(R.id.password_input);
+        repeatPasswordInput = view.findViewById(R.id.repeat_password_input);
+
+        viewModel = new ViewModelProvider(
+                requireParentFragment()
+        ).get(RegistrationViewModel.class);
+
+        setupEmailInput();
+        setupPasswordInput();
+        setupRepeatPasswordInput();
     }
+
+    private void setupEmailInput() {
+        emailInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String email = editable.toString();
+                if (email.isEmpty()) {
+                    emailInput.setError("Email is required");
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailInput.setError("Please enter a valid email address");
+                } else {
+                    emailInput.setError(null);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setEmail(charSequence.toString());
+            }
+        });
+    }
+
+    private void setupPasswordInput() {
+        passwordInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String password = editable.toString();
+                if (password.isEmpty()) {
+                    passwordInput.setError("Password is required");
+                } else if (password.length() < 8) {
+                    passwordInput.setError("Password must be at least 8 characters");
+                } else {
+                    passwordInput.setError(null);
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setPassword(charSequence.toString());
+            }
+        });
+    }
+
+    private void setupRepeatPasswordInput() {
+        repeatPasswordInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String password = viewModel.getPassword().getValue();
+                final String repeatedPassword = editable.toString();
+                if (repeatedPassword.isEmpty()) {
+                    passwordInput.setError("Password is required");
+                } else if (repeatedPassword.length() < 8) {
+                    passwordInput.setError("Password must be at least 8 characters");
+                } else if (!repeatedPassword.equals(password)) {
+                    passwordInput.setError("Passwords must match");
+                } else {
+                    passwordInput.setError(null);
+                }
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                viewModel.setRepeatPassword(charSequence.toString());
+            }
+        });
+    }
+
 
     @Override
     public void onResume() {

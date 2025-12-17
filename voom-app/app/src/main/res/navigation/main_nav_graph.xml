@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="inc.visor.voom.app.unauthenticated.RegistrationFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationFragment"
         android:label="fragment_registration"
         tools:layout="@layout/fragment_registration" />
 </navigation>

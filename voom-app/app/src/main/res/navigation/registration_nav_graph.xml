@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/registrationPersonalFragment"
-        android:name="inc.visor.voom.app.unauthenticated.RegistrationPersonalFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationPersonalFragment"
         android:label="fragment_registration_personal"
         tools:layout="@layout/fragment_registration_personal" >
         <action
@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/registrationAccountFragment"
-        android:name="inc.visor.voom.app.unauthenticated.RegistrationAccountFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationAccountFragment"
         android:label="fragment_registration_account"
         tools:layout="@layout/fragment_registration_account" >
         <action
@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/registrationContactFragment"
-        android:name="inc.visor.voom.app.unauthenticated.RegistrationContactFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationContactFragment"
         android:label="fragment_registration_contact"
         tools:layout="@layout/fragment_registration_contact" />
 </navigation>

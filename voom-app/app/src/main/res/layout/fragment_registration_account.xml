@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.VoomApp.FullscreenContainer"
-    tools:context=".unauthenticated.RegistrationAccountFragment">
+    tools:context=".unauthenticated.registration.RegistrationAccountFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -53,6 +53,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/email_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
@@ -75,6 +76,7 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
@@ -97,20 +99,41 @@
                 app:boxStrokeWidth="2dp">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/repeat_password_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
                     android:inputType="textPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.button.MaterialButton
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingVertical="16dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/next"
-                android:textColor="@android:color/white"
-                app:backgroundTint="@color/secondary"
-                app:cornerRadius="32dp" />
+                android:layout_height="match_parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="16dp"
+                    android:text="@string/previous"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/secondary"
+                    app:cornerRadius="32dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="@string/next"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/secondary"
+                    app:cornerRadius="32dp" />
+            </LinearLayout>
+
+
         </LinearLayout>
 
     </LinearLayout>
