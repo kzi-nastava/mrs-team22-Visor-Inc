@@ -1,4 +1,3 @@
-
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
@@ -14,14 +13,16 @@ $tertiary: #b1b2b5;
 $error: #7d0220;
 
 html {
-  @include mat.theme((
-    color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
 }
 
 body {
@@ -41,14 +42,76 @@ body {
   margin: 0;
 }
 
-@include mat.form-field-overrides((
-  filled-container-color: transparent,
-  outlined-container-shape: var(--mat-sys-corner-extra-large),
-  outlined-outline-color: $primary,
-  outlined-outline-width: 2px,
-  outlined-label-text-color: $primary,
+@include mat.form-field-overrides(
+  (
+    filled-container-color: transparent,
+    outlined-container-shape: var(--mat-sys-corner-extra-large),
+    outlined-outline-color: $primary,
+    outlined-outline-width: 2px,
+    outlined-label-text-color: $primary,
 
-  outlined-focus-outline-color: $primary,
-  outlined-focus-outline-width: 2px,
-  outlined-focus-label-text-color: $primary,
-));
+    outlined-focus-outline-color: $primary,
+    outlined-focus-outline-width: 2px,
+    outlined-focus-label-text-color: $primary,
+  )
+);
+
+.mat-mdc-header-row {
+  color: #fff !important;
+  background-color: $primary !important;
+}
+
+.mat-mdc-header-cell:first-child {
+  border-top-left-radius: 10px !important;
+}
+
+.mat-mdc-header-cell:last-child {
+  border-top-right-radius: 10px !important;
+}
+
+.mat-mdc-table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+}
+
+.driver-history-data-row {
+  height: 80px !important;
+}
+
+app-ride-history-table {
+  .mat-sort-header-arrow {
+    color: white !important;
+  }
+
+  .mat-mdc-row .mat-mdc-cell {
+    border-bottom: 0px solid transparent;
+    border-top: 0px solid transparent;
+    cursor: pointer;
+  }
+
+  .mat-mdc-row {
+    transition: background-color 200ms ease;
+  }
+
+  .driver-history-data-row:hover {
+    background-color: #0011ff04;
+  }
+  .row-active {
+    background-color: transparent;
+  }
+  .row-active:hover {
+    background-color: transparent;
+  }
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+.mat-sort-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

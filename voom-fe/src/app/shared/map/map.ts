@@ -75,14 +75,14 @@ export class Map implements AfterViewInit {
         speed: 1,
       };
 
-      this.snapToRoad(startPos).subscribe((res) => {
-        const snapped = res.waypoints[0].location;
-        driver.marker.setLatLng([snapped[1], snapped[0]]);
-      });
+      // this.snapToRoad(startPos).subscribe((res) => {
+      //   const snapped = res.waypoints[0].location;
+      //   driver.marker.setLatLng([snapped[1], snapped[0]]);
+      // });
 
-      if (status === 'BUSY') {
-        this.assignRouteToDriver(driver, startPos);
-      }
+      // if (status === 'BUSY') {
+      //   this.assignRouteToDriver(driver, startPos);
+      // }
 
       this.drivers.push(driver);
     }
@@ -165,6 +165,6 @@ export class Map implements AfterViewInit {
     }).addTo(this.map);
 
     this.initDrivers();
-    this.startSimulation();
+    // this.startSimulation();
   }
 }

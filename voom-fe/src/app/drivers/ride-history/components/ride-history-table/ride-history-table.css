@@ -1,0 +1,8 @@
+.fullRow {
+  height: fit-content !important;
+  border-bottom: 3px solid #0f1e52 !important;
+}
+
+.fullRow-border {
+  border-bottom: 1px solid #000;
+}
