@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentRegistrationBinding;
 
 /**
@@ -64,10 +65,10 @@ public class RegistrationFragment extends Fragment {
                     && activity.getWindow() != null) {
                 activity.getWindow().getDecorView().setSystemUiVisibility(flags);
             }
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.hide();
-            }
+//            ActionBar actionBar = getSupportActionBar();
+//            if (actionBar != null) {
+//                actionBar.hide();
+//            }
 
         }
     };
@@ -81,7 +82,7 @@ public class RegistrationFragment extends Fragment {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
+//            mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -124,17 +125,12 @@ public class RegistrationFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mVisible = true;
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
+
+        mContentView = view.findViewById(R.id.fragment_registration);
+        mControlsView = null;
     }
 
     @Override
@@ -171,7 +167,7 @@ public class RegistrationFragment extends Fragment {
 
     private void toggle() {
         if (mVisible) {
-            hide();
+//            hide();
         } else {
             show();
         }
@@ -183,7 +179,7 @@ public class RegistrationFragment extends Fragment {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
+//        mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay

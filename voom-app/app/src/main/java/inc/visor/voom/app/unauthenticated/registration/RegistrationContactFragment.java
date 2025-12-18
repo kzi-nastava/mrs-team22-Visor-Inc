@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -70,10 +72,10 @@ public class RegistrationContactFragment extends Fragment {
                     && activity.getWindow() != null) {
                 activity.getWindow().getDecorView().setSystemUiVisibility(flags);
             }
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.hide();
-            }
+//            ActionBar actionBar = getSupportActionBar();
+//            if (actionBar != null) {
+//                actionBar.hide();
+//            }
 
         }
     };
@@ -87,7 +89,7 @@ public class RegistrationContactFragment extends Fragment {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
+//            mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -128,6 +130,8 @@ public class RegistrationContactFragment extends Fragment {
     RegistrationViewModel viewModel;
     TextInputEditText phoneNumberInput;
     TextInputEditText addressInput;
+    Button buttonPrevious;
+    Button buttonSignup;
     
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -135,16 +139,13 @@ public class RegistrationContactFragment extends Fragment {
         mVisible = true;
 
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
 
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
+
+        mContentView = view.findViewById(R.id.fragment_registration_contact);
+        mControlsView = null;
         
         phoneNumberInput = view.findViewById(R.id.phone_number_input);
         addressInput = view.findViewById(R.id.address_input);
@@ -155,7 +156,17 @@ public class RegistrationContactFragment extends Fragment {
 
         setupPhoneNumberInput();
         setupAddressInput();
-        
+
+        buttonPrevious = view.findViewById(R.id.fragment_registration_contact_previous);
+
+        buttonPrevious.setOnClickListener(v -> {
+            Navigation.findNavController(view).navigate(R.id.action_registrationContactFragment_to_registrationAccountFragment);
+        });
+
+        buttonSignup = view.findViewById(R.id.fragment_registration_contact_signup);
+
+        //TODO what comes next?
+
     }
 
     private void setupPhoneNumberInput() {
@@ -244,7 +255,7 @@ public class RegistrationContactFragment extends Fragment {
 
     private void toggle() {
         if (mVisible) {
-            hide();
+//            hide();
         } else {
             show();
         }
@@ -256,7 +267,7 @@ public class RegistrationContactFragment extends Fragment {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
+//        mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay

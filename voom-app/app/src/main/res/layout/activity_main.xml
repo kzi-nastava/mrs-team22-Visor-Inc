@@ -17,12 +17,12 @@
         android:name="androidx.navigation.fragment.NavHostFragment"/>
 
 <!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-<!--        android:id="@+id/bottomNavigationView"-->
+<!--        android:id="@+id/bottom_navigation_view"-->
 <!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="56dp"-->
+<!--        android:layout_height="72dp"-->
 <!--        app:itemIconSize="24dp"-->
-<!--        app:itemIconTint="@color/primary"-->
-<!--        app:itemTextColor="@color/primary"-->
+<!--        app:itemIconTint="@color/white"-->
+<!--        app:itemTextColor="@color/white"-->
 <!--        app:labelVisibilityMode="labeled"-->
 <!--        app:layout_constraintBottom_toBottomOf="parent"-->
 <!--        app:layout_constraintEnd_toEndOf="parent"-->
