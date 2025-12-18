@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.VoomApp.FullscreenContainer"
+    android:id="@+id/fragment_registration_personal"
     tools:context=".unauthenticated.registration.RegistrationPersonalFragment">
 
     <LinearLayout
@@ -42,6 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8pt"
                 android:hint="@string/first_name"
+                android:textColorHint="@color/primary"
                 app:boxBackgroundColor="@color/white"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="32dp"
@@ -54,6 +57,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/first_name_input"
+                    android:textColor="@color/primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
@@ -65,6 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8pt"
                 android:hint="@string/last_name"
+                android:textColorHint="@color/primary"
                 app:boxBackgroundColor="@color/white"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="32dp"
@@ -77,6 +82,8 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/last_name_input"
+                    android:hint="@string/last_name"
+                    android:textColor="@color/primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
@@ -88,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8pt"
                 android:hint="@string/birth_date"
+                android:textColorHint="@color/primary"
                 app:boxBackgroundColor="@color/white"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="32dp"
@@ -100,6 +108,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/birth_date_input"
+                    android:textColor="@color/primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8pt"
@@ -107,6 +116,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/fragment_registration_personal_next"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -141,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="4dp"
                 android:text="@string/login"
-                android:textColor="@color/primary" />
+                android:textColor="@color/secondary" />
 
         </LinearLayout>
 

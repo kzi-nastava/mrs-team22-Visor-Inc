@@ -28,10 +28,17 @@
         <action
             android:id="@+id/action_registrationAccountFragment_to_registrationContactFragment"
             app:destination="@id/registrationContactFragment" />
+        <action
+            android:id="@+id/action_registrationAccountFragment_to_registrationPersonalFragment"
+            app:destination="@id/registrationPersonalFragment" />
     </fragment>
     <fragment
         android:id="@+id/registrationContactFragment"
         android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationContactFragment"
         android:label="fragment_registration_contact"
-        tools:layout="@layout/fragment_registration_contact" />
+        tools:layout="@layout/fragment_registration_contact" >
+        <action
+            android:id="@+id/action_registrationContactFragment_to_registrationAccountFragment"
+            app:destination="@id/registrationAccountFragment" />
+    </fragment>
 </navigation>

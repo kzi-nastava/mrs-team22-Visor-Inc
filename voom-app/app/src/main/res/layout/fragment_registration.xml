@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.VoomApp.FullscreenContainer"
+    android:id="@+id/fragment_registration"
     tools:context=".unauthenticated.registration.RegistrationFragment">
 
     <androidx.fragment.app.FragmentContainerView
