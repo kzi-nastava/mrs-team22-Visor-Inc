@@ -2,6 +2,7 @@ package inc.visor.voom.app.authenticated.user.profile;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.DialogFragment;
 
@@ -20,4 +21,22 @@ public class ChangePasswordDialogFragment extends DialogFragment {
         dialog.setCancelable(true);
         return dialog;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            int width = (int) (requireContext()
+                    .getResources()
+                    .getDisplayMetrics()
+                    .widthPixels * 0.8);
+
+            getDialog().getWindow().setLayout(
+                    width,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+        }
+    }
+
 }
