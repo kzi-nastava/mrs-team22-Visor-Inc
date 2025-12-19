@@ -4,15 +4,24 @@
   </div>
 
   <div class="flex items-center gap-6 text-blue-900">
-    <button mat-button routerLink="/favorites">Favorite Routes</button>
+    <!-- <button mat-button routerLink="/favorites">Favorite Routes</button> -->
 
     <button mat-button routerLink="/driver/rideHistory">Ride History</button>
 
-    <button mat-button>Sign Out</button>
+    <!-- <button mat-button>Sign Out</button> -->
 
     <button mat-button class="flex items-center gap-2" routerLink="/profile">
       <mat-icon>account_circle</mat-icon>
       My Profile
+    </button>
+
+    <button mat-button routerLink="/login">Sign In</button>
+
+    <button
+      routerLink="/registration"
+      class="bg-[#0f1e52] text-sm text-white h-[40px] pl-[12px] pr-[12px] rounded-4xl transition-colors cursor-pointer hover:bg-[#4a68d2]"
+    >
+      Sign Up
     </button>
   </div>
 </mat-toolbar>
