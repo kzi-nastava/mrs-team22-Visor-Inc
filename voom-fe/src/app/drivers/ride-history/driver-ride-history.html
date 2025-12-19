@@ -1,4 +1,17 @@
 <app-header></app-header>
-<section class="max-w-[1800px] p-[50px] ml-auto mr-auto">
-  <app-ride-history-table></app-ride-history-table>
+<section class="max-w-[1200px] p-[100px] ml-auto mr-auto flex flex-col items-center">
+  <h2 class="text-xl mb-[50px]">Filter Rides</h2>
+  <form class="flex items-center justify-between max-w-[700px] w-full mb-[100px]">
+    <app-value-input-date label="Date From" [formControl]="fromDate"> </app-value-input-date>
+
+    <app-value-input-date label="Date To" [formControl]="toDate"> </app-value-input-date>
+    <button matButton="filled" type="button" (click)="applyFilter()">Filter</button>
+    <p></p>
+  </form>
+  <app-ride-history-table
+    class="w-full"
+    [startDate]="appliedFromDate"
+    [endDate]="appliedToDate"
+  ></app-ride-history-table>
 </section>
+<app-footer></app-footer>

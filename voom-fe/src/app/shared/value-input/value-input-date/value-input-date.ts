@@ -1,8 +1,17 @@
-import {Component, forwardRef, Input} from '@angular/core';
-import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
-import {MatError, MatFormField, MatInput, MatLabel, MatSuffix} from '@angular/material/input';
-import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
-import {Subject, takeUntil} from 'rxjs';
+import { Component, forwardRef, Input } from '@angular/core';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerToggle,
+} from '@angular/material/datepicker';
+import { MatError, MatFormField, MatInput, MatLabel, MatSuffix } from '@angular/material/input';
+import {
+  ControlValueAccessor,
+  FormControl,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-value-input-date',
@@ -15,18 +24,19 @@ import {Subject, takeUntil} from 'rxjs';
     MatError,
     MatInput,
     MatSuffix,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './value-input-date.html',
   styleUrl: './value-input-date.css',
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => ValueInputDate),
-    multi: true
-  }]
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => ValueInputDate),
+      multi: true,
+    },
+  ],
 })
-export class ValueInputDate implements ControlValueAccessor{
-
+export class ValueInputDate implements ControlValueAccessor {
   formControl = new FormControl<Date | null>(null);
   @Input({ required: true }) label!: string;
 
@@ -36,14 +46,13 @@ export class ValueInputDate implements ControlValueAccessor{
   private onTouched = () => {};
 
   getErrors(): string[] {
-    return Object.keys(this.formControl.errors ?? [])
-      .filter((key) => (this.formControl.errors as any ?? [])[key])
+    return Object.keys(this.formControl.errors ?? []).filter(
+      (key) => ((this.formControl.errors as any) ?? [])[key]
+    );
   }
 
   registerOnChange(fn: any): void {
-    this.formControl.valueChanges.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(fn)
+    this.formControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(fn);
   }
 
   registerOnTouched(fn: any): void {
@@ -61,10 +70,10 @@ export class ValueInputDate implements ControlValueAccessor{
   writeValue(value: Date): void {
     if (!value) {
       this.formControl.reset();
-      this.formControl.enable({emitEvent: false});
+      this.formControl.enable({ emitEvent: false });
     } else {
       this.formControl.setValue(value);
-      this.formControl.disable({emitEvent: false});
+      // this.formControl.disable({ emitEvent: false });
     }
   }
 }

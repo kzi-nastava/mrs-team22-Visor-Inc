@@ -1,9 +1,7 @@
 <!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list -->
-<section></section>
 <table
   mat-table
   [dataSource]="rideDataSource"
-  class="p-50"
   multiTemplateDataRows
   matSort
   matSortActive="date"
@@ -47,6 +45,11 @@
     <td mat-cell *matCellDef="let element">{{ element.price }}</td>
   </ng-container>
 
+  <ng-container matColumnDef="panic">
+    <th mat-header-cell *matHeaderCellDef>Panic</th>
+    <td mat-cell *matCellDef="let element">{{ `${element.panic ? '✔️' : '✖️'}` }}</td>
+  </ng-container>
+
   <ng-container matColumnDef="openPassengerList">
     <th mat-header-cell *matHeaderCellDef>Passengers</th>
     <td mat-cell *matCellDef="let element">
@@ -85,4 +88,9 @@
     [class.row-active]="expandedRow === row"
   ></tr>
   <tr mat-row *matRowDef="let row; columns: ['fullRow']" class="fullRow"></tr>
+  <tr class="mat-row" *matNoDataRow>
+    <td class="mat-cell p-8 text-center" colspan="10">
+      <div class="text-gray-500">No rides found.</div>
+    </td>
+  </tr>
 </table>

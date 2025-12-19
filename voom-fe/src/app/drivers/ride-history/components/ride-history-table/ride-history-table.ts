@@ -1,13 +1,14 @@
-import { AfterViewInit, Component, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ViewChild,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
 
 // <!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list -->
 
@@ -25,7 +26,7 @@ export interface Ride {
   endTime: TimeString | '—';
   source: string;
   destination: string;
-  status: 'Cancelled' | 'Completed';
+  status: string;
   price: number;
   panic: boolean;
   passengers: Passenger[];
@@ -78,7 +79,7 @@ const RIDE_DATA: Ride[] = [
     endTime: '—',
     source: 'Spens',
     destination: 'Centar',
-    status: 'Cancelled',
+    status: 'Cancelled by you',
     price: 0,
     passengers: [{ name: 'Jelena', lastname: 'Popović', orderedRide: true }],
     panic: false,
@@ -120,7 +121,7 @@ const RIDE_DATA: Ride[] = [
       { name: 'Ognjen', lastname: 'Savić', orderedRide: true },
       { name: 'Petar', lastname: 'Milošević', orderedRide: false },
     ],
-    panic: false,
+    panic: true,
   },
   {
     date: new Date('2025-03-05'),
@@ -139,7 +140,7 @@ const RIDE_DATA: Ride[] = [
     endTime: '—',
     source: 'Promenada',
     destination: 'Limanski park',
-    status: 'Cancelled',
+    status: `Cancelled by ${'Vuk'}`,
     price: 0,
     passengers: [{ name: 'Vuk', lastname: 'Obradović', orderedRide: true }],
     panic: false,
@@ -169,7 +170,6 @@ const RIDE_DATA: Ride[] = [
 
 // <!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list
 export class RideHistoryTable implements AfterViewInit {
-  displayedColumns: string[] = ['demo-position', 'demo-name', 'demo-weight', 'demo-symbol'];
   displayedColumnsRide: string[] = [
     'date',
     'startTime',
@@ -178,17 +178,43 @@ export class RideHistoryTable implements AfterViewInit {
     'destination',
     'status',
     'price',
+    'panic',
     'openPassengerList',
   ];
 
+  @Input() startDate!: Date | null;
+  @Input() endDate!: Date | null;
+
   expandedRow: Ride | null = null;
 
-  rideDataSource = new MatTableDataSource(RIDE_DATA);
+  // rideDataSource = new MatTableDataSource(RIDE_DATA);
 
   @ViewChild(MatSort) sort: MatSort = new MatSort();
 
   toggleRow(row: Ride) {
     this.expandedRow = this.expandedRow === row ? null : row;
+  }
+
+  rideDataSource = new MatTableDataSource(RIDE_DATA);
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['startDate'] || changes['endDate']) {
+      this.applyFilter();
+    }
+  }
+
+  applyFilter() {
+    console.log(this.startDate);
+    this.rideDataSource.data = RIDE_DATA.filter((ride) => {
+      const rideDate = new Date(ride.date).getTime();
+      const start = this.startDate ? new Date(this.startDate).getTime() : null;
+      const end = this.endDate ? new Date(this.endDate).getTime() : null;
+
+      if (start && rideDate < start) return false;
+      if (end && rideDate > end) return false;
+
+      return true;
+    });
   }
 
   ngAfterViewInit() {
