@@ -39,7 +39,7 @@ public class DriverRegistrationController {
 
     @PostMapping("/activation")
     public ResponseEntity<String> activateDriver(
-        @RequestBody ActivateDriverRequestDto request
+        @Valid @RequestBody ActivateDriverRequestDto request
     ) {
         return ResponseEntity.ok("Driver account activated successfully.");
     }
