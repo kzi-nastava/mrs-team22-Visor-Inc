@@ -1,0 +1,19 @@
+<div class="w-full flex flex-col space-y-4">
+  <mat-label>{{ label }}</mat-label>
+  <div class="input-zone text-center flex flex-col justify-center items-center" (click)="fileInput.click()">
+    @if (formControl.value) {
+      <div class="flex flex-col justify-center items-center">
+        <img [src]="this.previewUrl" class="max-w-20 max-h-20"/>
+        <span>Selected: {{formControl.value.name}}</span>
+      </div>
+    } @else {
+      <button>Choose image</button>
+    }
+  </div>
+  <mat-error class="text-error">
+    @for (error of getErrors(); track error) {
+      {{ error }}
+    }
+  </mat-error>
+</div>
+<input #fileInput class="hidden" (change)="writeValue($any($event.target).files[0])" [type]="'file'"/>

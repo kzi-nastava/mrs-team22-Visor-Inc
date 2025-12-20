@@ -7,6 +7,7 @@ import {ROUTE_LOGIN} from '../login/login';
 import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
 import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
 import {ROUTE_USER_PROFILE} from '../../authenticated/user/user-profile/user-profile';
+import {ValueInputFile} from '../../shared/value-input/value-input-file/value-input-file';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -21,7 +22,8 @@ export const ROUTE_REGISTRATION = 'registration';
     MatStepper,
     MatStepperNext,
     MatStepperPrevious,
-    ValueInputDate
+    ValueInputDate,
+    ValueInputFile
   ],
   templateUrl: './registration.html',
   styleUrl: './registration.css',
@@ -45,6 +47,7 @@ export class Registration {
   contactForm = new FormGroup({
     address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
+    file: new FormControl<File | null>(null),
   });
 
   register() {

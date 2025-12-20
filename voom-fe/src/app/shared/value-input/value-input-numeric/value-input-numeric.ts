@@ -14,6 +14,11 @@ import {Subject, takeUntil} from 'rxjs';
     ],
   templateUrl: './value-input-numeric.html',
   styleUrl: './value-input-numeric.css',
+  providers: [{
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => ValueInputNumeric),
+    multi: true
+  }]
 })
 export class ValueInputNumeric implements ControlValueAccessor{
 
@@ -33,7 +38,7 @@ export class ValueInputNumeric implements ControlValueAccessor{
   registerOnChange(fn: any): void {
     this.formControl.valueChanges.pipe(
       takeUntil(this.destroy$)
-    ).subscribe(fn)
+    ).subscribe(fn);
   }
 
   registerOnTouched(fn: any): void {
@@ -57,6 +62,5 @@ export class ValueInputNumeric implements ControlValueAccessor{
       this.formControl.disable({emitEvent: false});
     }
   }
-
 
 }
