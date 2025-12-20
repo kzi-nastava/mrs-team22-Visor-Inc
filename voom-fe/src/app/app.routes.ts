@@ -7,6 +7,8 @@ import {
   DriverRideHistory,
   ROUTE_DRIVER_RIDE_HISTORY,
 } from './drivers/ride-history/driver-ride-history';
+import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/forgot-password/forgot-password';
+import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
 
 export const routes: Routes = [
   {
@@ -16,6 +18,14 @@ export const routes: Routes = [
   {
     path: ROUTE_REGISTRATION,
     component: Registration,
+  },
+  {
+    path: ROUTE_FORGOT_PASSWORD,
+    component: ForgotPassword,
+  },
+  {
+    path: ROUTE_RESET_PASSWORD,
+    component: ResetPassword,
   },
   {
     path: ROUTE_USER_PROFILE,
