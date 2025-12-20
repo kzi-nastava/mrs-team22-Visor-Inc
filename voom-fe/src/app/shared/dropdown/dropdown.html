@@ -1,0 +1,11 @@
+<mat-form-field>
+  <mat-label>Vehicle Type</mat-label>
+
+  <mat-select [(value)]="selected">
+    @for (option of options; track option.value) {
+    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+
+<!-- <p>You selected: {{ selected }}</p> -->

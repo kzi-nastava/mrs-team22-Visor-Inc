@@ -1,0 +1,41 @@
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
+import { Footer } from '../../../core/layout/footer/footer';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { Header } from '../../../core/layout/header/header';
+
+export const ROUTE_USER_PROFILE = 'profile';
+
+@Component({
+  selector: 'app-user-profile',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDividerModule,
+    MatSelectModule,
+    Footer,
+    ValueInputString,
+    Header
+  ],
+  templateUrl: './user-profile.html',
+  styleUrl: './user-profile.css',
+})
+export class UserProfile {
+
+  userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
+
+}

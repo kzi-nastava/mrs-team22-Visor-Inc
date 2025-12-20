@@ -1,0 +1,14 @@
+<mat-form-field class="w-full">
+  <mat-label>{{ label }}</mat-label>
+  <input matInput [type]="innerHide() ? 'password': 'text'" [formControl]="formControl"/>
+  @if (hide) {
+    <button matIconButton matSuffix (click)="innerHide.set(!innerHide())" [matTooltip]="'Toggle visibility'">
+      <mat-icon>{{innerHide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+    </button>
+  }
+  <mat-error class="text-error" >
+    @for (error of getErrors(); track error) {
+      {{ error }}
+    }
+  </mat-error>
+</mat-form-field>
