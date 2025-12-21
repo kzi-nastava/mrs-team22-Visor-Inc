@@ -4,6 +4,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {MatButton} from '@angular/material/button';
 import {Router} from '@angular/router';
 import {ROUTE_REGISTRATION} from '../registration/registration';
+import {ROUTE_FORGOT_PASSWORD} from './forgot-password/forgot-password';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -27,7 +28,7 @@ export class Login {
   });
 
   forgotPassword() {
-    console.log('forgot password');
+    this.router.navigate([ROUTE_FORGOT_PASSWORD]);
   }
 
   login() {
