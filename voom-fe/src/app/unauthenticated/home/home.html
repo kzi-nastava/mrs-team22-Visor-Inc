@@ -1,15 +1,15 @@
 <app-header></app-header>
-<app-map></app-map>
+<div class="p-8 rounded-3xl">
+  <app-map></app-map>
+</div>
 <section class="flex flex-col items-center w-full">
-  <form
-    class="pt-20 pl-20 pr-20 pb-10 flex max-w-[1200px] w-full ml-auto mr-auto justify-between items-center"
-  >
+  <form class="flex max-w-[1200px] w-full ml-auto mr-auto justify-between items-center">
     <app-value-input-string label="Pickup Location"></app-value-input-string>
     <app-value-input-string label="Dropoff Location"></app-value-input-string>
     <app-dropdown [options]="vehicleOptions" [(selected)]="selectedVehicle"> </app-dropdown>
     <app-dropdown [options]="timeOptions" [(selected)]="selectedTime"> </app-dropdown>
   </form>
-  <p class="text-center text-lg mb-10">Enter pickup, dropoff and type to see your estimate.</p>
+  <p class="text-center text-lg py-8">Enter pickup, dropoff and type to see your estimate.</p>
   <button matButton="filled" routerLink="/login">Sign in to Confirm Ride</button>
 </section>
 <section
@@ -23,8 +23,8 @@
       select your pickup and destination. You’ll see the estimated route and distance instantly.
     </p>
   </div>
-  <img src="assets/images/home grid img1.png" alt="" />
-  <img src="assets/images/home grid img2.png" alt="" />
+  <img src="../../../assets/images/home%20grid%20img1.png" alt="" />
+  <img src="../../../assets/images/home%20grid%20img2.png" alt="" />
   <div class="text-section max-w-[300px]">
     <h2 class="text-xl font-bold mb-5">Add Stops Along the Way</h2>
     <p>
@@ -39,8 +39,8 @@
       driver in real time and see exactly how the ride progresses on the map.
     </p>
   </div>
-  <img src="assets/images/home grid img3.png" alt="" />
-  <img src="assets/images/home grid img4.png" alt="" />
+  <img src="../../../assets/images/home%20grid%20img3.png" alt="" />
+  <img src="../../../assets/images/home%20grid%20img4.png" alt="" />
   <div class="text-section max-w-[300px]">
     <h2 class="text-xl font-bold mb-5">Pay After the Ride</h2>
     <p>
@@ -64,9 +64,9 @@
       <h3 class="text-center text-2xl mb-2">Van</h3>
       <p class="text-gray-400">130$</p>
     </div>
-    <img src="assets/images/standard car illustration.png" alt="" />
-    <img src="assets/images/luxury car illustration.png" alt="" />
-    <img src="assets/images/van car illustration.png" alt="" />
+    <img src="../../../assets/images/standard%20car%20illustration.png" alt="" />
+    <img src="../../../assets/images/luxury%20car%20illustration.png" alt="" />
+    <img src="../../../assets/images/van%20car%20illustration.png" alt="" />
   </div>
 </section>
 
@@ -76,8 +76,8 @@
     Download our Mobile App!
   </h2>
   <div class="flex max-w-[420px] mr-auto ml-auto justify-between">
-    <a href="#"><img src="assets/icons/google alt color.png" alt="" /></a>
-    <a href="#"><img src="assets/icons/app store alt fixed.png" alt="" /></a>
+    <a href="#"><img src="../../../assets/icons/google%20alt%20color.png" alt="" /></a>
+    <a href="#"><img src="../../../assets/icons/app%20store%20alt%20fixed.png" alt="" /></a>
   </div>
 </section>
 <app-footer></app-footer>

@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 // import { Header } from '../header/header';
-import { Map } from '../../../shared/map/map';
-import { Footer } from '../footer/footer';
-import { Dropdown } from '../../../shared/dropdown/dropdown';
-import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
-import { MatButton } from '@angular/material/button';
-import { RouterLink } from '@angular/router';
-import { Header } from '../header-kt1/header-kt1';
+import {Map} from '../../shared/map/map';
+import {Footer} from '../../core/layout/footer/footer';
+import {Dropdown} from '../../shared/dropdown/dropdown';
+import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
+import {MatButton} from '@angular/material/button';
+import {RouterLink} from '@angular/router';
+import {Header} from '../../core/layout/header-kt1/header-kt1';
 
 export const ROUTE_HOME = 'home';
 
