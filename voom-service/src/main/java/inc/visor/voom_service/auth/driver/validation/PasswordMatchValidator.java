@@ -1,15 +1,14 @@
 package inc.visor.voom_service.auth.driver.validation;
 
-import inc.visor.voom_service.auth.driver.dto.ActivateDriverRequestDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordMatchValidator
-        implements ConstraintValidator<PasswordMatch, ActivateDriverRequestDto> {
+        implements ConstraintValidator<PasswordMatch, PasswordConfirmable> {
 
     @Override
     public boolean isValid(
-            ActivateDriverRequestDto dto,
+            PasswordConfirmable dto,
             ConstraintValidatorContext context
     ) {
         if (dto.getPassword() == null || dto.getConfirmPassword() == null) {

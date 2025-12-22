@@ -3,6 +3,8 @@ package inc.visor.voom_service.authorized.user.profile.service;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.authorized.user.profile.dto.ChangePasswordRequestDto;
+import inc.visor.voom_service.authorized.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.authorized.user.profile.dto.UserProfileResponseDto;
 import inc.visor.voom_service.domain.model.Person;
 
@@ -21,4 +23,27 @@ public class UserProfileService {
 
         return dto;
     }
+
+    public UserProfileResponseDto updateProfile(
+        User user,
+        UpdateUserProfileRequestDto dto
+    ) {
+        UserProfileResponseDto response = new UserProfileResponseDto(
+            user.getEmail(),
+            dto.getFirstName(),
+            dto.getLastName(),
+            dto.getPhoneNumber(),
+            dto.getAddress()
+        );
+
+        return response;
+    }
+
+    public void changePassword(
+        User user,
+        ChangePasswordRequestDto request
+    ) {
+        // TODO: implement password change logic
+    }
+
 }

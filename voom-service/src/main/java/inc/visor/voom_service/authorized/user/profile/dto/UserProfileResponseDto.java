@@ -9,7 +9,15 @@ public class UserProfileResponseDto {
     private String address;
     private String password;
 
-    public UserProfileResponseDto() {}
+    public UserProfileResponseDto() {};
+
+    public UserProfileResponseDto(String email, String firstName, String lastName, String phoneNumber, String address) {
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+    }
 
     public String getEmail() {
         return email;

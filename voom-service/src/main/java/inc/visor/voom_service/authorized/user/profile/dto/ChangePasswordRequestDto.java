@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.driver.dto;
+package inc.visor.voom_service.authorized.user.profile.dto;
 
 import inc.visor.voom_service.auth.driver.validation.PasswordConfirmable;
 import inc.visor.voom_service.auth.driver.validation.PasswordMatch;
@@ -6,42 +6,31 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@PasswordMatch(message = "Password and confirm password do not match")
-public class ActivateDriverRequestDto implements  PasswordConfirmable{
+@PasswordMatch(message = "New password and confirm password do not match")
+public class ChangePasswordRequestDto implements  PasswordConfirmable{
 
-    @NotBlank(message="Activation token is required")
-    private String token;
-
-    @NotBlank(message="Password is required")
+    @NotBlank(message = "New password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(
         regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
         message = "Password must contain uppercase, lowercase letter and number"
     )
-    private String password;
+    private String newPassword;
 
-    @NotBlank(message="Confirm password is required")
-   
+    @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
 
-    public ActivateDriverRequestDto() {}
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
+    public ChangePasswordRequestDto() {}
 
     @Override
     public String getPassword() {
-        return password;
+        return newPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
+
 
     @Override
     public String getConfirmPassword() {
