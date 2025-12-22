@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, Validators, FormGroup } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,17 +39,43 @@ export const ROUTE_USER_PROFILE = 'profile';
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
-
   constructor(private dialog: MatDialog) {}
 
   userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
 
   openChangePasswordDialog(): void {
-  this.dialog.open(ChangePasswordDialog, {
-    width: '420px',
-    autoFocus: false,
-    panelClass: 'rounded-dialog'
-  });
-}
+    this.dialog.open(ChangePasswordDialog, {
+      width: '420px',
+      autoFocus: false,
+      panelClass: 'rounded-dialog',
+    });
+  }
 
+  profileForm = new FormGroup({
+    firstName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    lastName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    phone: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(55),
+    ]),
+    address: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    email: new FormControl<string>('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(255),
+    ]),
+  });
 }
