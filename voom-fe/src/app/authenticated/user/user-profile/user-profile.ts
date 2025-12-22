@@ -42,7 +42,7 @@ export class UserProfile {
 
   constructor(private dialog: MatDialog) {}
 
-  userRole: 'Driver' | 'User' | 'Admin' = 'Admin';
+  userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
 
   openChangePasswordDialog(): void {
   this.dialog.open(ChangePasswordDialog, {
