@@ -1,4 +1,4 @@
-package inc.visor.voom_service.domain.model.enums;
+package inc.visor.voom_service.domain.ride.enums;
 
 public enum VehicleType {
     STANDARD,

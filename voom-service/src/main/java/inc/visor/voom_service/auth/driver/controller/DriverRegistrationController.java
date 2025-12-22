@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import inc.visor.voom_service.auth.driver.dto.ActivateDriverRequestDto;
 import inc.visor.voom_service.auth.driver.dto.CreateDriverRequestDto;
 import inc.visor.voom_service.auth.driver.dto.CreateDriverResponseDto;
+import inc.visor.voom_service.domain.ride.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
 
 @RestController
@@ -25,7 +26,7 @@ public class DriverRegistrationController {
         CreateDriverResponseDto response = new CreateDriverResponseDto(
             1L,
             request.getEmail(),
-            inc.visor.voom_service.domain.model.enums.DriverAccountStatus.PENDING_ACTIVATION
+            DriverAccountStatus.PENDING_ACTIVATION
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
