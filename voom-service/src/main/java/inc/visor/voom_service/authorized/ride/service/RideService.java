@@ -10,7 +10,7 @@ import inc.visor.voom_service.domain.ride.enums.RideRequestStatus;
 @Service
 public class RideService {
 
-        public RideRequestResponseDto createRideRequest(
+    public RideRequestResponseDto createRideRequest(
             User user,
             CreateRideRequestDto request
     ) {
@@ -19,6 +19,21 @@ public class RideService {
         return new RideRequestResponseDto(
                 1L,
                 RideRequestStatus.ACCEPTED,
+                mockPrice
+        );
+    }
+
+
+    public RideRequestResponseDto createFromFavorite(
+            User user,
+            Long favoriteRouteId,
+            Object request
+    ) {
+        double mockPrice = 1200; 
+
+        return new RideRequestResponseDto(
+                2L,
+                RideRequestStatus.PENDING,
                 mockPrice
         );
     }
