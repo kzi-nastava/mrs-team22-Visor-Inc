@@ -1,0 +1,26 @@
+.input-zone {
+  min-height: 100px;
+  min-width: 250px;
+  border: 1px dashed var(--color-primary);
+  cursor: pointer;
+  border-radius: 5px;
+
+  &.highlight {
+    background-color: lightblue;
+    border: 1px solid var(--color-primary);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: no-drop;
+  }
+
+  .name-wrapper {
+    cursor: auto;
+  }
+
+  .delete-button {
+    cursor: pointer;
+  }
+}

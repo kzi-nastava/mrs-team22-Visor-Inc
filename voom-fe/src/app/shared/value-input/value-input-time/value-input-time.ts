@@ -18,6 +18,7 @@ import {MatTimepicker, MatTimepickerInput, MatTimepickerToggle} from '@angular/m
   styleUrl: './value-input-time.css',
 })
 export class ValueInputTime {
+
   formControl = new FormControl<string>('');
   @Input({ required: true }) label!: string;
 

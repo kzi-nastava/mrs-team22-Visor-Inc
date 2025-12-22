@@ -1,7 +1,24 @@
 <resources>
     <string name="app_name">Voom</string>
+    <string name="voom_logo">Voom logo</string>
     <string name="nav_home">Home</string>
     <string name="nav_services">Services</string>
     <string name="nav_activity">Activity</string>
     <string name="nav_profile">Profile</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="have_an_account">Already have an account?</string>
+    <string name="login">Login</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="birth_date">Birth date</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="phone_number">Phone number</string>
+    <string name="address">Address</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="signup">sign up</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

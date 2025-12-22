@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/registration_nav_graph"
+    app:startDestination="@id/registrationPersonalFragment">
+
+    <fragment
+        android:id="@+id/registrationPersonalFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationPersonalFragment"
+        android:label="fragment_registration_personal"
+        tools:layout="@layout/fragment_registration_personal" >
+        <action
+            android:id="@+id/action_registrationPersonalFragment_to_registrationAccountFragment"
+            app:destination="@id/registrationAccountFragment" />
+        <action
+            android:id="@+id/action_registrationPersonalFragment_to_registrationAccountFragment2"
+            app:destination="@id/registrationAccountFragment" />
+        <action
+            android:id="@+id/action_registrationPersonalFragment_to_registrationAccountFragment3"
+            app:destination="@id/registrationAccountFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registrationAccountFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationAccountFragment"
+        android:label="fragment_registration_account"
+        tools:layout="@layout/fragment_registration_account" >
+        <action
+            android:id="@+id/action_registrationAccountFragment_to_registrationContactFragment"
+            app:destination="@id/registrationContactFragment" />
+        <action
+            android:id="@+id/action_registrationAccountFragment_to_registrationPersonalFragment"
+            app:destination="@id/registrationPersonalFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registrationContactFragment"
+        android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationContactFragment"
+        android:label="fragment_registration_contact"
+        tools:layout="@layout/fragment_registration_contact" >
+        <action
+            android:id="@+id/action_registrationContactFragment_to_registrationAccountFragment"
+            app:destination="@id/registrationAccountFragment" />
+    </fragment>
+</navigation>
