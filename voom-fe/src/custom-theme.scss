@@ -115,3 +115,23 @@ app-ride-history-table {
   align-items: center;
   justify-content: center;
 }
+
+@include mat.slide-toggle-overrides((
+  selected-icon-size: 0px,
+  selected-track-outline-color: white,
+  selected-handle-color: white,
+  selected-pressed-handle-color: white,
+  selected-focus-handle-color: white,
+  selected-hover-handle-color: white,
+
+  unselected-icon-size: 0px,
+  unselected-track-color: $primary,
+  unselected-hover-track-color: $primary,
+  unselected-pressed-track-color: $primary,
+  unselected-focus-track-color: $primary,
+  track-outline-color: white,
+  unselected-handle-color: white,
+  unselected-pressed-handle-color: white,
+  unselected-focus-handle-color: white,
+  unselected-hover-handle-color: white,
+));

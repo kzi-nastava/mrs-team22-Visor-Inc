@@ -3,7 +3,7 @@ import {MatButton} from "@angular/material/button";
 import {ValueInputString} from "../../../shared/value-input/value-input-string/value-input-string";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
-import {ROUTE_HOME} from '../../../core/layout/home/home';
+import {ROUTE_HOME} from '../../home/home';
 
 export const ROUTE_RESET_PASSWORD = 'resetPassword';
 
