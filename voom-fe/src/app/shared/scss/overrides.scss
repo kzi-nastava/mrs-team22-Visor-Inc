@@ -1,60 +1,80 @@
 @use '@angular/material' as mat;
 
 html {
-  @include mat.dialog-overrides((
-    container-min-width: fit-content
-  ));
+  @include mat.dialog-overrides(
+    (
+      container-min-width: fit-content,
+    )
+  );
 
-  @include mat.fab-overrides((
-    container-elevation-shadow: transparent,
-    focus-container-elevation-shadow: transparent,
-    hover-container-elevation-shadow: transparent,
-    pressed-container-elevation-shadow: transparent,
-    small-container-elevation-shadow: transparent,
-    small-focus-container-elevation-shadow: transparent,
-    small-hover-container-elevation-shadow: transparent,
-    small-pressed-container-elevation-shadow: transparent,
-    extended-container-elevation-shadow: transparent,
-    extended-focus-container-elevation-shadow: transparent,
-    extended-hover-container-elevation-shadow: transparent,
-    extended-pressed-container-elevation-shadow: transparent
-  ));
+  @include mat.fab-overrides(
+    (
+      container-elevation-shadow: transparent,
+      focus-container-elevation-shadow: transparent,
+      hover-container-elevation-shadow: transparent,
+      pressed-container-elevation-shadow: transparent,
+      small-container-elevation-shadow: transparent,
+      small-focus-container-elevation-shadow: transparent,
+      small-hover-container-elevation-shadow: transparent,
+      small-pressed-container-elevation-shadow: transparent,
+      extended-container-elevation-shadow: transparent,
+      extended-focus-container-elevation-shadow: transparent,
+      extended-hover-container-elevation-shadow: transparent,
+      extended-pressed-container-elevation-shadow: transparent,
+    )
+  );
 
-  @include mat.expansion-overrides((
-    container-background-color: var(--mat-sys-surface),
-    header-text-size: 0.9rem,
-    container-text-size: 0.9rem,
-  ));
+  @include mat.expansion-overrides(
+    (
+      container-background-color: var(--mat-sys-surface),
+      header-text-size: 0.9rem,
+      container-text-size: 0.9rem,
+    )
+  );
 
-  @include mat.card-overrides((
-    outlined-container-color: var(--mat-sys-surface),
-    outlined-outline-color: transparent,
-  ));
+  @include mat.card-overrides(
+    (
+      outlined-container-color: var(--mat-sys-surface),
+      outlined-outline-color: transparent,
+    )
+  );
 
-  @include mat.table-overrides((
-    background-color: var(--mat-sys-surface),
-    row-item-outline-color: var(--mat-sys-outline-variant),
-  ));
+  @include mat.table-overrides(
+    (
+      background-color: var(--mat-sys-surface),
+      row-item-outline-color: var(--mat-sys-outline-variant),
+    )
+  );
 
-  @include mat.divider-overrides((
-    color: var(--mat-sys-outline-variant),
-  ));
+  @include mat.divider-overrides(
+    (
+      color: var(--mat-sys-outline-variant),
+    )
+  );
 
-  @include mat.tabs-overrides((
-    active-indicator-color: var(--mat-sys-tertiary),
-    active-focus-indicator-color: var(--mat-sys-tertiary),
-    active-hover-indicator-color: var(--mat-sys-tertiary),
-    active-indicator-height: 3px,
-    divider-height: 0px,
-  ));
+  @include mat.tabs-overrides(
+    (
+      active-indicator-color: var(--mat-sys-tertiary),
+      active-focus-indicator-color: var(--mat-sys-tertiary),
+      active-hover-indicator-color: var(--mat-sys-tertiary),
+      active-indicator-height: 3px,
+      divider-height: 0px,
+    )
+  );
 
   & {
-    --mat-sys-level0: 0px 0px 0px 0px var(--neutral-color-80), 0px 0px 0px 0px var(--neutral-color-80), 0px 0px 0px 0px var(--neutral-color-80) !important;
-    --mat-sys-level1: 0px 2px 1px -1px var(--neutral-color-80), 0px 1px 1px 0px var(--neutral-color-80), 0px 1px 3px 0px var(--neutral-color-80) !important;
-    --mat-sys-level2: 0px 3px 3px -2px var(--neutral-color-80), 0px 3px 4px 0px var(--neutral-color-80), 0px 1px 8px 0px var(--neutral-color-80) !important;
-    --mat-sys-level3: 0px 3px 5px -1px var(--neutral-color-80), 0px 6px 10px 0px var(--neutral-color-80), 0px 1px 18px 0px var(--neutral-color-80) !important;
-    --mat-sys-level4: 0px 5px 5px -3px var(--neutral-color-80), 0px 8px 10px 1px var(--neutral-color-80), 0px 3px 14px 2px var(--neutral-color-80) !important;
-    --mat-sys-level5: 0px 7px 8px -4px var(--neutral-color-80), 0px 12px 17px 2px var(--neutral-color-80), 0px 5px 22px 4px var(--neutral-color-80) !important;
+    --mat-sys-level0: 0px 0px 0px 0px var(--neutral-color-80),
+      0px 0px 0px 0px var(--neutral-color-80), 0px 0px 0px 0px var(--neutral-color-80) !important;
+    --mat-sys-level1: 0px 2px 1px -1px var(--neutral-color-80),
+      0px 1px 1px 0px var(--neutral-color-80), 0px 1px 3px 0px var(--neutral-color-80) !important;
+    --mat-sys-level2: 0px 3px 3px -2px var(--neutral-color-80),
+      0px 3px 4px 0px var(--neutral-color-80), 0px 1px 8px 0px var(--neutral-color-80) !important;
+    --mat-sys-level3: 0px 3px 5px -1px var(--neutral-color-80),
+      0px 6px 10px 0px var(--neutral-color-80), 0px 1px 18px 0px var(--neutral-color-80) !important;
+    --mat-sys-level4: 0px 5px 5px -3px var(--neutral-color-80),
+      0px 8px 10px 1px var(--neutral-color-80), 0px 3px 14px 2px var(--neutral-color-80) !important;
+    --mat-sys-level5: 0px 7px 8px -4px var(--neutral-color-80),
+      0px 12px 17px 2px var(--neutral-color-80), 0px 5px 22px 4px var(--neutral-color-80) !important;
   }
 
   // Adds borders on flat expansion panels
@@ -87,6 +107,10 @@ html {
     padding-bottom: 4px;
   }
 
+  .rounded-dialog .mat-mdc-dialog-container {
+    border-radius: 20px;
+  }
+
   app-autocomplete-chips {
     .required {
       .mat-mdc-notch-piece {
@@ -109,48 +133,68 @@ html {
   }
 
   app-widget-upsert {
-    @include mat.expansion-overrides((
-      header-collapsed-state-height: 88px
-    ));
+    @include mat.expansion-overrides(
+      (
+        header-collapsed-state-height: 88px,
+      )
+    );
   }
 
   body {
     &.alt-theme {
-      @include mat.tabs-overrides((
-        active-indicator-color: var(--mat-sys-tertiary),
-        active-focus-indicator-color: var(--mat-sys-tertiary),
-        active-hover-indicator-color: var(--mat-sys-tertiary),
-      ));
+      @include mat.tabs-overrides(
+        (
+          active-indicator-color: var(--mat-sys-tertiary),
+          active-focus-indicator-color: var(--mat-sys-tertiary),
+          active-hover-indicator-color: var(--mat-sys-tertiary),
+        )
+      );
 
-      @include mat.expansion-overrides((
-        container-background-color: var(--mat-sys-surface-container),
-      ));
+      @include mat.expansion-overrides(
+        (
+          container-background-color: var(--mat-sys-surface-container),
+        )
+      );
 
-      @include mat.card-overrides((
-        outlined-container-color: var(--mat-sys-surface-container),
-        outlined-outline-color: transparent,
-      ));
+      @include mat.card-overrides(
+        (
+          outlined-container-color: var(--mat-sys-surface-container),
+          outlined-outline-color: transparent,
+        )
+      );
 
-      @include mat.table-overrides((
-        background-color: var(--mat-sys-surface-container),
-        row-item-outline-color: var(--mat-sys-outline-variant),
-      ));
+      @include mat.table-overrides(
+        (
+          background-color: var(--mat-sys-surface-container),
+          row-item-outline-color: var(--mat-sys-outline-variant),
+        )
+      );
 
-      @include mat.divider-overrides((
-        color: var(--mat-sys-outline-variant),
-      ));
+      @include mat.divider-overrides(
+        (
+          color: var(--mat-sys-outline-variant),
+        )
+      );
 
-      @include mat.dialog-overrides((
-        container-color: var(--mat-sys-surface-container-high)
-      ));
+      @include mat.dialog-overrides(
+        (
+          container-color: var(--mat-sys-surface-container-high),
+        )
+      );
 
       & {
-        --mat-sys-level0: 0px 0px 0px 0px var(--neutral-color-10), 0px 0px 0px 0px var(--neutral-color-10), 0px 0px 0px 0px var(--neutral-color-10) !important;
-        --mat-sys-level1: 0px 2px 1px -1px var(--neutral-color-10), 0px 1px 1px 0px var(--neutral-color-10), 0px 1px 3px 0px var(--neutral-color-10) !important;
-        --mat-sys-level2: 0px 3px 3px -2px var(--neutral-color-10), 0px 3px 4px 0px var(--neutral-color-10), 0px 1px 8px 0px var(--neutral-color-10) !important;
-        --mat-sys-level3: 0px 3px 5px -1px var(--neutral-color-10), 0px 6px 10px 0px var(--neutral-color-10), 0px 1px 18px 0px var(--neutral-color-10) !important;
-        --mat-sys-level4: 0px 5px 5px -3px var(--neutral-color-10), 0px 8px 10px 1px var(--neutral-color-10), 0px 3px 14px 2px var(--neutral-color-10) !important;
-        --mat-sys-level5: 0px 7px 8px -4px var(--neutral-color-10), 0px 12px 17px 2px var(--neutral-color-10), 0px 5px 22px 4px var(--neutral-color-10) !important;
+        --mat-sys-level0: 0px 0px 0px 0px var(--neutral-color-10),
+          0px 0px 0px 0px var(--neutral-color-10), 0px 0px 0px 0px var(--neutral-color-10) !important;
+        --mat-sys-level1: 0px 2px 1px -1px var(--neutral-color-10),
+          0px 1px 1px 0px var(--neutral-color-10), 0px 1px 3px 0px var(--neutral-color-10) !important;
+        --mat-sys-level2: 0px 3px 3px -2px var(--neutral-color-10),
+          0px 3px 4px 0px var(--neutral-color-10), 0px 1px 8px 0px var(--neutral-color-10) !important;
+        --mat-sys-level3: 0px 3px 5px -1px var(--neutral-color-10),
+          0px 6px 10px 0px var(--neutral-color-10), 0px 1px 18px 0px var(--neutral-color-10) !important;
+        --mat-sys-level4: 0px 5px 5px -3px var(--neutral-color-10),
+          0px 8px 10px 1px var(--neutral-color-10), 0px 3px 14px 2px var(--neutral-color-10) !important;
+        --mat-sys-level5: 0px 7px 8px -4px var(--neutral-color-10),
+          0px 12px 17px 2px var(--neutral-color-10), 0px 5px 22px 4px var(--neutral-color-10) !important;
       }
     }
   }

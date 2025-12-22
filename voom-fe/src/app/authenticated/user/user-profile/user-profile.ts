@@ -9,9 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Footer } from '../../../core/layout/footer/footer';
 import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
 import { Header } from '../../../core/layout/header/header';
+import { ChangePasswordDialog } from '../../../shared/popup/change-password-dialog/change-password-dialog';
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -29,13 +31,25 @@ export const ROUTE_USER_PROFILE = 'profile';
     MatSelectModule,
     Footer,
     ValueInputString,
-    Header
+    Header,
+    MatDialogModule,
+    ChangePasswordDialog,
   ],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
 
-  userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
+  constructor(private dialog: MatDialog) {}
+
+  userRole: 'Driver' | 'User' | 'Admin' = 'Admin';
+
+  openChangePasswordDialog(): void {
+  this.dialog.open(ChangePasswordDialog, {
+    width: '420px',
+    autoFocus: false,
+    panelClass: 'rounded-dialog'
+  });
+}
 
 }
