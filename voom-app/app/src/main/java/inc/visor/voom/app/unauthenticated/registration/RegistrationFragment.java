@@ -19,8 +19,6 @@ import inc.visor.voom.app.R;
 public class RegistrationFragment extends Fragment {
 
     RegistrationViewModel viewModel;
-    private static final String TAG = "REG_DEBUG"; // Step 1: Define a Tag
-
 
     public RegistrationFragment() {
         // Required empty public constructor
@@ -34,7 +32,7 @@ public class RegistrationFragment extends Fragment {
 
         viewModel.getRegistrationComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
-                Navigation.findNavController(view).navigate(R.id.action_registrationFragment_to_profileFragment);
+                Navigation.findNavController(view).navigate(R.id.action_registrationFragment_to_loginFragment);
             }
         });
     }
