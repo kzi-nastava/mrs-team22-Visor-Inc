@@ -1,4 +1,16 @@
-<!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list -->
+<mat-form-field
+  appearance="outline"
+  class="w-full max-w-[250px] ml-auto mr-auto mb-[20px] md:!hidden"
+>
+  <mat-label>Sort By</mat-label>
+  <mat-select [(value)]="selected" (selectionChange)="onSortChange($event)">
+    @for (option of options; track option.value) {
+    <mat-option [value]="option.value">
+      {{ option.label }}
+    </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
 <table
   mat-table
   [dataSource]="rideDataSource"
@@ -10,49 +22,52 @@
 >
   <ng-container matColumnDef="date">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-    <td mat-cell *matCellDef="let element">
+
+    <td mat-cell *matCellDef="let element" data-label="Date">
       {{ `${element.date.getDate()}.${element.date.getMonth() + 1}.${element.date.getFullYear()}` }}
     </td>
   </ng-container>
 
   <ng-container matColumnDef="startTime">
     <th mat-header-cell *matHeaderCellDef>Start Time</th>
-    <td mat-cell *matCellDef="let element">{{ element.startTime }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Start Time">{{ element.startTime }}</td>
   </ng-container>
 
   <ng-container matColumnDef="endTime">
     <th mat-header-cell *matHeaderCellDef>End Time</th>
-    <td mat-cell *matCellDef="let element">{{ element.endTime }}</td>
+    <td mat-cell *matCellDef="let element" data-label="End Time">{{ element.endTime }}</td>
   </ng-container>
 
   <ng-container matColumnDef="source">
     <th mat-header-cell *matHeaderCellDef>Source</th>
-    <td mat-cell *matCellDef="let element">{{ element.source }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Source">{{ element.source }}</td>
   </ng-container>
 
   <ng-container matColumnDef="destination">
     <th mat-header-cell *matHeaderCellDef>Destination</th>
-    <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Destination">{{ element.destination }}</td>
   </ng-container>
 
   <ng-container matColumnDef="status">
     <th mat-header-cell *matHeaderCellDef>Status</th>
-    <td mat-cell *matCellDef="let element">{{ element.status }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Status">{{ element.status }}</td>
   </ng-container>
 
   <ng-container matColumnDef="price">
     <th mat-header-cell *matHeaderCellDef>Price</th>
-    <td mat-cell *matCellDef="let element">{{ element.price }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Price">{{ element.price }}</td>
   </ng-container>
 
   <ng-container matColumnDef="panic">
     <th mat-header-cell *matHeaderCellDef>Panic</th>
-    <td mat-cell *matCellDef="let element">{{ `${element.panic ? '✔️' : '✖️'}` }}</td>
+    <td mat-cell *matCellDef="let element" data-label="Panic">
+      {{ element.panic ? '✔️' : '✖️' }}
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="openPassengerList">
     <th mat-header-cell *matHeaderCellDef>Passengers</th>
-    <td mat-cell *matCellDef="let element">
+    <td mat-cell *matCellDef="let element" data-label="View Passengers">
       <span>↓</span>
     </td>
   </ng-container>
@@ -60,11 +75,11 @@
   <ng-container matColumnDef="fullRow">
     <td mat-cell *matCellDef="let row" [attr.colspan]="displayedColumnsRide.length">
       @if (expandedRow === row) {
-      <div class="p-[15px] flex flex-col items-start w-full">
+      <div class="p-[15px] flex flex-col md:items-start items-center w-full">
         <div class="w-full h-[3px] bg-gray-200 mb-[30px] rounded-4xl"></div>
-        <h3 class="text-xl mb-[30px]">Passengers</h3>
+        <h3 class="text-xl mb-[30px] md:text-left text-center">Passengers</h3>
 
-        <div>
+        <div class="flex flex-col md:block">
           @for(passenger of row.passengers; track passenger.name) {
           <div class="flex items-center gap-[10px] max-w-[200px] mb-[10px]">
             <img src="assets/icons/free driver.png" alt="" class="w-[30px]" />
@@ -75,7 +90,7 @@
         </div>
       </div>
       }
-      <div class="w-full h-[3px] bg-[#0f1e52] rounded-4xl"></div>
+      <div class="w-full h-[3px] bg-[#0f1e52] rounded-4xl hidden md:block"></div>
     </td>
   </ng-container>
 

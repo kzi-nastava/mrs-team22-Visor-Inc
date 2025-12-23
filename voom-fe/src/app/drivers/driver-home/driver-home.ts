@@ -1,19 +1,19 @@
-import {Component, signal} from '@angular/core';
-import {Header} from "../../core/layout/header-kt1/header-kt1";
-import {Map} from "../../shared/map/map";
-import {Footer} from '../../core/layout/footer/footer';
-import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
+import { Component, signal } from '@angular/core';
+import { Header } from '../../core/layout/header-kt1/header-kt1';
+import { Map } from '../../shared/map/map';
+import { Footer } from '../../core/layout/footer/footer';
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import {
   ApexChart,
   ApexDataLabels,
   ApexNonAxisChartSeries,
   ApexPlotOptions,
   ApexResponsive,
-  NgApexchartsModule
+  NgApexchartsModule,
 } from 'ng-apexcharts';
-import {MatIcon} from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 
-export const ROUTE_DRIVER_HOME = 'driver-home';
+export const ROUTE_DRIVER_HOME = 'driverHome';
 
 export type ChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -29,19 +29,11 @@ export type ChartOptions = {
 
 @Component({
   selector: 'app-driver-home',
-  imports: [
-    Header,
-    Map,
-    Footer,
-    MatSlideToggle,
-    NgApexchartsModule,
-    MatIcon
-  ],
+  imports: [Header, Map, Footer, MatSlideToggle, NgApexchartsModule, MatIcon],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
 export class DriverHome {
-
   isPassive = signal<boolean>(false);
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -52,15 +44,15 @@ export class DriverHome {
       chart: {
         height: 400,
         width: '100%',
-        type: "pie"
+        type: 'pie',
       } as ApexChart,
-      labels: ["Finished", "Cancelled"],
-      colors: ["#4a68d2", "#e74c3c"],
+      labels: ['Finished', 'Cancelled'],
+      colors: ['#4a68d2', '#e74c3c'],
       dataLabels: {
-        enabled: true
+        enabled: true,
       },
       legend: {
-        position: "bottom"
+        position: 'bottom',
       },
       responsive: [
         {
@@ -71,41 +63,42 @@ export class DriverHome {
               height: 10,
             },
             legend: {
-              position: "center"
-            }
-          }
-        }
-      ]
+              position: 'center',
+            },
+          },
+        },
+      ],
     };
 
     this.activeTimeOptions = {
-      series: [{
-        name: "Drive Time",
-        data: [75]
-      }],
+      series: [
+        {
+          name: 'Drive Time',
+          data: [75],
+        },
+      ],
       chart: {
-        type: "bar",
+        type: 'bar',
         height: 50,
-        sparkline: { enabled: true }
+        sparkline: { enabled: true },
       } as ApexChart,
       plotOptions: {
         bar: {
           horizontal: true,
-          barHeight: "40%",
+          barHeight: '40%',
           colors: {
-            backgroundBarColors: ["#E0E0E0"],
+            backgroundBarColors: ['#E0E0E0'],
             backgroundBarOpacity: 1,
-          }
-        }
+          },
+        },
       },
-      colors: ["#4a68d2"],
+      colors: ['#4a68d2'],
       xaxis: {
-        categories: ["Progress"],
-        max: 100 // Ensures the bar is relative to 100%
-      }
+        categories: ['Progress'],
+        max: 100, // Ensures the bar is relative to 100%
+      },
     };
   }
-
 
   getFormattedDate() {
     const date = Date.now();
@@ -114,7 +107,7 @@ export class DriverHome {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     };
 
     const dateString = new Intl.DateTimeFormat('en-US', options).format(date);

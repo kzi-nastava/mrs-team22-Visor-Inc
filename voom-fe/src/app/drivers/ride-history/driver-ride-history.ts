@@ -6,6 +6,7 @@ import { MatButton } from '@angular/material/button';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Footer } from '../../core/layout/footer/footer';
 import { Header } from '../../core/layout/header-kt1/header-kt1';
+import { MatInput } from '@angular/material/input';
 
 export const ROUTE_DRIVER_RIDE_HISTORY = 'driver/rideHistory';
 
@@ -21,6 +22,25 @@ export class DriverRideHistory {
 
   appliedFromDate: Date | null = null;
   appliedToDate: Date | null = null;
+
+  selected = 'date-desc';
+
+  options = [
+    { value: 'date-asc', label: 'Date (ASC)' },
+    { value: 'date-desc', label: 'Date (DESC)' },
+  ];
+
+  onSortChange(event: any) {
+    // this.rideDataSource.sort = null;
+    // let data = [...this.rideDataSource.data];
+    // console.log(data);
+    // data.sort((a: any, b: any) => {
+    //   const dateA = a.date.getTime();
+    //   const dateB = b.date.getTime();
+    //   return event.value === 'date-asc' ? dateA - dateB : dateB - dateA;
+    // });
+    // this.rideDataSource.data = data;
+  }
 
   applyFilter() {
     const rawFromDate = this.fromDate.value;

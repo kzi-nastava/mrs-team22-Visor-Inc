@@ -1,15 +1,23 @@
 <app-header></app-header>
-<section class="max-w-[1200px] p-[100px] ml-auto mr-auto flex flex-col items-center">
+<section class="max-w-[1200px] md:p-10 p-5 ml-auto mr-auto flex flex-col items-center">
   <h2 class="text-xl mb-[50px]">Filter Rides</h2>
-  <form class="flex items-center justify-between max-w-[700px] w-full mb-[100px]">
-    <app-value-input-date label="Date From" [formControl]="fromDate"> </app-value-input-date>
+  <form
+    class="flex flex-col md:flex-row items-center justify-between max-w-[800px] w-full mb-[50px]"
+  >
+    <app-value-input-date label="Date From" [formControl]="fromDate" class="mb-[10px]">
+    </app-value-input-date>
 
-    <app-value-input-date label="Date To" [formControl]="toDate"> </app-value-input-date>
-    <button matButton="filled" type="button" (click)="applyFilter()">Filter</button>
+    <app-value-input-date label="Date To" [formControl]="toDate" class="mb-[10px]">
+    </app-value-input-date>
+
+    <button matButton="filled" type="button" (click)="applyFilter()" class="!z-0">Filter</button>
     <p></p>
   </form>
+
+  <div class="w-full h-[3px] bg-[#0f1e52] rounded-4xl mb-[50px] md:hidden block"></div>
+
   <app-ride-history-table
-    class="w-full"
+    class="w-full flex flex-col items-center"
     [startDate]="appliedFromDate"
     [endDate]="appliedToDate"
   ></app-ride-history-table>
