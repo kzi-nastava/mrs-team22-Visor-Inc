@@ -16,6 +16,7 @@ public class RegistrationViewModel extends ViewModel {
     private final MutableLiveData<String> repeatPassword = new MutableLiveData<>();
     private final MutableLiveData<String> address = new MutableLiveData<>();
     private final MutableLiveData<String> phoneNumber = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> registrationComplete = new MutableLiveData<>();
 
     public void setFirstName(String value) {
         firstName.setValue(value);
@@ -79,5 +80,13 @@ public class RegistrationViewModel extends ViewModel {
 
     public LiveData<String> getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public void setRegistrationComplete(boolean registrationComplete) {
+        this.registrationComplete.setValue(registrationComplete);
+    }
+
+    public MutableLiveData<Boolean> getRegistrationComplete() {
+        return registrationComplete;
     }
 }

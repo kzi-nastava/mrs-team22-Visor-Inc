@@ -1,21 +1,19 @@
 package inc.visor.voom.app.unauthenticated.registration;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -40,9 +38,7 @@ public class RegistrationContactFragment extends Fragment {
         phoneNumberInput = view.findViewById(R.id.phone_number_input);
         addressInput = view.findViewById(R.id.address_input);
 
-        viewModel = new ViewModelProvider(
-                requireParentFragment()
-        ).get(RegistrationViewModel.class);
+        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(RegistrationViewModel.class);
 
         setupPhoneNumberInput();
         setupAddressInput();
@@ -52,6 +48,8 @@ public class RegistrationContactFragment extends Fragment {
         buttonPrevious.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationContactFragment_to_registrationAccountFragment));
 
         buttonSignup = view.findViewById(R.id.fragment_registration_contact_signup);
+
+        buttonSignup.setOnClickListener(v -> viewModel.setRegistrationComplete(true));
 
     }
 

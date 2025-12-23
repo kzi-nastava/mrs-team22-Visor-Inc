@@ -47,9 +47,7 @@ public class RegistrationPersonalFragment extends Fragment {
         lastNameInput = view.findViewById(R.id.last_name_input);
         birthDateInput = view.findViewById(R.id.birth_date_input);
 
-        viewModel = new ViewModelProvider(
-                requireParentFragment()
-        ).get(RegistrationViewModel.class);
+        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(RegistrationViewModel.class);
 
         setupFirstNameInput();
         setupLastNameInput();

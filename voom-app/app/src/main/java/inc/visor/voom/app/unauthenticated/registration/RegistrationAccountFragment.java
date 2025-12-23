@@ -1,19 +1,18 @@
 package inc.visor.voom.app.unauthenticated.registration;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -40,9 +39,7 @@ public class RegistrationAccountFragment extends Fragment {
         passwordInput = view.findViewById(R.id.password_input);
         repeatPasswordInput = view.findViewById(R.id.repeat_password_input);
 
-        viewModel = new ViewModelProvider(
-                requireParentFragment()
-        ).get(RegistrationViewModel.class);
+        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(RegistrationViewModel.class);
 
         setupEmailInput();
         setupPasswordInput();
