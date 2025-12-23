@@ -1,12 +1,9 @@
-import { Routes } from '@angular/router';
-import { Login, ROUTE_LOGIN } from './unauthenticated/login/login';
-import { UserProfile, ROUTE_USER_PROFILE } from './authenticated/user/user-profile/user-profile';
-import { Registration, ROUTE_REGISTRATION } from './unauthenticated/registration/registration';
-import { Home, ROUTE_HOME } from './unauthenticated/home/home';
-import {
-  DriverRideHistory,
-  ROUTE_DRIVER_RIDE_HISTORY,
-} from './drivers/ride-history/driver-ride-history';
+import {Routes} from '@angular/router';
+import {Login, ROUTE_LOGIN} from './unauthenticated/login/login';
+import {ROUTE_USER_PROFILE, UserProfile} from './authenticated/user/user-profile/user-profile';
+import {Registration, ROUTE_REGISTRATION} from './unauthenticated/registration/registration';
+import {Home, ROUTE_HOME} from './unauthenticated/home/home';
+import {DriverRideHistory, ROUTE_DRIVER_RIDE_HISTORY,} from './drivers/ride-history/driver-ride-history';
 import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/forgot-password/forgot-password';
 import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
 import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
