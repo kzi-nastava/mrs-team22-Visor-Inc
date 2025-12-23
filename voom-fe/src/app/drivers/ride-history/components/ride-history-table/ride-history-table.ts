@@ -12,6 +12,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import {NgOptimizedImage} from '@angular/common';
 
 // <!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list -->
 
@@ -166,7 +167,7 @@ const RIDE_DATA: Ride[] = [
 
 @Component({
   selector: 'app-ride-history-table',
-  imports: [MatTableModule, MatSortModule, MatFormFieldModule, MatSelectModule, FormsModule],
+  imports: [MatTableModule, MatSortModule, MatFormFieldModule, MatSelectModule, FormsModule, NgOptimizedImage],
   templateUrl: './ride-history-table.html',
   styleUrl: './ride-history-table.css',
 })
