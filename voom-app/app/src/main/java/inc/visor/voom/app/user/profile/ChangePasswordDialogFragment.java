@@ -1,4 +1,4 @@
-package inc.visor.voom.app.authenticated.user.profile;
+package inc.visor.voom.app.user.profile;
 
 import android.app.Dialog;
 import android.os.Bundle;

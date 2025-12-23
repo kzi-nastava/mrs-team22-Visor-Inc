@@ -1,4 +1,4 @@
-package inc.visor.voom.app.authenticated.user.profile;
+package inc.visor.voom.app.user.profile;
 
 import android.os.Bundle;
 
@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
 
 public class ProfileFragment extends Fragment {
@@ -67,8 +66,6 @@ public class ProfileFragment extends Fragment {
                         binding.etEmail.getText().toString()
                 )
         );
-
-
     }
 
     @Override

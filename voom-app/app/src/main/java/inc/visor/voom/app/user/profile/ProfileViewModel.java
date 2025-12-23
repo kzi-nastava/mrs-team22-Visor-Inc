@@ -1,4 +1,4 @@
-package inc.visor.voom.app.authenticated.user.profile;
+package inc.visor.voom.app.user.profile;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
