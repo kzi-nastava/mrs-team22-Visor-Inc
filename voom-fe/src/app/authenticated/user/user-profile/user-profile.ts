@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Footer } from '../../../core/layout/footer/footer';
 import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
-import { Header } from '../../../core/layout/header/header';
+import { Header } from '../../../core/layout/header-kt1/header-kt1';
 import { ChangePasswordDialog } from '../../../shared/popup/change-password-dialog/change-password-dialog';
 
 export const ROUTE_USER_PROFILE = 'profile';
@@ -33,7 +33,7 @@ export const ROUTE_USER_PROFILE = 'profile';
     ValueInputString,
     Header,
     MatDialogModule,
-    ChangePasswordDialog,
+    // ChangePasswordDialog,
   ],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',

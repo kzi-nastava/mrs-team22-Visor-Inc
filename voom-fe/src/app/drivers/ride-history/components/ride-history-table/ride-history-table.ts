@@ -9,6 +9,9 @@ import {
 } from '@angular/core';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 
 // <!-- for tabel we need date, start time, end time, source, destination, status, price, open passenger list -->
 
@@ -163,7 +166,7 @@ const RIDE_DATA: Ride[] = [
 
 @Component({
   selector: 'app-ride-history-table',
-  imports: [MatTableModule, MatSortModule],
+  imports: [MatTableModule, MatSortModule, MatFormFieldModule, MatSelectModule, FormsModule],
   templateUrl: './ride-history-table.html',
   styleUrl: './ride-history-table.css',
 })
@@ -187,7 +190,27 @@ export class RideHistoryTable implements AfterViewInit {
 
   expandedRow: Ride | null = null;
 
-  // rideDataSource = new MatTableDataSource(RIDE_DATA);
+  selected = 'date-desc';
+
+  options = [
+    { value: 'date-asc', label: 'Date (ASC)' },
+    { value: 'date-desc', label: 'Date (DESC)' },
+  ];
+
+  onSortChange(event: any) {
+    this.rideDataSource.sort = null;
+    let data = [...this.rideDataSource.data];
+    console.log(data);
+
+    data.sort((a: any, b: any) => {
+      const dateA = a.date.getTime();
+      const dateB = b.date.getTime();
+
+      return event.value === 'date-asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    this.rideDataSource.data = data;
+  }
 
   @ViewChild(MatSort) sort: MatSort = new MatSort();
 
@@ -204,7 +227,6 @@ export class RideHistoryTable implements AfterViewInit {
   }
 
   applyFilter() {
-    console.log(this.startDate);
     this.rideDataSource.data = RIDE_DATA.filter((ride) => {
       const rideDate = new Date(ride.date).getTime();
       const start = this.startDate ? new Date(this.startDate).getTime() : null;

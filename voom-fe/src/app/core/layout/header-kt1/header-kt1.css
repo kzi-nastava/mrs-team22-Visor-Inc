@@ -6,3 +6,11 @@
 .mat-toolbar {
   min-height: 80px;
 }
+
+/* .mat-sidenav {
+  background-color: #34234a;
+} */
+
+mat-sidenav .mat-mdc-button {
+  color: white !important;
+}

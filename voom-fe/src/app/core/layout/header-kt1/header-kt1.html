@@ -1,28 +1,50 @@
 <mat-toolbar class="bg-white shadow-md h-20 px-6 flex justify-between top-0 z-50">
-  <div class="flex items-center cursor-pointer" routerLink="/">
-    <img src="assets/images/logo.png" alt="Voom" class="h-12 ml-12" />
+  <div class="flex items-center cursor-pointer" (click)="home()">
+    <img src="assets/images/logo.png" alt="Voom" class="h-12" />
   </div>
 
-  <div class="flex items-center gap-6 text-blue-900">
-    <!-- <button mat-button routerLink="/favorites">Favorite Routes</button> -->
+  <div class="hidden md:flex items-center gap-6 text-blue-900">
+    <button mat-button (click)="driverHome()">Driver Home</button>
+    <button mat-button (click)="rideHistory()">Ride History</button>
 
-    <button mat-button routerLink="/driver-home">Driver Home</button>
-    <button mat-button routerLink="/driver/rideHistory">Ride History</button>
-
-    <!-- <button mat-button>Sign Out</button> -->
-
-    <button mat-button class="flex items-center gap-2" routerLink="/profile">
+    <button mat-button class="flex items-center gap-2" (click)="userProfile()">
       <mat-icon>account_circle</mat-icon>
       My Profile
     </button>
 
-    <button mat-button routerLink="/login">Sign In</button>
+    <button mat-button (click)="login()">Sign In</button>
 
     <button
-      routerLink="/registration"
+      (click)="regisration()"
       class="bg-[#0f1e52] text-sm text-white h-[40px] pl-[12px] pr-[12px] rounded-4xl transition-colors cursor-pointer hover:bg-[#4a68d2]"
     >
       Sign Up
     </button>
   </div>
+
+  <div class="md:hidden">
+    <button mat-icon-button (click)="sidenav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </div>
 </mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav mode="over" [fixedInViewport]="true">
+    <div class="flex flex-col items-center p-10">
+      <div class="cursor-pointer mb-10" (click)="home()">
+        <img src="assets/images/white-logo.png" alt="Voom" class="h-12" />
+      </div>
+      <a mat-button (click)="driverHome()"> Driver Home </a>
+      <a mat-button (click)="rideHistory()"> Ride History </a>
+
+      <a mat-button (click)="userProfile()"> My Profile </a>
+      <a mat-button (click)="login()"> Sign In </a>
+      <a mat-button (click)="regisration()"> Sign Up </a>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
