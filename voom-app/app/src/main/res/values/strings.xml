@@ -7,7 +7,9 @@
     <string name="nav_profile">Profile</string>
     <string name="create_new_account">Create new account</string>
     <string name="have_an_account">Already have an account?</string>
+    <string name="have_no_account">Don\'t have an account yet?</string>
     <string name="login">Login</string>
+    <string name="register">Register</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="birth_date">Birth date</string>
@@ -19,6 +21,7 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="signup">sign up</string>
+    <string name="signin">sign in</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="profile_picture">Profile picture</string>>

@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -33,6 +34,7 @@ public class RegistrationPersonalFragment extends Fragment {
     TextInputEditText lastNameInput;
     TextInputEditText birthDateInput;
     Button buttonNext;
+    TextView buttonLogin;
 
     public RegistrationPersonalFragment() {
         // Required empty public constructor
@@ -56,6 +58,10 @@ public class RegistrationPersonalFragment extends Fragment {
         buttonNext = view.findViewById(R.id.fragment_registration_personal_next);
 
         buttonNext.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationPersonalFragment_to_registrationAccountFragment));
+
+        buttonLogin = view.findViewById(R.id.login);
+
+        buttonLogin.setOnClickListener(v -> viewModel.setRegistrationComplete(true));
 
     }
 
