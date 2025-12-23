@@ -1,17 +1,24 @@
 package inc.visor.voom_service.authorized.ride.controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.authorized.ride.dto.CreateRideRequestDto;
 import inc.visor.voom_service.authorized.ride.dto.RideRequestResponseDto;
+import inc.visor.voom_service.authorized.ride.dto.RideResponseDto;
 import inc.visor.voom_service.authorized.ride.model.enums.RideRequestStatus;
+import inc.visor.voom_service.authorized.ride.model.enums.RideStatus;
 import jakarta.validation.Valid;
 
 @RestController
@@ -36,6 +43,24 @@ public class RideController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping
+    public ResponseEntity<List<RideResponseDto>> getRides(
+        @RequestParam(required = false, defaultValue = "false") boolean ongoing
+    ) {
+
+        RideResponseDto ride = new RideResponseDto(
+            1L,
+            ongoing ? RideStatus.ONGOING : RideStatus.FINISHED,
+            LocalDateTime.now().minusMinutes(10),
+            ongoing ? null : LocalDateTime.now(),
+            "John Doe",
+            "Mark Smith"
+        );
+
+        return ResponseEntity.ok(List.of(ride));
+    }
+
 
 
 
