@@ -59,6 +59,7 @@ public class UserProfileController {
             );
             return ResponseEntity.ok(response);
         }
+        
         return ResponseEntity.ok(userProfileService.updateProfile(user, request));
     }
 

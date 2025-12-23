@@ -1,24 +1,24 @@
 package inc.visor.voom_service.authorized.ride.dto;
 
-import inc.visor.voom_service.domain.ride.enums.RoutePointType;
+import inc.visor.voom_service.authorized.ride.model.enums.RoutePointType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class RoutePointDto {
 
-    @NotNull
+    @NotNull(message="Order index is required")
     private Integer orderIndex;
 
-    @NotNull
+    @NotNull(message="Latitude is required")
     private Double latitude;
 
-    @NotNull
+    @NotNull(message="Longitude is required")
     private Double longitude;
 
-    @NotBlank
+    @NotBlank(message="Address is required")
     private String address;
 
-    @NotNull
+    @NotNull(message="Type is required")
     private RoutePointType type;
 
     public Integer getOrderIndex() {

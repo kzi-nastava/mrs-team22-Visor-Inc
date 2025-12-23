@@ -1,6 +1,6 @@
 package inc.visor.voom_service.auth.driver.dto;
 
-import inc.visor.voom_service.domain.ride.enums.VehicleType;
+import inc.visor.voom_service.authorized.ride.model.enums.VehicleType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

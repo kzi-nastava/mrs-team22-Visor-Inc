@@ -3,7 +3,7 @@ package inc.visor.voom_service.authorized.ride.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import inc.visor.voom_service.domain.ride.enums.VehicleType;
+import inc.visor.voom_service.authorized.ride.model.enums.VehicleType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +14,7 @@ public class CreateRideRequestDto {
     @Valid
     private List<RoutePointDto> routePoints;
 
-    @NotEmpty(message = "Passenger Emails are required")
+    @NotEmpty(message = "Passenger emails are required")
     private List<String> passengerEmails;
 
     @NotNull(message = "Vehicle type is required")

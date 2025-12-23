@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import inc.visor.voom_service.auth.driver.dto.ActivateDriverRequestDto;
 import inc.visor.voom_service.auth.driver.dto.CreateDriverRequestDto;
 import inc.visor.voom_service.auth.driver.dto.CreateDriverResponseDto;
-import inc.visor.voom_service.domain.ride.enums.DriverAccountStatus;
+import inc.visor.voom_service.authorized.ride.model.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
 
 @RestController

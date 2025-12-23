@@ -1,9 +1,9 @@
-package inc.visor.voom_service.domain.ride;
+package inc.visor.voom_service.authorized.ride.model;
 
 import java.time.LocalDateTime;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.domain.ride.enums.RideStatus;
+import inc.visor.voom_service.authorized.ride.model.enums.RideStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

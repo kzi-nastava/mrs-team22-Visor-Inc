@@ -1,6 +1,6 @@
 package inc.visor.voom_service.auth.driver.dto;
 
-import inc.visor.voom_service.domain.ride.enums.DriverAccountStatus;
+import inc.visor.voom_service.authorized.ride.model.enums.DriverAccountStatus;
 
 public class CreateDriverResponseDto {
     

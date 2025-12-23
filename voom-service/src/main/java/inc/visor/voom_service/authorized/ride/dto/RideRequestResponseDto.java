@@ -1,19 +1,30 @@
 package inc.visor.voom_service.authorized.ride.dto;
 
-import inc.visor.voom_service.domain.ride.enums.RideRequestStatus;
+import java.time.LocalDateTime;
+
+import inc.visor.voom_service.auth.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.authorized.ride.model.enums.RideRequestStatus;
 
 public class RideRequestResponseDto {
-    
+
     private Long id;
     private RideRequestStatus status;
     private double price;
+    private LocalDateTime scheduledTime;
 
-    public RideRequestResponseDto() {}
+    private DriverSummaryDto driver;
 
-    public RideRequestResponseDto(Long id, RideRequestStatus status, double price) {
+
+
+    public RideRequestResponseDto() {
+    }
+
+    public RideRequestResponseDto(Long id, RideRequestStatus status, double price, LocalDateTime scheduledTime, DriverSummaryDto driver) {
         this.id = id;
         this.status = status;
         this.price = price;
+        this.scheduledTime = scheduledTime;
+        this.driver = driver;
     }
 
     public Long getId() {
@@ -38,5 +49,21 @@ public class RideRequestResponseDto {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public LocalDateTime getScheduledTime() {
+        return scheduledTime;
+    }
+
+    public void setScheduledTime(LocalDateTime scheduledTime) {
+        this.scheduledTime = scheduledTime;
+    }
+    
+    public DriverSummaryDto getDriver() {
+        return driver;
+    }
+
+    public void setDriver(DriverSummaryDto driver) {
+        this.driver = driver;
     }
 }

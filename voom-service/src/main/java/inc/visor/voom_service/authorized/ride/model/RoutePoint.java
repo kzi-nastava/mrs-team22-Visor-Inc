@@ -1,6 +1,6 @@
-package inc.visor.voom_service.domain.ride;
+package inc.visor.voom_service.authorized.ride.model;
 
-import inc.visor.voom_service.domain.ride.enums.RoutePointType;
+import inc.visor.voom_service.authorized.ride.model.enums.RoutePointType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

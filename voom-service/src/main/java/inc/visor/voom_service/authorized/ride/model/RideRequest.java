@@ -1,10 +1,10 @@
-package inc.visor.voom_service.domain.ride;
+package inc.visor.voom_service.authorized.ride.model;
 
 import java.time.LocalDateTime;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.domain.ride.enums.RideRequestStatus;
-import inc.visor.voom_service.domain.ride.enums.VehicleType;
+import inc.visor.voom_service.authorized.ride.model.enums.RideRequestStatus;
+import inc.visor.voom_service.authorized.ride.model.enums.VehicleType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

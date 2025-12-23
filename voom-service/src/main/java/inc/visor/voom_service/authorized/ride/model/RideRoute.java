@@ -1,4 +1,4 @@
-package inc.visor.voom_service.domain.ride;
+package inc.visor.voom_service.authorized.ride.model;
 
 import java.util.List;
 

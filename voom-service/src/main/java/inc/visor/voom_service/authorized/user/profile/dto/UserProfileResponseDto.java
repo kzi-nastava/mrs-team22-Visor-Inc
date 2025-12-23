@@ -7,8 +7,7 @@ public class UserProfileResponseDto {
     private String lastName;
     private String phoneNumber;
     private String address;
-    private String password;
-
+    
     public UserProfileResponseDto() {};
 
     public UserProfileResponseDto(String email, String firstName, String lastName, String phoneNumber, String address) {
@@ -57,13 +56,5 @@ public class UserProfileResponseDto {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }
