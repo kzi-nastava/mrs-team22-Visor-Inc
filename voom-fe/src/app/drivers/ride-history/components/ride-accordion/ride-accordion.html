@@ -1,0 +1,48 @@
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <div
+          class="grid grid-cols-[2fr_4fr_2fr] w-full place-items-center md:gap-[20px] gap-[10px]"
+        >
+          <div class="flex items-center md:gap-[10px] gap-[5px] justify-self-start">
+            <img src="/assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
+            <p class="md:text-left text-center">{{ orderedPassengerName }}</p>
+          </div>
+          <div class="md:justify-self-start justify-self-center">
+            <p class="text-center md:text-left">{{`${ride.source}   →   ${ride.destination}`}}</p>
+          </div>
+          <div class="justify-self-end ml-auto">
+            <p>{{ `${ride.startTime} - ${ride.endTime}` }}</p>
+          </div>
+        </div>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="">
+      <div class="w-full h-[3px] rounded-4xl bg-primary mb-[15px] mt-[10px]"></div>
+      <div class="flex gap-[50px]">
+        <div class="min-w-[180px]">
+          <p><b class="color-blue">Distance: </b>5km</p>
+          <p><b class="color-blue">Price: </b>{{ `${ride.price}` }}</p>
+          <p><b class="color-blue">Status: </b>{{ `${ride.status}` }}</p>
+          <p><b class="color-blue">Panic: </b>{{ `${ride.panic ? '✔️' : '✖️'}` }}</p>
+        </div>
+        <div class="w-full">
+          <p class="mb-[10px]">Passengers</p>
+          <div
+            class="grid md:grid-cols-[1fr_1fr_1fr] grid-cols-[1fr_1fr] gap-[10px] place-items-center"
+          >
+            @for(passenger of ride.passengers; track passenger) {
+            <div class="flex items-center md:gap-[10px] gap-[2px] justify-self-start mb-[10px]">
+              <img src="/assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
+              <p class="md:text-left text-center">
+                {{ `${passenger.name} ${passenger.lastname}` }}
+              </p>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>
