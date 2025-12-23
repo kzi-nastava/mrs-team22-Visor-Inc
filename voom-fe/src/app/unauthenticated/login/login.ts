@@ -5,6 +5,7 @@ import { MatButton } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { ROUTE_REGISTRATION } from '../registration/registration';
 import { ROUTE_FORGOT_PASSWORD } from './forgot-password/forgot-password';
+import {ROUTE_HOME} from '../home/home';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -35,7 +36,7 @@ export class Login {
   }
 
   login() {
-    console.log(this.form.value);
+    this.router.navigate([ROUTE_HOME]);
   }
 
   registration() {
