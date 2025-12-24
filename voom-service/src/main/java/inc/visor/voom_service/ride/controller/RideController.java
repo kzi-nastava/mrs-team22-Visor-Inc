@@ -5,13 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import inc.visor.voom_service.auth.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
@@ -25,12 +19,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/rides")
 public class RideController {
     
-    public RideController() {};
+    public RideController() {}
 
     @PostMapping
-    public ResponseEntity<RideRequestResponseDto> createRideRequest(
-        @Valid @RequestBody CreateRideRequestDto request
-    ) {
+    public ResponseEntity<RideRequestResponseDto> createRideRequest(@Valid @RequestBody CreateRideRequestDto request) {
 
         DriverSummaryDto driver = new DriverSummaryDto(1L, "John", "Doe");
         RideRequestResponseDto response = new RideRequestResponseDto(
@@ -45,9 +37,7 @@ public class RideController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RideResponseDto>> getRides(
-        @RequestParam(required = false, defaultValue = "false") boolean ongoing
-    ) {
+    public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing) {
 
         RideResponseDto ride = new RideResponseDto(
             1L,
@@ -61,8 +51,30 @@ public class RideController {
         return ResponseEntity.ok(List.of(ride));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
 
+        RideResponseDto ride = new RideResponseDto(
+                1L,
+                RideStatus.FINISHED,
+                LocalDateTime.now().minusMinutes(10),
+                LocalDateTime.now(),
+                "John Doe",
+                "Mark Smith"
+        );
 
+        return ResponseEntity.ok(ride);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<RideRequestResponseDto> updateRide(@PathVariable Long id,  @Valid @RequestBody RideRequestResponseDto request) {
+        return ResponseEntity.ok(request);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRide(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
 
     // @PostMapping("/requests/favorites/{id}")
     // public ResponseEntity<RideRequestResponseDto> createRideRequestFromFavorite(
@@ -78,11 +90,8 @@ public class RideController {
     //         rideService.createFromFavorite(user, id, request));
     // }
 
-    @PostMapping("/start/{id}")
-    public ResponseEntity<String> startRide(
-        @PathVariable Long id
-    ) {
+    @PostMapping("/{id}/start")
+    public ResponseEntity<String> startRide(@PathVariable Long id) {
         return ResponseEntity.ok("Ride started successfully.");
     }
-
 }

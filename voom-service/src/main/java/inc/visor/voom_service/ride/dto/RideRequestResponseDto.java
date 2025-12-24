@@ -11,10 +11,7 @@ public class RideRequestResponseDto {
     private RideRequestStatus status;
     private double price;
     private LocalDateTime scheduledTime;
-
     private DriverSummaryDto driver;
-
-
 
     public RideRequestResponseDto() {
     }

@@ -12,4 +12,6 @@ public class RideService {
         public RideRequestResponseDto createRideRequest(User user, CreateRideRequestDto request) {
             return null;
         }
+
+
 }

@@ -1,4 +1,4 @@
-package inc.visor.voom_service.route.favorite.dto;
+package inc.visor.voom_service.route.dto;
 
 import inc.visor.voom_service.ride.model.RideRoute;
 

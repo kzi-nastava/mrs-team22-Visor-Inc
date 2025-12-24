@@ -1,31 +1,24 @@
-package inc.visor.voom_service.route.favorite.controller;
+package inc.visor.voom_service.route.controller;
 
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import inc.visor.voom_service.route.favorite.dto.CreateFavoriteRouteRequestDto;
-import inc.visor.voom_service.route.favorite.dto.FavoriteRouteDto;
-import inc.visor.voom_service.route.favorite.dto.FavoriteRouteResponseDto;
+import inc.visor.voom_service.route.dto.CreateFavoriteRouteRequestDto;
+import inc.visor.voom_service.route.dto.FavoriteRouteDto;
+import inc.visor.voom_service.route.dto.FavoriteRouteResponseDto;
 
 @RestController
-@RequestMapping("/api/favorite-routes")
+@RequestMapping("/api/favorite")
 public class FavoriteRouteController {
 
     public FavoriteRouteController() {
     }
 
     @GetMapping
-    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(
-    ) {
+    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes() {
 
         FavoriteRouteDto dummyRoute1 =
             new FavoriteRouteDto(
@@ -45,9 +38,7 @@ public class FavoriteRouteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FavoriteRouteDto> getFavoriteRoutes(
-        @PathVariable Long id
-    ) {
+    public ResponseEntity<FavoriteRouteDto> getFavoriteRoute(@PathVariable Long id) {
 
         FavoriteRouteDto dummyRoute =
             new FavoriteRouteDto(
@@ -59,9 +50,7 @@ public class FavoriteRouteController {
     }
 
     @PostMapping
-    public ResponseEntity<FavoriteRouteResponseDto> addFavoriteRoute(
-        @RequestBody CreateFavoriteRouteRequestDto request
-    ) {
+    public ResponseEntity<FavoriteRouteResponseDto> addFavoriteRoute(@RequestBody CreateFavoriteRouteRequestDto request) {
 
         FavoriteRouteResponseDto response =
             new FavoriteRouteResponseDto(
@@ -72,10 +61,14 @@ public class FavoriteRouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping
+    public ResponseEntity<FavoriteRouteResponseDto> addFavoriteRoute(@RequestBody FavoriteRouteResponseDto request) {
+
+        return ResponseEntity.ok().body(request);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFavoriteRoute(
-        @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> deleteFavoriteRoute(@PathVariable Long id) {
 
         return ResponseEntity.noContent().build();
     }
