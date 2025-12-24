@@ -9,7 +9,7 @@ import java.util.Objects;
 public class UserType {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_type_id", nullable = false)
     private int id;
 

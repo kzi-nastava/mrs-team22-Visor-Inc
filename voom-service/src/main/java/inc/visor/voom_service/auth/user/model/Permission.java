@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Permission implements GrantedAuthority {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "permission_id", nullable = false)
     private long id;
 

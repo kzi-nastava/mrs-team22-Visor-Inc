@@ -4,6 +4,7 @@ import inc.visor.voom_service.auth.user.model.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "refresh_token")
@@ -24,5 +25,57 @@ public class RefreshToken {
     @Column(name = "expiry_date_time", nullable = false)
     private LocalDateTime expiryDateTime;
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getExpiryDateTime() {
+        return expiryDateTime;
+    }
+
+    public void setExpiryDateTime(LocalDateTime expiryDateTime) {
+        this.expiryDateTime = expiryDateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "RefreshToken{" +
+                "id=" + id +
+                ", token='" + token + '\'' +
+                ", user=" + user +
+                ", expiryDateTime=" + expiryDateTime +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RefreshToken that = (RefreshToken) o;
+        return Objects.equals(id, that.id) && Objects.equals(token, that.token) && Objects.equals(user, that.user) && Objects.equals(expiryDateTime, that.expiryDateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, token, user, expiryDateTime);
+    }
 }

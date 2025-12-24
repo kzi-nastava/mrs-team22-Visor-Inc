@@ -1,15 +1,20 @@
-package inc.visor.voom_service.domain.model;
-
-import jakarta.persistence.*;
+package inc.visor.voom_service.person.model;
 
 import java.util.Objects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "person")
 public class Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "person_id", nullable = false)
     private long id;
 

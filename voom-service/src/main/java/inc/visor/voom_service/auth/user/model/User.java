@@ -1,6 +1,6 @@
 package inc.visor.voom_service.auth.user.model;
 
-import inc.visor.voom_service.domain.model.Person;
+import inc.visor.voom_service.person.model.Person;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
     private long id;
 
