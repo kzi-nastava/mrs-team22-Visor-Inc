@@ -32,5 +32,7 @@
     <string name="new_password">New password</string>
     <string name="confirm_password">Confirm password</string>
     <string name="confirm">Confirm</string>
+    <string name="contact">Contact</string>
+    <string name="general">General</string>
 
 </resources>

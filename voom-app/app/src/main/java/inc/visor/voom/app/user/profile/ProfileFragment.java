@@ -56,14 +56,23 @@ public class ProfileFragment extends Fragment {
 
         viewModel.getEmail().observe(getViewLifecycleOwner(),
                 value -> binding.etEmail.setText(value));
+
+        viewModel.getAdress().observe(getViewLifecycleOwner(),
+                value -> binding.etAddress.setText(value));
+
+        viewModel.getPhoneNumeber().observe(getViewLifecycleOwner(),
+                value -> binding.etPhoneNumber.setText(value));
+
     }
 
     private void setupListeners() {
         binding.btnSave.setOnClickListener(v ->
                 viewModel.onSaveClicked(
-                        binding.etFirstName.getText().toString(),
-                        binding.etLastName.getText().toString(),
-                        binding.etEmail.getText().toString()
+                        String.valueOf(binding.etFirstName.getText()),
+                        String.valueOf(binding.etLastName.getText()),
+                        String.valueOf(binding.etEmail.getText()),
+                        String.valueOf(binding.etAddress.getText()),
+                        String.valueOf(binding.etPhoneNumber.getText())
                 )
         );
     }
