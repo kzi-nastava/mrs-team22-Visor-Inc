@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.driver.dto;
+package inc.visor.voom_service.driver.dto;
 
 import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 

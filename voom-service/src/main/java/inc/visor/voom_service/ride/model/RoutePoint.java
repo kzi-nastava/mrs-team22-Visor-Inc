@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 public class RoutePoint {
     
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "route_point_id", nullable = false)
     private long id;
 

@@ -2,7 +2,7 @@ package inc.visor.voom_service.ride.dto;
 
 import java.time.LocalDateTime;
 
-import inc.visor.voom_service.auth.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 
 public class RideRequestResponseDto {

@@ -11,7 +11,7 @@ import java.util.Set;
 public class UserRole {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_role_id", nullable = false)
     private int id;
 

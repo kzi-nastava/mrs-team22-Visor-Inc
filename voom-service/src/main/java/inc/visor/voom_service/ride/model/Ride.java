@@ -20,7 +20,7 @@ import jakarta.persistence.Table;
 public class Ride {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ride_id", nullable = false)
     private long id;
 

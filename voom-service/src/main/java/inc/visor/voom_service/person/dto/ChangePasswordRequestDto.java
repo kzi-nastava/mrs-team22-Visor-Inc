@@ -1,7 +1,7 @@
 package inc.visor.voom_service.person.dto;
 
-import inc.visor.voom_service.auth.driver.validation.PasswordConfirmable;
-import inc.visor.voom_service.auth.driver.validation.PasswordMatch;
+import inc.visor.voom_service.driver.validation.PasswordConfirmable;
+import inc.visor.voom_service.driver.validation.PasswordMatch;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.driver.validation;
+package inc.visor.voom_service.driver.validation;
 
 public interface PasswordConfirmable {
     String getPassword();

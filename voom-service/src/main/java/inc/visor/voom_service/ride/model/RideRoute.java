@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 public class RideRoute {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ride_route_id", nullable = false)
     private long id;
 

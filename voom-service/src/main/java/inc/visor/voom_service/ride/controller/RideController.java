@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import inc.visor.voom_service.auth.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;

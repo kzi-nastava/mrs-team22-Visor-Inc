@@ -1,4 +1,4 @@
-package inc.visor.voom_service.auth.driver.dto;
+package inc.visor.voom_service.driver.dto;
 
 public class DriverSummaryDto {
 
