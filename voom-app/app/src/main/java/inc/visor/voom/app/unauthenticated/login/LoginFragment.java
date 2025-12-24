@@ -26,6 +26,7 @@ public class LoginFragment extends Fragment {
     TextInputEditText emailInput;
     TextInputEditText passwordInput;
     Button buttonLogin;
+    TextView buttonForgotPassword;
     TextView buttonRegister;
     LoginViewModel viewModel;
 
@@ -49,12 +50,15 @@ public class LoginFragment extends Fragment {
 
         buttonLogin.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_profileFragment));
 
+        buttonForgotPassword = view.findViewById(R.id.forgot_password);
+
+        buttonForgotPassword.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_forgotPasswordFragment));
+
         buttonRegister = view.findViewById(R.id.register);
 
         buttonRegister.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_registrationFragment));
 
     }
-
 
     private void setupEmailInput() {
         emailInput.addTextChangedListener(new TextWatcher() {

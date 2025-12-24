@@ -8,6 +8,9 @@
     <string name="create_new_account">Create new account</string>
     <string name="have_an_account">Already have an account?</string>
     <string name="have_no_account">Don\'t have an account yet?</string>
+    <string name="reset_password">Reset password</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="submit">Submit</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="first_name">First name</string>
