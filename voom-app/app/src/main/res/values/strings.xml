@@ -34,5 +34,13 @@
     <string name="confirm">Confirm</string>
     <string name="contact">Contact</string>
     <string name="general">General</string>
+    <string name="baby_transport_allowed">Baby transport allowed</string>
+    <string name="pet_transport_allowed">Pet transport allowed\n</string>
+    <string name="number_of_seats">Number of seats</string>
+    <string name="license_plates">Licence plates</string>
+    <string name="vehicle_type">Vehicle type</string>
+    <string name="vehicle_model">Vehicle model</string>
+    <string name="vehicle_info">Vehicle info</string>
+    <string name="driver_profile">Driver profile\n</string>
 
 </resources>
