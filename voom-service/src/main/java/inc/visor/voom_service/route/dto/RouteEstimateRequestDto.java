@@ -1,6 +1,6 @@
 package inc.visor.voom_service.route.dto;
 
-import inc.visor.voom_service.ride.dto.RoutePointDto;
+import inc.visor.voom_service.shared.RoutePointDto;
 
 public class RouteEstimateRequestDto {
 

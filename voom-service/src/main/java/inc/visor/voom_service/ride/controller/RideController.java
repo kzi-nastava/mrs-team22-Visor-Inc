@@ -3,6 +3,7 @@ package inc.visor.voom_service.ride.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import inc.visor.voom_service.ride.dto.RideCancelDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -90,8 +91,39 @@ public class RideController {
     //         rideService.createFromFavorite(user, id, request));
     // }
 
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
+
+        RideResponseDto ride = new RideResponseDto(
+                1L,
+                RideStatus.FINISHED,
+                LocalDateTime.now().minusMinutes(10),
+                LocalDateTime.now(),
+                "John Doe",
+                "Mark Smith"
+        );
+
+        return ResponseEntity.ok(ride);
+    }
+
     @PostMapping("/{id}/start")
     public ResponseEntity<String> startRide(@PathVariable Long id) {
         return ResponseEntity.ok("Ride started successfully.");
     }
+
+    @PostMapping("/{id}/stop")
+    public ResponseEntity<RideResponseDto> stopRide(@PathVariable Long id) {
+
+        RideResponseDto ride = new RideResponseDto(
+                1L,
+                RideStatus.FINISHED,
+                LocalDateTime.now().minusMinutes(10),
+                LocalDateTime.now(),
+                "John Doe",
+                "Mark Smith"
+        );
+
+        return ResponseEntity.ok(ride);
+    }
+
 }

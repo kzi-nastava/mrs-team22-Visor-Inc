@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.dto;
+package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.validation.constraints.NotBlank;
