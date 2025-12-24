@@ -13,7 +13,6 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Avatar -->
         <ImageView
             android:id="@+id/img_avatar"
             android:layout_width="120dp"
@@ -24,7 +23,6 @@
             android:contentDescription="@string/profile_picture"
             android:src="@drawable/baseline_person_24" />
 
-        <!-- Full name -->
         <TextView
             android:id="@+id/txt_full_name"
             android:layout_width="wrap_content"
@@ -174,6 +172,20 @@
             android:text="@string/save_changes"
             app:backgroundTint="@color/primary"
             app:cornerRadius="28dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_change_driver_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/driver_profile_page"
+            app:cornerRadius="20dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/primary"
+            android:textColor="@color/primary"
+            app:backgroundTint="@android:color/transparent" />
+
 
 
     </LinearLayout>

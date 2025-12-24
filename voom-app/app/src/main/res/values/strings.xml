@@ -42,5 +42,6 @@
     <string name="vehicle_model">Vehicle model</string>
     <string name="vehicle_info">Vehicle info</string>
     <string name="driver_profile">Driver profile\n</string>
+    <string name="driver_profile_page">Driver profile page</string>
 
 </resources>

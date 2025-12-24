@@ -10,7 +10,7 @@
         android:id="@+id/registrationFragment"
         android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationFragment"
         android:label="fragment_registration"
-        tools:layout="@layout/fragment_registration" >
+        tools:layout="@layout/fragment_registration">
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
@@ -20,24 +20,27 @@
         android:id="@+id/profileFragment"
         android:name="inc.visor.voom.app.user.profile.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_user_to_driver_profile"
+            app:destination="@id/driverProfileFragment" />
+    </fragment>
     <fragment
         android:id="@+id/driverProfileFragment"
         android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
         android:label="fragment_driver_profile"
-        tools:layout="@layout/fragment_driver_profile"
-        />
+        tools:layout="@layout/fragment_driver_profile" />
 
     <fragment
         android:id="@+id/loginFragment"
         android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
             app:destination="@id/registrationFragment" />
         <action
             android:id="@+id/action_loginFragment_to_profileFragment"
-            app:destination="@id/driverProfileFragment" />
+            app:destination="@id/profileFragment"/>
     </fragment>
 </navigation>
