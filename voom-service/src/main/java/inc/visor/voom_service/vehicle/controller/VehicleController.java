@@ -1,9 +1,7 @@
 package inc.visor.voom_service.vehicle.controller;
 
 import inc.visor.voom_service.vehicle.dto.CreateVehicleDto;
-import inc.visor.voom_service.vehicle.dto.CreateVehicleTypeDto;
 import inc.visor.voom_service.vehicle.model.Vehicle;
-import inc.visor.voom_service.vehicle.model.VehicleType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
