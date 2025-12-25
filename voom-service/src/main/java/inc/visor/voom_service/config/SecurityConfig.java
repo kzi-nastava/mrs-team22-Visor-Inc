@@ -21,9 +21,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final AuthenticationProvider authenticationProvider;
+    private final JwtFilter jwtFilter;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, AuthenticationProvider authenticationProvider, JwtFilter jwtFilter) {
         this.userRepository = userRepository;
+        this.authenticationProvider = authenticationProvider;
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
@@ -63,6 +67,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
 }

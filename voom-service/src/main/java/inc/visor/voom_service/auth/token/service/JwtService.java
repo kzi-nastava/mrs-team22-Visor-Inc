@@ -69,7 +69,7 @@ public class JwtService {
     return (List<String>) extractClaims(token).get("permissions",  List.class);
   }
 
-  public boolean isTokenValid(String token, VoomUserDetails userDetails) {
+  public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
     return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
   }
