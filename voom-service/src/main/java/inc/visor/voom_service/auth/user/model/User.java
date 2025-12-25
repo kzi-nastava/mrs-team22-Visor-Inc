@@ -28,8 +28,8 @@ public class User {
     @JoinColumn(name = "user_type_id", nullable = false)
     private UserType userType;
 
-    @ManyToOne
-    @JoinColumn(name = "user_status_id", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @JoinColumn(name = "user_status", nullable = false)
     private UserStatus userStatus;
 
     @ManyToOne
