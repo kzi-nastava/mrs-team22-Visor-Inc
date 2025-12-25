@@ -1,4 +1,4 @@
-package inc.visor.voom.app.driver.history;
+package inc.visor.voom.app.driver.history.models;
 
 public class Passenger {
     private final String name;

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
@@ -24,6 +25,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.driver.history.adapters.RideAdapter;
 
 public class DriverRideHistoryFragment extends Fragment {
 
@@ -105,6 +107,16 @@ public class DriverRideHistoryFragment extends Fragment {
         sortButton.setOnClickListener(v -> {
             asc = !asc;
             mViewModel.activateSort(asc);
+            sortButton.setRotationX(sortButton.getRotationX() + 180f);
+        });
+
+        TextView clearFilters = view.findViewById(R.id.clearFiltersText);
+
+        clearFilters.setOnClickListener(v -> {
+            mViewModel.clearFilters(asc);
+            bookingDateEditText.setText("");
+            startDate = null;
+            endDate = null;
         });
     }
 

@@ -1,4 +1,4 @@
-package inc.visor.voom.app.driver.history;
+package inc.visor.voom.app.driver.history.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.driver.history.models.Passenger;
+import inc.visor.voom.app.driver.history.models.Ride;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -57,6 +60,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         TextView tvPassenger, tvRoute, tvTime, tvDate, tvDistance, tvPrice, tvStatus, tvPanic, tvPassengers;
         LinearLayout expandedLayout;
 
+        RecyclerView passengerRecyclerView;
+        PassengerAdapter passengerAdapter;
+
         RideViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPassenger = itemView.findViewById(R.id.tvPassenger);
@@ -69,6 +75,18 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             tvPassengers = itemView.findViewById(R.id.tvPassengers);
             tvPanic = itemView.findViewById(R.id.tvPanic);
             expandedLayout = itemView.findViewById(R.id.expandedLayout);
+
+            passengerRecyclerView =
+                    itemView.findViewById(R.id.passengerRecyclerView);
+
+            passengerRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(itemView.getContext())
+            );
+            passengerRecyclerView.setNestedScrollingEnabled(false);
+
+            passengerAdapter = new PassengerAdapter();
+            passengerRecyclerView.setAdapter(passengerAdapter);
+
         }
 
         void bind(Ride ride) {
@@ -103,13 +121,15 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             tvPrice.setText("Price: " + ride.getPrice());
             tvStatus.setText("Status: " + ride.getStatus());
             tvPanic.setText("Panic: " + (ride.isPanic() ? "✔\uFE0F" : "✖\uFE0F"));
-            StringBuilder passengersText = new StringBuilder("Passengers: \n");
-            for (Passenger p : ride.getPassengers()) {
-                passengersText.append(String.format("%s   ", p.getFullName()));
-            }
+//            StringBuilder passengersText = new StringBuilder("Passengers: \n");
+//            for (Passenger p : ride.getPassengers()) {
+//                passengersText.append(String.format("%s   ", p.getFullName()));
+//            }
 
-            tvPassengers.setText(passengersText.toString());
+            tvPassengers.setText("Passengers: ");
 
+
+            passengerAdapter.submitList(ride.getPassengers());
 
             expandedLayout.setVisibility(
                     ride.isExpanded() ? View.VISIBLE : View.GONE

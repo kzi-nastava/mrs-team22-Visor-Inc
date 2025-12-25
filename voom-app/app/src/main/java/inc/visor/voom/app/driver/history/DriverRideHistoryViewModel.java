@@ -10,6 +10,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import inc.visor.voom.app.driver.history.models.Passenger;
+import inc.visor.voom.app.driver.history.models.Ride;
+
 public class DriverRideHistoryViewModel extends ViewModel {
 
     private final MutableLiveData<List<Ride>> rides = new MutableLiveData<>();
@@ -56,14 +59,19 @@ public class DriverRideHistoryViewModel extends ViewModel {
         List<Ride> filtered = new ArrayList<>();
         List<Ride> current = createMockRides();
 
-        for (Ride r : current) {
-            if (r.getDate().before(start00(start)) || r.getDate().after(end23(end))) {
-                continue;
+        if (start != null && end != null) {
+            for (Ride r : current) {
+                if (r.getDate().before(start00(start)) || r.getDate().after(end23(end))) {
+                    continue;
+                }
+                filtered.add(r);
+                if (!seenDates.contains(r.getDate())) {
+                    seenDates.add(r.getDate());
+                }
             }
-            filtered.add(r);
-            if (!seenDates.contains(r.getDate())) {
-                seenDates.add(r.getDate());
-            }
+        }
+        else {
+            filtered = current;
         }
 
         filtered = sortByDate(asc, filtered);
@@ -74,7 +82,7 @@ public class DriverRideHistoryViewModel extends ViewModel {
         List<Ride> list = new ArrayList<>();
 
         list.add(new Ride(
-                date(2025, 3, 1).getTime(),
+                date(2024, 5, 7).getTime(),
                 "08:15",
                 "08:45",
                 "Bulevar Oslobođenja 45",
@@ -253,4 +261,7 @@ public class DriverRideHistoryViewModel extends ViewModel {
         return c;
     }
 
+    public void clearFilters(boolean asc) {
+        filter(null, null, asc);
+    }
 }

@@ -1,4 +1,4 @@
-package inc.visor.voom.app.driver.history;
+package inc.visor.voom.app.driver.history.models;
 
 import java.util.Date;
 import java.util.List;
