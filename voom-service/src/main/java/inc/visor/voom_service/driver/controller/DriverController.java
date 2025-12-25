@@ -2,15 +2,12 @@ package inc.visor.voom_service.driver.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import inc.visor.voom_service.driver.dto.ActivateDriverRequestDto;
-import inc.visor.voom_service.driver.dto.CreateDriverRequestDto;
+import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.CreateDriverResponseDto;
 import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
@@ -20,7 +17,7 @@ import jakarta.validation.Valid;
 public class DriverController {
     
     @PostMapping
-    public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverRequestDto request) {
+    public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
         CreateDriverResponseDto response = new CreateDriverResponseDto(
             1L,
             request.getEmail(),
