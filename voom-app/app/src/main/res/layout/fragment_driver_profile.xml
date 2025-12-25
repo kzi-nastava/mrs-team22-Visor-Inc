@@ -46,7 +46,8 @@
             style="@style/RoundedOutlinedInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/first_name">
+            android:hint="@string/first_name"
+            android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_first_name"
