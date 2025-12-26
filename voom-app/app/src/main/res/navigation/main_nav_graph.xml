@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/driverRideHistoryFragment">
 
 
     <fragment
@@ -35,7 +35,7 @@
         android:id="@+id/forgotPasswordFragment"
         android:name="inc.visor.voom.app.unauthenticated.password.ForgotPasswordFragment"
         android:label="fragment_forgot_password"
-        tools:layout="@layout/fragment_forgot_password" >
+        tools:layout="@layout/fragment_forgot_password">
         <action
             android:id="@+id/action_forgotPasswordFragment_to_resetPasswordFragment"
             app:destination="@id/resetPasswordFragment" />
@@ -44,7 +44,7 @@
         android:id="@+id/resetPasswordFragment"
         android:name="inc.visor.voom.app.unauthenticated.password.ResetPasswordFragment"
         android:label="fragment_reset_password"
-        tools:layout="@layout/fragment_reset_password" >
+        tools:layout="@layout/fragment_reset_password">
         <action
             android:id="@+id/action_resetPasswordFragment_to_mainUserFragment"
             app:destination="@id/mainUserFragment" />
@@ -63,4 +63,9 @@
         android:name="inc.visor.voom.app.driver.main.MainDriverFragment"
         android:label="fragment_main_driver"
         tools:layout="@layout/fragment_main_driver" />
+    <fragment
+        android:id="@+id/driverRideHistoryFragment"
+        android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
+        android:label="fragment_driver_ride_history"
+        tools:layout="@layout/fragment_driver_ride_history" />
 </navigation>

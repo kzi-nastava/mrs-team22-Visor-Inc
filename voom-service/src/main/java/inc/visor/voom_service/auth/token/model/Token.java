@@ -7,31 +7,22 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "password_reset_token")
-public class PasswordResetToken {
-
+@Table(name = "token")
+public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "password_token_id", nullable = false)
-    private Long id;
-
-    @Column(name = "password_token", nullable = false, unique = true)
+    @Column(name = "token_id", nullable = false, unique = true)
     private String token;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "expiry_date_time", nullable = false)
     private LocalDateTime expiryDateTime;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Enumerated(EnumType.ORDINAL)
+    private TokenType tokenType;
 
     public String getToken() {
         return token;
@@ -57,25 +48,33 @@ public class PasswordResetToken {
         this.expiryDateTime = expiryDateTime;
     }
 
+    public TokenType getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
+    }
+
     @Override
     public String toString() {
-        return "PasswordResetToken{" +
-                "id=" + id +
-                ", token='" + token + '\'' +
+        return "Token{" +
+                "token='" + token + '\'' +
                 ", user=" + user +
                 ", expiryDateTime=" + expiryDateTime +
+                ", tokenType=" + tokenType +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        PasswordResetToken that = (PasswordResetToken) o;
-        return Objects.equals(id, that.id) && Objects.equals(token, that.token) && Objects.equals(user, that.user) && Objects.equals(expiryDateTime, that.expiryDateTime);
+        Token token1 = (Token) o;
+        return Objects.equals(token, token1.token) && Objects.equals(user, token1.user) && Objects.equals(expiryDateTime, token1.expiryDateTime) && tokenType == token1.tokenType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, token, user, expiryDateTime);
+        return Objects.hash(token, user, expiryDateTime, tokenType);
     }
 }
