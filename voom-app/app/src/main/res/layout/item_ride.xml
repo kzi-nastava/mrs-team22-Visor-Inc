@@ -65,14 +65,6 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvRoute"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="A → B" />
-
-                <TextView
                     android:id="@+id/tvTime"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -91,17 +83,23 @@
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/tvRoute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
                     android:id="@+id/tvDistance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Distance: 5.4 km"
+                    android:paddingTop="4dp"
                     android:textSize="14sp"/>
 
                 <TextView
                     android:id="@+id/tvPrice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Price: 850 RSD"
                     android:textSize="14sp"
                     android:paddingTop="4dp"/>
 
@@ -109,25 +107,20 @@
                     android:id="@+id/tvStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Status: Completed"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:paddingTop="4dp"/>
 
                 <TextView
                     android:id="@+id/tvPanic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="True"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:paddingTop="4dp"/>
 
                 <TextView
                     android:id="@+id/tvPassengers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Passengers: Marko Petrović, Ivan Jovanović"
                     android:textSize="14sp"
                     android:paddingTop="4dp"/>
 
