@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_nav_graph"
-    app:startDestination="@id/driverRideHistoryFragment">
+    app:startDestination="@id/loginFragment">
 
 
     <fragment
@@ -53,7 +53,7 @@
         android:id="@+id/mainUserFragment"
         android:name="inc.visor.voom.app.user.main.MainUserFragment"
         android:label="fragment_main_user"
-        tools:layout="@layout/fragment_main_user" >
+        tools:layout="@layout/fragment_main_user">
         <action
             android:id="@+id/action_mainUserFragment_to_mainDriverFragment"
             app:destination="@id/mainDriverFragment" />

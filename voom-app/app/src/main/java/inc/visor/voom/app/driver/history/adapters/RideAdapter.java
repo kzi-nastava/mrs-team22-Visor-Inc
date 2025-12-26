@@ -118,13 +118,10 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             tvDate.setVisibility(showDateHeader ? View.VISIBLE : View.GONE);
 
             tvDistance.setText("Distance: 2km");
-            tvPrice.setText("Price: " + ride.getPrice());
+            tvPrice.setText(String.format("Price: %d", ride.getPrice()));
             tvStatus.setText("Status: " + ride.getStatus());
-            tvPanic.setText("Panic: " + (ride.isPanic() ? "✔\uFE0F" : "✖\uFE0F"));
-//            StringBuilder passengersText = new StringBuilder("Passengers: \n");
-//            for (Passenger p : ride.getPassengers()) {
-//                passengersText.append(String.format("%s   ", p.getFullName()));
-//            }
+            tvPanic.setText("Panic: " + (ride.isPanic() ? "✔️" : "✖️"));
+
 
             tvPassengers.setText("Passengers: ");
 

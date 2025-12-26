@@ -46,5 +46,10 @@
     <string name="vehicle_info">Vehicle info</string>
     <string name="driver_profile">Driver profile\n</string>
     <string name="driver_profile_page">Driver profile page</string>
-
+    <string name="distance_placeholder">Distance: 5.2km</string>
+    <string name="activity">Activity</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="apply_filter">APPLY FILTER</string>
+    <string name="sort">Sort</string>
+    <string name="select_dates">Select date range for filtering</string>
 </resources>

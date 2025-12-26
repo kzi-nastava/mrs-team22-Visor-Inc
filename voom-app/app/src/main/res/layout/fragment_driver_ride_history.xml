@@ -13,7 +13,7 @@
         android:id="@+id/textView8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Activity"
+        android:text="@string/activity"
         android:textAlignment="center"
         android:textSize="20sp"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,7 +26,7 @@
         style="?attr/textInputOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select date range for filtering"
+        android:hint="@string/select_dates"
         app:boxBackgroundMode="outline"
         app:boxCornerRadiusBottomEnd="26dp"
         app:boxCornerRadiusBottomStart="26dp"
@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
 
         android:layout_marginTop="12dp"
-        android:text="Apply Filter"
+        android:text="@string/apply_filter"
 
         app:cornerRadius="32dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -73,7 +73,7 @@
         android:id="@+id/clearFiltersText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Clear filters"
+        android:text="@string/clear_filters"
         android:textColor="@color/primary"
         android:textSize="14sp"
         android:clickable="true"
@@ -105,7 +105,7 @@
         android:layout_marginEnd="8dp"
 
         android:background="#03FDF7F7"
-        android:contentDescription="Sort Button"
+        android:contentDescription="@string/sort"
         android:src="@drawable/ic_sort"
         app:layout_constraintBottom_toBottomOf="@id/apply_btn"
 

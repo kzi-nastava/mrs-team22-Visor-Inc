@@ -5,10 +5,10 @@
         android:icon="@drawable/baseline_home_24"
         android:title="@string/nav_home"/>
 
-    <item
-        android:id="@+id/nav_services"
-        android:icon="@drawable/round_apps_24"
-        android:title="@string/nav_services"/>
+<!--    <item-->
+<!--        android:id="@+id/nav_services"-->
+<!--        android:icon="@drawable/round_apps_24"-->
+<!--        android:title="@string/nav_services"/>-->
 
     <item
         android:id="@+id/nav_activity"

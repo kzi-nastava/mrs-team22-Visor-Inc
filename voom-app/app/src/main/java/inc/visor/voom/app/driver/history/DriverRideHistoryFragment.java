@@ -51,6 +51,16 @@ public class DriverRideHistoryFragment extends Fragment {
     ) {
         View view = inflater.inflate(R.layout.fragment_driver_ride_history, container, false);
 
+
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        super.onViewCreated(view, savedInstanceState);
+
         RecyclerView recyclerView = view.findViewById(R.id.rideRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -60,14 +70,6 @@ public class DriverRideHistoryFragment extends Fragment {
         mViewModel = new ViewModelProvider(this).get(DriverRideHistoryViewModel.class);
 
         mViewModel.getRides().observe(getViewLifecycleOwner(), adapter::submitList);
-
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        super.onViewCreated(view, savedInstanceState);
 
         bookingDateEditText = view.findViewById(R.id.booking_date_edit_text);
 
