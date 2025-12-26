@@ -13,6 +13,8 @@ public class ProfileViewModel extends ViewModel {
 
     private final MutableLiveData<String> phoneNumber = new MutableLiveData<>();
 
+    private final MutableLiveData<Boolean> changeFragment = new MutableLiveData<>(); //TODO remove
+
     public ProfileViewModel() {
         firstName.setValue("Nikola");
         lastName.setValue("Bjelica");
@@ -40,6 +42,20 @@ public class ProfileViewModel extends ViewModel {
     public LiveData<String> getPhoneNumeber() {
         return phoneNumber;
     }
+
+    //TODO remove
+
+    public LiveData<Boolean> getChangeFragment() {
+        return changeFragment;
+    }
+
+    //TODO remove
+
+    public void setChangeFragment(boolean value) {
+        changeFragment.setValue(value);
+    }
+
+
 
     public void onSaveClicked(String fn, String ln, String em, String ad, String pn) {
         firstName.setValue(fn);

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/driver_nav_graph"
+    app:startDestination="@id/driverProfileFragment">
+    <fragment
+        android:id="@+id/driverProfileFragment"
+        android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
+        android:label="DriverProfileFragment" />
+</navigation>

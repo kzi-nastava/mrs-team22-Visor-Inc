@@ -48,7 +48,7 @@ public class LoginFragment extends Fragment {
 
         buttonLogin = view.findViewById(R.id.login);
 
-        buttonLogin.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_profileFragment));
+        buttonLogin.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment));
 
         buttonForgotPassword = view.findViewById(R.id.forgot_password);
 
