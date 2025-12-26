@@ -42,7 +42,7 @@ public class ResetPasswordFragment extends Fragment {
         setupRepeatPasswordInput();
 
         buttonSubmit = view.findViewById(R.id.reset_password_button);
-        buttonSubmit.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_resetPasswordFragment_to_profileFragment));
+        buttonSubmit.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_resetPasswordFragment_to_mainUserFragment));
     }
 
     private void setupPasswordInput() {

@@ -17,21 +17,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="inc.visor.voom.app.user.profile.ProfileFragment"
-        android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_user_to_driver_profile"
-            app:destination="@id/driverProfileFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/driverProfileFragment"
-        android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
-        android:label="fragment_driver_profile"
-        tools:layout="@layout/fragment_driver_profile" />
-
-    <fragment
         android:id="@+id/loginFragment"
         android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
         android:label="fragment_login"
@@ -40,11 +25,11 @@
             android:id="@+id/action_loginFragment_to_registrationFragment"
             app:destination="@id/registrationFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
-        <action
             android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
             app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
     </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
@@ -61,7 +46,21 @@
         android:label="fragment_reset_password"
         tools:layout="@layout/fragment_reset_password" >
         <action
-            android:id="@+id/action_resetPasswordFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
+            android:id="@+id/action_resetPasswordFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/mainUserFragment"
+        android:name="inc.visor.voom.app.user.main.MainUserFragment"
+        android:label="fragment_main_user"
+        tools:layout="@layout/fragment_main_user" >
+        <action
+            android:id="@+id/action_mainUserFragment_to_mainDriverFragment"
+            app:destination="@id/mainDriverFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mainDriverFragment"
+        android:name="inc.visor.voom.app.driver.main.MainDriverFragment"
+        android:label="fragment_main_driver"
+        tools:layout="@layout/fragment_main_driver" />
 </navigation>
