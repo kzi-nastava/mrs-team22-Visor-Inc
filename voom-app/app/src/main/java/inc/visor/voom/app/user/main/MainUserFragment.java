@@ -44,10 +44,7 @@ public class MainUserFragment extends Fragment {
             }
         });
 
-        NavController navController =
-                NavHostFragment.findNavController(
-                        getChildFragmentManager().findFragmentById(R.id.user_nav_host)
-                );
+        NavController navController = NavHostFragment.findNavController(getChildFragmentManager().findFragmentById(R.id.user_nav_host));
 
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation_view);
 

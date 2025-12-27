@@ -39,8 +39,7 @@ public class MainDriverFragment extends Fragment {
             @Nullable Bundle savedInstanceState
     ) {
 
-        NavController navController =
-                NavHostFragment.findNavController(
+        NavController navController = NavHostFragment.findNavController(
                         getChildFragmentManager().findFragmentById(R.id.driver_nav_host)
                 );
 
@@ -50,6 +49,11 @@ public class MainDriverFragment extends Fragment {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
+                navController.navigate(R.id.driverHomeFragment);
+                return true;
+            }
+
+            if (id == R.id.nav_services) {
                 NavController parentNavController =
                         NavHostFragment.findNavController(
                                 requireParentFragment()
@@ -68,7 +72,6 @@ public class MainDriverFragment extends Fragment {
                 navController.navigate(R.id.driverRideHistoryFragment);
                 return true;
             }
-
 
             return false;
         });
