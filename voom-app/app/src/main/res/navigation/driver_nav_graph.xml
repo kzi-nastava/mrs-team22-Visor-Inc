@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/driver_nav_graph"
-    app:startDestination="@id/driverProfileFragment">
+    app:startDestination="@id/driverHomeFragment">
 
     <fragment
         android:id="@+id/loginFragment"
@@ -31,5 +31,10 @@
         android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
         android:label="fragment_driver_profile"
          />
+    <fragment
+        android:id="@+id/driverHomeFragment"
+        android:name="inc.visor.voom.app.driver.home.DriverHomeFragment"
+        android:label="fragment_driver_home"
+        tools:layout="@layout/fragment_driver_home" />
 
 </navigation>
