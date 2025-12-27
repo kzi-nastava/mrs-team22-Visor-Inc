@@ -1,5 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
+import inc.visor.voom_service.ride.dto.RideLocationDto;
+import inc.visor.voom_service.ride.model.Ride;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
@@ -13,5 +15,14 @@ public class RideService {
             return null;
         }
 
+        public void updateRidePosition(RideLocationDto dto) {
+            // get and set position
+            return;
+        }
+
+        public void finishRide(Ride ride) {
+            // set status
+            return;
+        }
 
 }

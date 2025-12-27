@@ -1,17 +1,15 @@
 package inc.visor.voom_service.driver.controller;
 
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.driver.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
-import inc.visor.voom_service.driver.dto.ActivateDriverRequestDto;
-import inc.visor.voom_service.driver.dto.CreateDriverRequestDto;
-import inc.visor.voom_service.driver.dto.CreateDriverResponseDto;
 import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
 
@@ -28,6 +26,22 @@ public class DriverController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    // we would use message mapping in real world if driver location came from actual driver and not from simulation
+//    @MessageMapping("/drivers.updateLocation")
+//    @SendTo("/topic/driversLocations")
+//    public DriverLocationDto updateLocation(@Payload DriverLocationDto request) {
+//        return request;
+//    }
+
+    @PostMapping("/{driverId}/reportDriver")
+    public ResponseEntity<Void> reportDriver(@PathVariable Long driverId, @RequestBody ReportDriverDto req, @AuthenticationPrincipal User user) {
+        // get needed info and pass into DriverService
+    }
+
+
+
+
 
     //TODO remove, this is under user
 
