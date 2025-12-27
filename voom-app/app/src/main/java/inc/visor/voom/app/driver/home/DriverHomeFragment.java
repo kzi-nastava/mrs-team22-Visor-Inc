@@ -16,12 +16,19 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.osmdroid.api.IMapController;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
 
 public class DriverHomeFragment extends Fragment {
+
+    private MapView map = null;
 
     public DriverHomeFragment() {
         // Required empty public constructor
@@ -52,9 +59,41 @@ public class DriverHomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_driver_home, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_driver_home, container, false);
+
+        MapView map = view.findViewById(R.id.map);
+        map.setMultiTouchControls(true);
+
+        IMapController controller = map.getController();
+        controller.setZoom(15.0);
+
+        GeoPoint startPoint = new GeoPoint(45.2671, 19.8335); // Novi Sad 🙂
+        controller.setCenter(startPoint);
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (map != null) {
+            map.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (map != null) {
+            map.onPause();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        map = null;
     }
 }

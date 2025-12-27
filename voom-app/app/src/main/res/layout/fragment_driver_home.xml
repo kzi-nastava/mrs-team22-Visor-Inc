@@ -3,20 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".driver.home.DriverHomeFragment">
-
-<!--    <org.osmdroid.views.MapView-->
-<!--        android:id="@+id/map"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:paddingHorizontal="8dp"-->
-<!--        android:paddingVertical="32dp"/>-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingVertical="64dp"
+        android:paddingVertical="32dp"
         android:paddingHorizontal="8dp">
 
         <TextView
@@ -97,6 +91,20 @@
                 android:paddingHorizontal="16dp"/>
 
         </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/mapContainer"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            app:cardCornerRadius="32dp"
+            app:cardUseCompatPadding="true">
+
+            <org.osmdroid.views.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
