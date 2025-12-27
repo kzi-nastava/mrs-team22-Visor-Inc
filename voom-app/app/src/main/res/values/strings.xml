@@ -58,4 +58,6 @@
     <string name="date_today">Tuesday, September 1, 2025</string>
     <string name="rides_today">Rides today: 10</string>
     <string name="money_earned">Money earned: $115.23</string>
+    <string name="upload_image">Upload profile image</string>
+    <string name="profile_image_preview">Profile image preview</string>
 </resources>
