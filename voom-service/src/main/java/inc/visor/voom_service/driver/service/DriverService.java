@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DriverService {
-    private void simulateMove(DriverLocationDto dto) {
+    public void simulateMove(DriverLocationDto dto) {
         // used for simulating movement
         // one possible way is to 1. select 2 random points in Novi Sad
         // 2. call external api to get route and waypoints between these two
@@ -14,7 +14,7 @@ public class DriverService {
         return;
     }
 
-    private void reportDriver(Long driverId, Long userId, String comment) {
+    public void reportDriver(Long driverId, Long userId, String comment) {
         return;
     }
 

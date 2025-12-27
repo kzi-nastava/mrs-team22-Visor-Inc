@@ -2,16 +2,21 @@ package inc.visor.voom_service.driver.controller;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.dto.*;
+import inc.visor.voom_service.ride.dto.RideResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+//import org.springframework.messaging.handler.annotation.MessageMapping;
+//import org.springframework.messaging.handler.annotation.Payload;
+//import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -34,13 +39,27 @@ public class DriverController {
 //        return request;
 //    }
 
-    @PostMapping("/{driverId}/reportDriver")
-    public ResponseEntity<Void> reportDriver(@PathVariable Long driverId, @RequestBody ReportDriverDto req, @AuthenticationPrincipal User user) {
+    @GetMapping("/active")
+    public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
+        List<DriverSummaryDto> response = new ArrayList<>();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{driverId}/report")
+    public ResponseEntity<Void> reportDriver(@PathVariable Long driverId, @RequestBody ReportDriverRequestDto req, @AuthenticationPrincipal User user) {
         // get needed info and pass into DriverService
+        // driverService.reportDriver(driverId, req.getComment(), user.getId())
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
+    @GetMapping("/{driverId}/history")
+    public ResponseEntity<List<RideResponseDto>> getRideHistory(@PathVariable Long driverId, @AuthenticationPrincipal User user) {
+        List<RideResponseDto> response = new ArrayList<>();
 
+        // if (user is not driver) -> obliterate him { return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); }
+        return ResponseEntity.ok(response);
+    }
 
 
     //TODO remove, this is under user

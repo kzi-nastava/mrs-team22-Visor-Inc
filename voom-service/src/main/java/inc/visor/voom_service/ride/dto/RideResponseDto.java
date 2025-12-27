@@ -1,6 +1,7 @@
 package inc.visor.voom_service.ride.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 
@@ -14,6 +15,11 @@ public class RideResponseDto {
 
     private String driverName;
     private String passengerName;
+
+    private List<String> passengerNames;
+
+    private String startAddress;
+    private String destinationAddress;
 
     public RideResponseDto() {
     }
@@ -32,6 +38,18 @@ public class RideResponseDto {
         this.finishedAt = finishedAt;
         this.driverName = driverName;
         this.passengerName = passengerName;
+    }
+
+    public RideResponseDto(Long id, RideStatus status, LocalDateTime startedAt, LocalDateTime finishedAt, String driverName, String passengerName, List<String> passengerNames, String startAddress, String destinationAddress) {
+        this.id = id;
+        this.status = status;
+        this.startedAt = startedAt;
+        this.finishedAt = finishedAt;
+        this.driverName = driverName;
+        this.passengerName = passengerName;
+        this.passengerNames = passengerNames;
+        this.startAddress = startAddress;
+        this.destinationAddress = destinationAddress;
     }
 
     public Long getId() {
@@ -80,5 +98,29 @@ public class RideResponseDto {
 
     public void setPassengerName(String passengerName) {
         this.passengerName = passengerName;
+    }
+
+    public List<String> getPassengerNames() {
+        return passengerNames;
+    }
+
+    public void setPassengerNames(List<String> passengerNames) {
+        this.passengerNames = passengerNames;
+    }
+
+    public String getStartAddress() {
+        return startAddress;
+    }
+
+    public void setStartAddress(String startAddress) {
+        this.startAddress = startAddress;
+    }
+
+    public String getDestinationAddress() {
+        return destinationAddress;
+    }
+
+    public void setDestinationAddress(String destinationAddress) {
+        this.destinationAddress = destinationAddress;
     }
 }

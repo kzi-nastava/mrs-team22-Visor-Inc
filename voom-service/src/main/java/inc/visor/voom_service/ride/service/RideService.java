@@ -8,6 +8,8 @@ import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 
+import java.util.List;
+
 @Service
 public class RideService {
 
@@ -23,6 +25,10 @@ public class RideService {
         public void finishRide(Ride ride) {
             // set status
             return;
+        }
+
+        public List<Ride> getDriverRides(Long driverId) {
+            return null;
         }
 
 }

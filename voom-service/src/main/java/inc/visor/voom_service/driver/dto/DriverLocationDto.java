@@ -9,4 +9,5 @@ public class DriverLocationDto {
     Double lat;
     Double lng;
     DriverActivityStatus status;
+    Integer etaSecondsUntilFinished;
 }
