@@ -3,6 +3,7 @@ package inc.visor.voom_service.ride.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import inc.visor.voom_service.rating.dto.RatingRequestDto;
 import inc.visor.voom_service.ride.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -123,11 +124,4 @@ public class RideController {
         return ResponseEntity.ok(ride);
     }
 
-    @PostMapping("/{id}/rate")
-    public ResponseEntity<Void> rateRide(@PathVariable Long id, @Valid @RequestBody RideRatingRequestDto request) {
-
-        // if date.today() - ride.getFinishedAt() > 3 days -> return error
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 }
