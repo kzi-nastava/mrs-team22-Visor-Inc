@@ -152,8 +152,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
-
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_change_password"
             android:layout_width="match_parent"
@@ -162,7 +160,6 @@
             android:text="@string/change_password"
             app:backgroundTint="@color/primary"
             app:cornerRadius="24dp" />
-
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
@@ -185,8 +182,6 @@
             app:strokeColor="@color/primary"
             android:textColor="@color/primary"
             app:backgroundTint="@android:color/transparent" />
-
-
 
     </LinearLayout>
 
