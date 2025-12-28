@@ -52,6 +52,10 @@ public class RideRequest {
     @Column(name = "pet_transport", nullable = false)
     private boolean petTransport;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = true)
+    private User cancelledBy;
+
     public long getId() {
         return id;
     }
@@ -82,7 +86,6 @@ public class RideRequest {
 
     public void setStatus(RideRequestStatus status) {
         this.status = status;
-
     }
 
     public LocalDateTime getScheduledTime() {
@@ -115,5 +118,13 @@ public class RideRequest {
 
     public void setPetTransport(boolean petTransport) {
         this.petTransport = petTransport;
+    }
+
+    public User getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public void setCancelledBy(User cancelledBy) {
+        this.cancelledBy = cancelledBy;
     }
 }
