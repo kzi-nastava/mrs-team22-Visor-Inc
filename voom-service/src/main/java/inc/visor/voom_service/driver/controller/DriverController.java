@@ -23,7 +23,7 @@ import java.util.List;
 public class DriverController {
     
     @PostMapping
-    public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverRequestDto request) {
+    public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
         CreateDriverResponseDto response = new CreateDriverResponseDto(
             1L,
             request.getEmail(),
