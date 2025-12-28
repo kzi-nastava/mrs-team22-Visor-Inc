@@ -3,19 +3,14 @@ package inc.visor.voom_service.driver.controller;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.messaging.handler.annotation.MessageMapping;
-//import org.springframework.messaging.handler.annotation.Payload;
-//import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
-import jakarta.validation.Valid;
-
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -52,7 +47,6 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-
     @GetMapping("/{driverId}/history")
     public ResponseEntity<List<RideResponseDto>> getRideHistory(@PathVariable Long driverId, @AuthenticationPrincipal User user) {
         List<RideResponseDto> response = new ArrayList<>();
@@ -61,21 +55,24 @@ public class DriverController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/activation")
+    public ResponseEntity<Boolean> checkActivationToken(
+        @RequestParam String token
+    ) {
+        return ResponseEntity.ok(true);
+    }
 
-    //TODO remove, this is under user
+    @PostMapping("/activation")
+    public ResponseEntity<String> activateDriver(
+        @Valid @RequestBody ActivateDriverRequestDto request
+    ) {
+        return ResponseEntity.ok("Driver account activated successfully.");
+    }
 
-//    @GetMapping("/activation")
-//    public ResponseEntity<Boolean> checkActivationToken(
-//        @RequestParam String token
-//    ) {
-//        return ResponseEntity.ok(true);
-//    }
-//
-//    @PostMapping("/activation")
-//    public ResponseEntity<String> activateDriver(
-//        @Valid @RequestBody ActivateDriverRequestDto request
-//    ) {
-//        return ResponseEntity.ok("Driver account activated successfully.");
-//    }
+    @PutMapping("/{driverId}/status")
+    public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, @RequestParam String status) {
+        DriverSummaryDto response = new DriverSummaryDto();
+        return ResponseEntity.ok(response);
+    }
 
 }

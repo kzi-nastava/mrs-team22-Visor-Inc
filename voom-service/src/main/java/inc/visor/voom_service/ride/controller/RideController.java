@@ -50,6 +50,22 @@ public class RideController {
         return ResponseEntity.ok(List.of(ride));
     }
 
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity<List<RideHistoryDto>> getRidesByUser(@PathVariable long userId, @RequestParam(required = false) LocalDateTime date) {
+
+        RideHistoryDto ride = new RideHistoryDto();
+
+        return ResponseEntity.ok(List.of(ride));
+    }
+
+    @GetMapping("/driver/{driverId}/history")
+    public ResponseEntity<List<RideHistoryDto>> getRidesByDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
+
+        RideHistoryDto ride = new RideHistoryDto();
+
+        return ResponseEntity.ok(List.of(ride));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
 

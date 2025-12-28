@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.dto.ForgotPasswordDto;
 import inc.visor.voom_service.auth.dto.LoginDto;
-import inc.visor.voom_service.auth.dto.RefreshTokenDto;
+import inc.visor.voom_service.auth.dto.TokenDto;
 import inc.visor.voom_service.auth.dto.RegistrationDto;
 import inc.visor.voom_service.auth.dto.ResetPasswordDto;
 
@@ -19,38 +20,40 @@ import inc.visor.voom_service.auth.dto.ResetPasswordDto;
 public class AuthController {
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto) {
+        TokenDto tokenDto = new TokenDto();
+        return ResponseEntity.ok().body(tokenDto);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegistrationDto registrationDto) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> register(@RequestBody RegistrationDto registrationDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenDto refreshTokenDto) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> logout(@RequestBody TokenDto refreshTokenDto) {
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenDto refreshTokenDto) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<TokenDto> refreshToken(@RequestBody TokenDto refreshTokenDto) {
+        TokenDto tokenDto = new TokenDto();
+        return ResponseEntity.ok().body(tokenDto);
     }
 
     @GetMapping("/verifyEmail")
-    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> verifyEmail(@RequestParam("token") String token) {
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDto forgotPasswordRequestDto) {
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordDto forgotPasswordRequestDto) {
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetPasswordRequestDto) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDto resetPasswordRequestDto) {
+        return ResponseEntity.noContent().build();
     }
 
 }
