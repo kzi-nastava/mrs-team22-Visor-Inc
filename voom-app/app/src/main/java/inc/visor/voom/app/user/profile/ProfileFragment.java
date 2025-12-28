@@ -39,13 +39,15 @@ public class ProfileFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(ProfileViewModel.class);
 
         binding.btnChangePassword.setOnClickListener(v -> {
             new ChangePasswordDialogFragment().show(getParentFragmentManager(), "ChangePasswordDialog");
         });
 
-        binding.btnChangeDriverProfile.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_user_to_driver_profile));
+        binding.btnChangeDriverProfile.setOnClickListener(v -> {
+            viewModel.setChangeFragment(true);
+        });
 
         observeViewModel();
         setupListeners();

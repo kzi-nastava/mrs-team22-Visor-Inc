@@ -15,17 +15,5 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/main_nav_graph"
         android:name="androidx.navigation.fragment.NavHostFragment"/>
-
-<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-<!--        android:id="@+id/bottom_navigation_view"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="72dp"-->
-<!--        app:itemIconSize="24dp"-->
-<!--        app:itemIconTint="@color/white"-->
-<!--        app:itemTextColor="@color/white"-->
-<!--        app:labelVisibilityMode="labeled"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:menu="@menu/bottom_nav_menu" />-->
+    
 </androidx.constraintlayout.widget.ConstraintLayout>

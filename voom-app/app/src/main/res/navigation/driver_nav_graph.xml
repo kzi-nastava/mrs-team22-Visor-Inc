@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/driver_nav_graph"
+    app:startDestination="@id/driverHomeFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/driverRideHistoryFragment"
+        android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
+        android:label="fragment_driver_ride_history" />
+
+    <fragment
+        android:id="@+id/driverProfileFragment"
+        android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
+        android:label="fragment_driver_profile"
+         />
+    <fragment
+        android:id="@+id/driverHomeFragment"
+        android:name="inc.visor.voom.app.driver.home.DriverHomeFragment"
+        android:label="fragment_driver_home"
+        tools:layout="@layout/fragment_driver_home" />
+
+</navigation>
