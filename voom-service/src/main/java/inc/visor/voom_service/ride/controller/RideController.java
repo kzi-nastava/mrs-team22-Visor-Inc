@@ -3,15 +3,12 @@ package inc.visor.voom_service.ride.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import inc.visor.voom_service.ride.dto.RideCancelDto;
+import inc.visor.voom_service.ride.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
-import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
-import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
-import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import jakarta.validation.Valid;
@@ -126,4 +123,11 @@ public class RideController {
         return ResponseEntity.ok(ride);
     }
 
+    @PostMapping("/{id}/rate")
+    public ResponseEntity<Void> rateRide(@PathVariable Long id, @Valid @RequestBody RideRatingRequestDto request) {
+
+        // if date.today() - ride.getFinishedAt() > 3 days -> return error
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
