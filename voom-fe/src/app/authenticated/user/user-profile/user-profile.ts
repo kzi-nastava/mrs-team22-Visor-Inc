@@ -15,8 +15,24 @@ import {ValueInputString} from '../../../shared/value-input/value-input-string/v
 import {Header} from '../../../core/layout/header-kt1/header-kt1';
 import {ChangePasswordDialog} from '../../../shared/dialog/change-password-dialog/change-password-dialog';
 import {MatCheckbox} from '@angular/material/checkbox';
+import { UserProfileApi } from './user-profile.api';
 
 export const ROUTE_USER_PROFILE = 'profile';
+
+export type UserProfileResponseDto = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+};
+
+export type UpdateUserProfileRequestDto = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+};
 
 @Component({
   selector: 'app-user-profile',
@@ -41,7 +57,7 @@ export const ROUTE_USER_PROFILE = 'profile';
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private profileApi: UserProfileApi) {}
 
   userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
 
@@ -81,7 +97,44 @@ export class UserProfile {
     ]),
   });
 
-  submit() {
-    console.log('Submit')
+    ngOnInit(): void {
+    this.profileApi.getProfile().subscribe({
+      next: (profile) => {
+        this.profileForm.patchValue({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          phone: profile.phoneNumber,
+          address: profile.address,
+          email: profile.email,
+        });
+
+        this.profileForm.controls.email.disable();
+      },
+      error: (err) => {
+        console.error('Failed to load profile', err);
+      },
+    });
   }
+
+  submit() {
+  if (this.profileForm.invalid) {
+    this.profileForm.markAllAsTouched();
+    return;
+  }
+
+  const v = this.profileForm.getRawValue();
+
+  console.log('Submitting profile update', v.firstName);
+
+  this.profileApi.updateProfile({
+    firstName: v.firstName ?? '',
+    lastName: v.lastName ?? '',
+    phoneNumber: v.phone ?? '',
+    address: v.address ?? '',
+  }).subscribe({
+    next: () => console.log('Profile updated'),
+    error: console.error,
+  });
+}
+
 }

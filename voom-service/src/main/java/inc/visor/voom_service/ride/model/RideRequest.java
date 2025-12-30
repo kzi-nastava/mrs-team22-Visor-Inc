@@ -56,6 +56,8 @@ public class RideRequest {
     @JoinColumn(name = "user_id", nullable = true)
     private User cancelledBy;
 
+    public RideRequest() {}
+
     public long getId() {
         return id;
     }

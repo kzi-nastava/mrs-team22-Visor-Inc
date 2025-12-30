@@ -9,35 +9,38 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;
+import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.UserProfileService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users/me")
 public class UserProfileController {
+
+    private final UserService userService;
     
     private final UserProfileService userProfileService;
 
-    public UserProfileController(UserProfileService userProfileService) {
+    public UserProfileController(UserProfileService userProfileService, UserService userService) {
         this.userProfileService = userProfileService;
+        this.userService = userService;
     }
+
+    Person dummyPerson = new Person("Nikola", "Bjelica", "1234567890", "Tose Jovanovica 57a, Novi Sad");
+    User dummyUser = new User("nikolabjelica4@gmail.com", "password", null, null, null, dummyPerson);
 
     @GetMapping
     public ResponseEntity<UserProfileResponseDto> getProfile(
             @AuthenticationPrincipal User user
     ) {
         if (user == null) {
-            UserProfileResponseDto dto = new UserProfileResponseDto(
-                "test@example.com",
-                "Test",
-                "User",
-                "+38160000000",
-                "Test Address"
+            return ResponseEntity.ok(
+                userProfileService.getProfile(dummyUser)
             );
-            return ResponseEntity.ok(dto);
         }
 
         return ResponseEntity.ok(userProfileService.getProfile(user));
