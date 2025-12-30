@@ -28,7 +28,7 @@ public class VehicleTypeController {
         return ResponseEntity.ok(new VehicleType());
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<VehicleType> updateVehicleType(@PathVariable long id, @RequestBody VehicleType vehicleTypeDto) {
         return ResponseEntity.ok(vehicleTypeDto);
     }
