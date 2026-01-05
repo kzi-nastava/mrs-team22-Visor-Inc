@@ -31,7 +31,6 @@ public class ChangePasswordRequestDto implements  PasswordConfirmable{
         this.newPassword = newPassword;
     }
 
-
     @Override
     public String getConfirmPassword() {
         return confirmPassword;

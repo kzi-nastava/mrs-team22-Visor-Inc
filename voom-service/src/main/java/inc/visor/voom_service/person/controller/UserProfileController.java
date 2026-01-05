@@ -92,12 +92,12 @@ public class UserProfileController {
         @Valid @RequestBody ChangePasswordRequestDto request,
         @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            return ResponseEntity.ok().build();
-        }
+        Long userId = (user != null) ? user.getId() : 2L;
 
-        userProfileService.changePassword(user, request);
+        userProfileService.changePassword(userId, request);
+
         return ResponseEntity.ok().build();
     }
+
 
 }

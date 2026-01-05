@@ -17,6 +17,11 @@ export type UpdateUserProfileRequestDto = {
   address: string;
 };
 
+export type UpdateUserPasswordRequestDto = {
+  newPassword: string;
+  confirmPassword: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileApi {
   private readonly baseUrl = 'http://localhost:8080/api/users/me';
@@ -30,5 +35,9 @@ export class UserProfileApi {
   updateProfile(body: UpdateUserProfileRequestDto): Observable<UserProfileResponseDto> {
     console.log('Updating profile with data:', body);
     return this.http.put<UserProfileResponseDto>(this.baseUrl, body);
+  }
+
+  updatePassword(body: UpdateUserPasswordRequestDto): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/password`, body);
   }
 }

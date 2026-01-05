@@ -124,8 +124,6 @@ export class UserProfile {
 
   const v = this.profileForm.getRawValue();
 
-  console.log('Submitting profile update', v.firstName);
-
   this.profileApi.updateProfile({
     firstName: v.firstName ?? '',
     lastName: v.lastName ?? '',

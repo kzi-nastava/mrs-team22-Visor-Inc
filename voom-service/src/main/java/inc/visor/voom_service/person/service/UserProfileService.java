@@ -64,14 +64,18 @@ public class UserProfileService {
 
     @Transactional
     public void changePassword(
-        User user,
+        Long userId,
         ChangePasswordRequestDto request
     ) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalStateException("User not found"));
+
         user.setPassword(
             passwordEncoder.encode(request.getPassword())
         );
 
         userRepository.save(user);
     }
+
 
 }
