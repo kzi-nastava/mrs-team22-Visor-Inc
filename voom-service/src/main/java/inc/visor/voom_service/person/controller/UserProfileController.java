@@ -9,38 +9,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.service.UserService;
+import inc.visor.voom_service.auth.user.model.UserRole;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.UserProfileService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users/me")
 public class UserProfileController {
-
-    private final UserService userService;
     
     private final UserProfileService userProfileService;
 
-    public UserProfileController(UserProfileService userProfileService, UserService userService) {
+    public UserProfileController(UserProfileService userProfileService) {
         this.userProfileService = userProfileService;
-        this.userService = userService;
     }
-
-    Person dummyPerson = new Person("Nikola", "Bjelica", "1234567890", "Tose Jovanovica 57a, Novi Sad");
-    User dummyUser = new User("nikolabjelica4@gmail.com", "password", null, null, null, dummyPerson);
 
     @GetMapping
     public ResponseEntity<UserProfileResponseDto> getProfile(
             @AuthenticationPrincipal User user
     ) {
         if (user == null) {
-            return ResponseEntity.ok(
-                userProfileService.getProfile(dummyUser)
+            UserProfileResponseDto dto = new UserProfileResponseDto(
+                "test@example.com",
+                "Test",
+                "User",
+                "+38160000000",
+                "Test Address"
             );
+            return ResponseEntity.ok(dto);
         }
 
         return ResponseEntity.ok(userProfileService.getProfile(user));
@@ -51,16 +54,34 @@ public class UserProfileController {
         @Valid @RequestBody UpdateUserProfileRequestDto request,
         @AuthenticationPrincipal User user
     ) {
-
         if (user == null) {
             UserProfileResponseDto response = new UserProfileResponseDto(
                 "test@example.com",
-                request.getFirstName(),
+                "NIKOLA091",
                 request.getLastName(),
                 request.getPhoneNumber(),
                 request.getAddress()
             );
-            return ResponseEntity.ok(response);
+            
+            Person person = new Person();
+            person.setId(1L);
+
+            UserType userType = new UserType();
+            userType.setId(1);
+
+            UserRole userRole = new UserRole();
+            userRole.setId(1);
+
+            User mockUser = new User(
+                "nikola@test.com",
+                "akjsdks",
+                userType,
+                UserStatus.ACTIVE, 
+                userRole,
+                person
+            );
+
+            return ResponseEntity.ok(userProfileService.updateProfile(mockUser, request));
         }
         
         return ResponseEntity.ok(userProfileService.updateProfile(user, request));

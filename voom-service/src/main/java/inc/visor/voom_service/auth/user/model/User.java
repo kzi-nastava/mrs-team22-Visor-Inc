@@ -113,6 +113,10 @@ public class User {
         this.person = person;
     }
 
+    public User(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
         return "User{" +
