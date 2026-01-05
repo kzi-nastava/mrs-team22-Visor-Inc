@@ -8,6 +8,7 @@ import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/for
 import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
 import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
 import { AdminRegisterDriver, ROUTE_ADMIN_REGISTER_DRIVER } from './authenticated/admin/register-driver/register-driver';
+import { ActivateProfile, ROUTE_ACTIVATE_PROFILE } from './unauthenticated/activate/activate-profile/activate-profile';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,10 @@ export const routes: Routes = [
   {
     path: ROUTE_ADMIN_REGISTER_DRIVER,
     component: AdminRegisterDriver,
+  },
+  {
+    path: ROUTE_ACTIVATE_PROFILE,
+    component: ActivateProfile,
   },
   {
     path: '**',

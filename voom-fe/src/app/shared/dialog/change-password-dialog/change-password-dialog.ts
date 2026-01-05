@@ -85,7 +85,7 @@ export class ChangePasswordDialog {
   );
 }
 
-function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
+export function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const p1 = control.get('password1')?.value;
   const p2 = control.get('password2')?.value;
 
