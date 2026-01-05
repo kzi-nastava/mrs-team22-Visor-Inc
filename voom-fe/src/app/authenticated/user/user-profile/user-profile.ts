@@ -1,38 +1,24 @@
-import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatSelectModule} from '@angular/material/select';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {Footer} from '../../../core/layout/footer/footer';
-import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
-import {Header} from '../../../core/layout/header-kt1/header-kt1';
-import {ChangePasswordDialog} from '../../../shared/dialog/change-password-dialog/change-password-dialog';
-import {MatCheckbox} from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { Footer } from '../../../core/layout/footer/footer';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { Header } from '../../../core/layout/header-kt1/header-kt1';
+import { ChangePasswordDialog } from '../../../shared/dialog/change-password-dialog/change-password-dialog';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { UserProfileApi } from './user-profile.api';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 
 export const ROUTE_USER_PROFILE = 'profile';
-
-export type UserProfileResponseDto = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  address: string;
-};
-
-export type UpdateUserProfileRequestDto = {
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  address: string;
-};
 
 @Component({
   selector: 'app-user-profile',
@@ -51,13 +37,18 @@ export type UpdateUserProfileRequestDto = {
     Header,
     MatDialogModule,
     MatCheckbox,
+    MatSnackBarModule,
     // ChangePasswordDialog,
   ],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
-  constructor(private dialog: MatDialog, private profileApi: UserProfileApi) {}
+  constructor(
+    private dialog: MatDialog,
+    private profileApi: UserProfileApi,
+    private snackBar: MatSnackBar
+  ) {}
 
   userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
 
@@ -97,7 +88,7 @@ export class UserProfile {
     ]),
   });
 
-    ngOnInit(): void {
+  ngOnInit(): void {
     this.profileApi.getProfile().subscribe({
       next: (profile) => {
         this.profileForm.patchValue({
@@ -117,22 +108,37 @@ export class UserProfile {
   }
 
   submit() {
-  if (this.profileForm.invalid) {
-    this.profileForm.markAllAsTouched();
-    return;
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+
+    const v = this.profileForm.getRawValue();
+
+    this.profileApi
+      .updateProfile({
+        firstName: v.firstName ?? '',
+        lastName: v.lastName ?? '',
+        phoneNumber: v.phone ?? '',
+        address: v.address ?? '',
+      })
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Profile successfully updated', 'OK', {
+            duration: 3000,
+            panelClass: ['snackbar-success'],
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+          });
+        },
+        error: () => {
+          this.snackBar.open('Failed to update profile', 'Dismiss', {
+            duration: 4000,
+            panelClass: ['snackbar-error'],
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+          });
+        },
+      });
   }
-
-  const v = this.profileForm.getRawValue();
-
-  this.profileApi.updateProfile({
-    firstName: v.firstName ?? '',
-    lastName: v.lastName ?? '',
-    phoneNumber: v.phone ?? '',
-    address: v.address ?? '',
-  }).subscribe({
-    next: () => console.log('Profile updated'),
-    error: console.error,
-  });
-}
-
 }

@@ -35,18 +35,11 @@ public class UserProfileController {
     public ResponseEntity<UserProfileResponseDto> getProfile(
             @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            UserProfileResponseDto dto = new UserProfileResponseDto(
-                "test@example.com",
-                "Test",
-                "User",
-                "+38160000000",
-                "Test Address"
-            );
-            return ResponseEntity.ok(dto);
-        }
 
-        return ResponseEntity.ok(userProfileService.getProfile(user));
+        Long userId = (user != null) ? user.getId() : 2L;
+
+
+        return ResponseEntity.ok(userProfileService.getProfile(userId));
     }
 
     @PutMapping

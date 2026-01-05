@@ -25,7 +25,10 @@ public class UserProfileService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserProfileResponseDto getProfile(User user) {
+    public UserProfileResponseDto getProfile(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalStateException("User not found"));
+
         Person person = user.getPerson();
 
         UserProfileResponseDto dto = new UserProfileResponseDto();
