@@ -38,7 +38,6 @@ public class UserProfileController {
 
         Long userId = (user != null) ? user.getId() : 2L;
 
-
         return ResponseEntity.ok(userProfileService.getProfile(userId));
     }
 

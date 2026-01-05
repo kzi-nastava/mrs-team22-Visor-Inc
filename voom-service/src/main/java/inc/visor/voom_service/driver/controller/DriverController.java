@@ -5,6 +5,7 @@ import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,16 +14,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
+
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
-    
+
+    private final DriverService driverService;
+
+    public DriverController(DriverService driverService) {
+        this.driverService = driverService;
+    }
+
     @PostMapping
     public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
         CreateDriverResponseDto response = new CreateDriverResponseDto(
-            1L,
-            request.getEmail(),
-            DriverAccountStatus.PENDING_ACTIVATION
+                1L,
+                request.getEmail(),
+                DriverAccountStatus.PENDING_ACTIVATION
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -33,11 +43,17 @@ public class DriverController {
 //    public DriverLocationDto updateLocation(@Payload DriverLocationDto request) {
 //        return request;
 //    }
-
     @GetMapping("/active")
     public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
         List<DriverSummaryDto> response = new ArrayList<>();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal User user) {
+        Long userId = (user != null) ? user.getId() : 2L;
+
+        return ResponseEntity.ok(driverService.getVehicle(userId));
     }
 
     @PostMapping("/{driverId}/report")
@@ -57,14 +73,14 @@ public class DriverController {
 
     @GetMapping("/activation")
     public ResponseEntity<Boolean> checkActivationToken(
-        @RequestParam String token
+            @RequestParam String token
     ) {
         return ResponseEntity.ok(true);
     }
 
     @PostMapping("/activation")
     public ResponseEntity<String> activateDriver(
-        @Valid @RequestBody ActivateDriverRequestDto request
+            @Valid @RequestBody ActivateDriverRequestDto request
     ) {
         return ResponseEntity.ok("Driver account activated successfully.");
     }

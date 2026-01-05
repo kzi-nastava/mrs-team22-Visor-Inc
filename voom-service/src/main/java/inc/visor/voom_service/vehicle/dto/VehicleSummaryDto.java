@@ -1,8 +1,7 @@
 package inc.visor.voom_service.vehicle.dto;
-
-public class CreateVehicleDto {
-
-    private long vehicleTypeId;
+public class VehicleSummaryDto {
+    
+    private String vehicleType;
     private int year;
     private String model;
     private String licensePlate;
@@ -10,12 +9,22 @@ public class CreateVehicleDto {
     private boolean petFriendly;
     private int numberOfSeats;
 
-    public long getVehicleTypeId() {
-        return vehicleTypeId;
+    public VehicleSummaryDto(String vehicleType, int year, String model, String licensePlate, boolean babySeat, boolean petFriendly, int numberOfSeats) {
+        this.vehicleType = vehicleType;
+        this.year = year;
+        this.model = model;
+        this.licensePlate = licensePlate;
+        this.babySeat = babySeat;
+        this.petFriendly = petFriendly;
+        this.numberOfSeats = numberOfSeats;
     }
 
-    public void setVehicleTypeId(long vehicleTypeId) {
-        this.vehicleTypeId = vehicleTypeId;
+    public String getVehicleType() {
+        return this.vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public int getYear() {

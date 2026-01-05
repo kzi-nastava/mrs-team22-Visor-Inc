@@ -39,7 +39,7 @@ public class User {
     private UserType userType;
 
     @Enumerated(EnumType.ORDINAL)
-    @JoinColumn(name = "user_status", nullable = false)
+    @Column(name = "user_status", nullable = false)
     private UserStatus userStatus;
 
     @ManyToOne

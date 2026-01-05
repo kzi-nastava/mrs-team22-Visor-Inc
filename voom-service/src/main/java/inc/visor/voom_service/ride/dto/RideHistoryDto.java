@@ -1,12 +1,12 @@
 package inc.visor.voom_service.ride.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class RideHistoryDto {
     private Long id;

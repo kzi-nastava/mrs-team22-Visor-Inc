@@ -8,49 +8,41 @@
     <h2 class="text-lg font-medium text-gray-800">Name Lastname</h2>
   </div>
 
-  <mat-divider/>
+  <mat-divider />
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 md:gap-16 mt-12">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-16 mt-12">
     <div>
       <h4 class="text-xs font-semibold text-gray-500 tracking-widest mb-6">GENERAL</h4>
-      <div class="flex flex-col gap-6 mb-20">
-        <app-value-input-string label="Name" [formControl]="profileForm.controls.firstName"/>
-        <app-value-input-string label="Last Name" [formControl]="profileForm.controls.lastName"/>
+      <div class="flex flex-col gap-6 mb-16">
+        <app-value-input-string label="Name" [formControl]="profileForm.controls.firstName" />
+        <app-value-input-string label="Last Name" [formControl]="profileForm.controls.lastName" />
       </div>
-      <h4 class="text-xs font-semibold text-gray-500 tracking-widest mt-10 mb-6">CONTACT</h4>
+
+      <h4 class="text-xs font-semibold text-gray-500 tracking-widest mb-6">CONTACT</h4>
       <div class="flex flex-col gap-6">
-        <app-value-input-string label="Phone" [formControl]="profileForm.controls.phone"/>
-        <app-value-input-string label="Address" [formControl]="profileForm.controls.address"/>
+        <app-value-input-string label="Phone" [formControl]="profileForm.controls.phone" />
+        <app-value-input-string label="Address" [formControl]="profileForm.controls.address" />
       </div>
     </div>
 
-    <div class="mt-20 md:mt-0">
+    <div>
       <h4 class="text-xs font-semibold text-gray-500 tracking-widest mb-6">SECURITY</h4>
 
-      <div class="flex flex-col gap-6 mb-10">
-        <app-value-input-string label="Email" [formControl]="profileForm.controls.email"/>
+      <div class="flex flex-col gap-6">
+        <app-value-input-string label="Email" [formControl]="profileForm.controls.email" />
 
-        <button type="button" (click)="openChangePasswordDialog()"
-                class="w-full h-14 rounded-full border-2 border-blue-900 bg-transparent text-blue-900 text-base font-medium px-6 flex items-center justify-center focus:outline-none cursor-pointer">
+        <button
+          type="button"
+          (click)="openChangePasswordDialog()"
+          class="w-full h-14 rounded-full border-2 border-blue-900 bg-transparent text-blue-900 text-base font-medium px-6 flex items-center justify-center cursor-pointer"
+        >
           Change password
         </button>
       </div>
 
       @if (userRole === 'User') {
-      <div class="mt-12">
-        <h2 class="text-sm font-semibold text-gray-500 tracking-widest mt-10 mb-6">
-          Favorite Routes
-        </h2>
-
-        <div class="flex items-center justify-between text-sm mb-2">
-          <span class="text-gray-700">Address Num 12 - Another Address</span>
-          <mat-icon class="cursor-pointer">close</mat-icon>
-        </div>
-
-        <div class="flex items-center justify-between text-sm mb-2">
-          <span class="text-gray-700">Address Num 12 - Another Address</span>
-          <mat-icon class="cursor-pointer">close</mat-icon>
-        </div>
+      <div class="mt-14">
+        <h2 class="text-sm font-semibold text-gray-500 tracking-widest mb-6">Favorite Routes</h2>
 
         <div class="flex items-center justify-between text-sm mb-2">
           <span class="text-gray-700">Address Num 12 - Another Address</span>
@@ -68,48 +60,65 @@
     </div>
   </div>
 
-  @if (userRole === 'Driver') {
-    <div class="py-16 space-y-8">
-      <h3 class="text-xs font-semibold tracking-widest text-gray-500">DRIVER INFORMATION</h3>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <app-value-input-string label="Vehicle model"/>
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-select placeholder="Select vehicle type">
-            <mat-option value="standard">Standard</mat-option>
-            <mat-option value="luxury">Luxury</mat-option>
-            <mat-option value="van">Van</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <app-value-input-string label="License plate"/>
-        <app-value-input-string label="Number of seats"/>
-      </div>
-
-      <div class="flex justify-around">
-        <div class="flex flex-col space-y-4">
-          <div class="flex items-center text-sm text-gray-700">
-            <mat-checkbox/>
-            <h2>Baby transport allowed</h2>
-          </div>
-
-          <div class="flex items-center text-sm text-gray-700">
-            <mat-checkbox/>
-            <h2>Pets allowed</h2>
-          </div>
-        </div>
-        <div class="text-sm text-gray-700">
-          <h1>Active hours (last 24h):</h1>
-          <span class="font-semibold">6.5h</span>
-        </div>
-      </div>
-
-      <div class="text-xs text-gray-500 italic text-center">Changes made by drivers require administrator approval.</div>
-    </div>
-  }
-
-  <div class="flex justify-center">
-    <button (click)="submit()" class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer">Confirm Changes</button>
+  <div class="flex justify-center mt-20">
+    <button
+      (click)="submit()"
+      class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
+    >
+      Save Profile Changes
+    </button>
   </div>
+
+  @if (userRole === 'Driver') {
+  <div class="pt-20 space-y-10">
+    <h3 class="text-xs font-semibold tracking-widest text-gray-500">VEHICLE INFORMATION</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <app-value-input-string label="Vehicle model" [formControl]="vehicleForm.controls.model" />
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-select placeholder="Select vehicle type" [formControl]="vehicleForm.controls.vehicleType">
+          <mat-option value="STANDARD">Standard</mat-option>
+          <mat-option value="LUXURY">Luxury</mat-option>
+          <mat-option value="VAN">Van</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <app-value-input-string label="License plate" [formControl]="vehicleForm.controls.licensePlate" />
+      <app-value-input-string label="Number of seats" [formControl]="vehicleForm.controls.seats" />
+    </div>
+
+    <div class="flex flex-col md:flex-row md:justify-between gap-10">
+      <div class="flex flex-col space-y-4">
+        <label class="flex items-center gap-3 text-sm text-gray-700">
+          <mat-checkbox [formControl]="vehicleForm.controls.babyTransportAllowed" />
+          Baby transport allowed
+        </label>
+
+        <label class="flex items-center gap-3 text-sm text-gray-700">
+          <mat-checkbox [formControl]="vehicleForm.controls.petsAllowed" />
+          Pets allowed
+        </label>
+      </div>
+
+      <div class="text-sm text-gray-700">
+        <div>Active hours (last 24h):</div>
+        <div class="font-semibold mt-1">6.5h</div>
+      </div>
+    </div>
+
+    <div class="text-xs text-gray-500 italic text-center">
+      Changes made by drivers require administrator approval.
+    </div>
+
+    <div class="flex justify-center">
+      <button
+        class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
+      >
+        Save Vehicle Information
+      </button>
+    </div>
+  </div>
+  }
 </div>
 
 <app-footer></app-footer>

@@ -88,6 +88,15 @@ export class UserProfile {
     ]),
   });
 
+  vehicleForm = new FormGroup({
+    model: new FormControl<string>('', Validators.required),
+    vehicleType: new FormControl<string | null>(null, Validators.required),
+    licensePlate: new FormControl<string>('', Validators.required),
+    seats: new FormControl<number | null>(null, Validators.required),
+    babyTransportAllowed: new FormControl<boolean>(false),
+    petsAllowed: new FormControl<boolean>(false),
+  });
+
   ngOnInit(): void {
     this.profileApi.getProfile().subscribe({
       next: (profile) => {
@@ -101,10 +110,26 @@ export class UserProfile {
 
         this.profileForm.controls.email.disable();
       },
-      error: (err) => {
-        console.error('Failed to load profile', err);
-      },
     });
+
+    if (this.userRole === 'Driver') {
+      this.profileApi.getMyVehicle().subscribe({
+        next: (vehicle) => {
+          console.log('Loaded vehicle info:', vehicle);
+          this.vehicleForm.patchValue({
+            model: vehicle.model,
+            vehicleType: vehicle.vehicleType,
+            licensePlate: vehicle.licensePlate,
+            seats: vehicle.numberOfSeats,
+            babyTransportAllowed: vehicle.babySeat,
+            petsAllowed: vehicle.petFriendly,
+          });
+        },
+        error: (err) => {
+          console.error('Failed to load vehicle info', err);
+        },
+      });
+    }
   }
 
   submit() {

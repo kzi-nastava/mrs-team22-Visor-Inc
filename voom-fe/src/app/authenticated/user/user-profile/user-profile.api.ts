@@ -22,22 +22,36 @@ export type UpdateUserPasswordRequestDto = {
   confirmPassword: string;
 };
 
+export type DriverVehicleResponseDto = {
+  model: string;
+  vehicleType: 'STANDARD' | 'LUXURY' | 'VAN';
+  licensePlate: string;
+  numberOfSeats: number;
+  babySeat: boolean;
+  petFriendly: boolean;
+  activeHoursLast24h?: number;
+};
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileApi {
-  private readonly baseUrl = 'http://localhost:8080/api/users/me';
+  private readonly baseUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
 
   getProfile(): Observable<UserProfileResponseDto> {
-    return this.http.get<UserProfileResponseDto>(this.baseUrl);
+    return this.http.get<UserProfileResponseDto>(`${this.baseUrl}/users/me`);
   }
 
   updateProfile(body: UpdateUserProfileRequestDto): Observable<UserProfileResponseDto> {
     console.log('Updating profile with data:', body);
-    return this.http.put<UserProfileResponseDto>(this.baseUrl, body);
+    return this.http.put<UserProfileResponseDto>(`${this.baseUrl}/users/me`, body);
+  }
+
+  getMyVehicle(): Observable<DriverVehicleResponseDto> {
+    return this.http.get<DriverVehicleResponseDto>(`${this.baseUrl}/drivers/me`);
   }
 
   updatePassword(body: UpdateUserPasswordRequestDto): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/password`, body);
+    return this.http.put<void>(`${this.baseUrl}/users/me/password`, body);
   }
 }
