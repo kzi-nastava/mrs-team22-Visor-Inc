@@ -7,21 +7,25 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateDriverDto {
 
-    @NotBlank(message="Email is required")
-    @Email(message="Email is not valid.")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email is not valid")
     private String email;
 
-    @NotBlank(message="First name is required")
+    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank(message="Last name is required")
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @NotBlank(message="Phone number is required")
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotBlank(message="Address is required")
+    @NotBlank(message = "Address is required")
     private String address;
+
+    @NotNull(message = "Vehicle data is required")
+    @Valid
+    private CreateVehicleDto vehicle;
 
     public CreateDriverDto() {}
 
@@ -65,4 +69,11 @@ public class CreateDriverDto {
         this.address = address;
     }
 
+    public CreateVehicleDto getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(CreateVehicleDto vehicle) {
+        this.vehicle = vehicle;
+    }
 }

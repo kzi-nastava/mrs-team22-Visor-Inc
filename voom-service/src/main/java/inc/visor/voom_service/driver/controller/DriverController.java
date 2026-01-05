@@ -44,6 +44,9 @@ public class DriverController {
                 request.getEmail(),
                 DriverAccountStatus.PENDING_ACTIVATION
         );
+
+        driverService.createDriver(request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
