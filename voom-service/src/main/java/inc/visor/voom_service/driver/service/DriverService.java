@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import inc.visor.voom_service.activation.model.ActivationToken;
+import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
@@ -16,6 +18,7 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
@@ -38,7 +41,10 @@ public class DriverService {
     private final UserRoleRepository userRoleRepository;
     private final PersonRepository personRepository;
 
-    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder) {
+    private final EmailService emailService;
+    private final ActivationTokenService activationTokenService;
+
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -47,6 +53,8 @@ public class DriverService {
         this.userRoleRepository = userRoleRepository;
         this.personRepository = personRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.activationTokenService = activationTokenService;
     }
 
     public void simulateMove(DriverLocationDto dto) {
@@ -151,7 +159,7 @@ public class DriverService {
         user.setPerson(person);
         user.setUserType(userType);
         user.setUserRole(userRole);
-        user.setUserStatus(UserStatus.INACTIVE);
+        user.setUserStatus(UserStatus.NOTACTIVATED);
 
         String dummyPassword = UUID.randomUUID().toString();
         user.setPassword(passwordEncoder.encode(dummyPassword));
@@ -174,6 +182,17 @@ public class DriverService {
         vehicle.setPetFriendly(request.getVehicle().getPetFriendly());
 
         vehicleRepository.save(vehicle);
+
+        ActivationToken activationToken
+                = activationTokenService.createForUser(user);
+
+        String activationLink
+                = "http://localhost:4200/activate?token=" + activationToken.getToken();
+
+        emailService.sendActivationEmail(
+                user.getEmail(),
+                activationLink
+        );
 
     }
 

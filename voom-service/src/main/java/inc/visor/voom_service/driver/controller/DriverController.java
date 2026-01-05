@@ -38,7 +38,7 @@ public class DriverController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateDriverResponseDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
+    public ResponseEntity<Void> createDriver(@Valid @RequestBody CreateDriverDto request) {
         CreateDriverResponseDto response = new CreateDriverResponseDto(
                 1L,
                 request.getEmail(),
@@ -47,7 +47,7 @@ public class DriverController {
 
         driverService.createDriver(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // we would use message mapping in real world if driver location came from actual driver and not from simulation
