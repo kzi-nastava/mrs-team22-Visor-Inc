@@ -32,6 +32,15 @@ export type DriverVehicleResponseDto = {
   activeHoursLast24h?: number;
 };
 
+export type UpdateDriverVehicleRequestDto = {
+  model: string;
+  vehicleType: 'STANDARD' | 'LUXURY' | 'VAN';
+  licensePlate: string;
+  numberOfSeats: number;
+  babySeat: boolean;
+  petFriendly: boolean;
+};
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileApi {
   private readonly baseUrl = 'http://localhost:8080/api';
@@ -49,6 +58,10 @@ export class UserProfileApi {
 
   getMyVehicle(): Observable<DriverVehicleResponseDto> {
     return this.http.get<DriverVehicleResponseDto>(`${this.baseUrl}/drivers/me`);
+  }
+
+  updateMyVehicle(body: UpdateDriverVehicleRequestDto): Observable<DriverVehicleResponseDto> {
+    return this.http.put<DriverVehicleResponseDto>(`${this.baseUrl}/drivers/me`, body);
   }
 
   updatePassword(body: UpdateUserPasswordRequestDto): Observable<void> {

@@ -77,13 +77,19 @@
       <app-value-input-string label="Vehicle model" [formControl]="vehicleForm.controls.model" />
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-select placeholder="Select vehicle type" [formControl]="vehicleForm.controls.vehicleType">
+        <mat-select
+          placeholder="Select vehicle type"
+          [formControl]="vehicleForm.controls.vehicleType"
+        >
           <mat-option value="STANDARD">Standard</mat-option>
           <mat-option value="LUXURY">Luxury</mat-option>
           <mat-option value="VAN">Van</mat-option>
         </mat-select>
       </mat-form-field>
-      <app-value-input-string label="License plate" [formControl]="vehicleForm.controls.licensePlate" />
+      <app-value-input-string
+        label="License plate"
+        [formControl]="vehicleForm.controls.licensePlate"
+      />
       <app-value-input-string label="Number of seats" [formControl]="vehicleForm.controls.seats" />
     </div>
 
@@ -112,6 +118,7 @@
 
     <div class="flex justify-center">
       <button
+        (click)="vehicleSubmit()"
         class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
       >
         Save Vehicle Information

@@ -166,4 +166,41 @@ export class UserProfile {
         },
       });
   }
+
+  vehicleSubmit() {
+    if (this.vehicleForm.invalid) {
+      this.vehicleForm.markAllAsTouched();
+      return;
+    }
+
+    const v = this.vehicleForm.getRawValue();
+
+    this.profileApi
+      .updateMyVehicle({
+        model: v.model ?? '',
+        vehicleType: v.vehicleType as 'STANDARD' | 'LUXURY' | 'VAN',
+        licensePlate: v.licensePlate ?? '',
+        numberOfSeats: v.seats ?? 0,
+        babySeat: v.babyTransportAllowed ?? false,
+        petFriendly: v.petsAllowed ?? false,
+      })
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Request for vehicle update sent', 'OK', {
+            duration: 3000,
+            panelClass: ['snackbar-success'],
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+          });
+        },
+        error: () => {
+          this.snackBar.open('Failed to update vehicle', 'Dismiss', {
+            duration: 4000,
+            panelClass: ['snackbar-error'],
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+          });
+        },
+      });
+  }
 }

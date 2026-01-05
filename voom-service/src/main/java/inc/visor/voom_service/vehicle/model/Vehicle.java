@@ -72,6 +72,10 @@ public class Vehicle {
         this.vehicleType = vehicleType;
     }
 
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = new VehicleType(vehicleType);
+    }
+
     public int getYear() {
         return year;
     }

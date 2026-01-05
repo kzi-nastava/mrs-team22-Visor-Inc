@@ -1,21 +1,31 @@
 package inc.visor.voom_service.driver.controller;
 
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.driver.dto.*;
-import inc.visor.voom_service.ride.dto.RideResponseDto;
-import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
-import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.driver.dto.ActivateDriverRequestDto;
+import inc.visor.voom_service.driver.dto.CreateDriverDto;
+import inc.visor.voom_service.driver.dto.CreateDriverResponseDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.dto.ReportDriverRequestDto;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.ride.model.enums.DriverAccountStatus;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -54,6 +64,14 @@ public class DriverController {
         Long userId = (user != null) ? user.getId() : 2L;
 
         return ResponseEntity.ok(driverService.getVehicle(userId));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<VehicleSummaryDto> updateMyDriverInfo(@AuthenticationPrincipal User user, @RequestBody VehicleSummaryDto request) {
+        Long userId = (user != null) ? user.getId() : 2L;
+
+
+        return ResponseEntity.ok(driverService.updateVehicle(userId, request));
     }
 
     @PostMapping("/{driverId}/report")
