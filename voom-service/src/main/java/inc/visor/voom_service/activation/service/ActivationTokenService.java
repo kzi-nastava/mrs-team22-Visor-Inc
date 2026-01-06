@@ -8,14 +8,18 @@ import org.springframework.stereotype.Service;
 import inc.visor.voom_service.activation.model.ActivationToken;
 import inc.visor.voom_service.activation.repository.ActivationTokenRepository;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.service.UserService;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ActivationTokenService {
 
     private final ActivationTokenRepository repository;
+    private final UserService userService;
 
-    public ActivationTokenService(ActivationTokenRepository repository) {
+    public ActivationTokenService(ActivationTokenRepository repository, UserService userService) {
         this.repository = repository;
+        this.userService = userService;
     }
 
     public ActivationToken createForUser(User user) {
@@ -49,4 +53,24 @@ public class ActivationTokenService {
         token.setUsed(true);
         repository.save(token);
     }
+
+    @Transactional
+    public void activateAccount(
+            String rawToken,
+            String password,
+            String confirmPassword
+    ) {
+        ActivationToken token = validate(rawToken);
+
+        User user = token.getUser();
+
+        userService.activateUserAndSetPassword(
+                user,
+                password,
+                confirmPassword
+        );
+
+        markAsUsed(token);
+    }
+
 }

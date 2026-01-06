@@ -2,6 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export type RegisterDriverRequestDto = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    address: string;
+    vehicle: {
+        model: string;
+        vehicleType: 'STANDARD' | 'LUXURY' | 'VAN';
+        licensePlate: string;
+        numberOfSeats: number;
+        babySeat: boolean;
+        petFriendly: boolean;
+    };
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -10,9 +26,9 @@ export class RegisterDriverApi {
 
   constructor(private http: HttpClient) {}
 
-  registerDriver(body: FormData): Observable<void> {
+  registerDriver(body: RegisterDriverRequestDto): Observable<void> {
     return this.http.post<void>(
-      `${this.baseUrl}/admin/drivers`,
+      `${this.baseUrl}/drivers`,
       body
     );
   }

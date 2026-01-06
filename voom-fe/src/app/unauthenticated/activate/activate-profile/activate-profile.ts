@@ -1,32 +1,37 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { passwordsMatchValidator } from '../../../shared/dialog/change-password-dialog/change-password-dialog';
 import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
 import { ROUTE_LOGIN } from '../../login/login';
 import { MatButton } from '@angular/material/button';
-
+import { ActivateProfileApi } from './activate-profile.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const ROUTE_ACTIVATE_PROFILE = 'activate';
 
 @Component({
   selector: 'app-activate-profile',
-  imports: [
-    ValueInputString,
-    ReactiveFormsModule,
-    MatButton
-  ],
+  imports: [ValueInputString, ReactiveFormsModule, MatButton, MatSnackBarModule],
   templateUrl: './activate-profile.html',
   styleUrl: './activate-profile.css',
 })
 export class ActivateProfile {
+  constructor(private api: ActivateProfileApi, private snackBar: MatSnackBar) {
+    this.api = api;
+    this.snackBar = snackBar;
 
-  private readonly baseUrl = 'http://localhost:8080/api';
+    const token = this.route.snapshot.queryParamMap.get('token');
+    if (!token) {
+      this.error = 'Invalid activation link';
+      return;
+    }
+    this.token = token;
+  }
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
 
   token!: string;
   error?: string;
@@ -44,38 +49,43 @@ export class ActivateProfile {
         Validators.minLength(8),
         Validators.maxLength(255),
       ]),
-    }, { validators: passwordsMatchValidator }
+    },
+    { validators: passwordsMatchValidator }
   );
-
-  constructor() {
-    const token = this.route.snapshot.queryParamMap.get('token');
-    if (!token) {
-      this.error = 'Invalid activation link';
-      return;
-    }
-    this.token = token;
-  }
 
   submit() {
     if (this.form.invalid) return;
 
-    console.log('Activating profile with token:', this.token);
+    this.api
+      .activateProfile({
+        token: this.token,
+        password: this.form.value.password1!,
+        confirmPassword: this.form.value.password2!,
+      })
+      .subscribe({
+        next: () => {
+          this.success = true;
 
-    this.http.post(`${this.baseUrl}/drivers/activation`, {
-      token: this.token,
-      password: this.form.value.password1,
-      confirmPassword: this.form.value.password2,
-    }).subscribe({
-      next: () => {
-        this.success = true;
+          this.snackBar.open('Profile successfully activated. Redirecting to login...', 'OK', {
+            duration: 3000,
+            panelClass: ['snackbar-success'],
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+          });
 
-        setTimeout(() => {
-          this.router.navigate([ROUTE_LOGIN]);
-        }, 1500);
-      },
-      error: (err) => {
-        this.error = err.error?.message ?? 'Activation failed';
-      },
-    });
+          setTimeout(() => {
+            console.log('Navigating to login');
+            this.router.navigateByUrl('/login');
+          }, 500);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.snackBar.open('Failed to activate profile', 'Dismiss', {
+            duration: 4000,
+            panelClass: ['snackbar-error'],
+          });
+
+          this.error = err.error?.message ?? 'Activation failed';
+        },
+      });
   }
 }

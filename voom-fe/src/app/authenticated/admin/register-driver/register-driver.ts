@@ -41,10 +41,7 @@ export const ROUTE_ADMIN_REGISTER_DRIVER = 'admin/register-driver';
   templateUrl: './register-driver.html',
 })
 export class AdminRegisterDriver {
-  constructor(
-    private api: RegisterDriverApi,
-    private snackBar: MatSnackBar
-  ) {}
+  constructor(private api: RegisterDriverApi, private snackBar: MatSnackBar) {}
 
   form = new FormGroup({
     profileImage: new FormControl<File | null>(null),
@@ -76,39 +73,38 @@ export class AdminRegisterDriver {
 
     const v = this.form.getRawValue();
 
-    const payload = new FormData();
-    payload.append('firstName', v.firstName!);
-    payload.append('lastName', v.lastName!);
-    payload.append('phoneNumber', v.phone!);
-    payload.append('address', v.address!);
-    payload.append('email', v.email!);
+    const payload = {
+      firstName: v.firstName!,
+      lastName: v.lastName!,
+      phoneNumber: v.phone!,
+      address: v.address!,
+      email: v.email!,
+      vehicle: {
+        model: v.vehicleModel!,
+        vehicleType: v.vehicleType!,
+        licensePlate: v.licensePlate!,
+        numberOfSeats: v.seats!,
+        babySeat: v.babyTransportAllowed!,
+        petFriendly: v.petsAllowed!,
+      },
+    };
 
-    payload.append('vehicle.model', v.vehicleModel!);
-    payload.append('vehicle.type', v.vehicleType!);
-    payload.append('vehicle.licensePlate', v.licensePlate!);
-    payload.append('vehicle.numberOfSeats', String(v.seats!));
-    payload.append('vehicle.babySeat', String(v.babyTransportAllowed!));
-    payload.append('vehicle.petFriendly', String(v.petsAllowed!));
+    // if (v.profileImage) {
+    //   payload.append('profileImage', v.profileImage);
+    // }
 
-    if (v.profileImage) {
-      payload.append('profileImage', v.profileImage);
-    }
+    console.log('Registering driver with data:', payload);
 
     this.api.registerDriver(payload).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Driver registered. Activation email sent.',
-          'OK',
-          { duration: 3500 }
-        );
-        this.form.reset();
+        this.snackBar.open('Driver registered. Activation email sent.', 'OK', { duration: 3500 });
+        this.form.reset({
+          babyTransportAllowed: false,
+          petsAllowed: false,
+        });
       },
       error: () => {
-        this.snackBar.open(
-          'Failed to register driver',
-          'Dismiss',
-          { duration: 4000 }
-        );
+        this.snackBar.open('Failed to register driver', 'Dismiss', { duration: 4000 });
       },
     });
   }
