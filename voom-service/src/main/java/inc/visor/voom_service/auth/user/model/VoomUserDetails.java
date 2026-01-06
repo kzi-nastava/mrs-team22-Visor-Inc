@@ -1,9 +1,9 @@
 package inc.visor.voom_service.auth.user.model;
 
+import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
 
 public class VoomUserDetails implements UserDetails {
 
@@ -37,7 +37,7 @@ public class VoomUserDetails implements UserDetails {
   public boolean isAccountNonLocked() {
     return switch (user.getUserStatus()) {
       case INACTIVE, PENDING, ACTIVE -> true;
-      case SUSPENDED -> false;
+      case SUSPENDED, NOTACTIVATED -> false;
     };
   }
 
@@ -50,7 +50,7 @@ public class VoomUserDetails implements UserDetails {
   public boolean isEnabled() {
     return switch (user.getUserStatus()) {
       case ACTIVE -> true;
-      case INACTIVE, PENDING, SUSPENDED -> false;
+      case INACTIVE, PENDING, SUSPENDED, NOTACTIVATED -> false;
     };
   }
 }

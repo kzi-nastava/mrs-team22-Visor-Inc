@@ -1,14 +1,14 @@
 package inc.visor.voom_service.ride.service;
 
-import inc.visor.voom_service.ride.dto.RideLocationDto;
-import inc.visor.voom_service.ride.model.Ride;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
+import inc.visor.voom_service.ride.dto.RideLocationDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
-
-import java.util.List;
+import inc.visor.voom_service.ride.model.Ride;
 
 @Service
 public class RideService {

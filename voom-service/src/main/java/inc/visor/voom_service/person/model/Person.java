@@ -30,6 +30,7 @@ public class Person {
     @Column(name = "address", nullable = false)
     private String address;
 
+    public Person() {}
 
     public long getId() {
         return id;
@@ -68,6 +69,13 @@ public class Person {
     }
 
     public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Person(String firstName, String lastName, String phoneNumber, String address) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
         this.address = address;
     }
 

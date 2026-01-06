@@ -52,13 +52,7 @@ export class ValueInputString implements ControlValueAccessor{
   }
 
   writeValue(value: string): void {
-    if (!value) {
-      this.formControl.reset();
-      this.formControl.enable({emitEvent: false});
-    } else {
-      this.formControl.setValue(value);
-      this.formControl.disable({emitEvent: false});
-    }
+    this.formControl.setValue(value ?? '', { emitEvent: false });
   }
 
   registerOnChange(fn: any): void {

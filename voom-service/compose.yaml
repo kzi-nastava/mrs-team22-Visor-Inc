@@ -14,3 +14,8 @@ services:
       - 'RABBITMQ_DEFAULT_USER=mq'
     ports:
       - '5672:5672'
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - '1025:1025'  
+      - '8025:8025'   
