@@ -88,13 +88,7 @@ export class AdminRegisterDriver {
         petFriendly: v.petsAllowed!,
       },
     };
-
-    // if (v.profileImage) {
-    //   payload.append('profileImage', v.profileImage);
-    // }
-
-    console.log('Registering driver with data:', payload);
-
+    
     this.api.registerDriver(payload).subscribe({
       next: () => {
         this.snackBar.open('Driver registered. Activation email sent.', 'OK', { duration: 3500 });

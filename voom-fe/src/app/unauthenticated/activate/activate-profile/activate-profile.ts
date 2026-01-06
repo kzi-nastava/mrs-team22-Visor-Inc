@@ -1,57 +1,102 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { passwordsMatchValidator } from '../../../shared/dialog/change-password-dialog/change-password-dialog';
-import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
-import { ROUTE_LOGIN } from '../../login/login';
 import { MatButton } from '@angular/material/button';
-import { ActivateProfileApi } from './activate-profile.api';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { ActivateProfileApi } from './activate-profile.api';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
 
 export const ROUTE_ACTIVATE_PROFILE = 'activate';
 
+function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value as string;
+  if (!value) return null;
+
+  const hasMinLength = value.length >= 8;
+  const hasUppercase = /[A-Z]/.test(value);
+  const hasLowercase = /[a-z]/.test(value);
+  const hasNumber = /[0-9]/.test(value);
+
+  const valid = hasMinLength && hasUppercase && hasLowercase && hasNumber;
+
+  return valid
+    ? null
+    : {
+        passwordStrength: {
+          hasMinLength,
+          hasUppercase,
+          hasLowercase,
+          hasNumber,
+        },
+      };
+}
+
+function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+  const p1 = group.get('password1')?.value;
+  const p2 = group.get('password2')?.value;
+  return p1 && p2 && p1 !== p2 ? { passwordsMismatch: true } : null;
+}
+
 @Component({
   selector: 'app-activate-profile',
-  imports: [ValueInputString, ReactiveFormsModule, MatButton, MatSnackBarModule],
+  imports: [
+    ValueInputString,
+    ReactiveFormsModule,
+    MatButton,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatIconModule,
+  ],
   templateUrl: './activate-profile.html',
-  styleUrl: './activate-profile.css',
 })
 export class ActivateProfile {
-  constructor(private api: ActivateProfileApi, private snackBar: MatSnackBar) {
-    this.api = api;
-    this.snackBar = snackBar;
-
-    const token = this.route.snapshot.queryParamMap.get('token');
-    if (!token) {
-      this.error = 'Invalid activation link';
-      return;
-    }
-    this.token = token;
-  }
-
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   token!: string;
-  error?: string;
-  success = false;
 
   form = new FormGroup(
     {
-      password1: new FormControl<string>('', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(255),
-      ]),
-      password2: new FormControl<string>('', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(255),
-      ]),
+      password1: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(255), passwordStrengthValidator],
+      }),
+      password2: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.maxLength(255)],
+      }),
     },
     { validators: passwordsMatchValidator }
   );
+
+  get passwordTooltipText(): string {
+    const e = this.passwordStrengthErrors;
+
+    return [
+      `${e?.hasMinLength ? '✓' : '•'} At least 8 characters`,
+      `${e?.hasUppercase ? '✓' : '•'} One uppercase letter`,
+      `${e?.hasLowercase ? '✓' : '•'} One lowercase letter`,
+      `${e?.hasNumber ? '✓' : '•'} One number`,
+    ].join('\n');
+  }
+
+  constructor(private api: ActivateProfileApi, private snackBar: MatSnackBar) {
+    const token = this.route.snapshot.queryParamMap.get('token');
+    if (token) this.token = token;
+  }
+
+  get passwordStrengthErrors() {
+    return this.form.controls.password1.errors?.['passwordStrength'] ?? null;
+  }
 
   submit() {
     if (this.form.invalid) return;
@@ -59,32 +104,16 @@ export class ActivateProfile {
     this.api
       .activateProfile({
         token: this.token,
-        password: this.form.value.password1!,
-        confirmPassword: this.form.value.password2!,
+        password: this.form.controls.password1.value,
+        confirmPassword: this.form.controls.password2.value,
       })
       .subscribe({
         next: () => {
-          this.success = true;
-
-          this.snackBar.open('Profile successfully activated. Redirecting to login...', 'OK', {
-            duration: 3000,
-            panelClass: ['snackbar-success'],
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom',
-          });
-
-          setTimeout(() => {
-            console.log('Navigating to login');
-            this.router.navigateByUrl('/login');
-          }, 500);
+          this.snackBar.open('Profile activated', 'OK', { duration: 2000 });
+          setTimeout(() => this.router.navigateByUrl('/login'), 500);
         },
-        error: (err: HttpErrorResponse) => {
-          this.snackBar.open('Failed to activate profile', 'Dismiss', {
-            duration: 4000,
-            panelClass: ['snackbar-error'],
-          });
-
-          this.error = err.error?.message ?? 'Activation failed';
+        error: () => {
+          this.snackBar.open('Activation failed', 'Dismiss', { duration: 3000 });
         },
       });
   }
