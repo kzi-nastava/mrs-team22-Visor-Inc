@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Map } from '../../../shared/map/map';
 import { Footer } from '../../../core/layout/footer/footer';
@@ -15,28 +15,22 @@ interface RoutePoint {
   id: string;
   lat: number;
   lng: number;
+  address: string;
   type: RoutePointType;
   order: number;
 }
 
 @Component({
   selector: 'app-home',
-  imports: [
-    Header,
-    Map,
-    Footer,
-    Dropdown,
-    ValueInputString,
-    MatButton,
-    ReactiveFormsModule,
-  ],
+  imports: [Header, Map, Footer, Dropdown, ValueInputString, MatButton, ReactiveFormsModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class UserHome {
-  routePoints: RoutePoint[] = [];
+  @ViewChild(Map) map!: Map;
 
-  // 👉 dropdown state (OBAVEZNO jer koristiš [(selected)])
+  routePoints = signal<RoutePoint[]>([]);
+
   selectedVehicle: number | null = null;
   selectedTime: string = 'now';
 
@@ -56,51 +50,102 @@ export class UserHome {
     { label: 'Later', value: 'later' },
   ];
 
-  onMapClick(event: { lat: number; lng: number }) {
-    this.addPoint(event.lat, event.lng);
-  }
+  pitstopsView = computed(() =>
+    this.routePoints()
+      .filter((p) => p.type === 'STOP')
+      .map((p) => ({
+        ...p,
+        cleanAddress: p.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim(),
+      }))
+  );
 
-  addPoint(lat: number, lng: number) {
-    const hasPickup = this.routePoints.some(p => p.type === 'PICKUP');
-    const hasDropoff = this.routePoints.some(p => p.type === 'DROPOFF');
+  onMapClick(event: { lat: number; lng: number; address: string }) {
+    const cleanAddress = event.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim();
+    const points = this.routePoints();
 
-    let type: RoutePointType = 'STOP';
-    if (!hasPickup) type = 'PICKUP';
-    else if (!hasDropoff) type = 'STOP';
-    else return;
+    if (points.length === 0) {
+      this.routePoints.set([
+        {
+          id: crypto.randomUUID(),
+          lat: event.lat,
+          lng: event.lng,
+          address: cleanAddress,
+          type: 'PICKUP',
+          order: 0,
+        },
+      ]);
+      this.rideForm.patchValue({ pickup: cleanAddress });
+      return;
+    }
 
-    this.routePoints.push({
+    const updated = points.map((p) =>
+      p.type === ('DROPOFF' as RoutePointType) ? { ...p, type: 'STOP' as RoutePointType } : p
+    );
+
+    updated.push({
       id: crypto.randomUUID(),
-      lat,
-      lng,
-      type,
-      order: this.routePoints.length,
+      lat: event.lat,
+      lng: event.lng,
+      address: cleanAddress,
+      type: 'DROPOFF' as RoutePointType,
+      order: updated.length,
     });
+
+    this.routePoints.set(updated);
+    this.rideForm.patchValue({ dropoff: cleanAddress });
   }
 
   setAsDropoff(id: string) {
-    this.routePoints = this.routePoints.map(p =>
-      p.id === id
-        ? { ...p, type: 'DROPOFF' }
-        : p.type === 'DROPOFF'
-        ? { ...p, type: 'STOP' }
-        : p
-    );
+    const points = this.routePoints();
+
+    const pickup = points.find((p) => p.type === 'PICKUP');
+    const newDropoff = points.find((p) => p.id === id);
+    if (!pickup || !newDropoff) return;
+
+    const stops = points.filter((p) => p.id !== id && p.type !== 'PICKUP');
+
+    const updated: RoutePoint[] = [
+      { ...pickup, type: 'PICKUP', order: 0 },
+      ...stops.map((p, i) => ({
+        ...p,
+        type: 'STOP' as RoutePointType,
+        order: i + 1,
+      })),
+      {
+        ...newDropoff,
+        type: 'DROPOFF' as RoutePointType,
+        order: stops.length + 1,
+      },
+    ];
+
+    this.routePoints.set(updated);
+    this.rideForm.patchValue({ dropoff: newDropoff.address });
   }
 
   removePoint(id: string) {
-    this.routePoints = this.routePoints
-      .filter(p => p.id !== id)
+    const updated = this.routePoints()
+      .filter((p) => p.id !== id)
       .map((p, i) => ({ ...p, order: i }));
+
+    this.routePoints.set(updated);
+  }
+
+  onMapCleared() {
+    this.routePoints.set([]);
+    this.rideForm.reset({
+      pickup: '',
+      dropoff: '',
+    });
   }
 
   confirmRide() {
     const payload = {
-      route: this.routePoints.map((p, i) => ({
+      route: this.routePoints().map((p, i) => ({
         order: i,
         lat: p.lat,
         lng: p.lng,
         type: p.type,
+        address: p.address,
       })),
       pickup: this.rideForm.value.pickup,
       dropoff: this.rideForm.value.dropoff,
