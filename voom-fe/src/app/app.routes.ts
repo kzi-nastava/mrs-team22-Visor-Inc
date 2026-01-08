@@ -9,6 +9,7 @@ import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset
 import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
 import { AdminRegisterDriver, ROUTE_ADMIN_REGISTER_DRIVER } from './authenticated/admin/register-driver/register-driver';
 import { ActivateProfile, ROUTE_ACTIVATE_PROFILE } from './unauthenticated/activate/activate-profile/activate-profile';
+import { ROUTE_USER_HOME, UserHome } from './authenticated/user/home/home';
 
 export const routes: Routes = [
   {
@@ -50,6 +51,10 @@ export const routes: Routes = [
   {
     path: ROUTE_ACTIVATE_PROFILE,
     component: ActivateProfile,
+  },
+  {
+    path: ROUTE_USER_HOME,
+    component: UserHome,
   },
   {
     path: '**',
