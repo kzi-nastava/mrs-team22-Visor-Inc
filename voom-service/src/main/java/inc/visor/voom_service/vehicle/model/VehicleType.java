@@ -44,6 +44,15 @@ public class VehicleType {
         this.type = type;
     }
 
+    public double getBasePrice() {
+        return switch (type) {
+            case "CAR" -> 5.0;
+            case "VAN" -> 8.0;
+            case "LUXURY" -> 15.0;
+            default -> 0.0;
+        };
+    }
+
     @Override
     public String toString() {
         return "VehicleTypeController{" +

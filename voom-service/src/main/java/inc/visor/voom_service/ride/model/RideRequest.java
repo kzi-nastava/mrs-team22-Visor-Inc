@@ -1,12 +1,16 @@
 package inc.visor.voom_service.ride.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -39,6 +43,10 @@ public class RideRequest {
     @Column(name = "status", nullable = false)
     private RideRequestStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "schedule_type", nullable = false)
+    private ScheduleType scheduleType;
+
     @Column(name = "scheduled_time", nullable = true)
     private LocalDateTime scheduledTime;
 
@@ -52,12 +60,22 @@ public class RideRequest {
     @Column(name = "pet_transport", nullable = false)
     private boolean petTransport;
 
+    @Column(name = "calculated_price", nullable = false)
+    private double calculatedPrice;
+
+    @ElementCollection
+    @CollectionTable(
+        name = "ride_request_linked_passengers",
+        joinColumns = @JoinColumn(name = "ride_request_id")
+    )
+    @Column(name = "email", nullable = false)
+    private List<String> linkedPassengerEmails;
+
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "cancelled_by_user_id", nullable = true)
     private User cancelledBy;
 
-    public RideRequest() {
-    }
+    public RideRequest() {}
 
     public long getId() {
         return id;
@@ -99,6 +117,14 @@ public class RideRequest {
         this.scheduledTime = scheduledTime;
     }
 
+    public ScheduleType getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(ScheduleType scheduleType) {
+        this.scheduleType = scheduleType;
+    }
+
     public VehicleType getVehicleType() {
         return vehicleType;
     }
@@ -129,5 +155,21 @@ public class RideRequest {
 
     public void setCancelledBy(User cancelledBy) {
         this.cancelledBy = cancelledBy;
+    }
+
+    public double getCalculatedPrice() {
+        return calculatedPrice;
+    }
+
+    public void setCalculatedPrice(double calculatedPrice) {
+        this.calculatedPrice = calculatedPrice;
+    }
+
+    public List<String> getLinkedPassengerEmails() {
+        return linkedPassengerEmails;
+    }
+
+    public void setLinkedPassengerEmails(List<String> linkedPassengerEmails) {
+        this.linkedPassengerEmails = linkedPassengerEmails;
     }
 }
