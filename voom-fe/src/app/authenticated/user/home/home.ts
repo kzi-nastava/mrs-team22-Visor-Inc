@@ -73,8 +73,8 @@ export class UserHome {
   ];
 
   timeOptions = [
-    { label: 'Now', value: 'now' },
-    { label: 'Later', value: 'later' },
+    { label: 'Now', value: 'NOW' },
+    { label: 'Later', value: 'LATER' },
   ];
 
   pitstopsView = computed(() =>
