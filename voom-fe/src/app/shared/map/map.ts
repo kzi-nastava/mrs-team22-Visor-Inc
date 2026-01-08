@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, Output, EventEmitter } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Output,
+  EventEmitter,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
@@ -14,9 +22,6 @@ type Driver = {
   id: number;
   status: string;
   marker: L.Marker;
-  route?: L.LatLng[];
-  routeIndex?: number;
-  speed?: number;
 };
 
 @Component({
@@ -24,7 +29,9 @@ type Driver = {
   templateUrl: './map.html',
   styleUrl: './map.css',
 })
-export class Map implements AfterViewInit {
+export class Map implements AfterViewInit, OnChanges {
+  private drawVersion = 0;
+
   private map!: L.Map;
   private drivers: Driver[] = [];
 
@@ -32,11 +39,20 @@ export class Map implements AfterViewInit {
   private markers: L.Marker[] = [];
   private routeLine: L.Polyline | null = null;
 
+  @Input() points: {
+    lat: number;
+    lng: number;
+    type: 'PICKUP' | 'STOP' | 'DROPOFF';
+    order: number;
+  }[] = [];
+
   @Output() mapClick = new EventEmitter<{
     lat: number;
     lng: number;
     address: string;
   }>();
+
+  @Output() cleared = new EventEmitter<void>();
 
   constructor(private http: HttpClient) {}
 
@@ -46,20 +62,88 @@ export class Map implements AfterViewInit {
     iconAnchor: [16, 32],
   });
 
-  private randomLatLng(): L.LatLng {
-    const lat =
-      NOVI_SAD_BOUNDS.latMin + Math.random() * (NOVI_SAD_BOUNDS.latMax - NOVI_SAD_BOUNDS.latMin);
-    const lon =
-      NOVI_SAD_BOUNDS.lonMin + Math.random() * (NOVI_SAD_BOUNDS.lonMax - NOVI_SAD_BOUNDS.lonMin);
-    return new L.LatLng(lat, lon);
+  ngAfterViewInit(): void {
+    this.map = L.map('map').setView([45.2396, 19.8227], 14);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(this.map);
+
+    const ClearControl = L.Control.extend({
+      onAdd: () => {
+        const btn = L.DomUtil.create('button', 'leaflet-bar');
+        btn.innerHTML = '✕';
+        btn.style.width = '36px';
+        btn.style.height = '36px';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '20px';
+        btn.style.background = 'white';
+        btn.style.border = 'none';
+
+        btn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.clearUserRoute();
+        };
+
+        return btn;
+      },
+    });
+
+    this.map.addControl(new ClearControl({ position: 'topright' }));
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.reverseSearch(e.latlng.lat, e.latlng.lng).subscribe((res) => {
+        const address = res?.features?.[0]?.properties?.display_name ?? 'Unknown location';
+
+        this.mapClick.emit({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+          address,
+        });
+      });
+    });
+
+    this.initDrivers();
   }
 
-  private drawRouteOSRM() {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['points'] && this.map) {
+      this.syncFromPoints();
+    }
+  }
+
+  private syncFromPoints() {
+    this.drawVersion++;
+
+    this.markers.forEach((m) => this.map.removeLayer(m));
+    this.markers = [];
+
     if (this.routeLine) {
       this.map.removeLayer(this.routeLine);
       this.routeLine = null;
     }
 
+    if (!this.points || this.points.length === 0) {
+      this.waypoints = [];
+      return;
+    }
+
+    const sorted = [...this.points].sort((a, b) => a.order - b.order);
+
+    this.waypoints = sorted.map((p) => {
+      const ll = L.latLng(p.lat, p.lng);
+      const marker = L.marker(ll, { icon: this.userMarkerIcon }).addTo(this.map);
+      this.markers.push(marker);
+      return ll;
+    });
+
+    if (this.waypoints.length >= 2) {
+      this.drawRouteOSRM(this.drawVersion);
+    }
+  }
+
+  private drawRouteOSRM(version: number) {
     if (this.waypoints.length < 2) return;
 
     const requests = [];
@@ -68,6 +152,8 @@ export class Map implements AfterViewInit {
     }
 
     forkJoin(requests).subscribe((results) => {
+      if (version !== this.drawVersion) return;
+
       const allPoints: L.LatLng[] = [];
 
       results.forEach((res) => {
@@ -77,12 +163,29 @@ export class Map implements AfterViewInit {
         });
       });
 
+      if (this.routeLine) {
+        this.map.removeLayer(this.routeLine);
+      }
+
       this.routeLine = L.polyline(allPoints, {
         color: '#2563eb',
         weight: 4,
         lineJoin: 'round',
       }).addTo(this.map);
     });
+  }
+
+  private clearUserRoute() {
+    this.markers.forEach((m) => this.map.removeLayer(m));
+    this.markers = [];
+    this.waypoints = [];
+
+    if (this.routeLine) {
+      this.map.removeLayer(this.routeLine);
+      this.routeLine = null;
+    }
+
+    this.cleared.emit();
   }
 
   getRoute(from: L.LatLng, to: L.LatLng) {
@@ -93,16 +196,18 @@ export class Map implements AfterViewInit {
     );
   }
 
-  snapToRoad(latlng: L.LatLng) {
-    return this.http.get<any>(
-      `https://router.project-osrm.org/nearest/v1/driving/${latlng.lng},${latlng.lat}`
-    );
-  }
-
   reverseSearch(lat: number, lon: number): Observable<any> {
     return this.http.get(
       `https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${lat}&lon=${lon}`
     );
+  }
+
+  private randomLatLng(): L.LatLng {
+    const lat =
+      NOVI_SAD_BOUNDS.latMin + Math.random() * (NOVI_SAD_BOUNDS.latMax - NOVI_SAD_BOUNDS.latMin);
+    const lon =
+      NOVI_SAD_BOUNDS.lonMin + Math.random() * (NOVI_SAD_BOUNDS.lonMax - NOVI_SAD_BOUNDS.lonMin);
+    return new L.LatLng(lat, lon);
   }
 
   private async initDrivers() {
@@ -119,50 +224,11 @@ export class Map implements AfterViewInit {
 
       const marker = L.marker(startPos, { icon }).addTo(this.map);
 
-      const driver = {
+      this.drivers.push({
         id: i,
         status,
         marker,
-        routeIndex: 0,
-        speed: 1,
-      };
-
-      this.drivers.push(driver);
-    }
-  }
-
-  ngAfterViewInit(): void {
-    this.map = L.map('map').setView([45.2396, 19.8227], 14);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(this.map);
-
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const latlng = e.latlng;
-
-      this.reverseSearch(latlng.lat, latlng.lng).subscribe((res) => {
-        const address = res?.features?.[0]?.properties?.display_name ?? 'Unknown location';
-
-        const marker = L.marker(latlng, {
-          icon: this.userMarkerIcon,
-        }).addTo(this.map);
-
-        marker.bindPopup(address);
-
-        this.markers.push(marker);
-        this.waypoints.push(latlng);
-
-        this.mapClick.emit({
-          lat: latlng.lat,
-          lng: latlng.lng,
-          address,
-        });
-
-        this.drawRouteOSRM();
       });
-    });
-
-    this.initDrivers();
+    }
   }
 }
