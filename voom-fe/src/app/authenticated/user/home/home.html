@@ -10,9 +10,7 @@
 
 <section class="flex flex-col items-center w-full px-4 sm:px-6">
   <form class="w-full max-w-[1200px] bg-white rounded-2xl p-4 sm:p-6 md:p-8" [formGroup]="rideForm">
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-0 md:gap-x-6 lg:gap-x-6 items-center"
-    >
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-6 md:gap-x-6 items-center">
       <app-value-input-string
         label="Pickup Location"
         formControlName="pickup"
@@ -24,29 +22,50 @@
       ></app-value-input-string>
 
       <app-dropdown
-        class="lg:col-span-1 mx-auto md:col-span-2 md:justify-self-center lg:justify-self-stretch max-w-[260px] lg:max-w-none"
+        class="mx-auto md:justify-self-center lg:justify-self-stretch max-w-[260px] lg:max-w-none"
         label="Vehicle Type"
         [options]="vehicleOptions"
         [(selected)]="selectedVehicle"
       ></app-dropdown>
 
       <app-dropdown
-        class="lg:col-span-1 mx-auto md:col-span-2 md:justify-self-center lg:justify-self-stretch max-w-[260px] lg:max-w-none"
+        class="mx-auto md:justify-self-center lg:justify-self-stretch max-w-[260px] lg:max-w-none"
         label="Time"
         [options]="timeOptions"
         [(selected)]="selectedTime"
       ></app-dropdown>
     </div>
 
+    @if (isLaterSelected) {
+    <div class="w-full mt-4 flex justify-center">
+      <div class="w-full max-w-[280px]">
+        <label class="block text-sm mb-1">Pick time</label>
+
+        <input
+          type="time"
+          class="w-full border rounded-lg px-3 py-2"
+          formControlName="scheduledTime"
+          [min]="minTime"
+          [max]="maxTime"
+          [class.border-red-500]="
+            rideForm.controls.scheduledTime.touched && !isScheduledTimeValid()
+          "
+        />
+
+        @if (!isScheduledTimeValid()) {
+        <p class="text-xs text-red-600 mt-1">Time must be within the next 5 hours</p>
+        }
+      </div>
+    </div>
+    }
+
     <div class="w-full mt-8">
       <h4 class="font-medium mb-3">Additional Pitstops</h4>
       <div class="flex gap-3 flex-wrap">
         @for (p of pitstopsView(); track p.id) {
-        <div class="flex items-center gap-2 text-sm bg-gray-100 rounded-full px-3 py-1 max-w-full">
+        <div class="flex items-center gap-2 text-sm bg-gray-100 rounded-full px-3 py-1">
           <span class="text-red-500 text-xs">●</span>
-          <span class="truncate max-w-[180px] sm:max-w-[240px]">
-            {{ p.cleanAddress }}
-          </span>
+          <span class="truncate max-w-[220px]">{{ p.cleanAddress }}</span>
           <button
             type="button"
             class="w-5 h-5 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-100"
@@ -56,7 +75,7 @@
           </button>
           <button
             type="button"
-            class="text-blue-600 text-xs hover:underline whitespace-nowrap"
+            class="text-blue-600 text-xs hover:underline"
             (click)="setAsDropoff(p.id)"
           >
             Set as destination
@@ -110,21 +129,16 @@
       </div>
     </div>
 
-    <div class="w-full mt-8 flex flex-col sm:flex-row gap-4 sm:gap-8 items-start sm:items-center">
-      <mat-checkbox formControlName="pets"> Traveling with pets </mat-checkbox>
-
-      <mat-checkbox formControlName="baby"> Need a baby seat </mat-checkbox>
+    <div class="w-full mt-8 flex flex-col sm:flex-row gap-6">
+      <mat-checkbox formControlName="pets">Traveling with pets</mat-checkbox>
+      <mat-checkbox formControlName="baby">Need a baby seat</mat-checkbox>
     </div>
 
-    <p class="text-center text-base sm:text-lg py-8 text-gray-600">
-      Enter pickup, dropoff and ride details to see your estimate.
-    </p>
-
-    <div class="flex justify-center">
+    <div class="flex justify-center mt-10">
       <button
         matButton="filled"
         class="px-10 w-full sm:w-auto"
-        [disabled]="!rideForm.valid"
+        [disabled]="!rideForm.valid || (isLaterSelected && !isScheduledTimeValid())"
         (click)="confirmRide()"
       >
         Confirm Ride

@@ -1,5 +1,5 @@
 import { Component, signal, computed, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Map } from '../../../shared/map/map';
 import { Footer } from '../../../core/layout/footer/footer';
 import { Header } from '../../../core/layout/header-kt1/header-kt1';
@@ -9,8 +9,6 @@ import { MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
-import { Validators } from '@angular/forms';
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -57,6 +55,7 @@ export class UserHome {
     emailInput: new FormControl<string>('', Validators.email),
     pets: new FormControl<boolean>(false),
     baby: new FormControl<boolean>(false),
+    scheduledTime: new FormControl<string | null>(null),
   });
 
   vehicleOptions = [
@@ -79,6 +78,35 @@ export class UserHome {
       }))
   );
 
+  get isLaterSelected(): boolean {
+    return this.selectedTime === 'later';
+  }
+
+  get minTime(): string {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5);
+  }
+
+  get maxTime(): string {
+    const max = new Date();
+    max.setHours(max.getHours() + 5);
+    return max.toTimeString().slice(0, 5);
+  }
+
+  isScheduledTimeValid(): boolean {
+    const value = this.rideForm.value.scheduledTime;
+    if (!value) return false;
+
+    const now = new Date();
+    const selected = new Date();
+    const [h, m] = value.split(':').map(Number);
+
+    selected.setHours(h, m, 0, 0);
+
+    const diffMinutes = (selected.getTime() - now.getTime()) / 60000;
+    return diffMinutes >= 0 && diffMinutes <= 300;
+  }
+
   onMapClick(event: { lat: number; lng: number; address: string }) {
     const cleanAddress = event.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim();
     const points = this.routePoints();
@@ -99,7 +127,7 @@ export class UserHome {
     }
 
     const updated = points.map((p) =>
-      p.type === ('DROPOFF' as RoutePointType) ? { ...p, type: 'STOP' as RoutePointType } : p
+      p.type === 'DROPOFF' ? { ...p, type: 'STOP' as RoutePointType } : p
     );
 
     updated.push({
@@ -107,7 +135,7 @@ export class UserHome {
       lat: event.lat,
       lng: event.lng,
       address: cleanAddress,
-      type: 'DROPOFF' as RoutePointType,
+      type: 'DROPOFF',
       order: updated.length,
     });
 
@@ -126,7 +154,7 @@ export class UserHome {
     const updated: RoutePoint[] = [
       { ...pickup, order: 0 },
       ...stops.map((p, i) => ({ ...p, type: 'STOP' as RoutePointType, order: i + 1 })),
-      { ...newDropoff, type: 'DROPOFF' as RoutePointType, order: stops.length + 1 },
+      { ...newDropoff, type: 'DROPOFF', order: stops.length + 1 },
     ];
 
     this.routePoints.set(updated);
@@ -134,10 +162,11 @@ export class UserHome {
   }
 
   removePoint(id: string) {
-    const updated = this.routePoints()
-      .filter((p) => p.id !== id)
-      .map((p, i) => ({ ...p, order: i }));
-    this.routePoints.set(updated);
+    this.routePoints.set(
+      this.routePoints()
+        .filter((p) => p.id !== id)
+        .map((p, i) => ({ ...p, order: i }))
+    );
   }
 
   get emailControl() {
@@ -146,21 +175,20 @@ export class UserHome {
 
   onMapCleared() {
     this.routePoints.set([]);
+    this.passengerEmails.set([]);
     this.rideForm.reset({
       pickup: '',
       dropoff: '',
       pets: false,
       baby: false,
+      scheduledTime: null,
     });
-    this.passengerEmails.set([]);
   }
 
   addEmail() {
     const control = this.emailControl;
     const email = control?.value?.trim();
-
-    if (!email) return;
-    if (control?.invalid) return;
+    if (!email || control?.invalid) return;
     if (this.passengerEmails().length >= 3) return;
     if (this.passengerEmails().includes(email)) return;
 
@@ -172,18 +200,35 @@ export class UserHome {
     this.passengerEmails.set(this.passengerEmails().filter((e) => e !== email));
   }
 
+  private buildScheduledDate(): string {
+    const [h, m] = this.rideForm.value.scheduledTime!.split(':').map(Number);
+    const date = new Date();
+    date.setHours(h, m, 0, 0);
+    return date.toISOString();
+  }
+
   confirmRide() {
+    const schedule =
+      this.selectedTime === 'later'
+        ? { type: 'LATER', startAt: this.buildScheduledDate() }
+        : { type: 'NOW', startAt: new Date().toISOString() };
+
     const payload = {
-      route: this.routePoints(),
-      pickup: this.rideForm.value.pickup,
-      dropoff: this.rideForm.value.dropoff,
-      vehiclePrice: this.selectedVehicle,
-      time: this.selectedTime,
-      passengers: this.passengerEmails(),
+      route: {
+        points: this.routePoints().map((p) => ({
+          lat: p.lat,
+          lng: p.lng,
+          order: p.order,
+          type: p.type,
+        })),
+      },
+      schedule,
+      vehicleType: this.selectedVehicle,
       preferences: {
         pets: this.rideForm.value.pets,
         baby: this.rideForm.value.baby,
       },
+      linkedPassengers: this.passengerEmails(),
     };
 
     console.log(payload);
