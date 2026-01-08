@@ -10,19 +10,19 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "ride")
 public class Ride {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ride_id", nullable = false)
@@ -33,7 +33,7 @@ public class Ride {
     private RideRequest rideRequest;
 
     @OneToOne
-    @JoinColumn(name = "driver_id", nullable = false)
+    @JoinColumn(name = "driver_id", nullable = true)
     private Driver driver;
 
     @Enumerated(EnumType.STRING)
@@ -46,10 +46,70 @@ public class Ride {
     @Column(name = "finished_at", nullable = true)
     private LocalDateTime finishedAt;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @Column(name = "passengers", nullable = false)
+    @ManyToMany
+    @JoinTable(
+        name = "ride_passenger",
+        joinColumns = @JoinColumn(name = "ride_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> passengers;
 
     public Ride() {}
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public RideRequest getRideRequest() {
+        return rideRequest;
+    }
+
+    public void setRideRequest(RideRequest rideRequest) {
+        this.rideRequest = rideRequest;
+
+    }
+
+    public Driver getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    public RideStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RideStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getFinishedAt() {
+        return finishedAt;
+    }
+
+    public void setFinishedAt(LocalDateTime finishedAt) {
+        this.finishedAt = finishedAt;
+    }
+
+    public List<User> getPassengers() {
+        return passengers;
+    }
+
+    public void setPassengers(List<User> passengers) {
+        this.passengers = passengers;
+    }
 }

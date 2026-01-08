@@ -4,18 +4,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
-import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.model.Ride;
 
 @Service
 public class RideService {
 
-        public RideRequestResponseDto createRideRequest(User user, CreateRideRequestDto request) {
-            return null;
-        }
 
         public void updateRidePosition(RideLocationDto dto) {
             // get and set position

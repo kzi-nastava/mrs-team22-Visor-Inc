@@ -25,13 +25,7 @@ public class RideRoute {
     @Column(name = "total_distance_km", nullable = false)
     private double totalDistanceKm;
 
-    @Column(name = "estimated_duration_min", nullable = false)
-    private int estimatedDurationMin;
-
-    @Column(name = "calculated_price", nullable = false)
-    private double calculatedPrice;
-
-    @OneToMany(cascade= CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ride_route_id", nullable = false)
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
@@ -52,22 +46,6 @@ public class RideRoute {
 
     public void setTotalDistanceKm(double totalDistanceKm) {
         this.totalDistanceKm = totalDistanceKm;
-    }
-
-    public int getEstimatedDurationMin() {
-        return estimatedDurationMin;
-    }
-
-    public void setEstimatedDurationMin(int estimatedDurationMin) {
-        this.estimatedDurationMin = estimatedDurationMin;
-    }
-
-    public double getCalculatedPrice() {
-        return calculatedPrice;
-    }
-
-    public void setCalculatedPrice(double calculatedPrice) {
-        this.calculatedPrice = calculatedPrice;
     }
 
     public List<RoutePoint> getRoutePoints() {
