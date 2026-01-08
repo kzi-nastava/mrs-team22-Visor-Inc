@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   imports: [MatFormFieldModule, MatSelectModule],
 })
 export class Dropdown {
+  @Input() label = '';
   @Input() options: { label: string; value: string | number }[] = [];
   @Input() selected: string | number | null = null;
   @Output() selectedChange = new EventEmitter<string | number>();
