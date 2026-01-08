@@ -41,7 +41,7 @@ public class RideController {
             @AuthenticationPrincipal User user
     ) {
 
-        Long userId = (user != null) ? user.getId() : 2L;
+        Long userId = (user != null) ? user.getId() : 1L;
 
         RideRequestResponseDto response
                 = rideRequestService.createRideRequest(request, userId);

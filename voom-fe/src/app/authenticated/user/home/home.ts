@@ -9,10 +9,15 @@ import { MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { RideApi } from './home.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RideRequestDto } from './home.api';
 
 export const ROUTE_USER_HOME = 'user/home';
 
 type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
+
+type ScheduleType = 'NOW' | 'LATER';
 
 interface RoutePoint {
   id: string;
@@ -36,6 +41,7 @@ interface RoutePoint {
     MatIconModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatSnackBarModule,
   ],
   templateUrl: './home.html',
   styleUrl: './home.css',
@@ -43,11 +49,13 @@ interface RoutePoint {
 export class UserHome {
   @ViewChild(Map) map!: Map;
 
+  constructor(private rideApi: RideApi, private snackBar: MatSnackBar) {}
+
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
 
   selectedVehicle: number | null = null;
-  selectedTime: string = 'now';
+  selectedTime: ScheduleType = 'NOW';
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -59,9 +67,9 @@ export class UserHome {
   });
 
   vehicleOptions = [
-    { label: 'Standard', value: 100 },
-    { label: 'Luxury', value: 200 },
-    { label: 'Van', value: 150 },
+    { label: 'Standard', value: 1 },
+    { label: 'Luxury', value: 3 },
+    { label: 'Van', value: 2 },
   ];
 
   timeOptions = [
@@ -79,7 +87,7 @@ export class UserHome {
   );
 
   get isLaterSelected(): boolean {
-    return this.selectedTime === 'later';
+    return this.selectedTime === 'LATER';
   }
 
   get minTime(): string {
@@ -208,29 +216,48 @@ export class UserHome {
   }
 
   confirmRide() {
-    const schedule =
-      this.selectedTime === 'later'
+    if (this.selectedVehicle === null) {
+      this.snackBar.open('Please select vehicle type', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const schedule: { type: ScheduleType; startAt: string } =
+      this.selectedTime === 'LATER'
         ? { type: 'LATER', startAt: this.buildScheduledDate() }
         : { type: 'NOW', startAt: new Date().toISOString() };
 
-    const payload = {
+    const payload: RideRequestDto = {
       route: {
         points: this.routePoints().map((p) => ({
           lat: p.lat,
           lng: p.lng,
           order: p.order,
           type: p.type,
+          address: p.address,
         })),
       },
       schedule,
-      vehicleType: this.selectedVehicle,
+      vehicleTypeId: this.selectedVehicle,
       preferences: {
-        pets: this.rideForm.value.pets,
-        baby: this.rideForm.value.baby,
+        pets: !!this.rideForm.value.pets,
+        baby: !!this.rideForm.value.baby,
       },
       linkedPassengers: this.passengerEmails(),
     };
 
-    console.log(payload);
+    this.rideApi.createRideRequest(payload).subscribe({
+      next: (res) => {
+        if (res.status === 'ACCEPTED') {
+          this.snackBar.open(`Ride accepted. Price: ${res.price}`, 'Close', { duration: 4000 });
+        } else {
+          this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
+        }
+      },
+      error: () => {
+        this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
+      },
+    });
   }
 }
