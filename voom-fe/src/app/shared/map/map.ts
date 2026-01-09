@@ -20,8 +20,17 @@ const NOVI_SAD_BOUNDS = {
 
 type Driver = {
   id: number;
+  firstName?: string;
+  lastName?: string;
   status: string;
   marker: L.Marker;
+
+  route?: L.LatLng[];
+  routeIndex?: number;
+  direction?: 1 | -1;
+
+  progress?: number;
+  speed?: number;
 };
 
 @Component({
@@ -103,8 +112,118 @@ export class Map implements AfterViewInit, OnChanges {
         });
       });
     });
+  }
 
-    this.initDrivers();
+  applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
+    const driver = this.drivers.find((d) => d.id === driverId);
+    if (!driver) return;
+
+    driver.route = coords.map((c) => L.latLng(c.lat, c.lng));
+    driver.routeIndex = 0;
+    driver.direction = 1;
+
+    this.startSimulation();
+  }
+
+  startSimulation() {
+    let lastTime = performance.now();
+
+    const animate = (now: number) => {
+      const deltaSec = (now - lastTime) / 1000;
+      lastTime = now;
+
+      this.drivers.forEach((driver) => {
+        if (!driver.route || driver.route.length < 2) return;
+
+        const dir = driver.direction ?? 1;
+        let i = driver.routeIndex ?? 0;
+        let p = driver.progress ?? 0;
+
+        const a = driver.route[i];
+        const b = driver.route[i + dir];
+
+        if (!b) {
+          driver.direction = dir === 1 ? -1 : 1;
+          return;
+        }
+
+        const segmentDist = a.distanceTo(b);
+        const move = (driver.speed ?? 1) * deltaSec;
+
+        p += move / segmentDist;
+
+        if (p >= 1) {
+          driver.routeIndex = i + dir;
+          driver.progress = 0;
+
+          if (driver.routeIndex <= 0 || driver.routeIndex >= driver.route.length - 1) {
+            driver.direction = dir === 1 ? -1 : 1;
+          }
+        } else {
+          driver.progress = p;
+          const lat = a.lat + (b.lat - a.lat) * p;
+          const lng = a.lng + (b.lng - a.lng) * p;
+          driver.marker.setLatLng([lat, lng]);
+        }
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }
+
+  addSimulatedDriver(config: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    start: { lat: number; lng: number };
+    status: 'BUSY' | 'FREE';
+  }) {
+    const icon = L.icon({
+      iconUrl:
+        config.status === 'BUSY' ? 'assets/icons/busy driver.png' : 'assets/icons/free driver.png',
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+    });
+
+    const marker = L.marker([config.start.lat, config.start.lng], { icon })
+      .addTo(this.map)
+      .bindTooltip(
+        `
+      <div style="font-size: 13px; line-height: 1.4">
+        <strong>Driver #${config.id}</strong><br/>
+        ${config.firstName} ${config.lastName}
+      </div>
+      `,
+        {
+          direction: 'top',
+          offset: [0, -20],
+          opacity: 0.9,
+          sticky: true, 
+        }
+      );
+
+    this.drivers.push({
+      id: config.id,
+      firstName: config.firstName,
+      lastName: config.lastName,
+      status: config.status,
+      marker,
+      route: [],
+      routeIndex: 0,
+      direction: 1,
+      progress: 0,
+      speed: 0.25 + Math.random() * 0.25,
+    });
+  }
+
+  assignRouteToDriver(driver: any, start: L.LatLng, end: { lat: number; lng: number }) {
+    this.getRoute(start, L.latLng(end.lat, end.lng)).subscribe((res) => {
+      const coords = res.routes[0].geometry.coordinates;
+      driver.route = coords.map((c: number[]) => L.latLng(c[1], c[0]));
+      driver.routeIndex = 0;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -200,35 +319,5 @@ export class Map implements AfterViewInit, OnChanges {
     return this.http.get(
       `https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${lat}&lon=${lon}`
     );
-  }
-
-  private randomLatLng(): L.LatLng {
-    const lat =
-      NOVI_SAD_BOUNDS.latMin + Math.random() * (NOVI_SAD_BOUNDS.latMax - NOVI_SAD_BOUNDS.latMin);
-    const lon =
-      NOVI_SAD_BOUNDS.lonMin + Math.random() * (NOVI_SAD_BOUNDS.lonMax - NOVI_SAD_BOUNDS.lonMin);
-    return new L.LatLng(lat, lon);
-  }
-
-  private async initDrivers() {
-    for (let i = 0; i < 10; i++) {
-      const status = i < 5 ? 'BUSY' : 'FREE';
-      const startPos = this.randomLatLng();
-
-      const icon = L.icon({
-        iconUrl:
-          status === 'BUSY' ? 'assets/icons/busy driver.png' : 'assets/icons/free driver.png',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-      });
-
-      const marker = L.marker(startPos, { icon }).addTo(this.map);
-
-      this.drivers.push({
-        id: i,
-        status,
-        marker,
-      });
-    }
   }
 }

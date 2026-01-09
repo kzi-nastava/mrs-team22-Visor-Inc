@@ -1,4 +1,4 @@
-import { Component, signal, computed, ViewChild } from '@angular/core';
+import { Component, signal, computed, ViewChild, AfterViewInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Map } from '../../../shared/map/map';
 import { Footer } from '../../../core/layout/footer/footer';
@@ -9,9 +9,10 @@ import { MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { RideApi } from './home.api';
+import { DriverSummaryDto, PREDEFINED_ROUTES, RideApi } from './home.api';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RideRequestDto } from './home.api';
+import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -46,10 +47,14 @@ interface RoutePoint {
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class UserHome {
+export class UserHome implements AfterViewInit {
   @ViewChild(Map) map!: Map;
 
-  constructor(private rideApi: RideApi, private snackBar: MatSnackBar) {}
+  constructor(
+    private rideApi: RideApi,
+    private snackBar: MatSnackBar,
+    private driverSocket: DriverSimulationWsService
+  ) {}
 
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
@@ -258,6 +263,38 @@ export class UserHome {
       error: () => {
         this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
       },
+    });
+  }
+
+  private initDriverSimulation(drivers: DriverSummaryDto[]) {
+    drivers.slice(0, 20).forEach((driver, index) => {
+      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
+
+      this.map.addSimulatedDriver({
+        id: driver.id,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        start: routeDef.start,
+        status: 'FREE',
+      });
+
+      this.driverSocket.requestRoute({
+        driverId: driver.id,
+        start: routeDef.start,
+        end: routeDef.end,
+      });
+    });
+  }
+
+  ngAfterViewInit() {
+    this.driverSocket.connect((route) => {
+      console.log('WS ROUTE PAYLOAD:', route);
+      this.map.applyDriverRoute(route.driverId, route.route);
+    });
+
+    this.rideApi.getActiveDrivers().subscribe({
+      next: (drivers) => this.initDriverSimulation(drivers),
+      error: (err) => console.error(err),
     });
   }
 }

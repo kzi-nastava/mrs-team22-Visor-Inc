@@ -92,6 +92,8 @@ public class DataInitializer implements ApplicationRunner {
 
     private void seedDrivers() {
 
+        final int NUMBER_OF_DRIVERS = 20;
+
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
         UserType driverType = userTypeRepository.findByTypeName("DRIVER").orElseThrow();
 
@@ -101,7 +103,7 @@ public class DataInitializer implements ApplicationRunner {
 
         VehicleType[] vehicleTypes = new VehicleType[]{standard, van, luxury};
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= NUMBER_OF_DRIVERS; i++) {
 
             Person person = new Person();
             person.setFirstName("Driver" + i);
