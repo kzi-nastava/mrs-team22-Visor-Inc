@@ -54,7 +54,7 @@ public class DriverController {
 //    }
     @GetMapping("/active")
     public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
-        List<DriverSummaryDto> response = new ArrayList<>();
+        List<DriverSummaryDto> response = driverService.getActiveDrivers();
         return ResponseEntity.ok(response);
     }
 

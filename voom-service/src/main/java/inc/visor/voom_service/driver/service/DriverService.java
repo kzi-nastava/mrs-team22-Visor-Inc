@@ -1,5 +1,6 @@
 package inc.visor.voom_service.driver.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.auth.user.repository.UserTypeRepository;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
@@ -194,6 +196,24 @@ public class DriverService {
                 activationLink
         );
 
+    }
+
+    public List<DriverSummaryDto> getActiveDrivers() {
+        List<Driver> activeDrivers = driverRepository.findAll();
+
+        activeDrivers = activeDrivers.stream()
+                .filter(driver -> driver.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .toList();
+
+        List<DriverSummaryDto> driverDtos = activeDrivers.stream()
+                .map(driver -> new DriverSummaryDto(
+                        driver.getId(),
+                        driver.getPerson().getFirstName(),
+                        driver.getPerson().getLastName()
+                ))
+                .toList();
+
+        return driverDtos;
     }
 
 }
