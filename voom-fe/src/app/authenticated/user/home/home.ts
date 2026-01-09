@@ -220,6 +220,19 @@ export class UserHome implements AfterViewInit {
     return date.toISOString();
   }
 
+  sendDriverToPickup(driverId: number, lat: number, lng: number) {
+    const driver = this.map.getDriver(driverId);
+    if (!driver) return;
+
+    driver.status = 'GOING_TO_PICKUP';
+
+    this.driverSocket.requestRoute({
+      driverId,
+      start: driver.marker.getLatLng(),
+      end: { lat, lng },
+    });
+  }
+
   confirmRide() {
     if (this.selectedVehicle === null) {
       this.snackBar.open('Please select vehicle type', 'Close', {
@@ -259,8 +272,16 @@ export class UserHome implements AfterViewInit {
 
     this.rideApi.createRideRequest(payload).subscribe({
       next: (res) => {
-        if (res.status === 'ACCEPTED') {
-          this.snackBar.open(`Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`, 'Close', { duration: 4000 });
+        if (res.status === 'ACCEPTED' && res.driver) {
+          console.log('Ride accepted:', res);
+          this.snackBar.open(
+            `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
+            'Close',
+            { duration: 4000 }
+          );
+          if (res.pickupLat && res.pickupLng) {
+            this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
+          }
         } else {
           this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
         }

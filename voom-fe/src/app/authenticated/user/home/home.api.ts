@@ -209,6 +209,8 @@ export type RideRequestResponseDto = {
   price: number;
   scheduledTime: string | null;
   driver: DriverSummaryDto | null;
+  pickupLat: number | null;
+  pickupLng: number | null;
 };
 
 @Injectable({ providedIn: 'root' })

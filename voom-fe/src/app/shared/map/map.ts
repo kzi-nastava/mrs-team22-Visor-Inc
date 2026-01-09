@@ -18,11 +18,13 @@ const NOVI_SAD_BOUNDS = {
   lonMax: 19.95,
 };
 
+type DriverStatus = 'FREE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE';
+
 type Driver = {
   id: number;
   firstName?: string;
   lastName?: string;
-  status: string;
+  status: DriverStatus;
   marker: L.Marker;
 
   route?: L.LatLng[];
@@ -156,6 +158,13 @@ export class Map implements AfterViewInit, OnChanges {
           driver.routeIndex = i + dir;
           driver.progress = 0;
 
+          if (driver.status === 'GOING_TO_PICKUP' && driver.routeIndex >= driver.route.length - 1) {
+            driver.status = 'WAITING_AT_PICKUP';
+            driver.route = undefined;
+            driver.progress = 0;
+            return;
+          }
+
           if (driver.routeIndex <= 0 || driver.routeIndex >= driver.route.length - 1) {
             driver.direction = dir === 1 ? -1 : 1;
           }
@@ -171,6 +180,10 @@ export class Map implements AfterViewInit, OnChanges {
     };
 
     requestAnimationFrame(animate);
+  }
+
+  getDriver(driverId: number): Driver | undefined {
+    return this.drivers.find((d) => d.id === driverId);
   }
 
   getFreeDriversSnapshot(): {
@@ -195,11 +208,11 @@ export class Map implements AfterViewInit, OnChanges {
     firstName: string;
     lastName: string;
     start: { lat: number; lng: number };
-    status: 'BUSY' | 'FREE';
+    status: DriverStatus;
   }) {
     const icon = L.icon({
       iconUrl:
-        config.status === 'BUSY' ? 'assets/icons/busy driver.png' : 'assets/icons/free driver.png',
+        config.status === 'FREE' ? 'assets/icons/free driver.png' : 'assets/icons/busy driver.png',
       iconSize: [30, 30],
       iconAnchor: [15, 30],
     });

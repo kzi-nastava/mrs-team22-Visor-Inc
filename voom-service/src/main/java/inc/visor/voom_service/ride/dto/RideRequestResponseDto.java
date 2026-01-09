@@ -14,6 +14,8 @@ public class RideRequestResponseDto {
     private double price;
     private LocalDateTime scheduledTime;
     private DriverSummaryDto driver;
+    private double pickupLat;
+    private double pickupLng;
 
     private RideRequestResponseDto(
             long requestId,
@@ -21,7 +23,9 @@ public class RideRequestResponseDto {
             double distanceKm,
             double price,
             LocalDateTime scheduledTime,
-            DriverSummaryDto driver
+            DriverSummaryDto driver,
+            double pickupLat,
+            double pickupLng
     ) {
         this.requestId = requestId;
         this.status = status;
@@ -29,6 +33,8 @@ public class RideRequestResponseDto {
         this.price = price;
         this.scheduledTime = scheduledTime;
         this.driver = driver;
+        this.pickupLat = pickupLat;
+        this.pickupLng = pickupLng;
     }
 
     public static RideRequestResponseDto create(
@@ -37,7 +43,9 @@ public class RideRequestResponseDto {
             double distanceKm,
             double price,
             LocalDateTime scheduledTime,
-            DriverSummaryDto driver
+            DriverSummaryDto driver,
+            double pickupLat,
+            double pickupLng
     ) {
         return new RideRequestResponseDto(
                 requestId,
@@ -45,7 +53,9 @@ public class RideRequestResponseDto {
                 distanceKm,
                 price,
                 scheduledTime,
-                driver
+                driver,
+                pickupLat,
+                pickupLng
         );
     }
 
@@ -60,7 +70,9 @@ public class RideRequestResponseDto {
                 distanceKm,
                 rideRequest.getCalculatedPrice(),
                 rideRequest.getScheduledTime(),
-                driver
+                driver,
+                rideRequest.getRideRoute().getPickupPoint().getLatitude(),
+                rideRequest.getRideRoute().getPickupPoint().getLongitude()
         );
     }
 
@@ -88,4 +100,11 @@ public class RideRequestResponseDto {
         return driver;
     }
 
+    public double getPickupLat() {
+        return pickupLat;
+    }
+
+    public double getPickupLng() {
+        return pickupLng;
+    }
 }
