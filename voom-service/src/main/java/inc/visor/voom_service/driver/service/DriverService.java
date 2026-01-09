@@ -1,5 +1,6 @@
 package inc.visor.voom_service.driver.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,9 @@ import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
@@ -207,13 +211,83 @@ public class DriverService {
 
         List<DriverSummaryDto> driverDtos = activeDrivers.stream()
                 .map(driver -> new DriverSummaryDto(
-                        driver.getId(),
-                        driver.getPerson().getFirstName(),
-                        driver.getPerson().getLastName()
-                ))
+                driver.getId(),
+                driver.getPerson().getFirstName(),
+                driver.getPerson().getLastName()
+        ))
                 .toList();
 
         return driverDtos;
+    }
+
+    public Driver findDriverForRideRequest(
+            RideRequest rideRequest,
+            List<RideRequestCreateDTO.DriverLocationDTO> snapshot
+    ) {
+
+        if (snapshot == null || snapshot.isEmpty()) {
+            return null;
+        }
+
+        RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
+
+        boolean needsBaby = rideRequest.isBabyTransport();
+        boolean needsPet = rideRequest.isPetTransport();
+        Long vehicleTypeId = rideRequest.getVehicleType().getId();
+
+        return snapshot.stream()
+                .map(s -> driverRepository.findById(s.driverId).orElse(null))
+                .filter(driver -> driver != null)
+                .filter(driver -> {
+                    Vehicle v = vehicleRepository.findByDriverId(driver.getId())
+                            .orElse(null);
+
+                    if (needsBaby && !v.isBabySeat()) {
+                        return false;
+                    }
+                    if (needsPet && !v.isPetFriendly()) {
+                        return false;
+                    }
+                    if (v.getVehicleType().getId() != vehicleTypeId) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .min(Comparator.comparingDouble(driver -> {
+                    RideRequestCreateDTO.DriverLocationDTO loc
+                            = snapshot.stream()
+                                    .filter(s -> s.driverId.equals(driver.getId()))
+                                    .findFirst()
+                                    .orElseThrow();
+
+                    return distanceKm(
+                            loc.lat,
+                            loc.lng,
+                            pickup.getLatitude(),
+                            pickup.getLongitude()
+                    );
+                }))
+                .orElse(null);
+    }
+
+    public double distanceKm(
+            double lat1,
+            double lon1,
+            double lat2,
+            double lon2
+    ) {
+        final int R = 6371;
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c;
+
+        return distance;
     }
 
 }

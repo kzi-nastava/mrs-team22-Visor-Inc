@@ -92,7 +92,7 @@ public class DataInitializer implements ApplicationRunner {
 
     private void seedDrivers() {
 
-        final int NUMBER_OF_DRIVERS = 20;
+        final int NUMBER_OF_DRIVERS = 30;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
         UserType driverType = userTypeRepository.findByTypeName("DRIVER").orElseThrow();

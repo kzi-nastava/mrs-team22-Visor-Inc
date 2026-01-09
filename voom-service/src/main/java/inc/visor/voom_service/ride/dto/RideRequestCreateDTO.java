@@ -10,6 +10,7 @@ public class RideRequestCreateDTO {
     public Long vehicleTypeId;
     public PreferencesDTO preferences;
     public List<String> linkedPassengers;
+    public List<DriverLocationDTO> freeDriversSnapshot;
 
     public static class RouteDTO {
         public List<RoutePointDTO> points;
@@ -33,6 +34,13 @@ public class RideRequestCreateDTO {
         public boolean pets;
     }
 
+    public static class DriverLocationDTO {
+        public Long driverId;
+        public double lat;
+        public double lng;
+        
+    }
+
     public RouteDTO getRoute() {
         return route;
     }
@@ -53,4 +61,7 @@ public class RideRequestCreateDTO {
         return linkedPassengers;
     }
 
+    public List<DriverLocationDTO> getFreeDriversSnapshot() {
+        return freeDriversSnapshot;
+    }
 }
