@@ -173,6 +173,23 @@ export class Map implements AfterViewInit, OnChanges {
     requestAnimationFrame(animate);
   }
 
+  getFreeDriversSnapshot(): {
+    driverId: number;
+    lat: number;
+    lng: number;
+  }[] {
+    return this.drivers
+      .filter((d) => d.status === 'FREE')
+      .map((d) => {
+        const pos = d.marker.getLatLng();
+        return {
+          driverId: d.id,
+          lat: pos.lat,
+          lng: pos.lng,
+        };
+      });
+  }
+
   addSimulatedDriver(config: {
     id: number;
     firstName: string;
@@ -200,7 +217,7 @@ export class Map implements AfterViewInit, OnChanges {
           direction: 'top',
           offset: [0, -20],
           opacity: 0.9,
-          sticky: true, 
+          sticky: true,
         }
       );
 

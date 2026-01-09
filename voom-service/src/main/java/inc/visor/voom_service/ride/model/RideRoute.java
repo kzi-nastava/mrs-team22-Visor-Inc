@@ -2,6 +2,7 @@ package inc.visor.voom_service.ride.model;
 
 import java.util.List;
 
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,6 +56,19 @@ public class RideRoute {
     public void setRoutePoints(List<RoutePoint> routePoints) {
         this.routePoints = routePoints;
     }
-    
+
+    public RoutePoint getPickupPoint() {
+        return routePoints.stream()
+                .filter(rp -> rp.getPointType() == RoutePointType.PICKUP)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public RoutePoint getDropoffPoint() {
+        return routePoints.stream()
+                .filter(rp -> rp.getPointType() == RoutePointType.DROPOFF)
+                .findFirst()
+                .orElse(null);
+    }
     
 }

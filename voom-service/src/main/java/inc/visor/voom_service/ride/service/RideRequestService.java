@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.mapper.RideRequestMapper;
@@ -22,17 +24,20 @@ public class RideRequestService {
     private final VehicleTypeRepository vehicleTypeRepository;
     private final RideEstimateService rideEstimationService;
     private final UserRepository userRepository;
+    private final DriverService driverService;
 
     public RideRequestService(
         RideRequestRepository rideRequestRepository,
         VehicleTypeRepository vehicleTypeRepository,
         RideEstimateService rideEstimationService,
-        UserRepository userRepository
+        UserRepository userRepository,
+        DriverService driverService
     ) {
         this.rideRequestRepository = rideRequestRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.rideEstimationService = rideEstimationService;
         this.userRepository = userRepository;
+        this.driverService = driverService;
     }
 
     public RideRequestResponseDto createRideRequest(
@@ -62,7 +67,9 @@ public class RideRequestService {
                 estimate.distanceKm()
             );
 
-        boolean driverFound = true;
+        Driver driver = driverService.findDriverForRideRequest(rideRequest, dto.getFreeDriversSnapshot());
+
+        boolean driverFound = driver != null;
 
         if (driverFound) {
             rideRequest.setStatus(RideRequestStatus.ACCEPTED);
@@ -76,7 +83,7 @@ public class RideRequestService {
             rideRequest,
             estimate.distanceKm(),
             driverFound
-                ? new DriverSummaryDto(1L, "John", "Doe")
+                ? DriverSummaryDto.from(driver)
                 : null
         );
     }

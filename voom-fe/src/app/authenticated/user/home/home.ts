@@ -233,6 +233,10 @@ export class UserHome implements AfterViewInit {
         ? { type: 'LATER', startAt: this.buildScheduledDate() }
         : { type: 'NOW', startAt: new Date().toISOString() };
 
+    const freeDriversSnapshot = this.map.getFreeDriversSnapshot();
+
+    console.log('Free drivers snapshot:', freeDriversSnapshot);
+
     const payload: RideRequestDto = {
       route: {
         points: this.routePoints().map((p) => ({
@@ -250,12 +254,13 @@ export class UserHome implements AfterViewInit {
         baby: !!this.rideForm.value.baby,
       },
       linkedPassengers: this.passengerEmails(),
+      freeDriversSnapshot: freeDriversSnapshot,
     };
 
     this.rideApi.createRideRequest(payload).subscribe({
       next: (res) => {
         if (res.status === 'ACCEPTED') {
-          this.snackBar.open(`Ride accepted. Price: ${res.price}`, 'Close', { duration: 4000 });
+          this.snackBar.open(`Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`, 'Close', { duration: 4000 });
         } else {
           this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
         }
@@ -265,9 +270,8 @@ export class UserHome implements AfterViewInit {
       },
     });
   }
-
   private initDriverSimulation(drivers: DriverSummaryDto[]) {
-    drivers.slice(0, 20).forEach((driver, index) => {
+    drivers.forEach((driver, index) => {
       const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
 
       this.map.addSimulatedDriver({
