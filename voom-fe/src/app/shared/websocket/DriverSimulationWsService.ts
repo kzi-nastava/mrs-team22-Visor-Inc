@@ -5,7 +5,7 @@ import { Client } from '@stomp/stompjs';
 export class DriverSimulationWsService {
   private client!: Client;
 
-  connect(onRoute: (msg: any) => void) {
+  connect(onRoute: (msg: any) => void, onScheduledRide: (msg: any) => void) {
     this.client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       reconnectDelay: 5000,
@@ -15,8 +15,12 @@ export class DriverSimulationWsService {
     this.client.onConnect = () => {
       console.log('[WS] connected');
 
-      this.client.subscribe('/topic/route', message => {
+      this.client.subscribe('/topic/route', (message) => {
         onRoute(JSON.parse(message.body));
+      });
+
+      this.client.subscribe('/topic/scheduled-rides', (message) => {
+        onScheduledRide(JSON.parse(message.body));
       });
     };
 
@@ -24,7 +28,7 @@ export class DriverSimulationWsService {
       console.error('[WS ERROR]', err);
     };
 
-    this.client.onStompError = frame => {
+    this.client.onStompError = (frame) => {
       console.error('[STOMP ERROR]', frame);
     };
 
