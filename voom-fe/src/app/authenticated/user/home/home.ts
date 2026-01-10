@@ -9,7 +9,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DriverSummaryDto, PREDEFINED_ROUTES, RideApi } from './home.api';
+import { DriverSummaryDto, PREDEFINED_ROUTES, RideApi, ScheduledRideDto } from './home.api';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RideRequestDto } from './home.api';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
@@ -61,6 +61,8 @@ export class UserHome implements AfterViewInit {
 
   selectedVehicle: number | null = null;
   selectedTime: ScheduleType = 'NOW';
+  scheduledRide = signal<ScheduledRideDto | null>(null);
+  isRideLocked = signal<boolean>(false);
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -104,6 +106,41 @@ export class UserHome implements AfterViewInit {
     const max = new Date();
     max.setHours(max.getHours() + 5);
     return max.toTimeString().slice(0, 5);
+  }
+
+  private handleScheduledRides(rides: ScheduledRideDto[]) {
+    
+    console.log('Handling scheduled rides:', rides);
+    if (!rides || rides.length === 0) return;
+
+    const ride = rides[0];
+
+    if (this.scheduledRide()?.rideId === ride.rideId) return;
+
+    this.scheduledRide.set(ride);
+    this.isRideLocked.set(true);
+
+    this.routePoints.set(
+      ride.route
+        .sort((a, b) => a.order - b.order)
+        .map((p) => ({
+          id: crypto.randomUUID(),
+          lat: p.lat,
+          lng: p.lng,
+          address: '',
+          type: p.type,
+          order: p.order,
+        }))
+    );
+
+    if (ride.driverId) {
+      const pickup = ride.route.find((p) => p.type === 'PICKUP');
+      if (pickup) {
+        this.sendDriverToPickup(ride.driverId, pickup.lat, pickup.lng);
+      }
+    }
+
+    this.snackBar.open('You have a scheduled ride starting soon', 'Close', { duration: 4000 });
   }
 
   isScheduledTimeValid(): boolean {
@@ -279,7 +316,7 @@ export class UserHome implements AfterViewInit {
             'Close',
             { duration: 4000 }
           );
-          if (res.pickupLat && res.pickupLng) {
+          if (res.pickupLat && res.pickupLng && res.scheduledTime === null) {
             this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
           }
         } else {
@@ -312,10 +349,16 @@ export class UserHome implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.driverSocket.connect((route) => {
-      console.log('WS ROUTE PAYLOAD:', route);
-      this.map.applyDriverRoute(route.driverId, route.route);
-    });
+    this.driverSocket.connect(
+      (route) => {
+        console.log('WS ROUTE PAYLOAD:', route);
+        this.map.applyDriverRoute(route.driverId, route.route);
+      },
+      (scheduledRides) => {
+        console.log('WS SCHEDULED RIDES:', scheduledRides);
+        this.handleScheduledRides(scheduledRides);
+      }
+    );
 
     this.rideApi.getActiveDrivers().subscribe({
       next: (drivers) => this.initDriverSimulation(drivers),
