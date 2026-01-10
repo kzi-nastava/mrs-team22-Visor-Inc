@@ -172,4 +172,5 @@ public class RideRequest {
     public void setLinkedPassengerEmails(List<String> linkedPassengerEmails) {
         this.linkedPassengerEmails = linkedPassengerEmails;
     }
+
 }

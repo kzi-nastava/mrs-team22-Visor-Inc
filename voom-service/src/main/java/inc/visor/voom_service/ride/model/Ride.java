@@ -48,13 +48,14 @@ public class Ride {
 
     @ManyToMany
     @JoinTable(
-        name = "ride_passenger",
-        joinColumns = @JoinColumn(name = "ride_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+            name = "ride_passenger",
+            joinColumns = @JoinColumn(name = "ride_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> passengers;
 
-    public Ride() {}
+    public Ride() {
+    }
 
     public long getId() {
         return id;
