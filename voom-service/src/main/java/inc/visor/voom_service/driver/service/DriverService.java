@@ -1,7 +1,11 @@
 package inc.visor.voom_service.driver.service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,8 +29,13 @@ import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.shared.utils.GeoUtil;
+import inc.visor.voom_service.shared.utils.Helpers;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
@@ -47,10 +56,11 @@ public class DriverService {
     private final UserRoleRepository userRoleRepository;
     private final PersonRepository personRepository;
 
+    private final RideService rideService;
     private final EmailService emailService;
     private final ActivationTokenService activationTokenService;
 
-    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService) {
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -61,6 +71,7 @@ public class DriverService {
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.activationTokenService = activationTokenService;
+        this.rideService = rideService;
     }
 
     public void simulateMove(DriverLocationDto dto) {
@@ -230,64 +241,85 @@ public class DriverService {
         }
 
         RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
+        Map<Long, DriverLocationDTO> locMap = Helpers.snapshotToMap(snapshot);
 
-        boolean needsBaby = rideRequest.isBabyTransport();
-        boolean needsPet = rideRequest.isPetTransport();
-        Long vehicleTypeId = rideRequest.getVehicleType().getId();
-
-        return snapshot.stream()
+        List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
-                .filter(driver -> driver != null)
-                .filter(driver -> {
-                    Vehicle v = vehicleRepository.findByDriverId(driver.getId())
-                            .orElse(null);
+                .filter(Objects::nonNull)
+                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .filter(d -> vehicleMatches(d, rideRequest))
+                .toList();
 
-                    if (needsBaby && !v.isBabySeat()) {
-                        return false;
-                    }
-                    if (needsPet && !v.isPetFriendly()) {
-                        return false;
-                    }
-                    if (v.getVehicleType().getId() != vehicleTypeId) {
-                        return false;
-                    }
+        if (candidates.isEmpty()) {
+            return null;
+        }
 
-                    return true;
-                })
-                .min(Comparator.comparingDouble(driver -> {
-                    RideRequestCreateDTO.DriverLocationDTO loc
-                            = snapshot.stream()
-                                    .filter(s -> s.driverId.equals(driver.getId()))
-                                    .findFirst()
-                                    .orElseThrow();
+        List<Driver> freeDrivers = candidates.stream()
+                .filter(d -> rideService.isDriverFreeForRide(d, rideRequest))
+                .toList();
 
-                    return distanceKm(
-                            loc.lat,
-                            loc.lng,
+        if (!freeDrivers.isEmpty()) {
+            return nearestDriver(freeDrivers, pickup, locMap);
+        }
+
+        List<Driver> finishingSoon = candidates.stream()
+                .filter(d -> finishesInNext10Minutes(d))
+                .toList();
+
+        if (!finishingSoon.isEmpty()) {
+            return nearestDriver(finishingSoon, pickup, locMap);
+        }
+
+        return null;
+    }
+
+    private boolean finishesInNext10Minutes(Driver driver) {
+        return rideService.findActiveRides(driver.getId())
+                .stream()
+                .anyMatch(r -> Duration.between(
+                LocalDateTime.now(),
+                rideService.estimateRideEndTime(r)
+        ).toMinutes() <= 10);
+    }
+
+    private boolean vehicleMatches(Driver driver, RideRequest req) {
+        Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
+                .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
+
+        if (!vehicle.getVehicleType().equals(req.getVehicleType())) {
+            return false;
+        }
+
+        if (req.isPetTransport() && !vehicle.isPetFriendly()) {
+            return false;
+        }
+
+        if (req.isBabyTransport() && !vehicle.isBabySeat()) {
+            return false;
+        }
+
+        if (vehicle.getNumberOfSeats() < req.getLinkedPassengerEmails().size() + 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Driver nearestDriver(
+            List<Driver> drivers,
+            RoutePoint pickup,
+            Map<Long, DriverLocationDTO> locMap
+    ) {
+        return drivers.stream()
+                .min(Comparator.comparingDouble(d -> {
+                    DriverLocationDTO loc = locMap.get(d.getId());
+                    return GeoUtil.distanceKm(
                             pickup.getLatitude(),
-                            pickup.getLongitude()
+                            pickup.getLongitude(),
+                            loc.lat,
+                            loc.lng
                     );
                 }))
                 .orElse(null);
     }
-
-    public double distanceKm(
-            double lat1,
-            double lon1,
-            double lat2,
-            double lon2
-    ) {
-        final int R = 6371;
-
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = R * c;
-
-        return distance;
-    }
-
 }

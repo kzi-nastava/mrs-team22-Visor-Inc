@@ -103,7 +103,9 @@ public class RideRequestService {
         }
         ride.setPassengers(passengers);
 
-        rideRepository.save(ride);
+        if (driverFound) {
+            rideRepository.save(ride);
+        }
 
         return RideRequestResponseDto.from(
                 rideRequest,
