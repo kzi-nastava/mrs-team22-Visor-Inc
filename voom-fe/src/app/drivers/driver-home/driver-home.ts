@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild, AfterViewInit } from '@angular/core';
 import { Header } from '../../core/layout/header-kt1/header-kt1';
 import { Map } from '../../shared/map/map';
 import { Footer } from '../../core/layout/footer/footer';
@@ -9,9 +9,18 @@ import {
   ApexNonAxisChartSeries,
   ApexPlotOptions,
   ApexResponsive,
+  ApexXAxis,
+  ApexLegend,
   NgApexchartsModule,
 } from 'ng-apexcharts';
 import { MatIcon } from '@angular/material/icon';
+import {
+  DriverSummaryDto,
+  PREDEFINED_ROUTES,
+  RideApi,
+} from '../../authenticated/user/home/home.api';
+import { DriverSimulationWsService } from '../../shared/websocket/DriverSimulationWsService';
+import { UserProfileApi } from '../../authenticated/user/user-profile/user-profile.api';
 
 export const ROUTE_DRIVER_HOME = 'driverHome';
 
@@ -22,9 +31,9 @@ export type ChartOptions = {
   plotOptions: ApexPlotOptions;
   labels: any;
   colors: string[];
-  legend: ApexLegend;
   dataLabels: ApexDataLabels;
-  xaxis: ApexXAxis;
+  legend: ApexLegend;
+  xaxis?: ApexXAxis;
 };
 
 @Component({
@@ -33,41 +42,34 @@ export type ChartOptions = {
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
-export class DriverHome {
+export class DriverHome implements AfterViewInit {
+  @ViewChild(Map) map!: Map;
+
   isPassive = signal<boolean>(false);
+  myId = signal<number | null>(null);
+
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
 
-  constructor() {
+  constructor(
+    private rideApi: RideApi,
+    private profileApi: UserProfileApi,
+    private driverSocket: DriverSimulationWsService
+  ) {
     this.chartOptions = {
       series: [3, 2],
       chart: {
         height: 400,
         width: '100%',
         type: 'pie',
-      } as ApexChart,
+      },
       labels: ['Finished', 'Cancelled'],
       colors: ['#4a68d2', '#e74c3c'],
-      dataLabels: {
-        enabled: true,
-      },
+      dataLabels: { enabled: true },
       legend: {
         position: 'bottom',
       },
-      responsive: [
-        {
-          breakpoint: 20,
-          options: {
-            chart: {
-              width: 10,
-              height: 10,
-            },
-            legend: {
-              position: 'center',
-            },
-          },
-        },
-      ],
+      responsive: [],
     };
 
     this.activeTimeOptions = {
@@ -81,42 +83,74 @@ export class DriverHome {
         type: 'bar',
         height: 50,
         sparkline: { enabled: true },
-      } as ApexChart,
+      },
       plotOptions: {
         bar: {
           horizontal: true,
           barHeight: '40%',
-          colors: {
-            backgroundBarColors: ['#E0E0E0'],
-            backgroundBarOpacity: 1,
-          },
         },
       },
       colors: ['#4a68d2'],
       xaxis: {
         categories: ['Progress'],
-        max: 100, // Ensures the bar is relative to 100%
+        max: 100,
       },
     };
   }
 
-  getFormattedDate() {
-    const date = Date.now();
+  ngAfterViewInit() {
+    this.driverSocket.connect(
+      (route) => {
+        this.map.applyDriverRoute(route.driverId, route.route);
+      },
+      () => {}
+    );
 
-    const options: Intl.DateTimeFormatOptions = {
+    this.rideApi.getActiveDrivers().subscribe({
+      next: (drivers) => this.initDriversOnMap(drivers),
+      error: (err) => console.error(err),
+    });
+
+    this.profileApi.getMyVehicle().subscribe({
+      next: (vehicle) => {
+        this.myId.set(vehicle.driverId ?? null);
+        console.log('My driver ID is:', vehicle.driverId);
+      },
+    });
+  }
+
+  private initDriversOnMap(drivers: DriverSummaryDto[]) {
+    drivers.forEach((driver, index) => {
+      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
+
+      this.map.addSimulatedDriver({
+        id: driver.id,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        start: routeDef.start,
+        status: 'FREE',
+      });
+
+      this.driverSocket.requestRoute({
+        driverId: driver.id,
+        start: routeDef.start,
+        end: routeDef.end,
+      });
+    });
+  }
+
+  onToggleChange(event: MatSlideToggleChange) {
+    this.isPassive.set(event.checked);
+  }
+
+  getFormattedDate() {
+    const date = new Date();
+    return `Today - ${date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    };
-
-    const dateString = new Intl.DateTimeFormat('en-US', options).format(date);
-
-    return `Today - ${dateString}`;
-  }
-
-  onToggleChange(event: MatSlideToggleChange) {
-    this.isPassive.set(!this.isPassive);
+    })}`;
   }
 
   protected readonly Date = Date;

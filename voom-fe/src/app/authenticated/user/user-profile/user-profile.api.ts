@@ -30,6 +30,7 @@ export type DriverVehicleResponseDto = {
   babySeat: boolean;
   petFriendly: boolean;
   activeHoursLast24h?: number;
+  driverId?: number;
 };
 
 export type UpdateDriverVehicleRequestDto = {
@@ -52,7 +53,6 @@ export class UserProfileApi {
   }
 
   updateProfile(body: UpdateUserProfileRequestDto): Observable<UserProfileResponseDto> {
-    console.log('Updating profile with data:', body);
     return this.http.put<UserProfileResponseDto>(`${this.baseUrl}/users/me`, body);
   }
 

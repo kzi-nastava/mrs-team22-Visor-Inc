@@ -102,7 +102,8 @@ public class DriverService {
                 vehicle.getLicensePlate(),
                 vehicle.isBabySeat(),
                 vehicle.isPetFriendly(),
-                vehicle.getNumberOfSeats()
+                vehicle.getNumberOfSeats(),
+                driver.getId()
         );
 
         return dto;
@@ -136,7 +137,8 @@ public class DriverService {
                 vehicle.getLicensePlate(),
                 vehicle.isBabySeat(),
                 vehicle.isPetFriendly(),
-                vehicle.getNumberOfSeats()
+                vehicle.getNumberOfSeats(),
+                driver.getId()
         );
 
         return dto;

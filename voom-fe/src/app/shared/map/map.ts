@@ -42,6 +42,7 @@ type Driver = {
 })
 export class Map implements AfterViewInit, OnChanges {
   private drawVersion = 0;
+  private readonly FOCUSED_ZOOM = 17;
 
   private map!: L.Map;
   private drivers: Driver[] = [];
@@ -49,6 +50,8 @@ export class Map implements AfterViewInit, OnChanges {
   private waypoints: L.LatLng[] = [];
   private markers: L.Marker[] = [];
   private routeLine: L.Polyline | null = null;
+
+  @Input() focusedDriverId: number | null = null;
 
   @Input() points: {
     lat: number;
@@ -119,6 +122,14 @@ export class Map implements AfterViewInit, OnChanges {
     });
   }
 
+  private focusDriver(driver: Driver) {
+    const pos = driver.marker.getLatLng();
+
+    this.map.setView(pos, this.FOCUSED_ZOOM, {
+      animate: true,
+    });
+  }
+
   applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
     const driver = this.drivers.find((d) => d.id === driverId);
     if (!driver) return;
@@ -126,6 +137,10 @@ export class Map implements AfterViewInit, OnChanges {
     driver.route = coords.map((c) => L.latLng(c.lat, c.lng));
     driver.routeIndex = 0;
     driver.direction = 1;
+
+    if (this.focusedDriverId === driver.id) {
+      this.focusDriver(driver);
+    }
 
     this.startSimulation();
   }
@@ -176,6 +191,10 @@ export class Map implements AfterViewInit, OnChanges {
           const lat = a.lat + (b.lat - a.lat) * p;
           const lng = a.lng + (b.lng - a.lng) * p;
           driver.marker.setLatLng([lat, lng]);
+
+          if (this.focusedDriverId === driver.id) {
+            this.map.panTo([lat, lng], { animate: true });
+          }
         }
       });
 
