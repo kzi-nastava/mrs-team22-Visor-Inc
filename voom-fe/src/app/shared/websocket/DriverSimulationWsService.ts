@@ -5,7 +5,11 @@ import { Client } from '@stomp/stompjs';
 export class DriverSimulationWsService {
   private client!: Client;
 
-  connect(onRoute: (msg: any) => void, onScheduledRide: (msg: any) => void) {
+  connect(
+    onRoute: (msg: any) => void,
+    onScheduledRide: (msg: any) => void,
+    onDriverAssigned?: (msg: any) => void
+  ) {
     this.client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       reconnectDelay: 5000,
@@ -21,6 +25,12 @@ export class DriverSimulationWsService {
 
       this.client.subscribe('/topic/scheduled-rides', (message) => {
         onScheduledRide(JSON.parse(message.body));
+      });
+
+      this.client.subscribe('/topic/driver-assigned', (message) => {
+        const payload = JSON.parse(message.body);
+        console.log('[WS] Driver assigned:', payload);
+        onDriverAssigned?.(payload);
       });
     };
 

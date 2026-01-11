@@ -79,6 +79,7 @@ export class Map implements AfterViewInit, OnChanges {
   });
 
   ngAfterViewInit(): void {
+    if (this.map) return; 
     this.map = L.map('map').setView([45.2396, 19.8227], 14);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

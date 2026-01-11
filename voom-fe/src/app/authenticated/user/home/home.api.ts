@@ -64,7 +64,19 @@ export type ScheduledRideDto = {
     type: 'PICKUP' | 'STOP' | 'DROPOFF';
     address: string;
   }[];
-}
+};
+
+export type DriverAssignedDto = {
+  driverId: number;
+  rideId: number;
+  route: {
+    lat: number;
+    lng: number;
+    order: number;
+    type: 'PICKUP' | 'STOP' | 'DROPOFF';
+    address: string;
+  }[];
+};
 
 export const PREDEFINED_ROUTES = [
   // 1. Liman I → Centar

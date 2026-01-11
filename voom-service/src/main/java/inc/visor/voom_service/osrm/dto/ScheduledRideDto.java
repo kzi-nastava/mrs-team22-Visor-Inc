@@ -8,6 +8,7 @@ import inc.visor.voom_service.shared.RoutePointDto;
 public class ScheduledRideDto {
 
     public Long rideId;
+    
     public Long rideRequestId;
 
     public Long driverId;

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
 import inc.visor.voom_service.osrm.dto.ScheduledRideDto;
 
 @Service
@@ -20,6 +21,13 @@ public class RideWsService {
         messaging.convertAndSend(
                 "/topic/scheduled-rides",
                 rides
+        );
+    }
+
+    public void sendDriverAssigned(DriverAssignedDto dto) {
+        messaging.convertAndSend(
+                "/topic/driver-assigned",
+                dto
         );
     }
 }

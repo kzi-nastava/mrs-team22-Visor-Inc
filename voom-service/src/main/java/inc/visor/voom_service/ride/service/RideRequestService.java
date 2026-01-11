@@ -10,6 +10,8 @@ import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
+import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.mapper.RideRequestMapper;
@@ -33,6 +35,7 @@ public class RideRequestService {
     private final RideEstimateService rideEstimationService;
     private final UserRepository userRepository;
     private final DriverService driverService;
+    private final RideWsService rideWsService;
 
     public RideRequestService(
             RideRequestRepository rideRequestRepository,
@@ -40,7 +43,8 @@ public class RideRequestService {
             RideEstimateService rideEstimationService,
             UserRepository userRepository,
             DriverService driverService,
-            RideRepository rideRepository
+            RideRepository rideRepository,
+            RideWsService rideWsService
     ) {
         this.rideRequestRepository = rideRequestRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -48,6 +52,7 @@ public class RideRequestService {
         this.userRepository = userRepository;
         this.driverService = driverService;
         this.rideRepository = rideRepository;
+        this.rideWsService = rideWsService;
     }
 
     public RideRequestResponseDto createRideRequest(
@@ -103,8 +108,11 @@ public class RideRequestService {
         }
         ride.setPassengers(passengers);
 
+        
         if (driverFound) {
+        DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             rideRepository.save(ride);
+            rideWsService.sendDriverAssigned(driverAssignedDto);
         }
 
         return RideRequestResponseDto.from(

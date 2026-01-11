@@ -20,7 +20,7 @@ type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 
 type ScheduleType = 'NOW' | 'LATER';
 
-interface RoutePoint {
+export interface RoutePoint {
   id: string;
   lat: number;
   lng: number;
@@ -114,7 +114,6 @@ export class UserHome implements AfterViewInit {
   }
 
   private handleScheduledRides(rides: ScheduledRideDto[]) {
-    console.log('Handling scheduled rides:', rides);
     if (!rides || rides.length === 0) return;
 
     const now = Date.now() - 60 * 60 * 1000; // one hour back to account for server-client time diff

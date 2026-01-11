@@ -15,12 +15,16 @@ import {
 } from 'ng-apexcharts';
 import { MatIcon } from '@angular/material/icon';
 import {
+  DriverAssignedDto,
   DriverSummaryDto,
   PREDEFINED_ROUTES,
   RideApi,
+  RoutePointType,
 } from '../../authenticated/user/home/home.api';
 import { DriverSimulationWsService } from '../../shared/websocket/DriverSimulationWsService';
 import { UserProfileApi } from '../../authenticated/user/user-profile/user-profile.api';
+import { RoutePoint } from '../../authenticated/user/home/home';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const ROUTE_DRIVER_HOME = 'driverHome';
 
@@ -38,7 +42,7 @@ export type ChartOptions = {
 
 @Component({
   selector: 'app-driver-home',
-  imports: [Header, Map, Footer, MatSlideToggle, NgApexchartsModule, MatIcon],
+  imports: [Header, Map, Footer, MatSlideToggle, NgApexchartsModule, MatIcon, MatSnackBarModule],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
@@ -47,6 +51,8 @@ export class DriverHome implements AfterViewInit {
 
   isPassive = signal<boolean>(false);
   myId = signal<number | null>(null);
+  routePoints = signal<RoutePoint[]>([]);
+  toastMessage = signal<string | null>(null);
 
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -54,7 +60,8 @@ export class DriverHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private profileApi: UserProfileApi,
-    private driverSocket: DriverSimulationWsService
+    private driverSocket: DriverSimulationWsService,
+    private snackBar: MatSnackBar
   ) {
     this.chartOptions = {
       series: [3, 2],
@@ -99,24 +106,69 @@ export class DriverHome implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.profileApi.getMyVehicle().subscribe({
+      next: (vehicle) => {
+        this.myId.set(vehicle.driverId || null);
+      },
+    });
     this.driverSocket.connect(
       (route) => {
         this.map.applyDriverRoute(route.driverId, route.route);
       },
-      () => {}
+      () => {},
+      (assigned) => this.handleDriverAssigned(assigned)
     );
 
     this.rideApi.getActiveDrivers().subscribe({
       next: (drivers) => this.initDriversOnMap(drivers),
       error: (err) => console.error(err),
     });
+  }
 
-    this.profileApi.getMyVehicle().subscribe({
-      next: (vehicle) => {
-        this.myId.set(vehicle.driverId ?? null);
-        console.log('My driver ID is:', vehicle.driverId);
-      },
+  private handleDriverAssigned(payload: DriverAssignedDto) {
+    const myDriverId = this.myId();
+
+    if (!myDriverId) return;
+    const pickup = payload.route.find((p: any) => p.type === 'PICKUP');
+    if (!pickup) return;
+
+    const driver = this.map.getDriver(payload.driverId);
+    if (driver) {
+      driver.status = 'GOING_TO_PICKUP';
+    }
+
+    this.driverSocket.requestRoute({
+      driverId: myDriverId,
+      start: driver?.marker.getLatLng(),
+      end: { lat: pickup.lat, lng: pickup.lng },
     });
+
+    if (payload.driverId !== myDriverId) return;
+
+    this.snackBar.open(
+      `You are assigned to ride, pickup adress is ${
+        payload.route.find((p) => p.type === 'PICKUP')?.address || ''
+      }`,
+      'OK',
+      {
+        duration: 5000,
+        verticalPosition: 'bottom',
+        horizontalPosition: 'center',
+      }
+    );
+
+    this.routePoints.set(
+      payload.route
+        .sort((a, b) => a.order - b.order)
+        .map((p) => ({
+          id: crypto.randomUUID(),
+          lat: p.lat,
+          lng: p.lng,
+          address: '',
+          type: p.type,
+          order: p.order,
+        }))
+    );
   }
 
   private initDriversOnMap(drivers: DriverSummaryDto[]) {
