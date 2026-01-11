@@ -63,6 +63,7 @@ export class UserHome implements AfterViewInit {
   selectedTime: ScheduleType = 'NOW';
   scheduledRide = signal<ScheduledRideDto | null>(null);
   isRideLocked = signal<boolean>(false);
+  scheduledDriverSent = signal<boolean>(false);
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -108,12 +109,29 @@ export class UserHome implements AfterViewInit {
     return max.toTimeString().slice(0, 5);
   }
 
+  get isLocked(): boolean {
+    return this.isRideLocked();
+  }
+
   private handleScheduledRides(rides: ScheduledRideDto[]) {
-    
     console.log('Handling scheduled rides:', rides);
     if (!rides || rides.length === 0) return;
 
-    const ride = rides[0];
+    const now = Date.now() - 60 * 60 * 1000; // one hour back to account for server-client time diff
+    const TEN_MIN = 10 * 60 * 1000;
+
+    const ride = rides
+      .map((r) => ({
+        ...r,
+        startMs: new Date(r.scheduledStartTime).getTime(),
+      }))
+      .filter((r) => {
+        const diff = r.startMs - now;
+        return diff >= 0 && diff <= TEN_MIN;
+      })
+      .sort((a, b) => a.startMs - b.startMs)[0];
+
+    if (!ride) return;
 
     if (this.scheduledRide()?.rideId === ride.rideId) return;
 
@@ -133,11 +151,23 @@ export class UserHome implements AfterViewInit {
         }))
     );
 
-    if (ride.driverId) {
+    this.rideForm.patchValue({
+      pickup: ride.route.find((p) => p.type === 'PICKUP')?.address || '',
+      dropoff: ride.route.find((p) => p.type === 'DROPOFF')?.address || '',
+    });
+
+    if (ride.driverId && !this.scheduledDriverSent()) {
       const pickup = ride.route.find((p) => p.type === 'PICKUP');
       if (pickup) {
         this.sendDriverToPickup(ride.driverId, pickup.lat, pickup.lng);
+        this.scheduledDriverSent.set(true);
       }
+    }
+
+    if (this.isRideLocked()) {
+      this.rideForm.disable({ emitEvent: false });
+    } else {
+      this.rideForm.enable({ emitEvent: false });
     }
 
     this.snackBar.open('You have a scheduled ride starting soon', 'Close', { duration: 4000 });
@@ -158,6 +188,8 @@ export class UserHome implements AfterViewInit {
   }
 
   onMapClick(event: { lat: number; lng: number; address: string }) {
+    if (this.isLocked) return;
+
     const cleanAddress = event.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim();
     const points = this.routePoints();
 

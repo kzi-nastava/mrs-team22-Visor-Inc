@@ -62,10 +62,11 @@ public class ScheduledRideJob {
                 dto.route = req.getRideRoute().getRoutePoints().stream()
                         .map(p -> {
                             RoutePointDto rp = new RoutePointDto();
-                            rp.setLatitude(p.getLatitude());
-                            rp.setLongitude(p.getLongitude());
+                            rp.setLat(p.getLatitude());
+                            rp.setLng(p.getLongitude());
                             rp.setOrderIndex(p.getOrderIndex());
                             rp.setType(p.getPointType());
+                            rp.setAddress(p.getAddress());
                             return rp;
                         })
                         .toList();

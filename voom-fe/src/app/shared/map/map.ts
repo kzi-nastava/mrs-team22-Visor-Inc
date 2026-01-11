@@ -57,6 +57,8 @@ export class Map implements AfterViewInit, OnChanges {
     order: number;
   }[] = [];
 
+  @Input() locked = false;
+
   @Output() mapClick = new EventEmitter<{
     lat: number;
     lng: number;
@@ -92,6 +94,7 @@ export class Map implements AfterViewInit, OnChanges {
         btn.style.border = 'none';
 
         btn.onclick = (e) => {
+          if (this.locked) return;
           e.preventDefault();
           e.stopPropagation();
           this.clearUserRoute();

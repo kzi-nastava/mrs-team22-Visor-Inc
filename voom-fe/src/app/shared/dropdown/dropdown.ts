@@ -11,5 +11,6 @@ export class Dropdown {
   @Input() label = '';
   @Input() options: { label: string; value: string | number }[] = [];
   @Input() selected: string | number | null = null;
+  @Input() disabled: boolean = false;
   @Output() selectedChange = new EventEmitter<string | number>();
 }

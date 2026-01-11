@@ -62,6 +62,7 @@ export type ScheduledRideDto = {
     lng: number;
     order: number;
     type: 'PICKUP' | 'STOP' | 'DROPOFF';
+    address: string;
   }[];
 }
 

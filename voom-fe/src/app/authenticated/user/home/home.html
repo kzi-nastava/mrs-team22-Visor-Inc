@@ -5,6 +5,7 @@
     [points]="routePoints()"
     (mapClick)="onMapClick($event)"
     (cleared)="onMapCleared()"
+    [locked]="isLocked"
   ></app-map>
 </div>
 
@@ -26,6 +27,7 @@
         label="Vehicle Type"
         [options]="vehicleOptions"
         [(selected)]="selectedVehicle"
+        [disabled]="isLocked"
       ></app-dropdown>
 
       <app-dropdown
@@ -33,6 +35,7 @@
         label="Time"
         [options]="timeOptions"
         [(selected)]="selectedTime"
+        [disabled]="isLocked"
       ></app-dropdown>
     </div>
 
@@ -130,15 +133,15 @@
     </div>
 
     <div class="w-full mt-8 flex flex-col sm:flex-row gap-6">
-      <mat-checkbox formControlName="pets">Traveling with pets</mat-checkbox>
-      <mat-checkbox formControlName="baby">Need a baby seat</mat-checkbox>
+      <mat-checkbox formControlName="pets" [disabled]="isLocked">Traveling with pets</mat-checkbox>
+      <mat-checkbox formControlName="baby" [disabled]="isLocked">Need a baby seat</mat-checkbox>
     </div>
 
     <div class="flex justify-center mt-10">
       <button
         matButton="filled"
         class="px-10 w-full sm:w-auto"
-        [disabled]="!rideForm.valid || (isLaterSelected && !isScheduledTimeValid())"
+        [disabled]="!rideForm.valid || (isLaterSelected && !isScheduledTimeValid()) || isLocked"
         (click)="confirmRide()"
       >
         Confirm Ride

@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -32,7 +33,7 @@ public class Ride {
     @JoinColumn(name = "ride_request_id", nullable = false)
     private RideRequest rideRequest;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "driver_id", nullable = true)
     private Driver driver;
 

@@ -4,6 +4,7 @@
   <mat-select
     [value]="selected"
     (valueChange)="selectedChange.emit($event)"
+    [disabled]="disabled"
   >
     @for (option of options; track option.value) {
       <mat-option [value]="option.value">
