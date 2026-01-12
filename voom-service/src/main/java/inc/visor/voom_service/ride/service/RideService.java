@@ -1,34 +1,121 @@
 package inc.visor.voom_service.ride.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.ride.dto.CreateRideRequestDto;
+import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
-import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.route.service.RideRouteService;
 
 @Service
 public class RideService {
 
-        public RideRequestResponseDto createRideRequest(User user, CreateRideRequestDto request) {
+    private final RideRepository rideRepository;
+    private final RideRouteService routeService;
+
+    public RideService(RideRepository rideRepository, RideRouteService routeService) {
+        this.rideRepository = rideRepository;
+        this.routeService = routeService;
+    }
+
+    public void updateRidePosition(RideLocationDto dto) {
+        // get and set position
+        return;
+    }
+
+    public void finishRide(Ride ride) {
+        // set status
+        return;
+    }
+
+    public List<Ride> getDriverRides(Long driverId) {
+        return null;
+    }
+
+    public boolean existsOverlappingRide(
+            Long driverId,
+            LocalDateTime start,
+            LocalDateTime end
+    ) {
+        List<Ride> rides = rideRepository.findByDriverId(
+                driverId
+        );
+
+        for (Ride ride : rides) {
+            LocalDateTime rideStart = ride.getRideRequest().getScheduledTime();
+            if (rideStart == null) {
+                rideStart = ride.getStartedAt();
+            }
+            if (rideStart == null) {
+                continue;
+            }
+
+            LocalDateTime rideEnd = ride.getFinishedAt();
+            if (rideEnd == null) {
+                rideEnd = rideStart.plusMinutes(
+                        routeService.estimateDurationInMinutes(
+                                ride.getRideRequest().getRideRoute().getTotalDistanceKm()
+                        )
+                );
+            }
+
+            if (rideStart.isBefore(end) && rideEnd.isAfter(start)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public List<Ride> findActiveRides(Long driverId) {
+        List<Ride> rides = rideRepository.findByDriverId(driverId);
+
+        return rides.stream()
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .toList();
+    }
+
+    public LocalDateTime estimateRideEndTime(Ride ride) {
+        LocalDateTime start
+                = ride.getStartedAt() != null
+                ? ride.getStartedAt()
+                : ride.getRideRequest().getScheduledTime();
+
+        if (start == null) {
             return null;
         }
 
-        public void updateRidePosition(RideLocationDto dto) {
-            // get and set position
-            return;
-        }
+        long durationMinutes
+                = routeService.estimateDurationInMinutes(
+                        ride.getRideRequest().getRideRoute().getTotalDistanceKm()
+                );
 
-        public void finishRide(Ride ride) {
-            // set status
-            return;
-        }
+        return start.plusMinutes(durationMinutes);
+    }
 
-        public List<Ride> getDriverRides(Long driverId) {
-            return null;
-        }
+    public boolean isDriverFreeForRide(Driver driver, RideRequest req) {
+
+        LocalDateTime start
+                = req.getScheduleType() == ScheduleType.LATER
+                ? req.getScheduledTime()
+                : LocalDateTime.now();
+
+        LocalDateTime end = start.plusMinutes(
+                routeService.estimateDurationInMinutes(req.getRideRoute().getTotalDistanceKm())
+        );
+
+        return !this.existsOverlappingRide(
+                driver.getId(),
+                start,
+                end
+        );
+    }
 
 }

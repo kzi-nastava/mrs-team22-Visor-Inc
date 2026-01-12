@@ -10,10 +10,10 @@ public class RoutePointDto {
     private Integer orderIndex;
 
     @NotNull(message="Latitude is required")
-    private Double latitude;
+    private Double lat;
 
     @NotNull(message="Longitude is required")
-    private Double longitude;
+    private Double lng;
 
     @NotBlank(message="Address is required")
     private String address;
@@ -29,20 +29,20 @@ public class RoutePointDto {
         this.orderIndex = orderIndex;
     }
 
-    public Double getLatitude() {
-        return latitude;
+    public Double getLat() {
+        return lat;
     }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
+    public void setLat(Double lat) {
+        this.lat = lat;
     }
 
-    public Double getLongitude() {
-        return longitude;
+    public Double getLng() {
+        return lng;
     }
 
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 
     public String getAddress() {

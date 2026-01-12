@@ -2,6 +2,7 @@ package inc.visor.voom_service.ride.model;
 
 import java.util.List;
 
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,13 +26,7 @@ public class RideRoute {
     @Column(name = "total_distance_km", nullable = false)
     private double totalDistanceKm;
 
-    @Column(name = "estimated_duration_min", nullable = false)
-    private int estimatedDurationMin;
-
-    @Column(name = "calculated_price", nullable = false)
-    private double calculatedPrice;
-
-    @OneToMany(cascade= CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ride_route_id", nullable = false)
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
@@ -54,22 +49,6 @@ public class RideRoute {
         this.totalDistanceKm = totalDistanceKm;
     }
 
-    public int getEstimatedDurationMin() {
-        return estimatedDurationMin;
-    }
-
-    public void setEstimatedDurationMin(int estimatedDurationMin) {
-        this.estimatedDurationMin = estimatedDurationMin;
-    }
-
-    public double getCalculatedPrice() {
-        return calculatedPrice;
-    }
-
-    public void setCalculatedPrice(double calculatedPrice) {
-        this.calculatedPrice = calculatedPrice;
-    }
-
     public List<RoutePoint> getRoutePoints() {
         return routePoints;
     }
@@ -77,6 +56,19 @@ public class RideRoute {
     public void setRoutePoints(List<RoutePoint> routePoints) {
         this.routePoints = routePoints;
     }
-    
+
+    public RoutePoint getPickupPoint() {
+        return routePoints.stream()
+                .filter(rp -> rp.getPointType() == RoutePointType.PICKUP)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public RoutePoint getDropoffPoint() {
+        return routePoints.stream()
+                .filter(rp -> rp.getPointType() == RoutePointType.DROPOFF)
+                .findFirst()
+                .orElse(null);
+    }
     
 }

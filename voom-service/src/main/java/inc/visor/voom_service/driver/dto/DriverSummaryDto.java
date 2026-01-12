@@ -9,6 +9,7 @@ public class DriverSummaryDto {
     private String lastName;
     private String pfpUrl;
     private DriverActivityStatus status;
+    private String email;
 
     public DriverSummaryDto() {
     }
@@ -17,6 +18,13 @@ public class DriverSummaryDto {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public DriverSummaryDto(Long id, String firstName, String lastName, String email) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
     }
 
     public DriverSummaryDto(Long id, String firstName, String lastName, String pfpUrl, DriverActivityStatus status) {
@@ -65,5 +73,22 @@ public class DriverSummaryDto {
 
     public void setStatus(DriverActivityStatus status) {
         this.status = status;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public static DriverSummaryDto from(inc.visor.voom_service.driver.model.Driver driver) {
+        return new DriverSummaryDto(
+                driver.getId(),
+                driver.getPerson().getFirstName(),
+                driver.getPerson().getLastName(),
+                driver.getUser().getEmail()
+        );
     }
 }
