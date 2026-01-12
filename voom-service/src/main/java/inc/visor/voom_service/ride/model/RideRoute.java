@@ -36,6 +36,8 @@ public class RideRoute {
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
 
+    public RideRoute() {}
+
     public long getId() {
         return id;
     }

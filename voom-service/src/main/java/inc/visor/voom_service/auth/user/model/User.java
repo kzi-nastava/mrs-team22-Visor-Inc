@@ -1,12 +1,22 @@
 package inc.visor.voom_service.auth.user.model;
 
-import inc.visor.voom_service.person.model.Person;
-import jakarta.persistence.*;
-
 import java.util.Objects;
 
+import inc.visor.voom_service.person.model.Person;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -29,12 +39,14 @@ public class User {
     private UserType userType;
 
     @Enumerated(EnumType.ORDINAL)
-    @JoinColumn(name = "user_status", nullable = false)
+    @Column(name = "user_status", nullable = false)
     private UserStatus userStatus;
 
     @ManyToOne
     @JoinColumn(name = "user_role_id", nullable = false)
     private UserRole userRole;
+
+    public User() {}
 
     public long getId() {
         return id;
@@ -90,6 +102,19 @@ public class User {
 
     public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
+    }
+
+    public User(String email, String password, UserType userType, UserStatus userStatus, UserRole userRole, Person person) {
+        this.email = email;
+        this.password = password;
+        this.userType = userType;
+        this.userStatus = userStatus;
+        this.userRole = userRole;
+        this.person = person;
+    }
+
+    public User(String email) {
+        this.email = email;
     }
 
     @Override

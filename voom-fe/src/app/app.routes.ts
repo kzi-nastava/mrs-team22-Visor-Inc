@@ -7,6 +7,8 @@ import {DriverRideHistory, ROUTE_DRIVER_RIDE_HISTORY,} from './drivers/ride-hist
 import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/forgot-password/forgot-password';
 import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
 import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
+import { AdminRegisterDriver, ROUTE_ADMIN_REGISTER_DRIVER } from './authenticated/admin/register-driver/register-driver';
+import { ActivateProfile, ROUTE_ACTIVATE_PROFILE } from './unauthenticated/activate/activate-profile/activate-profile';
 
 export const routes: Routes = [
   {
@@ -40,6 +42,14 @@ export const routes: Routes = [
   {
     path: ROUTE_DRIVER_RIDE_HISTORY,
     component: DriverRideHistory,
+  },
+  {
+    path: ROUTE_ADMIN_REGISTER_DRIVER,
+    component: AdminRegisterDriver,
+  },
+  {
+    path: ROUTE_ACTIVATE_PROFILE,
+    component: ActivateProfile,
   },
   {
     path: '**',

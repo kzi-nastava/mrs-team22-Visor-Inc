@@ -1,10 +1,17 @@
 package inc.visor.voom_service.driver.model;
 
+import java.util.Objects;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.person.model.Person;
-import jakarta.persistence.*;
-
-import java.util.Objects;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "drivers")
@@ -23,8 +30,6 @@ public class Driver {
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 
-    @Column(name = "driver_license", nullable = false, unique = true)
-    private int driverLicense;
 
     public long getId() {
         return id;
@@ -50,13 +55,6 @@ public class Driver {
         this.person = person;
     }
 
-    public int getDriverLicense() {
-        return driverLicense;
-    }
-
-    public void setDriverLicense(int driverLicense) {
-        this.driverLicense = driverLicense;
-    }
 
     @Override
     public String toString() {
@@ -64,7 +62,6 @@ public class Driver {
                 "id=" + id +
                 ", user=" + user +
                 ", person=" + person +
-                ", driverLicense=" + driverLicense +
                 '}';
     }
 
@@ -72,11 +69,11 @@ public class Driver {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Driver driver = (Driver) o;
-        return id == driver.id && driverLicense == driver.driverLicense && Objects.equals(user, driver.user) && Objects.equals(person, driver.person);
+        return id == driver.id && Objects.equals(user, driver.user) && Objects.equals(person, driver.person);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, person, driverLicense);
+        return Objects.hash(id, user, person);
     }
 }
