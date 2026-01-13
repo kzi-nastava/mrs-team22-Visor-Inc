@@ -1,5 +1,7 @@
-import {Observable} from 'rxjs';
-
+export interface SignInRequest {
+  email: string;
+  password: string;
+}
 
 export interface SignInResponse {
   user: User;

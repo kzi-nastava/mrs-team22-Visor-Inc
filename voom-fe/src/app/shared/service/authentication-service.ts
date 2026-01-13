@@ -22,7 +22,6 @@ export class AuthenticationService {
     } else {
       this.logout();
     }
-
   }
 
   public setAuthentication(response: SignInResponse) {
