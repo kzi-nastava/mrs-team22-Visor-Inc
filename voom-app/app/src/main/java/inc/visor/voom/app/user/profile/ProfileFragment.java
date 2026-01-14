@@ -1,19 +1,16 @@
 package inc.visor.voom.app.user.profile;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
 
 public class ProfileFragment extends Fragment {
@@ -39,47 +36,46 @@ public class ProfileFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(ProfileViewModel.class);
-
-        binding.btnChangePassword.setOnClickListener(v -> {
-            new ChangePasswordDialogFragment().show(getParentFragmentManager(), "ChangePasswordDialog");
-        });
-
-        binding.btnChangeDriverProfile.setOnClickListener(v -> {
-            viewModel.setChangeFragment(true);
-        });
+        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         observeViewModel();
         setupListeners();
+
+        viewModel.loadProfile();
+
     }
 
     private void observeViewModel() {
         viewModel.getFirstName().observe(getViewLifecycleOwner(),
-                value -> binding.etFirstName.setText(value));
+                binding.etFirstName::setText);
 
         viewModel.getLastName().observe(getViewLifecycleOwner(),
-                value -> binding.etLastName.setText(value));
+                binding.etLastName::setText);
 
         viewModel.getEmail().observe(getViewLifecycleOwner(),
-                value -> binding.etEmail.setText(value));
+                binding.etEmail::setText);
 
-        viewModel.getAdress().observe(getViewLifecycleOwner(),
-                value -> binding.etAddress.setText(value));
+        viewModel.getAddress().observe(getViewLifecycleOwner(),
+                binding.etAddress::setText);
 
-        viewModel.getPhoneNumeber().observe(getViewLifecycleOwner(),
-                value -> binding.etPhoneNumber.setText(value));
-
+        viewModel.getPhoneNumber().observe(getViewLifecycleOwner(),
+                binding.etPhoneNumber::setText);
     }
 
     private void setupListeners() {
         binding.btnSave.setOnClickListener(v ->
                 viewModel.onSaveClicked(
-                        String.valueOf(binding.etFirstName.getText()),
-                        String.valueOf(binding.etLastName.getText()),
-                        String.valueOf(binding.etEmail.getText()),
-                        String.valueOf(binding.etAddress.getText()),
-                        String.valueOf(binding.etPhoneNumber.getText())
+                        binding.etFirstName.getText().toString(),
+                        binding.etLastName.getText().toString(),
+                        binding.etEmail.getText().toString(),
+                        binding.etAddress.getText().toString(),
+                        binding.etPhoneNumber.getText().toString()
                 )
+        );
+
+        binding.btnChangePassword.setOnClickListener(v ->
+                new ChangePasswordDialogFragment()
+                        .show(getParentFragmentManager(), "ChangePasswordDialog")
         );
     }
 
@@ -88,5 +84,4 @@ public class ProfileFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
-
 }

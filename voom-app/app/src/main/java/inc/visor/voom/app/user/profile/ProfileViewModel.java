@@ -1,26 +1,38 @@
 package inc.visor.voom.app.user.profile;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import inc.visor.voom.app.user.profile.dto.UserProfileDto;
+
 public class ProfileViewModel extends ViewModel {
+
+    private final ProfileRepository repository = new ProfileRepository();
+
     private final MutableLiveData<String> firstName = new MutableLiveData<>();
     private final MutableLiveData<String> lastName = new MutableLiveData<>();
     private final MutableLiveData<String> email = new MutableLiveData<>();
-
-    private final MutableLiveData<String> adress = new MutableLiveData<>();
-
+    private final MutableLiveData<String> address = new MutableLiveData<>();
     private final MutableLiveData<String> phoneNumber = new MutableLiveData<>();
 
-    private final MutableLiveData<Boolean> changeFragment = new MutableLiveData<>(); //TODO remove
+    public void loadProfile() {
+        repository.getProfile(new ProfileRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(UserProfileDto dto) {
+                firstName.postValue(dto.getFirstName());
+                lastName.postValue(dto.getLastName());
+                email.postValue(dto.getEmail());
+                address.postValue(dto.getAddress());
+                phoneNumber.postValue(dto.getPhoneNumber());
+            }
 
-    public ProfileViewModel() {
-        firstName.setValue("Nikola");
-        lastName.setValue("Bjelica");
-        email.setValue("nikolabjelica4@gmail.com");
-        adress.setValue("Tose Jovanovica 57a");
-        phoneNumber.setValue("0600119031");
+            @Override
+            public void onError(String error) {
+            }
+        });
     }
 
     public LiveData<String> getFirstName() {
@@ -35,35 +47,19 @@ public class ProfileViewModel extends ViewModel {
         return email;
     }
 
-    public LiveData<String> getAdress() {
-        return adress;
+    public LiveData<String> getAddress() {
+        return address;
     }
 
-    public LiveData<String> getPhoneNumeber() {
+    public LiveData<String> getPhoneNumber() {
         return phoneNumber;
     }
-
-    //TODO remove
-
-    public LiveData<Boolean> getChangeFragment() {
-        return changeFragment;
-    }
-
-    //TODO remove
-
-    public void setChangeFragment(boolean value) {
-        changeFragment.setValue(value);
-    }
-
-
 
     public void onSaveClicked(String fn, String ln, String em, String ad, String pn) {
         firstName.setValue(fn);
         lastName.setValue(ln);
         email.setValue(em);
-        adress.setValue(ad);
+        address.setValue(ad);
         phoneNumber.setValue(pn);
-
     }
-
 }
