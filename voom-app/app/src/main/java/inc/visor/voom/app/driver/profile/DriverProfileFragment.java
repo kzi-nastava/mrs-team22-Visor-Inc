@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -50,6 +52,7 @@ public class DriverProfileFragment extends Fragment {
         setupVehicleTypeDropdown();
 
         viewModel.loadProfile();
+        viewModel.loadVehicle();
     }
 
     private void observeViewModel() {
@@ -73,7 +76,7 @@ public class DriverProfileFragment extends Fragment {
                 binding.etVehicleModel::setText);
 
         viewModel.getVehicleType().observe(getViewLifecycleOwner(),
-                binding.etVehicleType::setText);
+                value -> binding.etVehicleType.setText(value, false));
 
         viewModel.getLicensePlate().observe(getViewLifecycleOwner(),
                 binding.etLicensePlate::setText);
@@ -102,6 +105,31 @@ public class DriverProfileFragment extends Fragment {
                         .show();
             }
         });
+
+        binding.btnChangeVehicleInfo.setOnClickListener(v ->
+                viewModel.saveVehicle(
+                        binding.etVehicleModel.getText().toString(),
+                        binding.etVehicleType.getText().toString(),
+                        binding.etLicensePlate.getText().toString(),
+                        binding.etNumberOfSeats.getText() != null &&
+                                !binding.etNumberOfSeats.getText().toString().isEmpty()
+                                ? Integer.parseInt(binding.etNumberOfSeats.getText().toString())
+                                : null,
+                        binding.cbBabyTransport.isChecked(),
+                        binding.cbPetTransport.isChecked()
+                )
+        );
+
+        viewModel.getVehicleUpdated().observe(getViewLifecycleOwner(), updated -> {
+            if (Boolean.TRUE.equals(updated)) {
+                Snackbar.make(
+                        requireView(),
+                        "Vehicle information updated",
+                        Snackbar.LENGTH_LONG
+                ).show();
+            }
+        });
+
     }
 
     private void setupListeners() {
@@ -136,7 +164,13 @@ public class DriverProfileFragment extends Fragment {
         );
 
         binding.etVehicleType.setAdapter(adapter);
+        binding.etVehicleType.setThreshold(0);
+
+        binding.etVehicleType.setOnClickListener(v ->
+                binding.etVehicleType.showDropDown()
+        );
     }
+
 
     @Override
     public void onDestroyView() {

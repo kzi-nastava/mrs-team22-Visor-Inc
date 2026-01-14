@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import inc.visor.voom.app.driver.profile.dto.VehicleSummaryDto;
 import inc.visor.voom.app.user.profile.ProfileRepository;
 import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;
@@ -11,6 +12,8 @@ import inc.visor.voom.app.user.profile.dto.UserProfileDto;
 public class DriverProfileViewModel extends ViewModel {
 
     private final ProfileRepository repository = new ProfileRepository();
+
+    private final VehicleRepository vehicleRepository = new VehicleRepository();
 
     private final MutableLiveData<String> firstName = new MutableLiveData<>();
     private final MutableLiveData<String> lastName = new MutableLiveData<>();
@@ -27,6 +30,8 @@ public class DriverProfileViewModel extends ViewModel {
     private final MutableLiveData<Integer> numberOfSeats = new MutableLiveData<>();
     private final MutableLiveData<Boolean> babyTransportAllowed = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> petTransportAllowed = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> vehicleUpdated = new MutableLiveData<>();
+
 
     public void loadProfile() {
         repository.getProfile(new ProfileRepository.ProfileCallback() {
@@ -45,6 +50,55 @@ public class DriverProfileViewModel extends ViewModel {
             }
         });
     }
+
+    public void loadVehicle() {
+        vehicleRepository.getVehicle(new VehicleRepository.CallbackApi() {
+            @Override
+            public void onSuccess(VehicleSummaryDto dto) {
+                vehicleModel.postValue(dto.getModel());
+                vehicleType.postValue(dto.getVehicleType());
+                licensePlate.postValue(dto.getLicensePlate());
+                numberOfSeats.postValue(dto.getNumberOfSeats());
+                babyTransportAllowed.postValue(dto.isBabySeat());
+                petTransportAllowed.postValue(dto.isPetFriendly());
+            }
+
+            @Override
+            public void onError(String error) {
+            }
+        });
+    }
+
+    public void saveVehicle(
+            String model,
+            String type,
+            String plate,
+            Integer seats,
+            boolean baby,
+            boolean pet
+    ) {
+
+        VehicleSummaryDto body = new VehicleSummaryDto();
+        body.setModel(model);
+        body.setVehicleType(type);
+        body.setLicensePlate(plate);
+        body.setNumberOfSeats(seats != null ? seats : 0);
+        body.setBabySeat(baby);
+        body.setPetFriendly(pet);
+
+        vehicleRepository.updateVehicle(body, new VehicleRepository.CallbackApi() {
+            @Override
+            public void onSuccess(VehicleSummaryDto dto) {
+                vehicleUpdated.postValue(true);
+                loadVehicle();
+            }
+
+            @Override
+            public void onError(String error) {
+            }
+        });
+    }
+
 
     public void saveProfile(
             String fn,
@@ -151,5 +205,9 @@ public class DriverProfileViewModel extends ViewModel {
 
     public LiveData<Boolean> isPetTransportAllowed() {
         return petTransportAllowed;
+    }
+
+    public LiveData<Boolean> getVehicleUpdated() {
+        return vehicleUpdated;
     }
 }
