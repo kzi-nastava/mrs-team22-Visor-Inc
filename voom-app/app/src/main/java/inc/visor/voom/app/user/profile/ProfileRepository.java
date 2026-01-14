@@ -3,6 +3,7 @@ package inc.visor.voom.app.user.profile;
 import android.util.Log;
 
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,7 +23,7 @@ public class ProfileRepository {
 
         Log.d("PROFILE_API", "GET /api/users/me REQUEST SENT");
 
-        api.getProfile().enqueue(new Callback<>() {
+        api.getProfile().enqueue(new Callback<UserProfileDto>() {
             @Override
             public void onResponse(
                     Call<UserProfileDto> call,
@@ -31,22 +32,47 @@ public class ProfileRepository {
                 Log.d("PROFILE_API", "RESPONSE CODE = " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("PROFILE_API", "RESPONSE BODY OK");
                     callback.onSuccess(response.body());
                 } else {
-                    Log.e("PROFILE_API", "RESPONSE FAILED");
                     callback.onError("Profile fetch failed");
                 }
             }
 
             @Override
             public void onFailure(Call<UserProfileDto> call, Throwable t) {
-                Log.e("PROFILE_API", "REQUEST FAILED", t);
                 callback.onError(t.getMessage());
             }
         });
     }
 
+    public void updateProfile(
+            UpdateUserProfileRequestDto body,
+            ProfileCallback callback
+    ) {
+
+        Log.d("PROFILE_API", "PUT /api/users/me REQUEST SENT");
+
+        api.updateProfile(body).enqueue(new Callback<UserProfileDto>() {
+            @Override
+            public void onResponse(
+                    Call<UserProfileDto> call,
+                    Response<UserProfileDto> response
+            ) {
+                Log.d("PROFILE_API", "RESPONSE CODE = " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Profile update failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileDto> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
 
     public interface ProfileCallback {
         void onSuccess(UserProfileDto dto);

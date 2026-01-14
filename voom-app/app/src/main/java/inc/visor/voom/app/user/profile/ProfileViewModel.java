@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;
 
 public class ProfileViewModel extends ViewModel {
@@ -35,6 +36,31 @@ public class ProfileViewModel extends ViewModel {
         });
     }
 
+    public void saveProfile(
+            String fn,
+            String ln,
+            String pn,
+            String ad
+    ) {
+        UpdateUserProfileRequestDto body =
+                new UpdateUserProfileRequestDto(fn, ln, pn, ad);
+
+        repository.updateProfile(body, new ProfileRepository.ProfileCallback() {
+            @Override
+            public void onSuccess(UserProfileDto dto) {
+                firstName.postValue(dto.getFirstName());
+                lastName.postValue(dto.getLastName());
+                phoneNumber.postValue(dto.getPhoneNumber());
+                address.postValue(dto.getAddress());
+            }
+
+            @Override
+            public void onError(String error) {
+            }
+        });
+    }
+
+
     public LiveData<String> getFirstName() {
         return firstName;
     }
@@ -61,5 +87,6 @@ public class ProfileViewModel extends ViewModel {
         email.setValue(em);
         address.setValue(ad);
         phoneNumber.setValue(pn);
+        saveProfile(fn, ln, pn, ad);
     }
 }
