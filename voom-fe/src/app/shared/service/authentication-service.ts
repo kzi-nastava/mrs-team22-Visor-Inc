@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import {BehaviorSubject, catchError, map, of} from 'rxjs';
 import {SignInResponse, User} from '../../core/rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
+import {ApiService} from '../../core/rest/api-service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,11 +15,24 @@ export class AuthenticationService {
 
   private refreshToken: string | null = null;
 
-  constructor() {
+  constructor(private apiService: ApiService) {
     this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
 
     if (this.isValid(this.refreshToken)) {
-      //TODO refresh token
+      this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
+        map(response => response.data),
+        catchError(() => {
+          this.logout();
+          return of(null);
+        }),
+      ).subscribe(token => {
+        if (!token || !token.user) {
+          this.logout();
+          return;
+        }
+
+        this.initiateAuthenticatedState(token);
+      });
     } else {
       this.logout();
     }
@@ -28,10 +42,6 @@ export class AuthenticationService {
     this.refreshToken = response.refreshToken;
     localStorage.setItem(this.REFRESH_TOKEN, response.refreshToken);
     this.initiateAuthenticatedState(response);
-  }
-
-  public get accessToken(): Observable<string> {
-    return of('')
   }
 
   private initiateAuthenticatedState(response: SignInResponse) {
@@ -52,4 +62,11 @@ export class AuthenticationService {
     return (payload.exp ?? 0) * 1000 >= new Date().valueOf();
   }
 
+  public get activeUser$() {
+    return this._activeUser$;
+  }
+
+  public get accessToken() {
+    return of('');
+  }
 }
