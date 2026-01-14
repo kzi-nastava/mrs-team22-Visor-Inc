@@ -37,6 +37,7 @@
     "@types/leaflet-routing-machine": "^3.2.9",
     "apexcharts": "^5.3.6",
     "express": "^5.1.0",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "leaflet-routing-machine": "^3.2.12",
     "ng-apexcharts": "^2.0.4",

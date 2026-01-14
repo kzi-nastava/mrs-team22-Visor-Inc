@@ -1,11 +1,15 @@
-import { Component, inject } from '@angular/core';
-import { ValueInputString } from '../../shared/value-input/value-input-string/value-input-string';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { Router } from '@angular/router';
-import { ROUTE_REGISTRATION } from '../registration/registration';
-import { ROUTE_FORGOT_PASSWORD } from './forgot-password/forgot-password';
+import {Component} from '@angular/core';
+import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatButton} from '@angular/material/button';
+import {Router} from '@angular/router';
+import {ROUTE_REGISTRATION} from '../registration/registration';
+import {ROUTE_FORGOT_PASSWORD} from './forgot-password/forgot-password';
 import {ROUTE_HOME} from '../home/home';
+import {ApiService} from '../../core/rest/api-service';
+import {map} from 'rxjs';
+import {AuthenticationService} from '../../shared/service/authentication-service';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -16,8 +20,6 @@ export const ROUTE_LOGIN = 'login';
   styleUrl: './login.css',
 })
 export class Login {
-  private router = inject(Router);
-
   form = new FormGroup({
     email: new FormControl<string>('', [
       Validators.required,
@@ -31,12 +33,31 @@ export class Login {
     ]),
   });
 
+  constructor(private router: Router, private apiService: ApiService, private authenticationService: AuthenticationService) {
+    authenticationService.activeUser$.pipe(
+      takeUntilDestroyed()
+    ).subscribe(() => {
+      this.router.navigate([ROUTE_HOME]);
+    })
+  }
+
   forgotPassword() {
     this.router.navigate([ROUTE_FORGOT_PASSWORD]);
   }
 
   login() {
-    this.router.navigate([ROUTE_HOME]);
+    this.apiService.authenticationApi.signIn({
+      email: this.form.value.email as string,
+      password: this.form.value.password as string,
+    }).pipe(
+      map(response => response.data),
+    ).subscribe((signInResponse) => {
+      if (!signInResponse) {
+        return;
+      }
+
+      this.authenticationService.setAuthentication(signInResponse);
+    });
   }
 
   registration() {
