@@ -6,6 +6,10 @@ import { Router } from '@angular/router';
 import { ROUTE_REGISTRATION } from '../registration/registration';
 import { ROUTE_FORGOT_PASSWORD } from './forgot-password/forgot-password';
 import {ROUTE_HOME} from '../home/home';
+import {AuthenticationApi} from '../../core/rest/authentication/authentication.api';
+import {ApiService} from '../../core/rest/api-service';
+import {map} from 'rxjs';
+import {AuthenticationService} from '../../shared/service/authentication-service';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -16,8 +20,6 @@ export const ROUTE_LOGIN = 'login';
   styleUrl: './login.css',
 })
 export class Login {
-  private router = inject(Router);
-
   form = new FormGroup({
     email: new FormControl<string>('', [
       Validators.required,
@@ -31,12 +33,26 @@ export class Login {
     ]),
   });
 
+  constructor(private router: Router, private apiService: ApiService, private authenticationService: AuthenticationService) {
+  }
+
   forgotPassword() {
     this.router.navigate([ROUTE_FORGOT_PASSWORD]);
   }
 
   login() {
-    this.router.navigate([ROUTE_HOME]);
+    this.apiService.authenticationApi.signIn({
+      email: this.form.value.email as string,
+      password: this.form.value.password as string,
+    }).pipe(
+      map(response => response.data),
+    ).subscribe((signInResponse) => {
+      if (!signInResponse) {
+        return;
+      }
+
+      this.authenticationService.setAuthentication(signInResponse);
+    });
   }
 
   registration() {

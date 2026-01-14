@@ -36,7 +36,6 @@ export class AuthenticationService {
 
   private initiateAuthenticatedState(response: SignInResponse) {
     this._activeUser$.next(response.user);
-
   }
 
   public logout() {
