@@ -1,27 +1,23 @@
 package inc.visor.voom.app.driver.profile;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentDriverProfileBinding;
 import inc.visor.voom.app.user.profile.ChangePasswordDialogFragment;
-
 
 public class DriverProfileFragment extends Fragment {
 
     private FragmentDriverProfileBinding binding;
-
     private DriverProfileViewModel viewModel;
 
     @Nullable
@@ -29,7 +25,7 @@ public class DriverProfileFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
-            @Nullable Bundle saveInstanceState
+            @Nullable Bundle savedInstanceState
     ) {
         binding = FragmentDriverProfileBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -38,46 +34,49 @@ public class DriverProfileFragment extends Fragment {
     @Override
     public void onViewCreated(
             @NonNull View view,
-            @Nullable Bundle saveInstanceState
+            @Nullable Bundle savedInstanceState
     ) {
-        super.onViewCreated(view, saveInstanceState);
+        super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(DriverProfileViewModel.class);
 
-        binding.btnChangePassword.setOnClickListener(v -> {
-            new ChangePasswordDialogFragment().show(getParentFragmentManager(), "ChangePasswordDialog");
-        });
+        binding.btnChangePassword.setOnClickListener(v ->
+                new ChangePasswordDialogFragment()
+                        .show(getParentFragmentManager(), "ChangePasswordDialog")
+        );
 
         observeViewModel();
         setupListeners();
         setupVehicleTypeDropdown();
+
+        viewModel.loadProfile();
     }
 
     private void observeViewModel() {
 
         viewModel.getFirstName().observe(getViewLifecycleOwner(),
-                value -> binding.etFirstName.setText(value));
+                binding.etFirstName::setText);
 
         viewModel.getLastName().observe(getViewLifecycleOwner(),
-                value -> binding.etLastName.setText(value));
+                binding.etLastName::setText);
 
         viewModel.getEmail().observe(getViewLifecycleOwner(),
-                value -> binding.etEmail.setText(value));
+                binding.etEmail::setText);
 
         viewModel.getAddress().observe(getViewLifecycleOwner(),
-                value -> binding.etAddress.setText(value));
+                binding.etAddress::setText);
 
         viewModel.getPhoneNumber().observe(getViewLifecycleOwner(),
-                value -> binding.etPhoneNumber.setText(value));
+                binding.etPhoneNumber::setText);
 
         viewModel.getVehicleModel().observe(getViewLifecycleOwner(),
-                value -> binding.etVehicleModel.setText(value));
+                binding.etVehicleModel::setText);
 
         viewModel.getVehicleType().observe(getViewLifecycleOwner(),
-                value -> binding.etVehicleType.setText(value));
+                binding.etVehicleType::setText);
 
         viewModel.getLicensePlate().observe(getViewLifecycleOwner(),
-                value -> binding.etLicensePlate.setText(value));
+                binding.etLicensePlate::setText);
 
         viewModel.getNumberOfSeats().observe(getViewLifecycleOwner(),
                 value -> binding.etNumberOfSeats.setText(
@@ -85,28 +84,38 @@ public class DriverProfileFragment extends Fragment {
                 ));
 
         viewModel.isBabyTransportAllowed().observe(getViewLifecycleOwner(),
-                value -> binding.cbBabyTransport.setChecked(
-                        value != null && value
-                ));
+                value -> binding.cbBabyTransport.setChecked(Boolean.TRUE.equals(value)));
 
         viewModel.isPetTransportAllowed().observe(getViewLifecycleOwner(),
-                value -> binding.cbPetTransport.setChecked(
-                        value != null && value
-                ));
+                value -> binding.cbPetTransport.setChecked(Boolean.TRUE.equals(value)));
+
+        viewModel.getFullName().observe(getViewLifecycleOwner(),
+                binding.txtFullName::setText);
+
+
+        viewModel.getProfileUpdated().observe(getViewLifecycleOwner(), updated -> {
+            if (Boolean.TRUE.equals(updated)) {
+                com.google.android.material.snackbar.Snackbar
+                        .make(binding.getRoot(),
+                                "Profile successfully updated",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        });
     }
 
     private void setupListeners() {
 
-        binding.btnSave.setOnClickListener(v ->
+        binding.btnSavePersonalInfo.setOnClickListener(v ->
                 viewModel.onSaveClicked(
-                        String.valueOf(binding.etFirstName.getText()),
-                        String.valueOf(binding.etLastName.getText()),
-                        String.valueOf(binding.etEmail.getText()),
-                        String.valueOf(binding.etAddress.getText()),
-                        String.valueOf(binding.etPhoneNumber.getText()),
-                        String.valueOf(binding.etVehicleModel.getText()),
-                        String.valueOf(binding.etVehicleType.getText()),
-                        String.valueOf(binding.etLicensePlate.getText()),
+                        binding.etFirstName.getText().toString(),
+                        binding.etLastName.getText().toString(),
+                        binding.etEmail.getText().toString(),
+                        binding.etAddress.getText().toString(),
+                        binding.etPhoneNumber.getText().toString(),
+                        binding.etVehicleModel.getText().toString(),
+                        binding.etVehicleType.getText().toString(),
+                        binding.etLicensePlate.getText().toString(),
                         binding.etNumberOfSeats.getText() != null &&
                                 !binding.etNumberOfSeats.getText().toString().isEmpty()
                                 ? Integer.parseInt(binding.etNumberOfSeats.getText().toString())
@@ -115,16 +124,6 @@ public class DriverProfileFragment extends Fragment {
                         binding.cbPetTransport.isChecked()
                 )
         );
-    }
-
-
-    public DriverProfileFragment() {
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 
     private void setupVehicleTypeDropdown() {
@@ -139,6 +138,9 @@ public class DriverProfileFragment extends Fragment {
         binding.etVehicleType.setAdapter(adapter);
     }
 
-
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

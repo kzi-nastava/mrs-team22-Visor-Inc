@@ -10,7 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
+import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
 
 public class ProfileFragment extends Fragment {
@@ -41,6 +43,10 @@ public class ProfileFragment extends Fragment {
         observeViewModel();
         setupListeners();
 
+        binding.btnChangeDriverProfile.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_global_to_mainDriverFragment)
+        );
         viewModel.loadProfile();
 
     }
