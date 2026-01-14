@@ -1,5 +1,6 @@
 package inc.visor.voom.app.user.profile;
 
+import inc.visor.voom.app.user.profile.dto.ChangePasswordRequestDto;
 import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;
 import retrofit2.Call;
@@ -16,5 +17,6 @@ public interface ProfileApi {
     @PUT("api/users/me")
     Call<UserProfileDto> updateProfile(@Body UpdateUserProfileRequestDto body);
 
-
+    @PUT("api/users/me/password")
+    Call<Void> changePassword(@Body ChangePasswordRequestDto body);
 }

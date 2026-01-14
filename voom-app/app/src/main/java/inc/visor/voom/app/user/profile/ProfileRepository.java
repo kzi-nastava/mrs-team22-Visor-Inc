@@ -1,8 +1,10 @@
 package inc.visor.voom.app.user.profile;
 
+import android.media.MediaRouter;
 import android.util.Log;
 
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.user.profile.dto.ChangePasswordRequestDto;
 import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;
 import retrofit2.Call;
@@ -74,8 +76,38 @@ public class ProfileRepository {
         });
     }
 
+    public void changePassword(
+            ChangePasswordRequestDto body,
+            SimpleCallback callback
+    ) {
+        Log.d("PROFILE_API", "PUT /api/users/password REQUEST SENT");
+
+        api.changePassword(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.d("PROFILE_API", "RESPONSE CODE = " + response.code());
+
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onError("Password change failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t.getMessage());
+            }
+        });
+    }
+
     public interface ProfileCallback {
         void onSuccess(UserProfileDto dto);
+        void onError(String error);
+    }
+
+    public interface SimpleCallback {
+        void onSuccess();
         void onError(String error);
     }
 }
