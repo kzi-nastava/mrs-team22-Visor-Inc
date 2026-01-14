@@ -1,5 +1,5 @@
 import {ApiClient} from './api-client';
-import {ApiResponse, RequestConfig, RequestHeaders} from './rest.model';
+import {ApiResponse, MultiPart, RequestConfig, RequestHeaders} from './rest.model';
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {catchError, map, Observable, OperatorFunction, throwError} from 'rxjs';
 
@@ -29,15 +29,33 @@ export class VoomApiClient extends ApiClient {
     return this.httpClient.put<TResponse>(`${this.baseUrl}${encodeURI(path)}`, body, this.formatConfig(config)).pipe(this.mapResponse(), this.mapError());
   }
 
-  //TODO implement postMultipart
-  // postMultipart<TRequest extends MultiPart[], TResponse>(path: string, body?: TRequest, config?: RequestConfig): Observable<TResponse> {
-  //   return Promise.resolve(undefined);
-  // }
+  postMultipart<TRequest extends MultiPart[], TResponse>(path: string, body: TRequest, config?: RequestConfig): Observable<ApiResponse<TResponse>> {
+    const multiPartData = new FormData();
 
-  //TODO implement putMultipart
-  // putMultipart<TRequest extends MultiPart[], TResponse>(path: string, body?: TRequest, config?: RequestConfig): Observable<TResponse> {
-  //   return Promise.resolve(undefined);
-  // }
+    body.forEach((part) => {
+      if (typeof part.content === 'string') {
+        multiPartData.append(part.name, new Blob([part.content], {type: 'application/json'}));
+      } else {
+        multiPartData.append(part.name, part.content, part.content.name);
+      }
+    });
+
+    return this.httpClient.post<TResponse>(`${this.baseUrl}${encodeURI(path)}`, multiPartData, this.formatConfig(config)).pipe(this.mapResponse(), this.mapError())
+  }
+
+  putMultipart<TRequest extends MultiPart[], TResponse>(path: string, body: TRequest, config?: RequestConfig): Observable<ApiResponse<TResponse>> {
+    const multiPartData = new FormData();
+
+    body.forEach((part) => {
+      if (typeof part.content === 'string') {
+        multiPartData.append(part.name, new Blob([part.content], {type: 'application/json'}));
+      } else {
+        multiPartData.append(part.name, part.content, part.content.name);
+      }
+    });
+
+    return this.httpClient.put<TResponse>(`${this.baseUrl}${encodeURI(path)}`, multiPartData, this.formatConfig(config)).pipe(this.mapResponse(), this.mapError())
+  }
 
   private formatConfig(config: RequestConfig | undefined) {
     return {
