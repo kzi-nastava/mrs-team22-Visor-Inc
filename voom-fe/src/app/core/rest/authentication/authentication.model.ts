@@ -15,3 +15,12 @@ export interface User {
   email: string;
   verified: boolean;
 }
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  password: string;
+  confirmPassword: string;
+}

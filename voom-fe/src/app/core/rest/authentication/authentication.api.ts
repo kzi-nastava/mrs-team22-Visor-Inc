@@ -1,6 +1,6 @@
 import {Api} from '../api';
 import {ApiClient} from '../api-client';
-import {SignInRequest, SignInResponse} from './authentication.model';
+import {ForgotPasswordDto, ResetPasswordDto, SignInRequest, SignInResponse} from './authentication.model';
 import {RequestConfig} from '../rest.model';
 
 
@@ -10,7 +10,7 @@ export class AuthenticationApi extends Api {
     super(apiClient);
   }
 
-  signIn(body: SignInRequest) {
+  login(body: SignInRequest) {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
@@ -18,7 +18,7 @@ export class AuthenticationApi extends Api {
       },
     }
 
-    return this.apiClient.post<SignInRequest, SignInResponse>(`/api/signIn`, body, config);
+    return this.apiClient.post<SignInRequest, SignInResponse>(`/auth/login`, body, config);
   }
 
   refreshToken(body: string) {
@@ -29,10 +29,10 @@ export class AuthenticationApi extends Api {
       }
     };
 
-    return this.apiClient.put<string, SignInResponse>(`/api/refreshToken`, body, config);
+    return this.apiClient.put<string, SignInResponse>(`/auth/refreshToken`, body, config);
   }
 
-  resetPassword(email: string) {
+  forgotPassword(body: ForgotPasswordDto) {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
@@ -40,7 +40,18 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.put<string, void>(`/api/passwordReset`, email, config);
+    return this.apiClient.post<ForgotPasswordDto, void>(`/auth/forgotPassword`, body, config);
+  }
+
+  resetPassword(body: ResetPasswordDto) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+    };
+
+    return this.apiClient.post<ResetPasswordDto, void>(`/auth/resetPassword`, body, config);
   }
 
 }
