@@ -18,6 +18,9 @@ public class ProfileViewModel extends ViewModel {
     private final MutableLiveData<String> email = new MutableLiveData<>();
     private final MutableLiveData<String> address = new MutableLiveData<>();
     private final MutableLiveData<String> phoneNumber = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> profileUpdated = new MutableLiveData<>();
+
+    private final MutableLiveData<String> fullName = new MutableLiveData<>();
 
     public void loadProfile() {
         repository.getProfile(new ProfileRepository.ProfileCallback() {
@@ -28,6 +31,9 @@ public class ProfileViewModel extends ViewModel {
                 email.postValue(dto.getEmail());
                 address.postValue(dto.getAddress());
                 phoneNumber.postValue(dto.getPhoneNumber());
+                fullName.postValue(
+                        dto.getFirstName() + " " + dto.getLastName()
+                );
             }
 
             @Override
@@ -52,6 +58,8 @@ public class ProfileViewModel extends ViewModel {
                 lastName.postValue(dto.getLastName());
                 phoneNumber.postValue(dto.getPhoneNumber());
                 address.postValue(dto.getAddress());
+                profileUpdated.postValue(true);
+                loadProfile();
             }
 
             @Override
@@ -69,6 +77,10 @@ public class ProfileViewModel extends ViewModel {
         return lastName;
     }
 
+    public LiveData<String> getFullName() {
+        return fullName;
+    }
+
     public LiveData<String> getEmail() {
         return email;
     }
@@ -80,6 +92,11 @@ public class ProfileViewModel extends ViewModel {
     public LiveData<String> getPhoneNumber() {
         return phoneNumber;
     }
+
+    public LiveData<Boolean> getProfileUpdated() {
+        return profileUpdated;
+    }
+
 
     public void onSaveClicked(String fn, String ln, String em, String ad, String pn) {
         firstName.setValue(fn);

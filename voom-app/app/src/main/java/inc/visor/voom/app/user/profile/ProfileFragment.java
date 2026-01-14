@@ -60,6 +60,18 @@ public class ProfileFragment extends Fragment {
 
         viewModel.getPhoneNumber().observe(getViewLifecycleOwner(),
                 binding.etPhoneNumber::setText);
+
+        viewModel.getProfileUpdated().observe(getViewLifecycleOwner(), success -> {
+            if (Boolean.TRUE.equals(success)) {
+                showProfileUpdatedMessage();
+            }
+        });
+
+        viewModel.getFullName().observe(getViewLifecycleOwner(),
+                binding.txtFullName::setText
+        );
+
+
     }
 
     private void setupListeners() {
@@ -78,6 +90,17 @@ public class ProfileFragment extends Fragment {
                         .show(getParentFragmentManager(), "ChangePasswordDialog")
         );
     }
+
+    private void showProfileUpdatedMessage() {
+        com.google.android.material.snackbar.Snackbar
+                .make(
+                        binding.getRoot(),
+                        "Profile successfully updated",
+                        com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                )
+                .show();
+    }
+
 
     @Override
     public void onDestroyView() {

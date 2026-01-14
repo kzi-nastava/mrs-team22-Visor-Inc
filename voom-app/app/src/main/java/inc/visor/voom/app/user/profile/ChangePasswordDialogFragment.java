@@ -69,7 +69,6 @@ public class ChangePasswordDialogFragment extends DialogFragment {
 
         viewModel.getError().observe(this, error -> {
             if (error != null) {
-                // kasnije možeš: binding.newPasswordLayout.setError(error);
             }
         });
     }
