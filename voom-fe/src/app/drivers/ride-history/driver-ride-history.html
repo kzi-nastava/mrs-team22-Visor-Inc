@@ -20,8 +20,8 @@
   </div>
   <div class="w-full rounded-4xl h-[3px] bg-primary mb-[50px]"></div>
   @for(date of dates; track date) {
-  <div class="w-full flex flex-col items-start gap-[10px] mb-[50px]">
-    <h1 class="text-xl mb-[10px]">{{ date.toDateString() }}</h1>
+  <div class="w-full flex flex-col items-start gap-2.5 mb-[50px]">
+    <h1 class="text-xl mb-2.5">{{ date.toDateString() }}</h1>
     <div class="w-full flex flex-col gap-[15px]">
       @for (ride of RIDE_DATA; track ride) { @if(ride.date.getTime() === date.getTime()) {
       <app-ride-accordion [ride]="ride"></app-ride-accordion>

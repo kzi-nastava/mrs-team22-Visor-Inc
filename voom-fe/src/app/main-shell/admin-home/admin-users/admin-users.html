@@ -1,1 +1,17 @@
-<p>admin-users works!</p>
+<mat-drawer-container class="w-full h-full">
+  <mat-drawer mode="side" opened class="pt-2">
+    <div class="p-2 space-y-2">
+      <div class="flex items-center pb-4">
+        <app-value-input-string [label]="'Search'"/>
+      </div>
+      <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
+        <div class="text-lg px-2">John Doe</div>
+      </mat-card>
+      <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
+        <div class="text-lg px-2">Jane Doe</div>
+      </mat-card>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
+  </mat-drawer-content>
+</mat-drawer-container>

@@ -5,6 +5,7 @@ import {MatIcon} from '@angular/material/icon';
 import {Tab} from './tab';
 import {ROUTE_ADMIN_LIVE} from './admin-live/admin-live';
 import {ROUTE_ADMIN_ACTIVITY} from './admin-activity/admin-activity';
+import {MatRipple} from '@angular/material/core';
 
 export const ROUTE_HOME_ADMIN = "admin-home"
 
@@ -15,7 +16,8 @@ export const ROUTE_HOME_ADMIN = "admin-home"
     MatDrawer,
     MatDrawerContent,
     RouterOutlet,
-    MatIcon
+    MatIcon,
+    MatRipple
   ],
   templateUrl: './admin-home.html',
   styleUrl: './admin-home.css',

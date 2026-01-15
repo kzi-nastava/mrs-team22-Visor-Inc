@@ -2,7 +2,7 @@
   <mat-drawer mode="side" opened class="pt-4">
     <div class="flex flex-col items-center justify-center space-y-4 px-8">
       @for (tab of tabs; track tab.routerLink) {
-        <div class="flex w-full items-center space-x-4 cursor-pointer" (click)="changeTab(tab.routerLink)">
+        <div matRipple class="flex w-full items-center space-x-4 cursor-pointer rounded-lg" (click)="changeTab(tab.routerLink)">
           <mat-icon>{{ tab.icon }}</mat-icon>
           <div class="text-2xl">{{ tab.title }}</div>
         </div>

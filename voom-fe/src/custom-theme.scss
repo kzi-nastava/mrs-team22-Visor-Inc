@@ -147,3 +147,7 @@ app-ride-history-table {
     container-width: 196px,
   )
 );
+
+@include mat.card-overrides((
+  outlined-outline-color: $primary,
+))
