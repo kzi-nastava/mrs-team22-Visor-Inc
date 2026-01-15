@@ -1,0 +1,35 @@
+<app-header></app-header>
+
+<section class="max-w-[1200px] mx-auto p-5 md:p-10">
+  <h1 class="text-2xl font-medium mb-10">Favorite Routes</h1>
+
+  <div class="flex flex-col gap-6">
+    @for (route of routes; track route.id) {
+    <div class="border rounded-xl p-4">
+      <div class="flex flex-col gap-[20px]">
+        @for (route of routes; track route.id) {
+        <app-favorite-route-accordion [route]="route"></app-favorite-route-accordion>
+        }
+      </div>
+
+      @if (expandedRouteId === route.id && route.stops.length > 0) {
+      <div class="mt-4 pl-10">
+        <p class="font-medium mb-2">Intermediate stops:</p>
+        <ul class="list-disc ml-5">
+          @for (stop of route.stops; track stop) {
+          <li>{{ stop }}</li>
+          }
+        </ul>
+
+        <div class="flex gap-4 mt-6">
+          <button class="px-6 py-2 rounded-full bg-primary text-white">Pick route</button>
+          <button class="px-6 py-2 rounded-full bg-red-600 text-white">Remove</button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</section>
+
+<app-footer></app-footer>

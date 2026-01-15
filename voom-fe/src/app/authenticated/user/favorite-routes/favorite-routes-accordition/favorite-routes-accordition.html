@@ -1,0 +1,72 @@
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <div
+          class="grid grid-cols-[2fr_4fr_2fr] w-full place-items-center md:gap-[20px] gap-[10px]"
+        >
+          <div class="flex items-center md:gap-[10px] gap-[5px] justify-self-start">
+            <div class="w-[14px] h-[14px] rounded-full bg-gray-400"></div>
+            <p class="md:text-left text-center font-medium">
+              {{ route.name }}
+            </p>
+          </div>
+
+          <div class="md:justify-self-start justify-self-center">
+            <p class="text-center md:text-left">{{ route.start }} → {{ route.end }}</p>
+          </div>
+
+          <div class="justify-self-end ml-auto">
+            <p>~{{ route.distanceKm }}km</p>
+          </div>
+        </div>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div>
+      <div class="w-full h-[3px] rounded-4xl bg-primary mb-[15px] mt-[10px]"></div>
+
+      <div class="flex flex-col md:flex-row gap-[40px]">
+        <div class="min-w-[200px]">
+          <p><b class="color-blue">Start:</b> {{ route.start }}</p>
+          <p><b class="color-blue">End:</b> {{ route.end }}</p>
+          <p><b class="color-blue">Distance:</b> {{ route.distanceKm }} km</p>
+        </div>
+
+        <div class="w-full">
+          <p class="mb-[10px]">Intermediate stops</p>
+
+          @if (route.stops.length === 0) {
+          <p class="text-gray-500">No intermediate stops</p>
+          }
+
+          <div class="flex flex-col gap-[6px]">
+            @for (stop of route.stops; track stop) {
+            <p class="text-sm">{{ stop }}</p>
+            }
+          </div>
+
+          <div class="flex justify-end mt-8">
+            <div class="flex gap-6">
+              <button
+                type="button"
+                class="rounded-full px-10 h-10 bg-blue-900 hover:bg-blue-800 text-white text-base font-medium transition-colors"
+                (click)="pickRoute()"
+              >
+                Pick route
+              </button>
+
+              <button
+                type="button"
+                class="rounded-full px-10 h-10 bg-red-600 hover:bg-red-700 text-white text-base font-medium transition-colors"
+                (click)="removeRoute()"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>

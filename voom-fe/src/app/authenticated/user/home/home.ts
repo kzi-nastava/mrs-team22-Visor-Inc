@@ -297,7 +297,7 @@ export class UserHome implements AfterViewInit {
     this.driverSocket.requestRoute({
       driverId,
       start: driver.marker.getLatLng(),
-      end: { lat, lng },
+      end: { lat, lng }, 
     });
   }
 
