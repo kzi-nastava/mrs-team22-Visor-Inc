@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Header } from '../../../core/layout/header-kt1/header-kt1';
 import { Footer } from '../../../core/layout/footer/footer';
 import { FavoriteRouteAccordion } from './favorite-routes-accordition/favorite-routes-accordition';
-import { FavoriteRoutesApi } from './favorite-routes.api';
+import { FavoriteRouteDto, FavoriteRoutesApi } from './favorite-routes.api';
 import { VoomApiClient } from '../../../core/rest/voom-api-client';
 
 export const ROUTE_FAVORITE_ROUTES = 'user/favorite-routes';
 
 export interface FavoriteRoute {
+  dto: FavoriteRouteDto;
   id: number;
   name: string;
   start: string;
@@ -15,7 +16,6 @@ export interface FavoriteRoute {
   distanceKm: number;
   stops: string[];
 }
-
 
 @Component({
   selector: 'app-favorite-routes',
@@ -46,14 +46,13 @@ export class FavoriteRoutes implements OnInit {
     const dropoff = dto.points.find((p: any) => p.type === 'DROPOFF');
 
     return {
+      dto: dto,
       id: dto.id,
       name: dto.name,
       start: pickup?.address ?? '',
       end: dropoff?.address ?? '',
       distanceKm: dto.totalDistanceKm,
-      stops: dto.points
-        .filter((p: any) => p.type === 'STOP')
-        .map((p: any) => p.address),
+      stops: dto.points.filter((p: any) => p.type === 'STOP').map((p: any) => p.address),
     };
   }
 }

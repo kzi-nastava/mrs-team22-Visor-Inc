@@ -2,15 +2,8 @@ import { Component, Input } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Router } from '@angular/router';
+import { FavoriteRoute } from '../favorite-routes';
 
-export interface FavoriteRoute {
-  id: number;
-  name: string;
-  start: string;
-  end: string;
-  distanceKm: number;
-  stops: string[];
-}
 
 @Component({
   selector: 'app-favorite-route-accordion',
@@ -23,8 +16,12 @@ export class FavoriteRouteAccordion {
 
   constructor(private router: Router) {}
 
-  pickRoute() {
-    this.router.navigate(['/user/home']);
+  pickRoute(route: FavoriteRoute) {
+    this.router.navigate(['/user/home'], {
+      state: {
+        favoriteRoute: route.dto,
+      },
+    });
   }
 
   removeRoute() {

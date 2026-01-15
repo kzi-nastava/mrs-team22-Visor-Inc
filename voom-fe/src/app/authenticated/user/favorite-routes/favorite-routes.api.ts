@@ -9,6 +9,8 @@ export type FavoriteRouteDto = {
   points: {
     orderIndex: number;
     address: string;
+    lat: number;
+    lng: number;
     type: 'PICKUP' | 'STOP' | 'DROPOFF';
   }[];
 };

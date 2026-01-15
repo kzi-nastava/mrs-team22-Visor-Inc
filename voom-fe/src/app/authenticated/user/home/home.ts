@@ -16,6 +16,8 @@ import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimul
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
+import { FavoriteRoute } from '../favorite-routes/favorite-routes';
+import { FavoriteRouteDto } from '../favorite-routes/favorite-routes.api';
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -346,7 +348,6 @@ export class UserHome implements AfterViewInit {
     this.rideApi.createRideRequest(payload).subscribe({
       next: (res) => {
         if (res.status === 'ACCEPTED' && res.driver) {
-          console.log('Ride accepted:', res);
           this.snackBar.open(
             `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
             'Close',
@@ -355,6 +356,8 @@ export class UserHome implements AfterViewInit {
           if (res.pickupLat && res.pickupLng && res.scheduledTime === null) {
             this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
           }
+          this.isRideLocked.set(true);
+          this.rideForm.disable({ emitEvent: false });
         } else {
           this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
         }
@@ -385,13 +388,19 @@ export class UserHome implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    const favoriteRoute = history.state?.favoriteRoute;
+
+    if (favoriteRoute) {
+      this.applyFavoriteRoute(favoriteRoute);
+
+      history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
+    }
+
     this.driverSocket.connect(
       (route) => {
-        console.log('WS ROUTE PAYLOAD:', route);
         this.map.applyDriverRoute(route.driverId, route.route);
       },
       (scheduledRides) => {
-        console.log('WS SCHEDULED RIDES:', scheduledRides);
         this.handleScheduledRides(scheduledRides);
       }
     );
@@ -399,6 +408,30 @@ export class UserHome implements AfterViewInit {
     this.rideApi.getActiveDrivers().subscribe({
       next: (drivers) => this.initDriverSimulation(drivers),
       error: (err) => console.error(err),
+    });
+  }
+
+  private applyFavoriteRoute(route: FavoriteRouteDto) {
+    const points = route.points
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((p) => ({
+        id: crypto.randomUUID(),
+        lat: p.lat,
+        lng: p.lng,
+        address: p.address,
+        type: p.type,
+        order: p.orderIndex,
+      }));
+
+    this.routePoints.set(points);
+
+    const pickup = points.find((p) => p.type === 'PICKUP');
+    const dropoff = points.find((p) => p.type === 'DROPOFF');
+
+    this.rideForm.patchValue({
+      pickup: pickup?.address ?? '',
+      dropoff: dropoff?.address ?? '',
     });
   }
 
