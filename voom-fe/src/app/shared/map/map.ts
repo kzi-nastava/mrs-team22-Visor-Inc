@@ -33,6 +33,11 @@ type Driver = {
 
   progress?: number;
   speed?: number;
+
+  lastPos?: L.LatLng;
+  targetPos?: L.LatLng;
+  animStart?: number;
+  animDuration?: number;
 };
 
 @Component({
@@ -79,7 +84,9 @@ export class Map implements AfterViewInit, OnChanges {
   });
 
   ngAfterViewInit(): void {
-    if (this.map) return; 
+    this.startInterpolationLoop();
+
+    if (this.map) return;
     this.map = L.map('map').setView([45.2396, 19.8227], 14);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -372,5 +379,52 @@ export class Map implements AfterViewInit, OnChanges {
     return this.http.get(
       `https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${lat}&lon=${lon}`
     );
+  }
+
+  updateDriverPosition(driverId: number, lat: number, lng: number) {
+    const driver = this.drivers.find((d) => d.id === driverId);
+    if (!driver) return;
+
+    const now = performance.now();
+    const target = L.latLng(lat, lng);
+
+    if (!driver.lastPos) {
+      driver.marker.setLatLng(target);
+      driver.lastPos = target;
+      return;
+    }
+
+    driver.lastPos = driver.marker.getLatLng();
+    driver.targetPos = target;
+    driver.animStart = now;
+    driver.animDuration = 2000;
+  }
+
+  private startInterpolationLoop() {
+    const animate = (now: number) => {
+      this.drivers.forEach((driver) => {
+        if (!driver.targetPos || !driver.animStart || !driver.animDuration) return;
+
+        const t = (now - driver.animStart) / driver.animDuration;
+        if (t >= 1) {
+          driver.marker.setLatLng(driver.targetPos);
+          driver.lastPos = driver.targetPos;
+          driver.targetPos = undefined;
+          return;
+        }
+
+        const a = driver.lastPos!;
+        const b = driver.targetPos;
+
+        const lat = a.lat + (b.lat - a.lat) * t;
+        const lng = a.lng + (b.lng - a.lng) * t;
+
+        driver.marker.setLatLng([lat, lng]);
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
   }
 }
