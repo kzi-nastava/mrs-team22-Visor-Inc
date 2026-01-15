@@ -396,4 +396,25 @@ export class UserHome implements AfterViewInit {
       error: (err) => console.error(err),
     });
   }
+
+  addRouteToFavorites() {
+    const points = this.routePoints();
+
+    if (points.length < 2) {
+      this.snackBar.open('Pickup and dropoff are required', 'Close', { duration: 3000 });
+      return;
+    }
+
+    console.log('Add route to favorites:', points);
+
+    this.snackBar.open('Route added to favorites', 'Close', { duration: 3000 });
+  }
+
+  openFavoriteRoutes() {
+    console.log('Open favorite routes');
+
+    this.snackBar.open('Favorite routes feature coming soon', 'Close', {
+      duration: 3000,
+    });
+  }
 }

@@ -138,14 +138,40 @@
     </div>
 
     <div class="flex justify-center mt-10">
-      <button
-        matButton="filled"
-        class="px-10 w-full sm:w-auto"
-        [disabled]="!rideForm.valid || (isLaterSelected && !isScheduledTimeValid()) || isLocked"
-        (click)="confirmRide()"
-      >
-        Confirm Ride
-      </button>
+      <div class="w-full sm:w-auto flex flex-col gap-3">
+        <!-- Confirm Ride -->
+        <button
+          matButton="filled"
+          class="px-10 w-full"
+          [disabled]="!rideForm.valid || (isLaterSelected && !isScheduledTimeValid()) || isLocked"
+          (click)="confirmRide()"
+        >
+          Confirm Ride
+        </button>
+
+        <!-- Secondary actions -->
+        <div class="flex gap-3 w-full">
+          <button
+            type="button"
+            matButton="outlined"
+            class="flex-1 text-sm"
+            [disabled]="isLocked"
+            (click)="addRouteToFavorites()"
+          >
+            Add to favorites
+          </button>
+
+          <button
+            type="button"
+            matButton="outlined"
+            class="flex-1 text-sm"
+            [disabled]="isLocked"
+            (click)="openFavoriteRoutes()"
+          >
+            Choose from favorites
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 </section>
