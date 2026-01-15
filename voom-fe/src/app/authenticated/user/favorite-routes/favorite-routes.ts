@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Header } from '../../../core/layout/header-kt1/header-kt1';
 import { Footer } from '../../../core/layout/footer/footer';
 import { FavoriteRouteAccordion } from './favorite-routes-accordition/favorite-routes-accordition';
+import { FavoriteRoutesApi } from './favorite-routes.api';
+import { VoomApiClient } from '../../../core/rest/voom-api-client';
 
 export const ROUTE_FAVORITE_ROUTES = 'user/favorite-routes';
 
@@ -14,43 +16,44 @@ export interface FavoriteRoute {
   stops: string[];
 }
 
+
 @Component({
   selector: 'app-favorite-routes',
   imports: [Header, Footer, FavoriteRouteAccordion],
   templateUrl: './favorite-routes.html',
   styleUrl: './favorite-routes.css',
 })
-export class FavoriteRoutes {
-  routes: FavoriteRoute[] = [
-    {
-      id: 1,
-      name: 'Route 1',
-      start: 'Address 1',
-      end: 'Address 2',
-      distanceKm: 3,
-      stops: [],
-    },
-    {
-      id: 2,
-      name: 'Route 2',
-      start: 'Address 1',
-      end: 'Address 2',
-      distanceKm: 5,
-      stops: ['Address 1', 'Address 1', 'Address 1'],
-    },
-    {
-      id: 3,
-      name: 'Route 3',
-      start: 'Address 2',
-      end: 'Address 3',
-      distanceKm: 10,
-      stops: [],
-    },
-  ];
+export class FavoriteRoutes implements OnInit {
+  routes: FavoriteRoute[] = [];
+  loading = true;
 
-  expandedRouteId: number | null = null;
+  constructor(private api: FavoriteRoutesApi) {}
 
-  toggle(routeId: number) {
-    this.expandedRouteId = this.expandedRouteId === routeId ? null : routeId;
+  ngOnInit() {
+    this.api.getFavoriteRoutes().subscribe({
+      next: (data) => {
+        this.routes = data.map(this.mapDto);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  private mapDto(dto: any): FavoriteRoute {
+    const pickup = dto.points.find((p: any) => p.type === 'PICKUP');
+    const dropoff = dto.points.find((p: any) => p.type === 'DROPOFF');
+
+    return {
+      id: dto.id,
+      name: dto.name,
+      start: pickup?.address ?? '',
+      end: dropoff?.address ?? '',
+      distanceKm: dto.totalDistanceKm,
+      stops: dto.points
+        .filter((p: any) => p.type === 'STOP')
+        .map((p: any) => p.address),
+    };
   }
 }

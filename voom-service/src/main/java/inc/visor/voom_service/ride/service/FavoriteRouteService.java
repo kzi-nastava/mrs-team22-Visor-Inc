@@ -17,9 +17,11 @@ import inc.visor.voom_service.shared.RoutePointDto;
 public class FavoriteRouteService {
 
     private final FavoriteRouteRepository repository;
+    private final RideEstimateService rideEstimateService;
 
-    public FavoriteRouteService(FavoriteRouteRepository repository) {
+    public FavoriteRouteService(FavoriteRouteRepository repository, RideEstimateService rideEstimateService) {
         this.repository = repository;
+        this.rideEstimateService = rideEstimateService;
     }
 
     public void create(long userId, CreateFavoriteRouteRequest request) {
@@ -42,11 +44,11 @@ public class FavoriteRouteService {
             }
         }
 
+        
         FavoriteRoute route = new FavoriteRoute();
         route.setUserId(userId);
         route.setName(request.getName());
-        route.setTotalDistanceKm(request.getTotalDistanceKm());
-
+        
         List<RoutePoint> points = incomingPoints.stream().map(dto -> {
             RoutePoint rp = new RoutePoint();
             rp.setOrderIndex(dto.getOrderIndex());
@@ -56,13 +58,16 @@ public class FavoriteRouteService {
             rp.setPointType(dto.getType());
             return rp;
         }).toList();
-
+       
+        double estimateDistance = rideEstimateService.calculateTotalDistanceEstimate(incomingPoints);
+        
         route.setRoutePoints(points);
+        route.setTotalDistanceKm(estimateDistance);
 
         repository.save(route);
     }
 
-    public List<FavoriteRouteDto> findAll(long userId) {
+    public List<FavoriteRouteDto> getAllByUserId(long userId) {
         return repository.findAllByUserId(userId)
                 .stream()
                 .map(this::toDto)

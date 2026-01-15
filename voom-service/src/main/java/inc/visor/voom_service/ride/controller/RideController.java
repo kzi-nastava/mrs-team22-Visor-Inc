@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
+import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
 import inc.visor.voom_service.ride.dto.RideHistoryDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
@@ -127,6 +128,22 @@ public class RideController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            long mockUserId = 2L;
+
+            List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(mockUserId);
+
+            return ResponseEntity.ok(favoriteRoutes);
+            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
+        return ResponseEntity.ok(favoriteRoutes);
+    }
+    
     
 
     @PostMapping("/{id}/cancel")

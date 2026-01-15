@@ -242,7 +242,6 @@ export type RideRequestResponseDto = {
 
 export type CreateFavoriteRouteDto = {
   name: string;
-  totalDistanceKm: number;
   points: RideRoutePointDto[];
 };
 

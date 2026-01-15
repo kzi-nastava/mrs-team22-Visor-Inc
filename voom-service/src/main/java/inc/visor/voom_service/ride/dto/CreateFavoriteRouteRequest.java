@@ -7,7 +7,6 @@ import inc.visor.voom_service.shared.RoutePointDto;
 public class CreateFavoriteRouteRequest {
 
     private String name;
-    private double totalDistanceKm;
     private List<RoutePointDto> points;
 
     public CreateFavoriteRouteRequest() {  }
@@ -18,14 +17,6 @@ public class CreateFavoriteRouteRequest {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public double getTotalDistanceKm() {
-        return totalDistanceKm;
-    }
-
-    public void setTotalDistanceKm(double totalDistanceKm) {
-        this.totalDistanceKm = totalDistanceKm;
     }
 
     public List<RoutePointDto> getPoints() {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
+import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.utils.GeoUtil;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 
@@ -21,7 +22,7 @@ public class RideEstimateService {
     ) {
         validateRoute(dto);
 
-        double distanceKm = calculateTotalDistance(dto);
+        double distanceKm = calculateTotalDistance(dto.route.points);
         double price =
             vehicleType.getBasePrice()
             + distanceKm * PRICE_PER_KM;
@@ -45,11 +46,11 @@ public class RideEstimateService {
         }
     }
 
-    private double calculateTotalDistance(
-        RideRequestCreateDTO dto
+    public double calculateTotalDistance(
+        List<RideRequestCreateDTO.RoutePointDTO> dto
     ) {
         List<RideRequestCreateDTO.RoutePointDTO> points =
-            dto.route.points.stream()
+            dto.stream()
                 .sorted(Comparator.comparingInt(p -> p.order))
                 .toList();
 
@@ -66,6 +67,30 @@ public class RideEstimateService {
         }
 
         return total;
+    }
+
+    
+    public double calculateTotalDistanceEstimate(
+        List<RoutePointDto> dto
+    ) {
+        List<RoutePointDto> points =
+            dto.stream()
+                .sorted(Comparator.comparingInt(p -> p.getOrderIndex()))
+                .toList();
+
+        double total = 0.0;
+
+        for (int i = 0; i < points.size() - 1; i++) {
+            var a = points.get(i);
+            var b = points.get(i + 1);
+
+            total += GeoUtil.distanceKm(
+                a.getLat(), a.getLng(),
+                b.getLat(), b.getLng()
+            );
+        }
+
+        return round2(total);
     }
 
     private double round2(double value) {

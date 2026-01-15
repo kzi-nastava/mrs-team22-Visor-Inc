@@ -419,7 +419,6 @@ export class UserHome implements AfterViewInit {
 
       const payload = {
         name,
-        totalDistanceKm: 0,
         points: points.map((p) => ({
           lat: p.lat,
           lng: p.lng,
