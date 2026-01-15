@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
 import inc.visor.voom_service.ride.dto.RideHistoryDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
 import jakarta.validation.Valid;
 
@@ -30,9 +32,11 @@ import jakarta.validation.Valid;
 public class RideController {
 
     private final RideRequestService rideRequestService;
+    private final FavoriteRouteService favoriteRouteService;
 
-    public RideController(RideRequestService rideRequestService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService) {
         this.rideRequestService = rideRequestService;
+        this.favoriteRouteService = favoriteRouteService;
     }
 
     @PostMapping("/requests")
@@ -107,18 +111,24 @@ public class RideController {
         return ResponseEntity.noContent().build();
     }
 
-    // @PostMapping("/requests/favorites/{id}")
-    // public ResponseEntity<RideRequestResponseDto> createRideRequestFromFavorite(
-    //     @AuthenticationPrincipal User user,
-    //     @PathVariable Long id,
-    //     @RequestBody @Valid CreateRideFromFavoriteRouteDto request
-    // ) {
-    //     if (user == null) {
-    //         return ResponseEntity.ok().body(null);
-    //     }
-    //     return ResponseEntity.ok(
-    //         rideService.createFromFavorite(user, id, request));
-    // }
+    @PostMapping("/favorites")
+    public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal User user, @Valid @RequestBody CreateFavoriteRouteRequest request) {
+
+        if (user == null) {
+            long mockUserId = 2L;
+
+            favoriteRouteService.create(mockUserId, request);
+
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        favoriteRouteService.create(user.getId(), request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    
+
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
 

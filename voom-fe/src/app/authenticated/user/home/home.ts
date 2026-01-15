@@ -13,6 +13,7 @@ import { DriverSummaryDto, PREDEFINED_ROUTES, RideApi, ScheduledRideDto } from '
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RideRequestDto } from './home.api';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
+import { Router } from '@angular/router';
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -53,7 +54,8 @@ export class UserHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private snackBar: MatSnackBar,
-    private driverSocket: DriverSimulationWsService
+    private driverSocket: DriverSimulationWsService,
+    private router: Router
   ) {}
 
   routePoints = signal<RoutePoint[]>([]);
@@ -297,7 +299,7 @@ export class UserHome implements AfterViewInit {
     this.driverSocket.requestRoute({
       driverId,
       start: driver.marker.getLatLng(),
-      end: { lat, lng }, 
+      end: { lat, lng },
     });
   }
 
@@ -323,7 +325,7 @@ export class UserHome implements AfterViewInit {
         points: this.routePoints().map((p) => ({
           lat: p.lat,
           lng: p.lng,
-          order: p.order,
+          orderIndex: p.order,
           type: p.type,
           address: p.address,
         })),
@@ -401,17 +403,48 @@ export class UserHome implements AfterViewInit {
     const points = this.routePoints();
 
     if (points.length < 2) {
-      this.snackBar.open('Pickup and dropoff are required', 'Close', { duration: 3000 });
+      this.snackBar.open('Pickup and dropoff are required', 'Close', {
+        duration: 3000,
+      });
       return;
     }
 
-    console.log('Add route to favorites:', points);
+    const pickup = points.find((p) => p.type === 'PICKUP');
+    const dropoff = points.find((p) => p.type === 'DROPOFF');
 
-    this.snackBar.open('Route added to favorites', 'Close', { duration: 3000 });
+    if (!pickup || !dropoff) {
+      this.snackBar.open('Invalid route', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const payload = {
+      name: `${pickup.address} → ${dropoff.address}`,
+      totalDistanceKm: 0,
+      points: points.map((p) => ({
+        lat: p.lat,
+        lng: p.lng,
+        orderIndex: p.order,
+        type: p.type,
+        address: p.address,
+      })),
+    };
+
+    this.rideApi.createFavoriteRoute(payload).subscribe({
+      next: () => {
+        this.snackBar.open('Favorite Route saved', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        if (err.status === 409) {
+          this.snackBar.open('This favorite route already exists', 'Close', { duration: 3000 });
+        }
+      },
+    });
   }
 
   openFavoriteRoutes() {
     console.log('Open favorite routes');
+
+    this.router.navigate(['/user/favorite-routes']);
 
     this.snackBar.open('Favorite routes feature coming soon', 'Close', {
       duration: 3000,

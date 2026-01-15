@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { Router } from '@angular/router';
 
 export interface FavoriteRoute {
   id: number;
@@ -20,8 +21,10 @@ export interface FavoriteRoute {
 export class FavoriteRouteAccordion {
   @Input({ required: true }) route!: FavoriteRoute;
 
+  constructor(private router: Router) {}
+
   pickRoute() {
-    console.log('Pick route', this.route);
+    this.router.navigate(['/user/home']);
   }
 
   removeRoute() {
