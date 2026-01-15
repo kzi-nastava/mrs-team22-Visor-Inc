@@ -46,8 +46,7 @@
             style="@style/RoundedOutlinedInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/first_name"
-            android:orientation="horizontal">
+            android:hint="@string/first_name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_first_name"
@@ -124,10 +123,28 @@
                 android:minHeight="48dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_change_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/change_password"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save_personal_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/save_changes"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="28dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="40dp"
             android:layout_marginBottom="12dp"
             android:text="@string/vehicle_info"
             android:textAllCaps="true"
@@ -166,7 +183,6 @@
                 android:paddingEnd="16dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
             style="@style/RoundedOutlinedInput"
             android:layout_width="match_parent"
@@ -201,33 +217,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
             android:text="@string/baby_transport_allowed" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/cb_pet_transport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:text="@string/pet_transport_allowed" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_change_password"
+            android:id="@+id/btn_change_vehicle_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/change_password"
+            android:paddingTop="16dp"
+            android:text="@string/change_vehicle_information"
             app:backgroundTint="@color/primary"
+            android:gravity="center"
+            android:textAlignment="center"
             app:cornerRadius="24dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/save_changes"
-            app:backgroundTint="@color/primary"
-            app:cornerRadius="28dp" />
 
     </LinearLayout>
 

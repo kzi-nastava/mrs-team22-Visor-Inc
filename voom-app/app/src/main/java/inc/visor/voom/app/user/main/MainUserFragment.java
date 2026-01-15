@@ -36,14 +36,6 @@ public class MainUserFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        //TODO remove
-        profileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
-        profileViewModel.getChangeFragment().observe(getViewLifecycleOwner(), isChange -> {
-            if (isChange) {
-                Navigation.findNavController(view).navigate(R.id.action_mainUserFragment_to_mainDriverFragment);
-            }
-        });
-
         NavController navController = NavHostFragment.findNavController(getChildFragmentManager().findFragmentById(R.id.user_nav_host));
 
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation_view);

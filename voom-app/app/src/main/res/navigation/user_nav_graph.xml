@@ -6,8 +6,9 @@
     app:startDestination="@id/profileFragment">
     <fragment
         android:id="@+id/profileFragment"
-        android:name="inc.visor.voom.app.user.profile.ProfileFragment"
-        android:label="ProfileFragment" />
+        android:name="inc.visor.voom.app.driver.profile.DriverProfileFragment"
+        android:label="ProfileFragment">
+    </fragment>
 
     <fragment
         android:id="@+id/loginFragment"
