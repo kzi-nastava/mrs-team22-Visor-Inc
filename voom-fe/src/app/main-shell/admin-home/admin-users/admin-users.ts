@@ -1,7 +1,9 @@
 import {Component} from '@angular/core';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
-import {MatCard} from '@angular/material/card';
+import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
+import {MatIcon} from '@angular/material/icon';
+import {MatDivider} from '@angular/material/list';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -12,7 +14,11 @@ export const ROUTE_ADMIN_USERS = "users";
     MatDrawerContainer,
     MatDrawerContent,
     ValueInputString,
-    MatCard
+    MatCard,
+    MatIcon,
+    MatCardContent,
+    MatCardTitle,
+    MatDivider
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import {MatCard} from '@angular/material/card';
+import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
+import {MatDivider} from '@angular/material/list';
+import {MatIcon} from '@angular/material/icon';
 
 export const ROUTE_ADMIN_ROLES = "roles";
 
@@ -12,7 +14,11 @@ export const ROUTE_ADMIN_ROLES = "roles";
     MatDrawer,
     MatDrawerContainer,
     MatDrawerContent,
-    ValueInputString
+    ValueInputString,
+    MatCardContent,
+    MatCardTitle,
+    MatDivider,
+    MatIcon
   ],
   templateUrl: './admin-roles.html',
   styleUrl: './admin-roles.css',

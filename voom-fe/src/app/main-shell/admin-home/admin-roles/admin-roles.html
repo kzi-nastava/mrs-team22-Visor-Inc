@@ -5,13 +5,37 @@
         <app-value-input-string [label]="'Search'"/>
       </div>
       <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
-        <div class="text-lg px-2">Role 1</div>
+        <div class="text-lg px-2">John Doe</div>
       </mat-card>
       <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
-        <div class="text-lg px-2">Role 2</div>
+        <div class="text-lg px-2">Jane Doe</div>
       </mat-card>
     </div>
   </mat-drawer>
-  <mat-drawer-content>
+  <mat-drawer-content class="flex flex-col space-y-4 p-8">
+    <mat-card appearance="outlined" class="">
+      <mat-card-title class="p-4">
+        <div class="flex justify-between items-center">
+          <div class="font-medium text-xl">General</div>
+          <mat-icon class="cursor-pointer">save</mat-icon>
+        </div>
+      </mat-card-title>
+      <mat-divider/>
+      <mat-card-content>
+
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="">
+      <mat-card-title class="p-4">
+        <div class="flex justify-between items-center">
+          <div class="font-medium text-xl">Permissions</div>
+          <mat-icon class="cursor-pointer">save</mat-icon>
+        </div>
+      </mat-card-title>
+      <mat-divider/>
+      <mat-card-content>
+
+      </mat-card-content>
+    </mat-card>
   </mat-drawer-content>
 </mat-drawer-container>
