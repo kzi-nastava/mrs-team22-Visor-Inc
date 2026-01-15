@@ -141,7 +141,8 @@ app-ride-history-table {
 
 @include mat.sidenav-overrides(
   (
-    container-background-color: $primary,
-    content-text-color: white,
+    container-divider-color: $primary,
+    container-text-color: $primary,
+    container-shape: 0px,
   )
 );

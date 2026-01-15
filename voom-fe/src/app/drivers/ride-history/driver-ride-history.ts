@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 // import { Header } from '../../core/layout/header/header';
-import { RideHistoryTable } from './components/ride-history-table/ride-history-table';
-import { ValueInputDate } from '../../shared/value-input/value-input-date/value-input-date';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Footer } from '../../core/layout/footer/footer';
-import { Header } from '../../core/layout/header-kt1/header-kt1';
-import { RideAccordion } from './components/ride-accordion/ride-accordion';
-import { MatIcon } from '@angular/material/icon';
+import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
+import {MatIconButton} from '@angular/material/button';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {Footer} from '../../core/layout/footer/footer';
+import {Header} from '../../core/layout/header-kt1/header-kt1';
+import {RideAccordion} from './components/ride-accordion/ride-accordion';
+import {MatIcon} from '@angular/material/icon';
 
 export const ROUTE_DRIVER_RIDE_HISTORY = 'driver/rideHistory';
 
@@ -35,9 +34,7 @@ export interface Ride {
   selector: 'app-driver-ride-history',
   imports: [
     Header,
-    RideHistoryTable,
     ValueInputDate,
-    MatButton,
     MatIcon,
     ReactiveFormsModule,
     Footer,

@@ -1,0 +1,15 @@
+<mat-drawer-container class="w-full h-full">
+  <mat-drawer mode="side" opened class="pt-4">
+    <div class="flex flex-col items-center space-y-4">
+      @for (tab of tabs; track tab.routerLink) {
+        <div class="grid grid-cols-2 grid-rows-1 w-full space-x-2 items-center">
+          <mat-icon class="col-start-1 justify-self-end cursor-pointer" (click)="changeTab(tab.routerLink)">{{ tab.icon }}</mat-icon>
+          <div class="text-2xl col-start-2 cursor-pointer" (click)="changeTab(tab.routerLink)">{{ tab.title }}</div>
+        </div>
+      }
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
+    <router-outlet/>
+  </mat-drawer-content>
+</mat-drawer-container>

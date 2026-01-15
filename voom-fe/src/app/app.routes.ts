@@ -7,6 +7,7 @@ import {DriverRideHistory, ROUTE_DRIVER_RIDE_HISTORY,} from './drivers/ride-hist
 import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/forgot-password/forgot-password';
 import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
 import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
+import {AdminHome, ROUTE_HOME_ADMIN} from './main-shell/admin-home/admin-home';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,11 @@ export const routes: Routes = [
   {
     path: ROUTE_HOME,
     component: Home,
+  },
+  {
+    path: ROUTE_HOME_ADMIN,
+    component: AdminHome,
+    loadChildren: () => import("./main-shell/admin-home/admin.routes")
   },
   {
     path: ROUTE_DRIVER_RIDE_HISTORY,
