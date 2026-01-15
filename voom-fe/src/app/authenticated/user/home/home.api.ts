@@ -46,7 +46,7 @@ export type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 export type RideRoutePointDto = {
   lat: number;
   lng: number;
-  order: number;
+  orderIndex: number;
   type: RoutePointType;
   address: string;
 };
@@ -240,6 +240,11 @@ export type RideRequestResponseDto = {
   pickupLng: number | null;
 };
 
+export type CreateFavoriteRouteDto = {
+  name: string;
+  points: RideRoutePointDto[];
+};
+
 @Injectable({ providedIn: 'root' })
 export class RideApi {
   private readonly baseUrl = 'http://localhost:8080/api/rides';
@@ -249,6 +254,10 @@ export class RideApi {
 
   createRideRequest(payload: RideRequestDto): Observable<RideRequestResponseDto> {
     return this.http.post<RideRequestResponseDto>(`${this.baseUrl}/requests`, payload);
+  }
+
+  createFavoriteRoute(payload: CreateFavoriteRouteDto): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/favorites`, payload);
   }
 
   getActiveDrivers(): Observable<DriverSummaryDto[]> {

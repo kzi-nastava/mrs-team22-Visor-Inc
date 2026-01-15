@@ -5,7 +5,10 @@
     <div class="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center mb-4">
       <mat-icon class="text-white text-6xl">person</mat-icon>
     </div>
-    <h2 class="text-lg font-medium text-gray-800">Name Lastname</h2>
+    <h2 class="text-lg font-medium text-gray-800">
+      {{ profileForm.controls.firstName.value }}
+      {{ profileForm.controls.lastName.value }}
+    </h2>
   </div>
 
   <mat-divider />
