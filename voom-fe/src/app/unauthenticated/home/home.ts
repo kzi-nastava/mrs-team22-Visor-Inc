@@ -40,7 +40,7 @@ export class Home {
 
   constructor(private ws: DriverSimulationWsService, private rideApi: RideApi) {}
 
-  loadDriversAndInsertDickIntoMouth() {
+  loadActiveDrivers() {
     this.rideApi.getActiveDrivers().subscribe((drivers) => {
       console.log('ACTIVE DRIVERS:', drivers);
 
@@ -73,6 +73,6 @@ export class Home {
   }
 
   ngOnInit() {
-    this.loadDriversAndInsertDickIntoMouth();
+    this.loadActiveDrivers();
   }
 }
