@@ -14,6 +14,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RideRequestDto } from './home.api';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -55,7 +57,8 @@ export class UserHome implements AfterViewInit {
     private rideApi: RideApi,
     private snackBar: MatSnackBar,
     private driverSocket: DriverSimulationWsService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   routePoints = signal<RoutePoint[]>([]);
@@ -403,41 +406,41 @@ export class UserHome implements AfterViewInit {
     const points = this.routePoints();
 
     if (points.length < 2) {
-      this.snackBar.open('Pickup and dropoff are required', 'Close', {
-        duration: 3000,
+      this.snackBar.open('Pickup and dropoff are required', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(FavoriteRouteNameDialog, {
+      width: '360px',
+    });
+
+    dialogRef.afterClosed().subscribe((name: string | undefined) => {
+      if (!name) return;
+
+      const payload = {
+        name,
+        totalDistanceKm: 0,
+        points: points.map((p) => ({
+          lat: p.lat,
+          lng: p.lng,
+          orderIndex: p.order,
+          type: p.type,
+          address: p.address,
+        })),
+      };
+
+      this.rideApi.createFavoriteRoute(payload).subscribe({
+        next: () => {
+          this.snackBar.open('Route added to favorites', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          if (err.status === 409) {
+            this.snackBar.open('Route already exists', 'Close', { duration: 3000 });
+          } else {
+            this.snackBar.open('Failed to save route', 'Close', { duration: 3000 });
+          }
+        },
       });
-      return;
-    }
-
-    const pickup = points.find((p) => p.type === 'PICKUP');
-    const dropoff = points.find((p) => p.type === 'DROPOFF');
-
-    if (!pickup || !dropoff) {
-      this.snackBar.open('Invalid route', 'Close', { duration: 3000 });
-      return;
-    }
-
-    const payload = {
-      name: `${pickup.address} → ${dropoff.address}`,
-      totalDistanceKm: 0,
-      points: points.map((p) => ({
-        lat: p.lat,
-        lng: p.lng,
-        orderIndex: p.order,
-        type: p.type,
-        address: p.address,
-      })),
-    };
-
-    this.rideApi.createFavoriteRoute(payload).subscribe({
-      next: () => {
-        this.snackBar.open('Favorite Route saved', 'Close', { duration: 3000 });
-      },
-      error: (err) => {
-        if (err.status === 409) {
-          this.snackBar.open('This favorite route already exists', 'Close', { duration: 3000 });
-        }
-      },
     });
   }
 
