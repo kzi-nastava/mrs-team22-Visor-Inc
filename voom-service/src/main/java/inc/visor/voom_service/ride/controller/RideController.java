@@ -144,8 +144,25 @@ public class RideController {
         return ResponseEntity.ok(favoriteRoutes);
     }
     
-    
+    @DeleteMapping("/favorites/{favoriteRouteId}")
+    public ResponseEntity<Void> deleteFavoriteRoute(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long favoriteRouteId
+    ) {
+        if (user == null) {
+            long mockUserId = 2L;
 
+            favoriteRouteService.delete(mockUserId, favoriteRouteId);
+
+            return ResponseEntity.noContent().build();
+            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        favoriteRouteService.delete(user.getId(), favoriteRouteId);
+
+        return ResponseEntity.noContent().build();
+    }
+    
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
 

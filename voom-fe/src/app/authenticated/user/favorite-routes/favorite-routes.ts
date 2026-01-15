@@ -3,7 +3,7 @@ import { Header } from '../../../core/layout/header-kt1/header-kt1';
 import { Footer } from '../../../core/layout/footer/footer';
 import { FavoriteRouteAccordion } from './favorite-routes-accordition/favorite-routes-accordition';
 import { FavoriteRouteDto, FavoriteRoutesApi } from './favorite-routes.api';
-import { VoomApiClient } from '../../../core/rest/voom-api-client';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const ROUTE_FAVORITE_ROUTES = 'user/favorite-routes';
 
@@ -19,7 +19,7 @@ export interface FavoriteRoute {
 
 @Component({
   selector: 'app-favorite-routes',
-  imports: [Header, Footer, FavoriteRouteAccordion],
+  imports: [Header, Footer, FavoriteRouteAccordion, MatSnackBarModule],
   templateUrl: './favorite-routes.html',
   styleUrl: './favorite-routes.css',
 })
@@ -27,7 +27,7 @@ export class FavoriteRoutes implements OnInit {
   routes: FavoriteRoute[] = [];
   loading = true;
 
-  constructor(private api: FavoriteRoutesApi) {}
+  constructor(private api: FavoriteRoutesApi, private snackBar: MatSnackBar) {}
 
   ngOnInit() {
     this.api.getFavoriteRoutes().subscribe({
@@ -54,5 +54,26 @@ export class FavoriteRoutes implements OnInit {
       distanceKm: dto.totalDistanceKm,
       stops: dto.points.filter((p: any) => p.type === 'STOP').map((p: any) => p.address),
     };
+  }
+
+  fetch() {
+    this.loading = true;
+
+    this.api.getFavoriteRoutes().subscribe({
+      next: (data) => {
+        this.routes = data.map(this.mapDto);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  onRouteDeleted() {
+    this.snackBar.open('Favorite route successfully removed', 'Close', {
+      duration: 3000,
+    });
+    this.fetch();
   }
 }

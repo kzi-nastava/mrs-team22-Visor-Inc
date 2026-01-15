@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Router } from '@angular/router';
 import { FavoriteRoute } from '../favorite-routes';
-
+import { FavoriteRoutesApi } from '../favorite-routes.api';
 
 @Component({
   selector: 'app-favorite-route-accordion',
@@ -14,7 +14,11 @@ import { FavoriteRoute } from '../favorite-routes';
 export class FavoriteRouteAccordion {
   @Input({ required: true }) route!: FavoriteRoute;
 
-  constructor(private router: Router) {}
+  @Output() deleted = new EventEmitter<void>();
+
+  deleting = false;
+
+  constructor(private router: Router, private api: FavoriteRoutesApi) {}
 
   pickRoute(route: FavoriteRoute) {
     this.router.navigate(['/user/home'], {
@@ -25,6 +29,17 @@ export class FavoriteRouteAccordion {
   }
 
   removeRoute() {
-    console.log('Remove route', this.route);
+    if (this.deleting) return;
+
+    this.deleting = true;
+    this.api.deleteFavoriteRoute(this.route.id).subscribe({
+      next: () => {
+        this.deleting = false;
+        this.deleted.emit();
+      },
+      error: () => {
+        this.deleting = false;
+      },
+    });
   }
 }

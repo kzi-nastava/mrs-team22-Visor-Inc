@@ -477,12 +477,6 @@ export class UserHome implements AfterViewInit {
   }
 
   openFavoriteRoutes() {
-    console.log('Open favorite routes');
-
     this.router.navigate(['/user/favorite-routes']);
-
-    this.snackBar.open('Favorite routes feature coming soon', 'Close', {
-      duration: 3000,
-    });
   }
 }

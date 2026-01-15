@@ -15,7 +15,6 @@ export type FavoriteRouteDto = {
   }[];
 };
 
-
 @Injectable({ providedIn: 'root' })
 export class FavoriteRoutesApi {
   private readonly baseUrl = 'http://localhost:8080/api/rides';
@@ -23,8 +22,10 @@ export class FavoriteRoutesApi {
   constructor(private http: HttpClient) {}
 
   getFavoriteRoutes() {
-  return this.http.get<FavoriteRouteDto[]>(`${this.baseUrl}/favorites`);
-}
+    return this.http.get<FavoriteRouteDto[]>(`${this.baseUrl}/favorites`);
+  }
 
-
+  deleteFavoriteRoute(routeId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/favorites/${routeId}`);
+  }
 }
