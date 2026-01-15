@@ -1,12 +1,16 @@
 package inc.visor.voom_service.ride.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
-import inc.visor.voom_service.ride.model.enums.VehicleType;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.vehicle.model.VehicleType;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -31,7 +35,7 @@ public class RideRequest {
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    @OneToOne(cascade= CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ride_route_id", nullable = false)
     private RideRoute rideRoute;
 
@@ -39,11 +43,15 @@ public class RideRequest {
     @Column(name = "status", nullable = false)
     private RideRequestStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "schedule_type", nullable = false)
+    private ScheduleType scheduleType;
+
     @Column(name = "scheduled_time", nullable = true)
     private LocalDateTime scheduledTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "vehicle_type", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "vehicle_type_id", nullable = false)
     private VehicleType vehicleType;
 
     @Column(name = "baby_transport", nullable = false)
@@ -51,6 +59,23 @@ public class RideRequest {
 
     @Column(name = "pet_transport", nullable = false)
     private boolean petTransport;
+
+    @Column(name = "calculated_price", nullable = false)
+    private double calculatedPrice;
+
+    @ElementCollection
+    @CollectionTable(
+        name = "ride_request_linked_passengers",
+        joinColumns = @JoinColumn(name = "ride_request_id")
+    )
+    @Column(name = "email", nullable = false)
+    private List<String> linkedPassengerEmails;
+
+    @ManyToOne
+    @JoinColumn(name = "cancelled_by_user_id", nullable = true)
+    private User cancelledBy;
+
+    public RideRequest() {}
 
     public long getId() {
         return id;
@@ -82,7 +107,6 @@ public class RideRequest {
 
     public void setStatus(RideRequestStatus status) {
         this.status = status;
-
     }
 
     public LocalDateTime getScheduledTime() {
@@ -91,6 +115,14 @@ public class RideRequest {
 
     public void setScheduledTime(LocalDateTime scheduledTime) {
         this.scheduledTime = scheduledTime;
+    }
+
+    public ScheduleType getScheduleType() {
+        return scheduleType;
+    }
+
+    public void setScheduleType(ScheduleType scheduleType) {
+        this.scheduleType = scheduleType;
     }
 
     public VehicleType getVehicleType() {
@@ -116,4 +148,29 @@ public class RideRequest {
     public void setPetTransport(boolean petTransport) {
         this.petTransport = petTransport;
     }
+
+    public User getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public void setCancelledBy(User cancelledBy) {
+        this.cancelledBy = cancelledBy;
+    }
+
+    public double getCalculatedPrice() {
+        return calculatedPrice;
+    }
+
+    public void setCalculatedPrice(double calculatedPrice) {
+        this.calculatedPrice = calculatedPrice;
+    }
+
+    public List<String> getLinkedPassengerEmails() {
+        return linkedPassengerEmails;
+    }
+
+    public void setLinkedPassengerEmails(List<String> linkedPassengerEmails) {
+        this.linkedPassengerEmails = linkedPassengerEmails;
+    }
+
 }

@@ -35,6 +35,8 @@ public class RoutePoint {
     @Column(name = "point_type", nullable = false)
     private RoutePointType pointType;
 
+    public RoutePoint() {}
+
     public long getId() {
         return id;
     }

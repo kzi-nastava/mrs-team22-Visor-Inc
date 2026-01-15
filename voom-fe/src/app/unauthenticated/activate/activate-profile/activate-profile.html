@@ -1,0 +1,44 @@
+<div class="py-16">
+  <div class="flex justify-center">
+    <div class="max-w-xl space-y-8">
+      <div class="w-80 md:w-96">
+        <img src="assets/images/logo.png" alt="Voom Logo" class="w-96" />
+
+        <div class="flex items-center justify-center gap-2">
+          <h1 class="text-xl text-primary">Set your password</h1>
+
+          <button
+            type="button"
+            mat-icon-button
+            [matTooltip]="passwordTooltipText"
+            matTooltipPosition="right"
+            matTooltipClass="password-tooltip"
+            
+          >
+            <mat-icon>info_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-8">
+        <app-value-input-string
+          label="Password"
+          [formControl]="form.controls.password1"
+          [hide]="true"
+          class="w-full"
+        />
+
+        <app-value-input-string
+          label="Repeat password"
+          [formControl]="form.controls.password2"
+          [hide]="true"
+          class="w-full"
+        />
+
+        <button matButton="filled" [disabled]="form.invalid" (click)="submit()">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

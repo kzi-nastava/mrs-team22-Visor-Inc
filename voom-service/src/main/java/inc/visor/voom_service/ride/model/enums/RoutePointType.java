@@ -1,7 +1,7 @@
 package inc.visor.voom_service.ride.model.enums;
 
 public enum RoutePointType {
-    START,
+    PICKUP,
     STOP,
-    DESTINATION
+    DROPOFF
 }

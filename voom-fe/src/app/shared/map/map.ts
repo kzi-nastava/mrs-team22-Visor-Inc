@@ -1,8 +1,15 @@
-import { AfterViewInit, Component, Output, EventEmitter } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Output,
+  EventEmitter,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
-// import 'leaflet-routing-machine';
 
 const NOVI_SAD_BOUNDS = {
   latMin: 45.2,
@@ -11,99 +18,346 @@ const NOVI_SAD_BOUNDS = {
   lonMax: 19.95,
 };
 
+type DriverStatus = 'FREE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE';
+
 type Driver = {
   id: number;
-  status: string;
+  firstName?: string;
+  lastName?: string;
+  status: DriverStatus;
   marker: L.Marker;
+
   route?: L.LatLng[];
   routeIndex?: number;
+  direction?: 1 | -1;
+
+  progress?: number;
   speed?: number;
 };
 
 @Component({
   selector: 'app-map',
-  imports: [],
   templateUrl: './map.html',
   styleUrl: './map.css',
 })
-export class Map implements AfterViewInit {
-  private waypoints: L.LatLng[] = [];
-  constructor(private http: HttpClient) {}
+export class Map implements AfterViewInit, OnChanges {
+  private drawVersion = 0;
+  private readonly FOCUSED_ZOOM = 17;
 
-  private map: any = null;
+  private map!: L.Map;
   private drivers: Driver[] = [];
 
-  private randomLatLng(): L.LatLng {
-    const lat =
-      NOVI_SAD_BOUNDS.latMin + Math.random() * (NOVI_SAD_BOUNDS.latMax - NOVI_SAD_BOUNDS.latMin);
+  private waypoints: L.LatLng[] = [];
+  private markers: L.Marker[] = [];
+  private routeLine: L.Polyline | null = null;
 
-    const lon =
-      NOVI_SAD_BOUNDS.lonMin + Math.random() * (NOVI_SAD_BOUNDS.lonMax - NOVI_SAD_BOUNDS.lonMin);
+  @Input() focusedDriverId: number | null = null;
 
-    return new L.LatLng(lat, lon);
+  @Input() points: {
+    lat: number;
+    lng: number;
+    type: 'PICKUP' | 'STOP' | 'DROPOFF';
+    order: number;
+  }[] = [];
+
+  @Input() locked = false;
+
+  @Output() mapClick = new EventEmitter<{
+    lat: number;
+    lng: number;
+    address: string;
+  }>();
+
+  @Output() cleared = new EventEmitter<void>();
+
+  constructor(private http: HttpClient) {}
+
+  private userMarkerIcon = L.icon({
+    iconUrl: 'assets/icons/location.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+
+  ngAfterViewInit(): void {
+    if (this.map) return; 
+    this.map = L.map('map').setView([45.2396, 19.8227], 14);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(this.map);
+
+    const ClearControl = L.Control.extend({
+      onAdd: () => {
+        const btn = L.DomUtil.create('button', 'leaflet-bar');
+        btn.innerHTML = '✕';
+        btn.style.width = '36px';
+        btn.style.height = '36px';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '20px';
+        btn.style.background = 'white';
+        btn.style.border = 'none';
+
+        btn.onclick = (e) => {
+          if (this.locked) return;
+          e.preventDefault();
+          e.stopPropagation();
+          this.clearUserRoute();
+        };
+
+        return btn;
+      },
+    });
+
+    this.map.addControl(new ClearControl({ position: 'topright' }));
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.reverseSearch(e.latlng.lat, e.latlng.lng).subscribe((res) => {
+        const address = res?.features?.[0]?.properties?.display_name ?? 'Unknown location';
+
+        this.mapClick.emit({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+          address,
+        });
+      });
+    });
   }
 
-  private async initDrivers() {
-    for (let i = 0; i < 10; i++) {
-      const status = i < 5 ? 'BUSY' : 'FREE';
+  private focusDriver(driver: Driver) {
+    const pos = driver.marker.getLatLng();
 
-      const startPos = this.randomLatLng();
-      const freeDriverIcon = L.icon({
-        iconUrl: 'assets/icons/free driver.png',
-        iconSize: [30, 30],
-        iconAnchor: [30, 30],
-      });
+    this.map.setView(pos, this.FOCUSED_ZOOM, {
+      animate: true,
+    });
+  }
 
-      const busyDriverIcon = L.icon({
-        iconUrl: 'assets/icons/busy driver.png',
-        iconSize: [30, 30],
-        iconAnchor: [30, 30],
-      });
-      const options = {
-        icon: status === 'BUSY' ? busyDriverIcon : freeDriverIcon,
-      };
-      const marker = L.marker(startPos, options).addTo(this.map);
-      marker.on('click', () => {
-        marker.bindPopup(`<b>Driver ${driver.id}</b><br>Status: ${driver.status}`).openPopup();
-      });
+  applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
+    const driver = this.drivers.find((d) => d.id === driverId);
+    if (!driver) return;
 
-      let driver = {
-        id: i,
-        status: status,
-        marker: marker,
-        routeIndex: 0,
-        speed: 1,
-      };
+    driver.route = coords.map((c) => L.latLng(c.lat, c.lng));
+    driver.routeIndex = 0;
+    driver.direction = 1;
 
-      // this.snapToRoad(startPos).subscribe((res) => {
-      //   const snapped = res.waypoints[0].location;
-      //   driver.marker.setLatLng([snapped[1], snapped[0]]);
-      // });
-
-      // if (status === 'BUSY') {
-      //   this.assignRouteToDriver(driver, startPos);
-      // }
-
-      this.drivers.push(driver);
+    if (this.focusedDriverId === driver.id) {
+      this.focusDriver(driver);
     }
+
+    this.startSimulation();
   }
 
-  assignRouteToDriver(driver: Driver, start: L.LatLng) {
-    const end = this.randomLatLng();
+  startSimulation() {
+    let lastTime = performance.now();
 
-    this.getRoute(start, end).subscribe((res) => {
+    const animate = (now: number) => {
+      const deltaSec = (now - lastTime) / 1000;
+      lastTime = now;
+
+      this.drivers.forEach((driver) => {
+        if (!driver.route || driver.route.length < 2) return;
+
+        const dir = driver.direction ?? 1;
+        let i = driver.routeIndex ?? 0;
+        let p = driver.progress ?? 0;
+
+        const a = driver.route[i];
+        const b = driver.route[i + dir];
+
+        if (!b) {
+          driver.direction = dir === 1 ? -1 : 1;
+          return;
+        }
+
+        const segmentDist = a.distanceTo(b);
+        const move = (driver.speed ?? 1) * deltaSec;
+
+        p += move / segmentDist;
+
+        if (p >= 1) {
+          driver.routeIndex = i + dir;
+          driver.progress = 0;
+
+          if (driver.status === 'GOING_TO_PICKUP' && driver.routeIndex >= driver.route.length - 1) {
+            driver.status = 'WAITING_AT_PICKUP';
+            driver.route = undefined;
+            driver.progress = 0;
+            return;
+          }
+
+          if (driver.routeIndex <= 0 || driver.routeIndex >= driver.route.length - 1) {
+            driver.direction = dir === 1 ? -1 : 1;
+          }
+        } else {
+          driver.progress = p;
+          const lat = a.lat + (b.lat - a.lat) * p;
+          const lng = a.lng + (b.lng - a.lng) * p;
+          driver.marker.setLatLng([lat, lng]);
+
+          if (this.focusedDriverId === driver.id) {
+            this.map.panTo([lat, lng], { animate: true });
+          }
+        }
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+  }
+
+  getDriver(driverId: number): Driver | undefined {
+    return this.drivers.find((d) => d.id === driverId);
+  }
+
+  getFreeDriversSnapshot(): {
+    driverId: number;
+    lat: number;
+    lng: number;
+  }[] {
+    return this.drivers
+      .filter((d) => d.status === 'FREE')
+      .map((d) => {
+        const pos = d.marker.getLatLng();
+        return {
+          driverId: d.id,
+          lat: pos.lat,
+          lng: pos.lng,
+        };
+      });
+  }
+
+  addSimulatedDriver(config: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    start: { lat: number; lng: number };
+    status: DriverStatus;
+  }) {
+    const icon = L.icon({
+      iconUrl:
+        config.status === 'FREE' ? 'assets/icons/free driver.png' : 'assets/icons/busy driver.png',
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+    });
+
+    const marker = L.marker([config.start.lat, config.start.lng], { icon })
+      .addTo(this.map)
+      .bindTooltip(
+        `
+      <div style="font-size: 13px; line-height: 1.4">
+        <strong>Driver #${config.id}</strong><br/>
+        ${config.firstName} ${config.lastName}
+      </div>
+      `,
+        {
+          direction: 'top',
+          offset: [0, -20],
+          opacity: 0.9,
+          sticky: true,
+        }
+      );
+
+    this.drivers.push({
+      id: config.id,
+      firstName: config.firstName,
+      lastName: config.lastName,
+      status: config.status,
+      marker,
+      route: [],
+      routeIndex: 0,
+      direction: 1,
+      progress: 0,
+      speed: 0.25 + Math.random() * 0.25,
+    });
+  }
+
+  assignRouteToDriver(driver: any, start: L.LatLng, end: { lat: number; lng: number }) {
+    this.getRoute(start, L.latLng(end.lat, end.lng)).subscribe((res) => {
       const coords = res.routes[0].geometry.coordinates;
-      console.log(`from getRoute: ${coords}`);
       driver.route = coords.map((c: number[]) => L.latLng(c[1], c[0]));
-
       driver.routeIndex = 0;
     });
   }
 
-  snapToRoad(latlng: L.LatLng) {
-    return this.http.get<any>(
-      `https://router.project-osrm.org/nearest/v1/driving/${latlng.lng},${latlng.lat}`
-    );
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['points'] && this.map) {
+      this.syncFromPoints();
+    }
+  }
+
+  private syncFromPoints() {
+    this.drawVersion++;
+
+    this.markers.forEach((m) => this.map.removeLayer(m));
+    this.markers = [];
+
+    if (this.routeLine) {
+      this.map.removeLayer(this.routeLine);
+      this.routeLine = null;
+    }
+
+    if (!this.points || this.points.length === 0) {
+      this.waypoints = [];
+      return;
+    }
+
+    const sorted = [...this.points].sort((a, b) => a.order - b.order);
+
+    this.waypoints = sorted.map((p) => {
+      const ll = L.latLng(p.lat, p.lng);
+      const marker = L.marker(ll, { icon: this.userMarkerIcon }).addTo(this.map);
+      this.markers.push(marker);
+      return ll;
+    });
+
+    if (this.waypoints.length >= 2) {
+      this.drawRouteOSRM(this.drawVersion);
+    }
+  }
+
+  private drawRouteOSRM(version: number) {
+    if (this.waypoints.length < 2) return;
+
+    const requests = [];
+    for (let i = 0; i < this.waypoints.length - 1; i++) {
+      requests.push(this.getRoute(this.waypoints[i], this.waypoints[i + 1]));
+    }
+
+    forkJoin(requests).subscribe((results) => {
+      if (version !== this.drawVersion) return;
+
+      const allPoints: L.LatLng[] = [];
+
+      results.forEach((res) => {
+        const coords = res.routes[0].geometry.coordinates;
+        coords.forEach((c: number[]) => {
+          allPoints.push(L.latLng(c[1], c[0]));
+        });
+      });
+
+      if (this.routeLine) {
+        this.map.removeLayer(this.routeLine);
+      }
+
+      this.routeLine = L.polyline(allPoints, {
+        color: '#2563eb',
+        weight: 4,
+        lineJoin: 'round',
+      }).addTo(this.map);
+    });
+  }
+
+  private clearUserRoute() {
+    this.markers.forEach((m) => this.map.removeLayer(m));
+    this.markers = [];
+    this.waypoints = [];
+
+    if (this.routeLine) {
+      this.map.removeLayer(this.routeLine);
+      this.routeLine = null;
+    }
+
+    this.cleared.emit();
   }
 
   getRoute(from: L.LatLng, to: L.LatLng) {
@@ -114,57 +368,9 @@ export class Map implements AfterViewInit {
     );
   }
 
-  startSimulation() {
-    console.log(this.drivers);
-    console.log('sim started');
-    setInterval(() => {
-      this.drivers
-        .filter((d) => d.status === 'BUSY' && d.route)
-        .forEach((driver) => {
-          console.log(driver);
-          const i = driver.routeIndex!;
-          if (i >= driver.route!.length - 1) {
-            driver.routeIndex = 0;
-            return;
-          }
-
-          const curr = driver.route![i];
-          const next = driver.route![i + 1];
-
-          const t = 0.000001;
-
-          const lat = this.lerp(curr.lat, next.lat, t);
-          const lng = this.lerp(curr.lng, next.lng, t);
-
-          driver.marker.setLatLng([lat, lng]);
-
-          console.log(`new: ${lat} ${lng}`);
-
-          driver.routeIndex! += driver.speed!;
-        });
-    }, 1000);
-  }
-
-  lerp(a: number, b: number, t: number) {
-    return a + (b - a) * t;
-  }
-
-  searchStreet(street: string): Observable<any> {
-    return this.http.get('https://nominatim.openstreetmap.org/search?format=json&q=' + street);
-  }
   reverseSearch(lat: number, lon: number): Observable<any> {
     return this.http.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1&format=geocodejson`
+      `https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${lat}&lon=${lon}`
     );
-  }
-  ngAfterViewInit(): void {
-    this.map = L.map('map').setView([45.2396, 19.8227], 14);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(this.map);
-
-    this.initDrivers();
-    // this.startSimulation();
   }
 }

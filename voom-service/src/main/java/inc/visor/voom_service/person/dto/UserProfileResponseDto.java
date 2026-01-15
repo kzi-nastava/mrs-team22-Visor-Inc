@@ -18,6 +18,13 @@ public class UserProfileResponseDto {
         this.address = address;
     }
 
+    public UserProfileResponseDto(String firstName, String lastName, String phoneNumber, String address) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+    }
+
     public String getEmail() {
         return email;
     }

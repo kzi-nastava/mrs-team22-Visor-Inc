@@ -1,10 +1,79 @@
 package inc.visor.voom_service.driver.service;
 
-import inc.visor.voom_service.driver.dto.DriverLocationDto;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import inc.visor.voom_service.activation.model.ActivationToken;
+import inc.visor.voom_service.activation.service.ActivationTokenService;
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.model.UserType;
+import inc.visor.voom_service.auth.user.repository.UserRepository;
+import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
+import inc.visor.voom_service.auth.user.repository.UserTypeRepository;
+import inc.visor.voom_service.driver.dto.CreateDriverDto;
+import inc.visor.voom_service.driver.dto.DriverLocationDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.mail.EmailService;
+import inc.visor.voom_service.person.model.Person;
+import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.shared.utils.GeoUtil;
+import inc.visor.voom_service.shared.utils.Helpers;
+import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
+import inc.visor.voom_service.vehicle.model.Vehicle;
+import inc.visor.voom_service.vehicle.model.VehicleType;
+import inc.visor.voom_service.vehicle.repository.VehicleRepository;
+import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class DriverService {
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final VehicleRepository vehicleRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleTypeRepository vehicleTypeRepository;
+    private final UserRepository userRepository;
+    private final UserTypeRepository userTypeRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final PersonRepository personRepository;
+
+    private final RideService rideService;
+    private final EmailService emailService;
+    private final ActivationTokenService activationTokenService;
+
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService) {
+        this.vehicleRepository = vehicleRepository;
+        this.driverRepository = driverRepository;
+        this.vehicleTypeRepository = vehicleTypeRepository;
+        this.userRepository = userRepository;
+        this.userTypeRepository = userTypeRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.personRepository = personRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.activationTokenService = activationTokenService;
+        this.rideService = rideService;
+    }
+
     public void simulateMove(DriverLocationDto dto) {
         // used for simulating movement
         // one possible way is to 1. select 2 random points in Novi Sad
@@ -18,4 +87,241 @@ public class DriverService {
         return;
     }
 
+    public VehicleSummaryDto getVehicle(Long userId) {
+
+        Driver driver = driverRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("Driver not found"));
+
+        Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
+                .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
+
+        VehicleSummaryDto dto = new VehicleSummaryDto(
+                vehicle.getVehicleType().getType(),
+                vehicle.getYear(),
+                vehicle.getModel(),
+                vehicle.getLicensePlate(),
+                vehicle.isBabySeat(),
+                vehicle.isPetFriendly(),
+                vehicle.getNumberOfSeats(),
+                driver.getId()
+        );
+
+        return dto;
+    }
+
+    public VehicleSummaryDto updateVehicle(Long userId, VehicleSummaryDto request) {
+
+        Driver driver = driverRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("Driver not found"));
+
+        Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
+                .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
+
+        VehicleType vehicleType
+                = vehicleTypeRepository.findByType(request.getVehicleType())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle type"));
+
+        vehicle.setModel(request.getModel());
+        vehicle.setLicensePlate(request.getLicensePlate());
+        vehicle.setNumberOfSeats(request.getNumberOfSeats());
+        vehicle.setBabySeat(request.isBabySeat());
+        vehicle.setPetFriendly(request.isPetFriendly());
+        vehicle.setVehicleType(vehicleType);
+
+        vehicleRepository.save(vehicle);
+
+        VehicleSummaryDto dto = new VehicleSummaryDto(
+                vehicle.getVehicleType().getType(),
+                vehicle.getYear(),
+                vehicle.getModel(),
+                vehicle.getLicensePlate(),
+                vehicle.isBabySeat(),
+                vehicle.isPetFriendly(),
+                vehicle.getNumberOfSeats(),
+                driver.getId()
+        );
+
+        return dto;
+    }
+
+    @Transactional
+    public void createDriver(CreateDriverDto request) {
+
+        UserType userType = userTypeRepository
+                .findByTypeName("DRIVER")
+                .orElseThrow(()
+                        -> new IllegalStateException("UserType DRIVER not found")
+                );
+
+        UserRole userRole = userRoleRepository
+                .findByRoleName("DRIVER")
+                .orElseThrow(()
+                        -> new IllegalStateException("UserRole DRIVER not found")
+                );
+
+        VehicleType vehicleType = vehicleTypeRepository
+                .findByType(request.getVehicle().getVehicleType())
+                .orElseThrow(()
+                        -> new IllegalArgumentException("Invalid vehicle type")
+                );
+
+        Person person = new Person();
+        person.setFirstName(request.getFirstName());
+        person.setLastName(request.getLastName());
+        person.setPhoneNumber(request.getPhoneNumber());
+        person.setAddress(request.getAddress());
+
+        personRepository.save(person);
+
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPerson(person);
+        user.setUserType(userType);
+        user.setUserRole(userRole);
+        user.setUserStatus(UserStatus.NOTACTIVATED);
+
+        String dummyPassword = UUID.randomUUID().toString();
+        user.setPassword(passwordEncoder.encode(dummyPassword));
+
+        userRepository.save(user);
+
+        Driver driver = new Driver();
+        driver.setUser(user);
+        driver.setPerson(person);
+
+        driverRepository.save(driver);
+
+        Vehicle vehicle = new Vehicle();
+        vehicle.setDriver(driver);
+        vehicle.setVehicleType(vehicleType);
+        vehicle.setModel(request.getVehicle().getModel());
+        vehicle.setLicensePlate(request.getVehicle().getLicensePlate());
+        vehicle.setNumberOfSeats(request.getVehicle().getNumberOfSeats());
+        vehicle.setBabySeat(request.getVehicle().getBabySeat());
+        vehicle.setPetFriendly(request.getVehicle().getPetFriendly());
+
+        vehicleRepository.save(vehicle);
+
+        ActivationToken activationToken
+                = activationTokenService.createForUser(user);
+
+        String activationLink
+                = "http://localhost:4200/activate?token=" + activationToken.getToken();
+
+        emailService.sendActivationEmail(
+                user.getEmail(),
+                activationLink
+        );
+
+    }
+
+    public List<DriverSummaryDto> getActiveDrivers() {
+        List<Driver> activeDrivers = driverRepository.findAll();
+
+        activeDrivers = activeDrivers.stream()
+                .filter(driver -> driver.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .toList();
+
+        List<DriverSummaryDto> driverDtos = activeDrivers.stream()
+                .map(driver -> new DriverSummaryDto(
+                driver.getId(),
+                driver.getPerson().getFirstName(),
+                driver.getPerson().getLastName()
+        ))
+                .toList();
+
+        return driverDtos;
+    }
+
+    public Driver findDriverForRideRequest(
+            RideRequest rideRequest,
+            List<RideRequestCreateDTO.DriverLocationDTO> snapshot
+    ) {
+
+        if (snapshot == null || snapshot.isEmpty()) {
+            return null;
+        }
+
+        RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
+        Map<Long, DriverLocationDTO> locMap = Helpers.snapshotToMap(snapshot);
+
+        List<Driver> candidates = snapshot.stream()
+                .map(s -> driverRepository.findById(s.driverId).orElse(null))
+                .filter(Objects::nonNull)
+                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .filter(d -> vehicleMatches(d, rideRequest))
+                .toList();
+
+        if (candidates.isEmpty()) {
+            return null;
+        }
+
+        List<Driver> freeDrivers = candidates.stream()
+                .filter(d -> rideService.isDriverFreeForRide(d, rideRequest))
+                .toList();
+
+        if (!freeDrivers.isEmpty()) {
+            return nearestDriver(freeDrivers, pickup, locMap);
+        }
+
+        List<Driver> finishingSoon = candidates.stream()
+                .filter(d -> finishesInNext10Minutes(d))
+                .toList();
+
+        if (!finishingSoon.isEmpty()) {
+            return nearestDriver(finishingSoon, pickup, locMap);
+        }
+
+        return null;
+    }
+
+    private boolean finishesInNext10Minutes(Driver driver) {
+        return rideService.findActiveRides(driver.getId())
+                .stream()
+                .anyMatch(r -> Duration.between(
+                LocalDateTime.now(),
+                rideService.estimateRideEndTime(r)
+        ).toMinutes() <= 10);
+    }
+
+    private boolean vehicleMatches(Driver driver, RideRequest req) {
+        Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
+                .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
+
+        if (!vehicle.getVehicleType().equals(req.getVehicleType())) {
+            return false;
+        }
+
+        if (req.isPetTransport() && !vehicle.isPetFriendly()) {
+            return false;
+        }
+
+        if (req.isBabyTransport() && !vehicle.isBabySeat()) {
+            return false;
+        }
+
+        if (vehicle.getNumberOfSeats() < req.getLinkedPassengerEmails().size() + 1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Driver nearestDriver(
+            List<Driver> drivers,
+            RoutePoint pickup,
+            Map<Long, DriverLocationDTO> locMap
+    ) {
+        return drivers.stream()
+                .min(Comparator.comparingDouble(d -> {
+                    DriverLocationDTO loc = locMap.get(d.getId());
+                    return GeoUtil.distanceKm(
+                            pickup.getLatitude(),
+                            pickup.getLongitude(),
+                            loc.lat,
+                            loc.lng
+                    );
+                }))
+                .orElse(null);
+    }
 }

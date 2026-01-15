@@ -6,8 +6,8 @@
   <form class="flex max-w-[1200px] w-full ml-auto mr-auto justify-between items-center">
     <app-value-input-string label="Pickup Location"></app-value-input-string>
     <app-value-input-string label="Dropoff Location"></app-value-input-string>
-    <app-dropdown [options]="vehicleOptions" [(selected)]="selectedVehicle"> </app-dropdown>
-    <app-dropdown [options]="timeOptions" [(selected)]="selectedTime"> </app-dropdown>
+    <app-dropdown label="Vehicle Type" [options]="vehicleOptions" [(selected)]="selectedVehicle"> </app-dropdown>
+    <app-dropdown label="Time" [options]="timeOptions" [(selected)]="selectedTime"> </app-dropdown>
   </form>
   <p class="text-center text-lg py-8">Enter pickup, dropoff and type to see your estimate.</p>
   <button matButton="filled" routerLink="/login">Sign in to Confirm Ride</button>

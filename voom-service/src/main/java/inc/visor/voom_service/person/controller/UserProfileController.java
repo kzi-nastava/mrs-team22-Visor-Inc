@@ -9,12 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;
+import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.UserProfileService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users/me")
 public class UserProfileController {
@@ -29,18 +35,10 @@ public class UserProfileController {
     public ResponseEntity<UserProfileResponseDto> getProfile(
             @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            UserProfileResponseDto dto = new UserProfileResponseDto(
-                "test@example.com",
-                "Test",
-                "User",
-                "+38160000000",
-                "Test Address"
-            );
-            return ResponseEntity.ok(dto);
-        }
 
-        return ResponseEntity.ok(userProfileService.getProfile(user));
+        Long userId = (user != null) ? user.getId() : 2L;
+
+        return ResponseEntity.ok(userProfileService.getProfile(userId));
     }
 
     @PutMapping
@@ -48,16 +46,34 @@ public class UserProfileController {
         @Valid @RequestBody UpdateUserProfileRequestDto request,
         @AuthenticationPrincipal User user
     ) {
-
         if (user == null) {
             UserProfileResponseDto response = new UserProfileResponseDto(
                 "test@example.com",
-                request.getFirstName(),
+                "NIKOLA091",
                 request.getLastName(),
                 request.getPhoneNumber(),
                 request.getAddress()
             );
-            return ResponseEntity.ok(response);
+            
+            Person person = new Person();
+            person.setId(1L);
+
+            UserType userType = new UserType();
+            userType.setId(1);
+
+            UserRole userRole = new UserRole();
+            userRole.setId(1);
+
+            User mockUser = new User(
+                "nikola@test.com",
+                "akjsdks",
+                userType,
+                UserStatus.ACTIVE, 
+                userRole,
+                person
+            );
+
+            return ResponseEntity.ok(userProfileService.updateProfile(mockUser, request));
         }
         
         return ResponseEntity.ok(userProfileService.updateProfile(user, request));
@@ -68,12 +84,12 @@ public class UserProfileController {
         @Valid @RequestBody ChangePasswordRequestDto request,
         @AuthenticationPrincipal User user
     ) {
-        if (user == null) {
-            return ResponseEntity.ok().build();
-        }
+        Long userId = (user != null) ? user.getId() : 2L;
 
-        userProfileService.changePassword(user, request);
+        userProfileService.changePassword(userId, request);
+
         return ResponseEntity.ok().build();
     }
+
 
 }

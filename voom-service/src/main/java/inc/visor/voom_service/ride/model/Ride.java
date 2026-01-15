@@ -1,8 +1,10 @@
 package inc.visor.voom_service.ride.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,13 +14,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "ride")
 public class Ride {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ride_id", nullable = false)
@@ -28,9 +33,9 @@ public class Ride {
     @JoinColumn(name = "ride_request_id", nullable = false)
     private RideRequest rideRequest;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User driver;
+    @ManyToOne
+    @JoinColumn(name = "driver_id", nullable = true)
+    private Driver driver;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -41,6 +46,17 @@ public class Ride {
 
     @Column(name = "finished_at", nullable = true)
     private LocalDateTime finishedAt;
+
+    @ManyToMany
+    @JoinTable(
+            name = "ride_passenger",
+            joinColumns = @JoinColumn(name = "ride_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> passengers;
+
+    public Ride() {
+    }
 
     public long getId() {
         return id;
@@ -56,13 +72,14 @@ public class Ride {
 
     public void setRideRequest(RideRequest rideRequest) {
         this.rideRequest = rideRequest;
+
     }
 
-    public User getDriver() {
+    public Driver getDriver() {
         return driver;
     }
 
-    public void setDriver(User driver) {
+    public void setDriver(Driver driver) {
         this.driver = driver;
     }
 
@@ -90,6 +107,11 @@ public class Ride {
         this.finishedAt = finishedAt;
     }
 
+    public List<User> getPassengers() {
+        return passengers;
+    }
 
-
+    public void setPassengers(List<User> passengers) {
+        this.passengers = passengers;
+    }
 }
