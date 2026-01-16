@@ -6,9 +6,9 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ROUTE_LOGIN} from '../login/login';
 import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
 import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
-import {ROUTE_USER_PROFILE} from '../../authenticated/user/user-profile/user-profile';
+import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-profile';
 import {ValueInputFile} from '../../shared/value-input/value-input-file/value-input-file';
-import {ApiService} from '../../core/rest/api-service';
+import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 
 export const ROUTE_REGISTRATION = 'registration';

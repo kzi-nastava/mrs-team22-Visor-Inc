@@ -1,65 +1,63 @@
-import {Routes} from '@angular/router';
+import {CanActivateFn, Router, Routes} from '@angular/router';
 import {Login, ROUTE_LOGIN} from './unauthenticated/login/login';
-import {ROUTE_USER_PROFILE, UserProfile} from './authenticated/user/user-profile/user-profile';
 import {Registration, ROUTE_REGISTRATION} from './unauthenticated/registration/registration';
-import {Home, ROUTE_HOME} from './unauthenticated/home/home';
-import {DriverRideHistory, ROUTE_DRIVER_RIDE_HISTORY,} from './drivers/ride-history/driver-ride-history';
 import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './unauthenticated/login/forgot-password/forgot-password';
 import {ResetPassword, ROUTE_RESET_PASSWORD} from './unauthenticated/login/reset-password/reset-password';
-import {DriverHome, ROUTE_DRIVER_HOME} from './drivers/driver-home/driver-home';
-import { AdminRegisterDriver, ROUTE_ADMIN_REGISTER_DRIVER } from './authenticated/admin/register-driver/register-driver';
-import { ActivateProfile, ROUTE_ACTIVATE_PROFILE } from './unauthenticated/activate/activate-profile/activate-profile';
-import { ROUTE_USER_HOME, UserHome } from './authenticated/user/home/home';
-import { FavoriteRoutes, ROUTE_FAVORITE_ROUTES } from './authenticated/user/favorite-routes/favorite-routes';
+import {AuthenticationService} from './shared/service/authentication-service';
+import {inject} from '@angular/core';
+import {map} from 'rxjs';
+import {MainShell, ROUTE_MAIN_SHELL} from './main-shell/main-shell';
+import {Home, ROUTE_HOME} from './unauthenticated/home/home';
+
+export const unauthenticatedGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  return inject(AuthenticationService).isAuthenticated().pipe(
+    map((authenticated) => {
+      return authenticated ? router.createUrlTree(['']) : true;
+    })
+  )
+};
+
+export const authenticatedGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  return inject(AuthenticationService).isAuthenticated().pipe(
+    map((authenticated) => {
+      return authenticated ? true : router.createUrlTree(['']);
+    })
+  )
+};
 
 export const routes: Routes = [
   {
+    path: ROUTE_HOME,
+    component: Home,
+    canActivate: [unauthenticatedGuard],
+  },
+  {
     path: ROUTE_LOGIN,
     component: Login,
+    canActivate: [unauthenticatedGuard],
   },
   {
     path: ROUTE_REGISTRATION,
     component: Registration,
+    canActivate: [unauthenticatedGuard],
   },
   {
     path: ROUTE_FORGOT_PASSWORD,
     component: ForgotPassword,
+    canActivate: [unauthenticatedGuard],
   },
   {
     path: ROUTE_RESET_PASSWORD,
     component: ResetPassword,
+    canActivate: [unauthenticatedGuard],
   },
   {
-    path: ROUTE_USER_PROFILE,
-    component: UserProfile,
-  },
-  {
-    path: ROUTE_DRIVER_HOME,
-    component: DriverHome,
-  },
-  {
-    path: ROUTE_HOME,
-    component: Home,
-  },
-  {
-    path: ROUTE_DRIVER_RIDE_HISTORY,
-    component: DriverRideHistory,
-  },
-  {
-    path: ROUTE_ADMIN_REGISTER_DRIVER,
-    component: AdminRegisterDriver,
-  },
-  {
-    path: ROUTE_ACTIVATE_PROFILE,
-    component: ActivateProfile,
-  },
-  {
-    path: ROUTE_USER_HOME,
-    component: UserHome,
-  },
-  {
-    path: ROUTE_FAVORITE_ROUTES,
-    component: FavoriteRoutes,
+    path: ROUTE_MAIN_SHELL,
+    component: MainShell,
+    canActivate: [authenticatedGuard],
+    loadChildren: () => import('./main-shell/main-shell.routes')
   },
   {
     path: '**',

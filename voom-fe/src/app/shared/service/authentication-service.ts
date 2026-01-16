@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, catchError, map, of} from 'rxjs';
-import {TokenDto, User} from '../../core/rest/authentication/authentication.model';
+import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
+import {TokenDto, User} from '../rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
-import {ApiService} from '../../core/rest/api-service';
+import ApiService from '../rest/api-service';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +36,10 @@ export class AuthenticationService {
     } else {
       this.logout();
     }
+  }
+
+  public isAuthenticated(): Observable<boolean> {
+    return of(this.isValid(this.refreshToken))
   }
 
   public setAuthentication(response: TokenDto) {

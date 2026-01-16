@@ -6,7 +6,7 @@ import {Router} from '@angular/router';
 import {ROUTE_REGISTRATION} from '../registration/registration';
 import {ROUTE_FORGOT_PASSWORD} from './forgot-password/forgot-password';
 import {ROUTE_HOME} from '../home/home';
-import {ApiService} from '../../core/rest/api-service';
+import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {AuthenticationService} from '../../shared/service/authentication-service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';

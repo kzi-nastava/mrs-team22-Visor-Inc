@@ -4,9 +4,9 @@ import {ValueInputString} from "../../../shared/value-input/value-input-string/v
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {ROUTE_HOME} from '../../home/home';
-import {ApiService} from '../../../core/rest/api-service';
+import ApiService from '../../../shared/rest/api-service';
 import {map} from 'rxjs';
-import {lookUpQueryParam} from '../../../core/util/url-util';
+import {lookUpQueryParam} from '../../../shared/util/url-util';
 
 export const ROUTE_RESET_PASSWORD = 'resetPassword';
 
