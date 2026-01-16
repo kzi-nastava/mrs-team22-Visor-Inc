@@ -50,17 +50,13 @@ public class UserProfileController {
             Person person = new Person();
             person.setId(2L);
 
-            UserType userType = new UserType();
-            userType.setId(1);
-
             UserRole userRole = new UserRole();
             userRole.setId(1);
 
             User mockUser = new User(
                 "nikola@test.com",
                 "akjsdks",
-                userType,
-                UserStatus.ACTIVE, 
+                UserStatus.ACTIVE,
                 userRole,
                 person
             );

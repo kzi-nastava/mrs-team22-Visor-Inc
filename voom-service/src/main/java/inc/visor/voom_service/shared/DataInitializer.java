@@ -23,7 +23,6 @@ import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 @Profile({"dev", "local"})
 public class DataInitializer implements ApplicationRunner {
 
-    private final UserTypeRepository userTypeRepository;
     private final UserRoleRepository userRoleRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final UserRepository userRepository;
@@ -31,8 +30,7 @@ public class DataInitializer implements ApplicationRunner {
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
 
-    public DataInitializer(UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository) {
-        this.userTypeRepository = userTypeRepository;
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -43,12 +41,6 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-
-        if (userTypeRepository.count() == 0) {
-            createUserType("ADMIN");
-            createUserType("DRIVER");
-            createUserType("PASSENGER");
-        }
 
         if (userRoleRepository.count() == 0) {
             createUserRole("ADMIN");
@@ -66,12 +58,6 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-    }
-
-    private void createUserType(String name) {
-        UserType type = new UserType();
-        type.setTypeName(name);
-        userTypeRepository.save(type);
     }
 
     private void createUserRole(String name) {
@@ -93,7 +79,6 @@ public class DataInitializer implements ApplicationRunner {
         final int NUMBER_OF_DRIVERS = 20;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
-        UserType driverType = userTypeRepository.readByTypeName("DRIVER").orElseThrow();
 
         VehicleType standard = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
         VehicleType van = vehicleTypeRepository.findByType("VAN").orElseThrow();
@@ -114,7 +99,6 @@ public class DataInitializer implements ApplicationRunner {
             user.setEmail("driver" + i + "@gmail.com");
             user.setPassword("password" + i);
             user.setUserRole(driverRole);
-            user.setUserType(driverType);
             user.setUserStatus(UserStatus.ACTIVE);
             user.setPerson(person);
             userRepository.save(user);
