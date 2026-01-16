@@ -8,10 +8,8 @@ import org.springframework.stereotype.Component;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
-import inc.visor.voom_service.auth.user.repository.UserTypeRepository;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
@@ -95,7 +93,7 @@ public class DataInitializer implements ApplicationRunner {
         final int NUMBER_OF_DRIVERS = 20;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
-        UserType driverType = userTypeRepository.findByTypeName("DRIVER").orElseThrow();
+        UserType driverType = userTypeRepository.readByTypeName("DRIVER").orElseThrow();
 
         VehicleType standard = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
         VehicleType van = vehicleTypeRepository.findByType("VAN").orElseThrow();

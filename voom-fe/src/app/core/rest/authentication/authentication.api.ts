@@ -1,6 +1,6 @@
 import {Api} from '../api';
 import {ApiClient} from '../api-client';
-import {SignInRequest, SignInResponse} from './authentication.model';
+import {LoginDto, TokenDto, RegistrationDto, ResetPasswordDto, User} from './authentication.model';
 import {RequestConfig} from '../rest.model';
 
 
@@ -10,7 +10,7 @@ export class AuthenticationApi extends Api {
     super(apiClient);
   }
 
-  signIn(body: SignInRequest) {
+  login(body: LoginDto) {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
@@ -18,7 +18,18 @@ export class AuthenticationApi extends Api {
       },
     }
 
-    return this.apiClient.post<SignInRequest, SignInResponse>(`/api/signIn`, body, config);
+    return this.apiClient.post<LoginDto, TokenDto>(`/api/login`, body, config);
+  }
+
+  register(body: RegistrationDto) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+    }
+
+    return this.apiClient.post<RegistrationDto, User>('/api/register', body, config);
   }
 
   refreshToken(body: string) {
@@ -29,10 +40,10 @@ export class AuthenticationApi extends Api {
       }
     };
 
-    return this.apiClient.put<string, SignInResponse>(`/api/refreshToken`, body, config);
+    return this.apiClient.put<string, string>(`/api/refreshToken`, body, config);
   }
 
-  resetPassword(email: string) {
+  forgotPassword(email: string) {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
@@ -40,7 +51,18 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.put<string, void>(`/api/passwordReset`, email, config);
+    return this.apiClient.put<string, void>(`/api/forgotPassword`, email, config);
+  }
+
+  resetPassword(body: ResetPasswordDto) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+    };
+
+    return this.apiClient.put<ResetPasswordDto, string>(`/api/resetPassword`, body, config);
   }
 
 }

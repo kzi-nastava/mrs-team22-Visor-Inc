@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;

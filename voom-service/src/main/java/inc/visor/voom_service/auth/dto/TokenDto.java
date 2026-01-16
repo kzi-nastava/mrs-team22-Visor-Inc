@@ -1,17 +1,28 @@
 package inc.visor.voom_service.auth.dto;
 
+import inc.visor.voom_service.auth.user.model.User;
+
 public class TokenDto {
 
-    private String accessToken;
+    private UserDto user;
     private String refreshToken;
-    private long expiresIn;
+    private String accessToken;
 
-    public String getAccessToken() {
-        return accessToken;
+    public TokenDto() {
     }
 
-    public void setAccessToken(String accessToken) {
+    public TokenDto(User user, String refreshToken, String accessToken) {
+        this.user = new UserDto(user);
+        this.refreshToken = refreshToken;
         this.accessToken = accessToken;
+    }
+
+    public UserDto getUser() {
+        return user;
+    }
+
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 
     public String getRefreshToken() {
@@ -22,12 +33,12 @@ public class TokenDto {
         this.refreshToken = refreshToken;
     }
 
-    public long getExpiresIn() {
-        return expiresIn;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setExpiresIn(long expiresIn) {
-        this.expiresIn = expiresIn;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 }
 

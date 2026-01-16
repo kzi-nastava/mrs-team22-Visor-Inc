@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, map, of} from 'rxjs';
-import {SignInResponse, User} from '../../core/rest/authentication/authentication.model';
+import {TokenDto, User} from '../../core/rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import {ApiService} from '../../core/rest/api-service';
 
@@ -26,7 +26,7 @@ export class AuthenticationService {
           return of(null);
         }),
       ).subscribe(token => {
-        if (!token || !token.user) {
+        if (!token) {
           this.logout();
           return;
         }
@@ -38,13 +38,13 @@ export class AuthenticationService {
     }
   }
 
-  public setAuthentication(response: SignInResponse) {
+  public setAuthentication(response: TokenDto) {
     this.refreshToken = response.refreshToken;
     localStorage.setItem(this.REFRESH_TOKEN, response.refreshToken);
     this.initiateAuthenticatedState(response);
   }
 
-  private initiateAuthenticatedState(response: SignInResponse) {
+  private initiateAuthenticatedState(response: TokenDto) {
     this._activeUser$.next(response.user);
   }
 

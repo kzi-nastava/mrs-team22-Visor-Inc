@@ -46,7 +46,7 @@ export class Login {
   }
 
   login() {
-    this.apiService.authenticationApi.signIn({
+    this.apiService.authenticationApi.login({
       email: this.form.value.email as string,
       password: this.form.value.password as string,
     }).pipe(

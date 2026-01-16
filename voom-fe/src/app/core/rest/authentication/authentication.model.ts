@@ -1,11 +1,29 @@
-export interface SignInRequest {
+export interface LoginDto {
   email: string;
   password: string;
 }
 
-export interface SignInResponse {
+interface Access {
+}
+
+export interface TokenDto {
   user: User;
   refreshToken: string;
+  accessList: Access[];
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  password: string;
+}
+
+export interface RegistrationDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
 }
 
 export interface User {
@@ -13,5 +31,4 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  verified: boolean;
 }

@@ -9,6 +9,5 @@ import inc.visor.voom_service.auth.user.model.UserRole;
 
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, Integer> {
-
     Optional<UserRole> findByRoleName(String roleName);
 }

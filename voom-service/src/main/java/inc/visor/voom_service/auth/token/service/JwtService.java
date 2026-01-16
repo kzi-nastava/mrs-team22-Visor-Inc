@@ -17,11 +17,24 @@ import java.util.List;
 public class JwtService {
 
   private final SecretKey signingKey;
-  public JwtService(@Value("${jwt.secret}") String secret) {
+  private final long expiration;
+  private final long verificationExpiration;
+
+  public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") long expiration, @Value("${jwt.verificationExpiration}") long verificationExpiration) {
     this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    this.expiration = expiration;
+    this.verificationExpiration = verificationExpiration;
   }
 
-  private String generateAccessToken(UserDetails userDetails, long expiration, List<String> permissions) {
+  public long getExpiration() {
+    return expiration;
+  }
+
+  public long getVerificationExpiration() {
+    return verificationExpiration;
+  }
+
+  public String generateAccessToken(UserDetails userDetails, List<String> permissions) {
     return Jwts
             .builder()
             .subject(userDetails.getUsername())
@@ -33,7 +46,7 @@ public class JwtService {
             .compact();
   }
 
-  private String generateRefreshToken(UserDetails userDetails, long expiration) {
+  public String generateRefreshToken(UserDetails userDetails) {
     return Jwts.builder()
             .subject(userDetails.getUsername())
             .issuedAt(new Date())
@@ -43,12 +56,22 @@ public class JwtService {
             .compact();
   }
 
-  private String generateEmailVerificationToken(UserDetails userDetails, long expiration) {
+  public String generateEmailVerificationToken(UserDetails userDetails) {
     return Jwts.builder()
             .subject(userDetails.getUsername())
             .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + expiration))
+            .expiration(new Date(System.currentTimeMillis() + verificationExpiration))
             .claim("token_type", "EMAIL_VERIFICATION")
+            .signWith(signingKey)
+            .compact();
+  }
+
+  public String generatePasswordResetToken(UserDetails userDetails) {
+    return Jwts.builder()
+            .subject(userDetails.getUsername())
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + verificationExpiration))
+            .claim("token_type", "PASSWORD_RESET")
             .signWith(signingKey)
             .compact();
   }
