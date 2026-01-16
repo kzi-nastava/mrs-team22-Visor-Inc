@@ -1,0 +1,25 @@
+<div class="dialog-container">
+  <h2 class="title">Name favorite route</h2>
+
+  <div class="input-wrapper">
+    <label class="label">Route name</label>
+    <input
+      type="text"
+      [formControl]="nameControl"
+      placeholder="e.g. Home → Faculty"
+      class="route-input"
+      autofocus
+    />
+  </div>
+
+  <div class="actions">
+    <button class="btn cancel" (click)="cancel()">Cancel</button>
+    <button
+      class="btn save"
+      [disabled]="nameControl.invalid"
+      (click)="save()"
+    >
+      Save
+    </button>
+  </div>
+</div>

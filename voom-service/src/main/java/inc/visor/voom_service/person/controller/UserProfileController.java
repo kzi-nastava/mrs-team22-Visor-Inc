@@ -47,16 +47,9 @@ public class UserProfileController {
         @AuthenticationPrincipal User user
     ) {
         if (user == null) {
-            UserProfileResponseDto response = new UserProfileResponseDto(
-                "test@example.com",
-                "NIKOLA091",
-                request.getLastName(),
-                request.getPhoneNumber(),
-                request.getAddress()
-            );
             
             Person person = new Person();
-            person.setId(1L);
+            person.setId(2L);
 
             UserType userType = new UserType();
             userType.setId(1);
