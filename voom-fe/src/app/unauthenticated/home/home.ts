@@ -1,20 +1,20 @@
 import { Component, ViewChild } from '@angular/core';
 // import { Header } from '../header/header';
 import { Map } from '../../shared/map/map';
-import { Footer } from '../../core/layout/footer/footer';
 import { Dropdown } from '../../shared/dropdown/dropdown';
 import { ValueInputString } from '../../shared/value-input/value-input-string/value-input-string';
 import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
-import { Header } from '../../core/layout/header-kt1/header-kt1';
 import { DriverSimulationWsService } from '../../shared/websocket/DriverSimulationWsService';
-import { RideApi } from '../../core/rest/home/home.api';
+import { RideApi } from '../../shared/rest/home/home.api';
+import {Header} from '../../shared/header/header';
+import {Footer} from '../../shared/footer/footer';
 
 export const ROUTE_HOME = 'home';
 
 @Component({
   selector: 'app-home',
-  imports: [Header, Map, Footer, Dropdown, ValueInputString, MatButton, RouterLink],
+  imports: [Map, Dropdown, ValueInputString, MatButton, RouterLink, Header, Footer],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -41,40 +41,37 @@ export class Home {
   constructor(private ws: DriverSimulationWsService, private rideApi: RideApi) {}
 
   loadActiveDrivers() {
-    this.rideApi.getActiveDrivers().subscribe((drivers) => {
-      console.log('ACTIVE DRIVERS:', drivers);
+  this.rideApi.getActiveDrivers().subscribe((drivers) => {
+    if (!drivers || drivers.length === 0) return;
 
-      if (!drivers) {
-        return;
-      }
+    this.ws.connect(
+      () => {},
+      () => {},
+      undefined,
+      (pos) => {
+        const driver = drivers.find(d => d.id === pos.driverId);
 
-      this.ws.connect(
-        () => {},
-        () => {},
-        undefined,
-        (pos) => {
-          if (!this.drivers.includes(pos.driverId)) {
-            this.drivers.push(pos.driverId);
-            const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
-            const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
-            const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
-            this.map.addSimulatedDriver({
-              id: pos.driverId,
-              firstName: name,
-              lastName: lastname,
-              start: {
-                lat: pos.lat,
-                lng: pos.lng,
-              },
-              status: status as any || 'FREE',
-            });
-          } else {
-            this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
-          }
+        if (!this.drivers.includes(pos.driverId)) {
+          this.drivers.push(pos.driverId);
+
+          this.map.addSimulatedDriver({
+            id: pos.driverId,
+            firstName: driver?.firstName ?? '',
+            lastName: driver?.lastName ?? '',
+            start: {
+              lat: pos.lat,
+              lng: pos.lng,
+            },
+            status: (driver?.status as any) || 'FREE',
+          });
+        } else {
+          this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
         }
-      );
-    });
-  }
+      }
+    );
+  });
+}
+
 
   ngOnInit() {
     this.loadActiveDrivers();

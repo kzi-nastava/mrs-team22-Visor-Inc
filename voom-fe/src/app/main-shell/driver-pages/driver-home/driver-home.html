@@ -1,0 +1,60 @@
+<div class="p-8 space-y-8">
+  <div class="rounded-3xl">
+<!--    <app-map [focusedDriverId]="myId()" [points]="routePoints()"></app-map>-->
+  </div>
+  <div>
+    <h1 class="text-xl text-primary font-medium">Summary</h1>
+    <h1 class="text-lg text-primary">{{ getFormattedDate() }}</h1>
+  </div>
+  <div class="flex justify-around items-center px-32 py-8">
+    <div class="w-xl">
+      <apx-chart
+        [series]="chartOptions.series!"
+        [chart]="chartOptions.chart!"
+        [labels]="chartOptions.labels!"
+        [colors]="chartOptions.colors!"
+        [dataLabels]="chartOptions.dataLabels!"
+        [legend]="chartOptions.legend!"
+        [responsive]="chartOptions.responsive!"
+      ></apx-chart>
+    </div>
+    <div class="space-y-8">
+      <div class="space-y-4">
+        <h1 class="text-xl text-primary">Rating</h1>
+        <div class="flex">
+          <mat-icon class="icon">star_rate</mat-icon>
+          <mat-icon class="icon">star_rate</mat-icon>
+          <mat-icon class="icon">star_rate</mat-icon>
+          <mat-icon class="icon">star_rate</mat-icon>
+          <mat-icon class="icon">star_rate_half</mat-icon>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-xl text-primary">Progress</h1>
+        <apx-chart
+          [series]="activeTimeOptions.series!"
+          [chart]="activeTimeOptions.chart!"
+          [plotOptions]="activeTimeOptions.plotOptions!"
+          [xaxis]="activeTimeOptions.xaxis!"
+          [colors]="activeTimeOptions.colors!"
+        ></apx-chart>
+        <h1 class="text-lg text-primary">75% driving out of active time</h1>
+      </div>
+      <div class="flex flex-col">
+        <div class="flex justify-between">
+          <h1 class="text-xl text-primary">Rides Completed:</h1>
+          <h1 class="text-xl text-primary">5</h1>
+        </div>
+        <div class="flex justify-between">
+          <h1 class="text-xl text-primary">Earned:</h1>
+          <h1 class="text-xl text-primary">$75.27</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex justify-center items-center space-x-4">
+    <span class="text-lg text-primary font-medium">PASSIVE</span>
+    <mat-slide-toggle (change)="onToggleChange($event)"></mat-slide-toggle>
+    <span class="text-lg text-primary font-medium">ACTIVE</span>
+  </div>
+</div>

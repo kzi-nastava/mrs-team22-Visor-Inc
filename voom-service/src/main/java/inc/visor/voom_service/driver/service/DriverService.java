@@ -16,10 +16,8 @@ import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
-import inc.visor.voom_service.auth.user.repository.UserTypeRepository;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
@@ -52,7 +50,6 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final UserRepository userRepository;
-    private final UserTypeRepository userTypeRepository;
     private final UserRoleRepository userRoleRepository;
     private final PersonRepository personRepository;
 
@@ -60,12 +57,11 @@ public class DriverService {
     private final EmailService emailService;
     private final ActivationTokenService activationTokenService;
 
-    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService) {
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
-        this.userTypeRepository = userTypeRepository;
         this.userRoleRepository = userRoleRepository;
         this.personRepository = personRepository;
         this.passwordEncoder = passwordEncoder;
@@ -147,12 +143,6 @@ public class DriverService {
     @Transactional
     public void createDriver(CreateDriverDto request) {
 
-        UserType userType = userTypeRepository
-                .findByTypeName("DRIVER")
-                .orElseThrow(()
-                        -> new IllegalStateException("UserType DRIVER not found")
-                );
-
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
                 .orElseThrow(()
@@ -176,7 +166,6 @@ public class DriverService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPerson(person);
-        user.setUserType(userType);
         user.setUserRole(userRole);
         user.setUserStatus(UserStatus.NOTACTIVATED);
 

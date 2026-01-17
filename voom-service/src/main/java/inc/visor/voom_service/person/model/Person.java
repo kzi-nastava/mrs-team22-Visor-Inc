@@ -2,6 +2,7 @@ package inc.visor.voom_service.person.model;
 
 import java.util.Objects;
 
+import inc.visor.voom_service.auth.dto.RegistrationDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +32,13 @@ public class Person {
     private String address;
 
     public Person() {}
+
+    public Person(RegistrationDto dto) {
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.address = dto.getAddress();
+    }
 
     public long getId() {
         return id;

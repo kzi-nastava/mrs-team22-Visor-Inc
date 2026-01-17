@@ -1,17 +1,16 @@
 package inc.visor.voom.app.user.profile;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
@@ -39,54 +38,79 @@ public class ProfileFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(requireParentFragment().requireParentFragment()).get(ProfileViewModel.class);
-
-        binding.btnChangePassword.setOnClickListener(v -> {
-            new ChangePasswordDialogFragment().show(getParentFragmentManager(), "ChangePasswordDialog");
-        });
-
-        binding.btnChangeDriverProfile.setOnClickListener(v -> {
-            viewModel.setChangeFragment(true);
-        });
+        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         observeViewModel();
         setupListeners();
+
+        binding.btnChangeDriverProfile.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_global_to_mainDriverFragment)
+        );
+        viewModel.loadProfile();
+
     }
 
     private void observeViewModel() {
         viewModel.getFirstName().observe(getViewLifecycleOwner(),
-                value -> binding.etFirstName.setText(value));
+                binding.etFirstName::setText);
 
         viewModel.getLastName().observe(getViewLifecycleOwner(),
-                value -> binding.etLastName.setText(value));
+                binding.etLastName::setText);
 
         viewModel.getEmail().observe(getViewLifecycleOwner(),
-                value -> binding.etEmail.setText(value));
+                binding.etEmail::setText);
 
-        viewModel.getAdress().observe(getViewLifecycleOwner(),
-                value -> binding.etAddress.setText(value));
+        viewModel.getAddress().observe(getViewLifecycleOwner(),
+                binding.etAddress::setText);
 
-        viewModel.getPhoneNumeber().observe(getViewLifecycleOwner(),
-                value -> binding.etPhoneNumber.setText(value));
+        viewModel.getPhoneNumber().observe(getViewLifecycleOwner(),
+                binding.etPhoneNumber::setText);
+
+        viewModel.getProfileUpdated().observe(getViewLifecycleOwner(), success -> {
+            if (Boolean.TRUE.equals(success)) {
+                showProfileUpdatedMessage();
+            }
+        });
+
+        viewModel.getFullName().observe(getViewLifecycleOwner(),
+                binding.txtFullName::setText
+        );
+
 
     }
 
     private void setupListeners() {
         binding.btnSave.setOnClickListener(v ->
                 viewModel.onSaveClicked(
-                        String.valueOf(binding.etFirstName.getText()),
-                        String.valueOf(binding.etLastName.getText()),
-                        String.valueOf(binding.etEmail.getText()),
-                        String.valueOf(binding.etAddress.getText()),
-                        String.valueOf(binding.etPhoneNumber.getText())
+                        binding.etFirstName.getText().toString(),
+                        binding.etLastName.getText().toString(),
+                        binding.etEmail.getText().toString(),
+                        binding.etAddress.getText().toString(),
+                        binding.etPhoneNumber.getText().toString()
                 )
         );
+
+        binding.btnChangePassword.setOnClickListener(v ->
+                new ChangePasswordDialogFragment()
+                        .show(getParentFragmentManager(), "ChangePasswordDialog")
+        );
     }
+
+    private void showProfileUpdatedMessage() {
+        com.google.android.material.snackbar.Snackbar
+                .make(
+                        binding.getRoot(),
+                        "Profile successfully updated",
+                        com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                )
+                .show();
+    }
+
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
-
 }

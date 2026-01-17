@@ -85,37 +85,16 @@ export class Map implements AfterViewInit, OnChanges {
 
   ngAfterViewInit(): void {
     this.startInterpolationLoop();
-
-    if (this.map) return;
-    this.map = L.map('map').setView([45.2396, 19.8227], 14);
+    
+    if (this.map) return; 
+    this.map = L.map('map', {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([45.2396, 19.8227], 14);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
-
-    const ClearControl = L.Control.extend({
-      onAdd: () => {
-        const btn = L.DomUtil.create('button', 'leaflet-bar');
-        btn.innerHTML = '✕';
-        btn.style.width = '36px';
-        btn.style.height = '36px';
-        btn.style.cursor = 'pointer';
-        btn.style.fontSize = '20px';
-        btn.style.background = 'white';
-        btn.style.border = 'none';
-
-        btn.onclick = (e) => {
-          if (this.locked) return;
-          e.preventDefault();
-          e.stopPropagation();
-          this.clearUserRoute();
-        };
-
-        return btn;
-      },
-    });
-
-    this.map.addControl(new ClearControl({ position: 'topright' }));
 
     this.map.on('click', (e: L.LeafletMouseEvent) => {
       this.reverseSearch(e.latlng.lat, e.latlng.lng).subscribe((res) => {

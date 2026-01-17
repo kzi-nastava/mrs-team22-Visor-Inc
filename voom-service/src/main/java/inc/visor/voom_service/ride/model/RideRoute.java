@@ -27,7 +27,7 @@ public class RideRoute {
     private double totalDistanceKm;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "ride_route_id", nullable = false)
+    @JoinColumn(name = "ride_route_id")
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
 
