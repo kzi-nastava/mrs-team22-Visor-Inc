@@ -28,7 +28,7 @@ export const ROUTE_ADMIN_DRIVERS = "drivers";
   styleUrl: './admin-drivers.css',
 })
 export class AdminDrivers {
-  userGeneralForm = new FormGroup({
+  driverGeneralForm = new FormGroup({
     firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     birthDate: new FormControl<Date | null>(null, [Validators.required]),

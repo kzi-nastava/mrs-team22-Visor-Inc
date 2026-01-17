@@ -17,12 +17,15 @@
       <mat-card-title class="p-4">
         <div class="flex justify-between items-center">
           <div class="font-medium text-xl">General</div>
-          <mat-icon class="cursor-pointer">save</mat-icon>
+          <mat-icon class="cursor-pointer" (click)="savePricing()">save</mat-icon>
         </div>
       </mat-card-title>
       <mat-divider/>
       <mat-card-content>
-
+        <form [formGroup]="pricingGeneralForm" class="p-4 flex space-x-2 justify-center" >
+          <app-value-input-string [label]="'Type'" [hide]="false" formControlName="type"/>
+          <app-value-input-numeric [label]="'Price'" formControlName="price" />
+        </form>
       </mat-card-content>
     </mat-card>
   </mat-drawer-content>
