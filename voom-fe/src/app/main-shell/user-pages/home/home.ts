@@ -406,43 +406,43 @@ export class UserHome implements AfterViewInit {
   }
 
     loadActiveDrivers() {
-    this.rideApi.getActiveDrivers().subscribe((drivers) => {
-      console.log('ACTIVE DRIVERS:', drivers);
+      this.rideApi.getActiveDrivers().subscribe((drivers) => {
+        console.log('ACTIVE DRIVERS:', drivers);
 
-      if (!drivers) {
-        return;
-      }
-
-      this.driverSocket.connect(
-        (route) => {
-        this.map.applyDriverRoute(route.driverId, route.route);
-      },
-        (scheduledRides) => {
-          this.handleScheduledRides(scheduledRides);
-      },
-        undefined,
-        (pos) => {
-          if (!this.drivers.includes(pos.driverId)) {
-            this.drivers.push(pos.driverId);
-            const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
-            const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
-            const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
-            this.map.addSimulatedDriver({
-              id: pos.driverId,
-              firstName: name,
-              lastName: lastname,
-              start: {
-                lat: pos.lat,
-                lng: pos.lng,
-              },
-              status: status as any || 'FREE',
-            });
-          } else {
-            this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
-          }
+        if (!drivers) {
+          return;
         }
-      );
-    });
+
+        this.driverSocket.connect(
+          (route) => {
+          this.map.applyDriverRoute(route.driverId, route.route);
+        },
+          (scheduledRides) => {
+            this.handleScheduledRides(scheduledRides);
+        },
+          undefined,
+          (pos) => {
+            if (!this.drivers.includes(pos.driverId)) {
+              this.drivers.push(pos.driverId);
+              const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
+              const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
+              const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
+              this.map.addSimulatedDriver({
+                id: pos.driverId,
+                firstName: name,
+                lastName: lastname,
+                start: {
+                  lat: pos.lat,
+                  lng: pos.lng,
+                },
+                status: status as any || 'FREE',
+              });
+            } else {
+              this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+            }
+          }
+        );
+      });
   }
   
 
