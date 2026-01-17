@@ -6,8 +6,10 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ROUTE_LOGIN} from '../login/login';
 import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
 import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
-import {ROUTE_USER_PROFILE} from '../../authenticated/user/user-profile/user-profile';
+import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-profile';
 import {ValueInputFile} from '../../shared/value-input/value-input-file/value-input-file';
+import ApiService from '../../shared/rest/api-service';
+import {map} from 'rxjs';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -30,7 +32,8 @@ export const ROUTE_REGISTRATION = 'registration';
 })
 export class Registration {
 
-  private router = inject(Router);
+  constructor(protected router: Router, protected apiService: ApiService) {
+  }
 
   personalForm = new FormGroup({
     firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
@@ -51,8 +54,20 @@ export class Registration {
   });
 
   register() {
-    console.log('register');
-    this.router.navigate([ROUTE_USER_PROFILE]);
+    const registrationData = {
+      email: this.accountForm.value.email as string,
+      password: this.accountForm.value.password1 as string,
+      firstName: this.personalForm.value.firstName as string,
+      lastName: this.personalForm.value.lastName as string,
+      phoneNumber: this.contactForm.value.phoneNumber as string,
+      address: this.contactForm.value.address as string,
+    };
+
+    this.apiService.authenticationApi.register(registrationData).pipe(
+      map(response => response.data),
+    ).subscribe(() => {
+      this.router.navigate([ROUTE_LOGIN]);
+    });
   }
 
   login() {

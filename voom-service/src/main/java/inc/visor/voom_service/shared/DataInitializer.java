@@ -3,15 +3,14 @@ package inc.visor.voom_service.shared;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
-import inc.visor.voom_service.auth.user.repository.UserTypeRepository;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
@@ -25,32 +24,26 @@ import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 @Profile({"dev", "local"})
 public class DataInitializer implements ApplicationRunner {
 
-    private final UserTypeRepository userTypeRepository;
     private final UserRoleRepository userRoleRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserTypeRepository userTypeRepository, UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository) {
-        this.userTypeRepository = userTypeRepository;
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-
-        if (userTypeRepository.count() == 0) {
-            createUserType("ADMIN");
-            createUserType("DRIVER");
-            createUserType("PASSENGER");
-        }
 
         if (userRoleRepository.count() == 0) {
             createUserRole("ADMIN");
@@ -68,12 +61,6 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-    }
-
-    private void createUserType(String name) {
-        UserType type = new UserType();
-        type.setTypeName(name);
-        userTypeRepository.save(type);
     }
 
     private void createUserRole(String name) {
@@ -95,7 +82,6 @@ public class DataInitializer implements ApplicationRunner {
         final int NUMBER_OF_DRIVERS = 20;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
-        UserType driverType = userTypeRepository.findByTypeName("DRIVER").orElseThrow();
 
         VehicleType standard = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
         VehicleType van = vehicleTypeRepository.findByType("VAN").orElseThrow();
@@ -114,9 +100,8 @@ public class DataInitializer implements ApplicationRunner {
 
             User user = new User();
             user.setEmail("driver" + i + "@gmail.com");
-            user.setPassword("password" + i);
+            user.setPassword(passwordEncoder.encode("test1234"));
             user.setUserRole(driverRole);
-            user.setUserType(driverType);
             user.setUserStatus(UserStatus.ACTIVE);
             user.setPerson(person);
             userRepository.save(user);

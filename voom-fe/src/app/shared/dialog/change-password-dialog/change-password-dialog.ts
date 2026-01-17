@@ -12,7 +12,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { UserProfileApi } from '../../../authenticated/user/user-profile/user-profile.api';
+import { UserProfileApi } from '../../../main-shell/user-pages/user-profile/user-profile.api';
 
 @Component({
   selector: 'app-change-password-dialog',

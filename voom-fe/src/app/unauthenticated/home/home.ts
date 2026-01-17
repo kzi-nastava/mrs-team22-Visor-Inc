@@ -1,18 +1,17 @@
 import {Component} from '@angular/core';
-// import { Header } from '../header/header';
 import {Map} from '../../shared/map/map';
-import {Footer} from '../../core/layout/footer/footer';
 import {Dropdown} from '../../shared/dropdown/dropdown';
 import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
 import {MatButton} from '@angular/material/button';
 import {RouterLink} from '@angular/router';
-import {Header} from '../../core/layout/header-kt1/header-kt1';
+import {Header} from '../../shared/header/header';
+import {Footer} from '../../shared/footer/footer';
 
 export const ROUTE_HOME = 'home';
 
 @Component({
   selector: 'app-home',
-  imports: [Header, Map, Footer, Dropdown, ValueInputString, MatButton, RouterLink],
+  imports: [Map, Dropdown, ValueInputString, MatButton, RouterLink, Header, Footer],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
