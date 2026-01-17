@@ -1,6 +1,6 @@
 import { Api } from '../api';
 import { ApiClient } from '../api-client';
-import { DriverSummaryDto, RideRequestDto, RideRequestResponseDto } from './home.model';
+import { DriverSummaryDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
 
@@ -8,6 +8,19 @@ export class RideApi extends Api {
 
   constructor(apiClient: ApiClient) {
     super(apiClient);
+  }
+
+  getRide(id: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+    };
+
+    return this.apiClient.get<void, RideResponseDto>(
+      `/api/rides/${id}`,
+      config
+    );
   }
 
   getActiveDrivers() {

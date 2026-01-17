@@ -5,13 +5,15 @@ import { DriverSummaryDto } from '../home/home.api';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
 import ApiService from '../../../shared/rest/api-service';
 import { ActivatedRoute } from '@angular/router';
-
+import { RideResponseDto } from '../../../shared/rest/home/home.model';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
 
 export const ROUTE_RIDE_TRACKING = 'ride/tracking/:rideId';
 
 @Component({
   selector: 'app-ride-tracking',
-  imports: [Header, Map],
+  imports: [Header, Map, MatButtonModule, FormsModule],
   templateUrl: './ride-tracking.html',
   styleUrl: './ride-tracking.css',
 })
@@ -19,9 +21,22 @@ export class RideTracking {
 
     @ViewChild(Map) map!: Map;
 
+    private rideId!: number;
     private driverId!: number;
     private rendered = false;
 
+    showReport = false;
+    message = "";
+    reported = false;
+
+    toggleReport(): void {
+    this.showReport = !this.showReport;
+  }
+
+  report(): void {
+    this.reported = true;
+    this.toggleReport();
+  }
 
   constructor(
     private ws: DriverSimulationWsService,
@@ -30,48 +45,72 @@ export class RideTracking {
   ) {}
 
   ngOnInit(): void {
-    this.driverId = Number(this.route.snapshot.paramMap.get('rideId'));
-    if (!this.driverId) {
-      throw new Error('driverId missing in route'); // DELETE LATER AAAAAAAAAAAAAAAAAAA
-    }
-    this.loadActiveDrivers();
+  this.rideId = Number(this.route.snapshot.paramMap.get('rideId'));
+
+  if (!this.rideId) {
+    throw new Error('rideId missing in route');
   }
 
-  private loadActiveDrivers(): void {
-  this.api.rideApi.getActiveDrivers().subscribe(res => {
-    const drivers: DriverSummaryDto[] = res.data ?? [];
-    const driver = drivers.find(d => d.id === this.driverId);
+  this.initDrive();
+}
 
-    if (!driver) {
+  // api/rides/:id
+
+ private initDrive(): void {
+  this.api.rideApi.getRide(this.rideId).subscribe((res) => {
+
+    const ride: RideResponseDto | null = res.data;
+
+    console.log(ride);
+
+    if (!ride) {
       return;
     }
 
-    this.ws.connect(
-      () => {},
-      () => {},
-      undefined,
-      (pos) => {
-        if (pos.driverId !== this.driverId) return;
+    this.driverId = ride.driverId;
 
-        if (!this.rendered) {
-          this.rendered = true;
+    if (!this.driverId) {
+      console.warn('Ride has no driver assigned');
+      return;
+    }
 
-          this.map.addSimulatedDriver({
-            id: driver.id,
-            firstName: driver.firstName,
-            lastName: driver.lastName,
-            start: {
-              lat: pos.lat,
-              lng: pos.lng,
-            },
-            status: driver.status as any,
-          });
-        } else {
-          this.map.updateDriverPosition(driver.id, pos.lat, pos.lng);
-        }
-      }
+    this.map.drawRouteFromAddresses(
+      ride.startAddress,
+      ride.destinationAddress
     );
+
+
+    this.startTrackingDriver(ride);
   });
+}
+
+
+private startTrackingDriver(ride: any): void {
+  this.ws.connect(
+    () => {},
+    () => {},
+    undefined,
+    (pos) => {
+      if (pos.driverId !== this.driverId) return;
+
+      if (!this.rendered) {
+        this.rendered = true;
+
+        this.map.addSimulatedDriver({
+          id: this.driverId,
+          firstName: ride.driverName.split(' ')[0] ?? '',
+          lastName: ride.driverName.split(' ')[1] ?? '',
+          start: {
+            lat: pos.lat,
+            lng: pos.lng,
+          },
+          status: ride.status as any,
+        });
+      } else {
+        this.map.updateDriverPosition(this.driverId, pos.lat, pos.lng);
+      }
+    }
+  );
 }
 
 

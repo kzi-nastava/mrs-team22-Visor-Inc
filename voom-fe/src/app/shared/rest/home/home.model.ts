@@ -62,6 +62,19 @@ export type ScheduledRideDto = {
   }[];
 };
 
+export type RideResponseDto = {
+  id: number;
+  status: 'CREATED' | 'ONGOING' | 'FINISHED' | 'CANCELLED';
+  startedAt: string;
+  finishedAt: string | null;
+  driverName: string;
+  passengerName: string;
+  driverId: number;
+  startAddress: string;
+  destinationAddress: string;
+};
+
+
 export type DriverAssignedDto = {
   driverId: number;
   rideId: number;
