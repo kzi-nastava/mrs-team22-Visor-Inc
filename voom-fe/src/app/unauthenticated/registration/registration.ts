@@ -61,6 +61,7 @@ export class Registration {
       lastName: this.personalForm.value.lastName as string,
       phoneNumber: this.contactForm.value.phoneNumber as string,
       address: this.contactForm.value.address as string,
+      userType: 'USER',
     };
 
     this.apiService.authenticationApi.register(registrationData).pipe(

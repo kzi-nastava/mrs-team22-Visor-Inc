@@ -64,7 +64,9 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.post<string, void>(`/api/auth/forgotPassword`, email, config);
+    const body = { email: email };
+
+    return this.apiClient.post<Object, void>(`/api/auth/forgotPassword`, body, config);
   }
 
   resetPassword(body: ResetPasswordDto) {

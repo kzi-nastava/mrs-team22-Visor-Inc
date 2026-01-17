@@ -27,15 +27,15 @@ export class ResetPassword {
   }
 
   form = new FormGroup({
-    password1: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
-    password2: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
+    password1: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(50)]),
+    password2: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(50)]),
   });
 
   submit() {
     const password = this.form.value.password1;
-    const token = lookUpQueryParam('token');
+    const token = lookUpQueryParam("token");
 
-    if (!password || !token) {
+    if (!password || !token || this.form.value.password1 !== this.form.value.password2) {
       return;
     }
 
@@ -45,6 +45,7 @@ export class ResetPassword {
     }).pipe(
       map(result => result.data),
     ).subscribe(() => {
+      console.log('Password reset successful');
       this.router.navigate([ROUTE_HOME]);
     });
   }

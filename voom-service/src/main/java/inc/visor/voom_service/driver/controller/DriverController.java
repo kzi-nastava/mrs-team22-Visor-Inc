@@ -54,14 +54,12 @@ public class DriverController {
 //        return request;
 //    }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('DRIVER')")
     @GetMapping("/active")
     public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
         List<DriverSummaryDto> response = driverService.getActiveDrivers();
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('DRIVER')")
     @GetMapping("/me")
     public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal User user) {
         Long userId = (user != null) ? user.getId() : 2L;

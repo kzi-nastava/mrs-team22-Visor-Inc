@@ -60,8 +60,8 @@ public class AuthService {
         String refreshTokenText = jwtService.generateRefreshToken(new VoomUserDetails(user));
         String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user),  user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
 
-        Token refreshToken = tokenService.readToken(user.getId(), TokenType.REFRESH).orElse(null);
-        Token accessToken = tokenService.readToken(user.getId(), TokenType.ACCESS).orElse(null);
+        Token refreshToken = tokenService.readToken(user, TokenType.REFRESH).orElse(null);
+        Token accessToken = tokenService.readToken(user, TokenType.ACCESS).orElse(null);
 
         if (refreshToken != null) {
             refreshToken.setToken(refreshTokenText);
@@ -89,7 +89,7 @@ public class AuthService {
         UserRole userRole = this.userRoleService.read(dto.getUserType()).orElseThrow(() -> new RuntimeException("User role not found"));
         User user = this.userService.create(new User(dto.getEmail(), passwordEncoder.encode(dto.getPassword()), person, userRole));
         String verificationTokenText = jwtService.generateEmailVerificationToken(new VoomUserDetails(user));
-        Token verificationToken = tokenService.readToken(user.getId(), TokenType.EMAIL_VERIFICATION).orElse(null);
+        Token verificationToken = tokenService.readToken(user, TokenType.EMAIL_VERIFICATION).orElse(null);
         if (verificationToken != null) {
             verificationToken.setToken(verificationTokenText);
             verificationToken.setExpiryDateTime(LocalDateTime.ofInstant(jwtService.extractExpiration(verificationTokenText).toInstant(), java.time.ZoneId.systemDefault()));
@@ -105,7 +105,7 @@ public class AuthService {
     public void verifyUser(String token) {
         String email = jwtService.extractUsername(token);
         User user = userService.readByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Token verificationToken = tokenService.readToken(user.getId(), TokenType.EMAIL_VERIFICATION).orElseThrow(() -> new RuntimeException("Verification token not found"));
+        Token verificationToken = tokenService.readToken(user, TokenType.EMAIL_VERIFICATION).orElseThrow(() -> new RuntimeException("Verification token not found"));
         if (user.getUserStatus() == UserStatus.ACTIVE) {
             throw new RuntimeException("User is already active.");
         } else if (!verificationToken.getToken().equals(token)) {
@@ -119,13 +119,13 @@ public class AuthService {
     public void forgotPassword(String email) {
         User user = userService.readByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         String passwordResetTokenText = jwtService.generatePasswordResetToken(new VoomUserDetails(user));
-        Token passwordResetToken = tokenService.readToken(user.getId(), TokenType.PASSWORD_RESET).orElse(null);
+        Token passwordResetToken = tokenService.readToken(user, TokenType.PASSWORD_RESET).orElse(null);
         if (passwordResetToken != null) {
             passwordResetToken.setToken(passwordResetTokenText);
             passwordResetToken.setExpiryDateTime(LocalDateTime.ofInstant(jwtService.extractExpiration(passwordResetTokenText).toInstant(), java.time.ZoneId.systemDefault()));
             tokenService.update(passwordResetToken);
         } else {
-            passwordResetToken = new Token(passwordResetTokenText, TokenType.EMAIL_VERIFICATION, user, this.jwtService.extractExpiration(passwordResetTokenText).getTime());
+            passwordResetToken = new Token(passwordResetTokenText, TokenType.PASSWORD_RESET, user, this.jwtService.extractExpiration(passwordResetTokenText).getTime());
             tokenService.create(passwordResetToken);
         }
         sendForgotPasswordEmail(user, passwordResetTokenText);
@@ -134,7 +134,7 @@ public class AuthService {
     public void resetPassword(ResetPasswordDto dto) {
         String email = jwtService.extractUsername(dto.getToken());
         User user = userService.readByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Token verificationToken = tokenService.readToken(user.getId(), TokenType.PASSWORD_RESET).orElseThrow(() -> new RuntimeException("Verification token not found"));
+        Token verificationToken = tokenService.readToken(user, TokenType.PASSWORD_RESET).orElseThrow(() -> new RuntimeException("Verification token not found"));
         if (!verificationToken.getToken().equals(dto.getToken())) {
             throw new RuntimeException("Invalid verification token.");
         } else {
@@ -146,13 +146,13 @@ public class AuthService {
     public TokenDto refreshToken(String refreshToken) {
         String email = jwtService.extractUsername(refreshToken);
         User user = userService.readByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Token storedRefreshToken = tokenService.readToken(user.getId(), TokenType.REFRESH).orElseThrow(() -> new RuntimeException("Refresh token not found"));
+        Token storedRefreshToken = tokenService.readToken(user, TokenType.REFRESH).orElseThrow(() -> new RuntimeException("Refresh token not found"));
         if (!storedRefreshToken.getToken().equals(refreshToken)) {
             throw new RuntimeException("Invalid refresh token.");
         }
 
         String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user),  user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
-        Token accessToken = tokenService.readToken(user.getId(), TokenType.ACCESS).orElse(null);
+        Token accessToken = tokenService.readToken(user, TokenType.ACCESS).orElse(null);
 
         if (accessToken != null) {
             accessToken.setToken(accessTokenText);
