@@ -91,13 +91,17 @@ public class RideController {
     public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
 
         RideResponseDto ride = new RideResponseDto(
+                1001L,
+                RideStatus.ONGOING,
+                LocalDateTime.of(2026, 1, 15, 14, 30),
+                null,
+                "Marko Marković",
+                "Petar Petrović",
                 1L,
-                RideStatus.FINISHED,
-                LocalDateTime.now().minusMinutes(10),
-                LocalDateTime.now(),
-                "John Doe",
-                "Mark Smith"
+                "Bulevar Oslobođenja 45, Novi Sad",
+                "Zmaj Jovina 12, Novi Sad"
         );
+
 
         return ResponseEntity.ok(ride);
     }
