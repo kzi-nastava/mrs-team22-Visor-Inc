@@ -10,7 +10,6 @@ export default [
   {
     path: ROUTE_DRIVER_RIDE_HISTORY,
     component: DriverRideHistory,
-    data: { roles: ['DRIVER'] },
   },
   {
     path: '**',
