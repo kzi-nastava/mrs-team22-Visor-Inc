@@ -4,6 +4,9 @@ import {ValueInputString} from "../../../shared/value-input/value-input-string/v
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {ROUTE_HOME} from '../../home/home';
+import ApiService from '../../../shared/rest/api-service';
+import {map} from 'rxjs';
+import {lookUpQueryParam} from '../../../shared/util/url-util';
 
 export const ROUTE_RESET_PASSWORD = 'resetPassword';
 
@@ -19,7 +22,9 @@ export const ROUTE_RESET_PASSWORD = 'resetPassword';
 })
 export class ResetPassword {
 
-  private router = inject(Router);
+
+  constructor(protected router: Router, protected apiService: ApiService) {
+  }
 
   form = new FormGroup({
     password1: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
@@ -27,7 +32,20 @@ export class ResetPassword {
   });
 
   submit() {
-    this.router.navigate([ROUTE_HOME]);
-  }
+    const password = this.form.value.password1;
+    const token = lookUpQueryParam('token');
 
+    if (!password || !token) {
+      return;
+    }
+
+    this.apiService.authenticationApi.resetPassword({
+      token: token,
+      password: password,
+    }).pipe(
+      map(result => result.data),
+    ).subscribe(() => {
+      this.router.navigate([ROUTE_HOME]);
+    });
+  }
 }

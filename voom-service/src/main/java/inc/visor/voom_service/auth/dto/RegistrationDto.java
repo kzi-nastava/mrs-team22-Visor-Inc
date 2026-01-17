@@ -1,7 +1,5 @@
 package inc.visor.voom_service.auth.dto;
 
-import java.util.Objects;
-
 public class RegistrationDto {
 
     private String email;
@@ -10,6 +8,7 @@ public class RegistrationDto {
     private String lastName;
     private String phoneNumber;
     private String address;
+    private String userType;
 
     public String getEmail() {
         return email;
@@ -59,27 +58,11 @@ public class RegistrationDto {
         this.address = address;
     }
 
-    @Override
-    public String toString() {
-        return "RegistrationDto{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", address='" + address + '\'' +
-                '}';
+    public String getUserType() {
+        return userType;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        RegistrationDto that = (RegistrationDto) o;
-        return Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(phoneNumber, that.phoneNumber) && Objects.equals(address, that.address);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(email, password, firstName, lastName, phoneNumber, address);
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }

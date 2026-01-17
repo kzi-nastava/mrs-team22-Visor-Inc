@@ -1,0 +1,20 @@
+<mat-toolbar class="bg-white shadow-md h-20 px-6 flex justify-between sticky top-0 z-1000">
+  <div class="flex items-center cursor-pointer" routerLink="/">
+    <img src="../../../assets/images/logo.png" alt="Voom" class="h-12 ml-12" />
+  </div>
+
+  <div class="flex items-center space-x-2">
+    @if (isAuthenticated()) {
+      <button mat-button (click)="favoriteRoutes()">Favorite Routes</button>
+      <button mat-button (click)="rideHistory()">Ride History</button>
+      <button mat-button (click)="signOut()">Sign Out</button>
+      <button mat-button class="flex items-center space-x-2" (click)="profile()">
+        <mat-icon>account_circle</mat-icon>
+        <div>Profile</div>
+      </button>
+    } @else {
+      <button mat-button (click)="register()">Register</button>
+      <button mat-flat-button (click)="login()">Login</button>
+    }
+  </div>
+</mat-toolbar>

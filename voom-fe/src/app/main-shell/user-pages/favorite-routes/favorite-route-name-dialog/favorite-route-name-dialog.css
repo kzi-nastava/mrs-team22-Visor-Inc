@@ -1,0 +1,80 @@
+.dialog-container {
+  width: 420px;
+  max-width: 90vw;
+  padding: 28px 32px 24px;
+  border-radius: 28px;
+  background: #fafafa;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: #111;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2a6d;
+}
+
+.route-input {
+  height: 56px;
+  padding: 0 20px;
+  font-size: 16px;
+  border-radius: 999px;
+  border: 3px solid #0d1b5e;
+  outline: none;
+  background: white;
+}
+
+.route-input::placeholder {
+  color: #9ca3af;
+}
+
+.route-input:focus {
+  border-color: #0b5cff;
+}
+
+.actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.btn {
+  height: 44px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.cancel {
+  background: transparent;
+  color: #2563eb;
+}
+
+.btn.save {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.btn.save:not(:disabled) {
+  background: #2563eb;
+  color: white;
+}
+
+.btn.save:not(:disabled):hover {
+  background: #1d4ed8;
+}

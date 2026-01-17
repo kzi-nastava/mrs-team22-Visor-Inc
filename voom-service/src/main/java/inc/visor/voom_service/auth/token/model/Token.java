@@ -37,6 +37,17 @@ public class Token {
     @Enumerated(EnumType.ORDINAL)
     private TokenType tokenType;
 
+    public Token(String token, TokenType tokenType, User user, long expiration) {
+        this.token = token;
+        this.user = user;
+        this.tokenType = tokenType;
+        this.expiryDateTime = LocalDateTime.now().plusSeconds(expiration);
+    }
+
+    public Token() {
+
+    }
+
     public String getToken() {
         return token;
     }

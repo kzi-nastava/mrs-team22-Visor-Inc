@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.UserType;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;
@@ -47,19 +46,9 @@ public class UserProfileController {
         @AuthenticationPrincipal User user
     ) {
         if (user == null) {
-            UserProfileResponseDto response = new UserProfileResponseDto(
-                "test@example.com",
-                "NIKOLA091",
-                request.getLastName(),
-                request.getPhoneNumber(),
-                request.getAddress()
-            );
             
             Person person = new Person();
-            person.setId(1L);
-
-            UserType userType = new UserType();
-            userType.setId(1);
+            person.setId(2L);
 
             UserRole userRole = new UserRole();
             userRole.setId(1);
@@ -67,8 +56,7 @@ public class UserProfileController {
             User mockUser = new User(
                 "nikola@test.com",
                 "akjsdks",
-                userType,
-                UserStatus.ACTIVE, 
+                UserStatus.ACTIVE,
                 userRole,
                 person
             );

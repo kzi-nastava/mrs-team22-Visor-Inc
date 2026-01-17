@@ -8,26 +8,33 @@ import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder
-    ) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    public User create(User user) {
+        return userRepository.save(user);
+    }
+
+    public User update(User user) {
+        return userRepository.save(user);
+    }
+
+    public Optional<User> readByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     @Transactional
-    public void activateUserAndSetPassword(
-        User user,
-        String password,
-        String confirmPassword
-    ) {
+    public void activateUserAndSetPassword(User user, String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
             throw new IllegalArgumentException("Passwords do not match");
         }
