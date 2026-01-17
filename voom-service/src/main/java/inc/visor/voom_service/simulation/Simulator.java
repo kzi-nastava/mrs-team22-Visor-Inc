@@ -53,6 +53,8 @@ public class Simulator implements ApplicationRunner {
             LatLng pos = driver.nextPosition();
             if (pos != null) {
                 publisher.publishPosition(driver.getDriverId(), pos);
+            } else {
+                publisher.publishPosition(driver.getDriverId(), driver.currentPosition());
             }
         });
     }
