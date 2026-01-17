@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
@@ -10,6 +10,7 @@ import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {AuthenticationService} from '../../shared/service/authentication-service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ROUTE_MAIN_SHELL} from '../../main-shell/main-shell';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -33,14 +34,9 @@ export class Login {
     ]),
   });
 
-  constructor(private router: Router, private apiService: ApiService, private authenticationService: AuthenticationService) {
-    authenticationService.activeUser$.pipe(
-      takeUntilDestroyed()
-    ).subscribe((user) => {
-      if (user) {
-        this.router.navigate([ROUTE_HOME]);
-      }
-    });
+  private apiService = inject(ApiService);
+
+  constructor(private router: Router, private authenticationService: AuthenticationService) {
   }
 
   forgotPassword() {

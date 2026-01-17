@@ -10,7 +10,7 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
   return inject(AuthenticationService).isAuthenticated().pipe(
     map((authenticated) => {
       console.log("UnauthenticatedGuard:", authenticated);
-      return authenticated ? router.createUrlTree(['']) : true;
+      return authenticated ? router.createUrlTree([""]) : true;
     })
   )
 };
@@ -20,23 +20,23 @@ export const authenticatedGuard: CanActivateFn = (route, state) => {
   return inject(AuthenticationService).isAuthenticated().pipe(
     map((authenticated) => {
       console.log("AuthenticatedGuard:", authenticated);
-      return authenticated ? true : router.createUrlTree(['']);
+      return authenticated ? true : router.createUrlTree([""]);
     })
   )
 };
 
 export const routes: Routes = [
   {
-    path: ROUTE_UNAUTHENTICATED_MAIN,
-    component: UnauthenticatedMain,
-    loadChildren: () => import('./unauthenticated/unauthenticated.routes'),
-    canActivate: [unauthenticatedGuard],
-  },
-  {
     path: ROUTE_MAIN_SHELL,
     component: MainShell,
     canActivate: [authenticatedGuard],
     loadChildren: () => import('./main-shell/main-shell.routes')
+  },
+  {
+    path: ROUTE_UNAUTHENTICATED_MAIN,
+    component: UnauthenticatedMain,
+    loadChildren: () => import('./unauthenticated/unauthenticated.routes'),
+    canActivate: [unauthenticatedGuard],
   },
   {
     path: '**',

@@ -3,7 +3,7 @@ import {FavoriteRouteAccordion} from './favorite-routes-accordition/favorite-rou
 import {FavoriteRouteDto, FavoriteRoutesApi} from './favorite-routes.api';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 
-export const ROUTE_FAVORITE_ROUTES = 'user/favorite-routes';
+export const ROUTE_FAVORITE_ROUTES = 'favorite';
 
 export interface FavoriteRoute {
   dto: FavoriteRouteDto;

@@ -1,21 +1,23 @@
 import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
 import {Footer} from '../shared/footer/footer';
 import {Header} from '../shared/header/header';
+import {RouterOutlet} from '@angular/router';
 
-export const ROUTE_MAIN_SHELL = "";
+export const ROUTE_MAIN_SHELL = "main";
 
 @Component({
   selector: 'app-main-shell',
   imports: [
-    RouterOutlet,
     Header,
     Footer,
-    Header
+    Header,
+    RouterOutlet
   ],
   templateUrl: './main-shell.html',
   styleUrl: './main-shell.css',
 })
 export class MainShell {
+  constructor() {
+  }
 
 }

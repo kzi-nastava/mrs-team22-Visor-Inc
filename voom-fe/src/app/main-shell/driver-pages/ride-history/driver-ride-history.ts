@@ -5,7 +5,7 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {RideAccordion} from './ride-accordion/ride-accordion';
 import {MatIcon} from '@angular/material/icon';
 
-export const ROUTE_DRIVER_RIDE_HISTORY = 'driver/rideHistory';
+export const ROUTE_DRIVER_RIDE_HISTORY = 'activity';
 
 type TimeString = `${number}:${number}` | `${number}:''`;
 

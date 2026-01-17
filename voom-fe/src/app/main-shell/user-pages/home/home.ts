@@ -15,7 +15,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
 
-export const ROUTE_USER_HOME = 'user/home';
+export const ROUTE_USER_HOME = 'home';
 
 type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 
@@ -52,7 +52,7 @@ export class UserHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private snackBar: MatSnackBar,
-    private driverSocket: DriverSimulationWsService,
+    // private driverSocket: DriverSimulationWsService,
     private router: Router,
     private dialog: MatDialog
   ) {}
@@ -295,11 +295,11 @@ export class UserHome implements AfterViewInit {
 
     driver.status = 'GOING_TO_PICKUP';
 
-    this.driverSocket.requestRoute({
-      driverId,
-      start: driver.marker.getLatLng(),
-      end: { lat, lng },
-    });
+    // this.driverSocket.requestRoute({
+    //   driverId,
+    //   start: driver.marker.getLatLng(),
+    //   end: { lat, lng },
+    // });
   }
 
   confirmRide() {
@@ -372,12 +372,12 @@ export class UserHome implements AfterViewInit {
         start: routeDef.start,
         status: 'FREE',
       });
-
-      this.driverSocket.requestRoute({
-        driverId: driver.id,
-        start: routeDef.start,
-        end: routeDef.end,
-      });
+      //
+      // this.driverSocket.requestRoute({
+      //   driverId: driver.id,
+      //   start: routeDef.start,
+      //   end: routeDef.end,
+      // });
     });
   }
 
@@ -390,14 +390,14 @@ export class UserHome implements AfterViewInit {
       history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
     }
 
-    this.driverSocket.connect(
-      (route) => {
-        this.map.applyDriverRoute(route.driverId, route.route);
-      },
-      (scheduledRides) => {
-        this.handleScheduledRides(scheduledRides);
-      }
-    );
+    // this.driverSocket.connect(
+    //   (route) => {
+    //     this.map.applyDriverRoute(route.driverId, route.route);
+    //   },
+    //   (scheduledRides) => {
+    //     this.handleScheduledRides(scheduledRides);
+    //   }
+    // );
 
     this.rideApi.getActiveDrivers().subscribe({
       next: (drivers) => this.initDriverSimulation(drivers),

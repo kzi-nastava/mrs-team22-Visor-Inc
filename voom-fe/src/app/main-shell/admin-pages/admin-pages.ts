@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+export const ROUTE_ADMIN_PAGES = "admin";
+
 @Component({
   selector: 'app-admin-pages',
   imports: [],
