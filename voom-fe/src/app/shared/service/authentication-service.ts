@@ -16,7 +16,7 @@ export class AuthenticationService {
   private refreshToken: string | null = null;
 
   constructor(private apiService: ApiService) {
-    this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
+    // this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
 
     if (this.isValid(this.refreshToken)) {
       this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(

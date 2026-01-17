@@ -3,6 +3,7 @@ package inc.visor.voom_service.shared;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import inc.visor.voom_service.auth.user.model.User;
@@ -29,14 +30,16 @@ public class DataInitializer implements ApplicationRunner {
     private final PersonRepository personRepository;
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -97,7 +100,7 @@ public class DataInitializer implements ApplicationRunner {
 
             User user = new User();
             user.setEmail("driver" + i + "@gmail.com");
-            user.setPassword("password" + i);
+            user.setPassword(passwordEncoder.encode("test1234"));
             user.setUserRole(driverRole);
             user.setUserStatus(UserStatus.ACTIVE);
             user.setPerson(person);

@@ -6,12 +6,12 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const authenticationService = inject(AuthenticationService);
   const router = inject(Router);
 
-  const allowedRoles = route.data['role'];
-  const user = authenticationService.accessToken;
+  console.log("RoleGuard:", route.data['roles']);
 
-  //TODO fix to work
+  const allowedRoles = route.data['roles'];
+  const user = authenticationService.activeUser$.value;
 
-  if (!authenticationService.isAuthenticated()) {
+  if (!authenticationService.isAuthenticated() || !user || !allowedRoles.includes(user.role)) {
     router.navigate(['']);
     return false;
   }

@@ -36,9 +36,11 @@ export class Login {
   constructor(private router: Router, private apiService: ApiService, private authenticationService: AuthenticationService) {
     authenticationService.activeUser$.pipe(
       takeUntilDestroyed()
-    ).subscribe(() => {
-      this.router.navigate([ROUTE_HOME]);
-    })
+    ).subscribe((user) => {
+      if (user) {
+        this.router.navigate([ROUTE_HOME]);
+      }
+    });
   }
 
   forgotPassword() {

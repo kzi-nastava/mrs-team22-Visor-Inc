@@ -13,7 +13,7 @@ export class VoomApiService extends ApiClient {
 
   constructor(private httpClient: HttpClient) {
     super();
-    this.baseUrl = "localhost:8080";
+    this.baseUrl = "http://localhost:8080";
   }
 
   delete<TRequest, TResponse>(path: string, config?: RequestConfig): Observable<ApiResponse<TResponse>> {
