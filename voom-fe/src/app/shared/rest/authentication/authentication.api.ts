@@ -40,8 +40,20 @@ export class AuthenticationApi extends Api {
       }
     };
 
-    return this.apiClient.put<string, TokenDto>(`/api/auth/refreshToken`, body, config);
+    return this.apiClient.post<string, TokenDto>(`/api/auth/refreshToken`, body, config);
   }
+
+  verifyUser(token: string) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+    };
+
+    return this.apiClient.post<string, void>(`/api/auth/verifyUser`, token, config);
+  }
+
 
   forgotPassword(email: string) {
     const config: RequestConfig = {
@@ -51,7 +63,7 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.put<string, void>(`/api/auth/forgotPassword`, email, config);
+    return this.apiClient.post<string, void>(`/api/auth/forgotPassword`, email, config);
   }
 
   resetPassword(body: ResetPasswordDto) {
@@ -62,7 +74,7 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.put<ResetPasswordDto, string>(`/api/auth/resetPassword`, body, config);
+    return this.apiClient.post<ResetPasswordDto, string>(`/api/auth/resetPassword`, body, config);
   }
 
 }

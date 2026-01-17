@@ -46,8 +46,8 @@ public class AuthController {
         return ResponseEntity.ok().body(tokenDto);
     }
 
-    @GetMapping("/verifyUser")
-    public ResponseEntity<Void> verifyUser(@RequestParam("token") String token) {
+    @PostMapping("/verifyUser")
+    public ResponseEntity<Void> verifyUser(@RequestBody String token) {
         authService.verifyUser(token);
         return ResponseEntity.noContent().build();
     }

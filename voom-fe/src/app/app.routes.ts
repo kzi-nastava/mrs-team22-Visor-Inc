@@ -10,6 +10,8 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
   const authenticationService = inject(AuthenticationService);
   const user = authenticationService.activeUser$.value;
   return authenticationService.isAuthenticated().pipe(
+
+
     map((authenticated) => {
       console.log("UnauthenticatedGuard:", authenticated);
       return authenticated ? router.createUrlTree([ROUTE_MAIN_SHELL, user!.role.toLowerCase()]) : true;

@@ -13,6 +13,7 @@ import inc.visor.voom_service.auth.user.model.User;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token,String> {
+
   @Query("SELECT token FROM Token token WHERE token.user.id = :userId AND token.tokenType = :tokenType")
   Optional<Token> find(Long userId, TokenType tokenType);
 }

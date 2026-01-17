@@ -20,6 +20,10 @@ public class TokenService {
         return tokenRepository.save(token);
     }
 
+    public Token update(Token token) {
+        return tokenRepository.save(token);
+    }
+
     public Optional<Token> readToken(Long userId, TokenType tokenType) {
         return tokenRepository.find(userId, tokenType);
     }
