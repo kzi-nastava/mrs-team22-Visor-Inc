@@ -1,8 +1,10 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
 import {TokenDto, User} from '../rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import ApiService from '../rest/api-service';
+import {HttpClient} from '@angular/common/http';
+import {isPlatformBrowser} from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -15,8 +17,13 @@ export class AuthenticationService {
 
   private refreshToken: string | null = null;
 
-  constructor(private apiService: ApiService) {
-    this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private apiService: ApiService) {
+    if (isPlatformBrowser(this.platformId)) {
+      console.log("Is platform browser")
+      this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
+    } else {
+      console.log("not platform browser")
+    }
 
     if (this.isValid(this.refreshToken)) {
       this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(

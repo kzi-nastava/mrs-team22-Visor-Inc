@@ -7,18 +7,22 @@ import {MainShell, ROUTE_MAIN_SHELL} from './main-shell/main-shell';
 
 export const unauthenticatedGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  return inject(AuthenticationService).isAuthenticated().pipe(
+  const authenticationService = inject(AuthenticationService);
+  const user = authenticationService.activeUser$.value;
+  return authenticationService.isAuthenticated().pipe(
     map((authenticated) => {
       console.log("UnauthenticatedGuard:", authenticated);
-      return authenticated ? router.createUrlTree([""]) : true;
+      return authenticated ? router.createUrlTree([ROUTE_MAIN_SHELL, user!.role.toLowerCase()]) : true;
     })
   )
 };
 
 export const authenticatedGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  return inject(AuthenticationService).isAuthenticated().pipe(
-    map((authenticated) => {
+  const authenticationService = inject(AuthenticationService);
+  const user = authenticationService.activeUser$.value;
+  return authenticationService.isAuthenticated().pipe(
+  map((authenticated) => {
       console.log("AuthenticatedGuard:", authenticated);
       return authenticated ? true : router.createUrlTree([""]);
     })
@@ -40,6 +44,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: ROUTE_UNAUTHENTICATED_MAIN,
+    redirectTo: ROUTE_MAIN_SHELL,
   },
 ];
