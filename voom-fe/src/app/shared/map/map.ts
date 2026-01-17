@@ -18,7 +18,7 @@ const NOVI_SAD_BOUNDS = {
   lonMax: 19.95,
 };
 
-type DriverStatus = 'FREE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE';
+type DriverStatus = 'FREE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE' | null;
 
 type Driver = {
   id: number;
@@ -397,7 +397,7 @@ export class Map implements AfterViewInit, OnChanges {
     driver.lastPos = driver.marker.getLatLng();
     driver.targetPos = target;
     driver.animStart = now;
-    driver.animDuration = 2000;
+    driver.animDuration = 3000;
   }
 
   private startInterpolationLoop() {

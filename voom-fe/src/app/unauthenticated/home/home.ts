@@ -8,7 +8,7 @@ import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { Header } from '../../core/layout/header-kt1/header-kt1';
 import { DriverSimulationWsService } from '../../shared/websocket/DriverSimulationWsService';
-import { RideApi } from './home.api';
+import { RideApi } from '../../core/rest/home/home.api';
 
 export const ROUTE_HOME = 'home';
 
@@ -44,6 +44,10 @@ export class Home {
     this.rideApi.getActiveDrivers().subscribe((drivers) => {
       console.log('ACTIVE DRIVERS:', drivers);
 
+      if (!drivers) {
+        return;
+      }
+
       this.ws.connect(
         () => {},
         () => {},
@@ -62,7 +66,7 @@ export class Home {
                 lat: pos.lat,
                 lng: pos.lng,
               },
-              status: 'FREE',
+              status: status as any || 'FREE',
             });
           } else {
             this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);

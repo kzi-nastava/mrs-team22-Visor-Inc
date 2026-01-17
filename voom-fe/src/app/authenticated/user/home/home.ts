@@ -65,6 +65,8 @@ export class UserHome implements AfterViewInit {
   isRideLocked = signal<boolean>(false);
   scheduledDriverSent = signal<boolean>(false);
 
+  drivers: number[] = [];
+
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
     dropoff: new FormControl<string>(''),
@@ -359,41 +361,57 @@ export class UserHome implements AfterViewInit {
       },
     });
   }
-  private initDriverSimulation(drivers: DriverSummaryDto[]) {
-    drivers.forEach((driver, index) => {
-      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
+  loadActiveDrivers() {
+    this.rideApi.getActiveDrivers().subscribe((drivers) => {
+      console.log('ACTIVE DRIVERS:', drivers);
 
-      this.map.addSimulatedDriver({
-        id: driver.id,
-        firstName: driver.firstName,
-        lastName: driver.lastName,
-        start: routeDef.start,
-        status: 'FREE',
-      });
+      if (!drivers) {
+        return;
+      }
 
-      this.driverSocket.requestRoute({
-        driverId: driver.id,
-        start: routeDef.start,
-        end: routeDef.end,
-      });
+      this.driverSocket.connect(
+        () => {},
+        (scheduledRides) => {
+        console.log('WS SCHEDULED RIDES:', scheduledRides);
+        this.handleScheduledRides(scheduledRides);
+      },
+        undefined,
+        (pos) => {
+          if (!this.drivers.includes(pos.driverId)) {
+            this.drivers.push(pos.driverId);
+            const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
+            const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
+            const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
+            this.map.addSimulatedDriver({
+              id: pos.driverId,
+              firstName: name,
+              lastName: lastname,
+              start: {
+                lat: pos.lat,
+                lng: pos.lng,
+              },
+              status: status as any || 'FREE',
+            });
+          } else {
+            this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+          }
+        }
+      );
     });
   }
 
   ngAfterViewInit() {
-    this.driverSocket.connect(
-      (route) => {
-        console.log('WS ROUTE PAYLOAD:', route);
-        this.map.applyDriverRoute(route.driverId, route.route);
-      },
-      (scheduledRides) => {
-        console.log('WS SCHEDULED RIDES:', scheduledRides);
-        this.handleScheduledRides(scheduledRides);
-      }
-    );
+    // this.driverSocket.connect(
+    //   (route) => {
+    //     console.log('WS ROUTE PAYLOAD:', route);
+    //     this.map.applyDriverRoute(route.driverId, route.route);
+    //   },
+    //   (scheduledRides) => {
+    //     console.log('WS SCHEDULED RIDES:', scheduledRides);
+    //     this.handleScheduledRides(scheduledRides);
+    //   }
+    // );
 
-    this.rideApi.getActiveDrivers().subscribe({
-      next: (drivers) => this.initDriverSimulation(drivers),
-      error: (err) => console.error(err),
-    });
+    this.loadActiveDrivers();
   }
 }
