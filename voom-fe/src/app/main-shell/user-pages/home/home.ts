@@ -14,6 +14,8 @@ import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
+import ApiService from '../../../shared/rest/api-service';
+
 
 export const ROUTE_USER_HOME = 'user/home';
 
@@ -54,7 +56,8 @@ export class UserHome implements AfterViewInit {
     private snackBar: MatSnackBar,
     private driverSocket: DriverSimulationWsService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private apiService: ApiService
   ) {}
 
   routePoints = signal<RoutePoint[]>([]);
@@ -67,6 +70,9 @@ export class UserHome implements AfterViewInit {
   scheduledDriverSent = signal<boolean>(false);
 
   drivers: number[] = [];
+
+  renderedDrivers: number[] = [];
+
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -406,12 +412,11 @@ export class UserHome implements AfterViewInit {
   }
 
     loadActiveDrivers() {
-      this.rideApi.getActiveDrivers().subscribe((drivers) => {
-        console.log('ACTIVE DRIVERS:', drivers);
-
-        if (!drivers) {
-          return;
-        }
+      this.apiService.rideApi.getActiveDrivers().subscribe((res) => {
+        const drivers: DriverSummaryDto[] = res.data ?? [];
+        if (drivers.length === 0) return;
+        
+        console.log('Loaded active drivers:', drivers);
 
         this.driverSocket.connect(
           (route) => {
