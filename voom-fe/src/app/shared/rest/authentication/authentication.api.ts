@@ -35,6 +35,7 @@ export class AuthenticationApi extends Api {
   refreshToken(body: string) {
     const config: RequestConfig = {
       headers: {
+
         accept: 'application/json',
         contentType: 'application/json',
       }

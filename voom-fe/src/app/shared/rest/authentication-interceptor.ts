@@ -3,7 +3,7 @@ import {switchMap, take} from 'rxjs';
 import {inject} from '@angular/core';
 import {AuthenticationService} from '../service/authentication-service';
 
-export const authenticationInterceptor: HttpInterceptorFn = (req, next) => {
+  export const authenticationInterceptor: HttpInterceptorFn = (req, next) => {
   const needsAuthorization = req.headers.has('Authorization') && !req.headers.get('Authorization');
 
   if (!needsAuthorization) {

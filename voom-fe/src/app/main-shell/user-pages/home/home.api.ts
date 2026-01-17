@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Inject, Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {ApiClient} from '../../../shared/rest/api-client';
+import {ApiResponse, RequestConfig} from '../../../shared/rest/rest.model';
+import {VoomApiService} from '../../../shared/rest/voom-api-service';
 
 export type UserProfileResponseDto = {
   email: string;
@@ -247,20 +249,44 @@ export type CreateFavoriteRouteDto = {
 
 @Injectable({ providedIn: 'root' })
 export class RideApi {
-  private readonly baseUrl = 'http://localhost:8080/api/rides';
-  private readonly driversBaseUrl = 'http://localhost:8080/api/drivers';
+  private readonly baseUrl = 'api/rides';
+  private readonly driversBaseUrl = '/api/drivers';
 
-  constructor(private http: HttpClient) {}
+  constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
 
-  createRideRequest(payload: RideRequestDto): Observable<RideRequestResponseDto> {
-    return this.http.post<RideRequestResponseDto>(`${this.baseUrl}/requests`, payload);
+  createRideRequest(payload: RideRequestDto): Observable<ApiResponse<RideRequestResponseDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.post<RideRequestDto, RideRequestResponseDto>(`${this.baseUrl}/requests`, payload, config);
   }
 
-  createFavoriteRoute(payload: CreateFavoriteRouteDto): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/favorites`, payload);
+  createFavoriteRoute(payload: CreateFavoriteRouteDto): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
   }
 
-  getActiveDrivers(): Observable<DriverSummaryDto[]> {
-    return this.http.get<DriverSummaryDto[]>(`${this.driversBaseUrl}/active`);
+  getActiveDrivers(): Observable<ApiResponse<DriverSummaryDto[]>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, DriverSummaryDto[]>(`${this.driversBaseUrl}/active`, config);
   }
 }

@@ -9,7 +9,8 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { provideHttpClient } from '@angular/common/http';
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {authenticationInterceptor} from './shared/rest/authentication-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,6 @@ export const appConfig: ApplicationConfig = {
         appearance: 'outline',
       },
     },
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authenticationInterceptor])),
   ],
 };

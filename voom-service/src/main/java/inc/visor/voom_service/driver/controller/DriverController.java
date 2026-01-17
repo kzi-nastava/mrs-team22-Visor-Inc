@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,12 +53,15 @@ public class DriverController {
 //    public DriverLocationDto updateLocation(@Payload DriverLocationDto request) {
 //        return request;
 //    }
+
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('DRIVER')")
     @GetMapping("/active")
     public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
         List<DriverSummaryDto> response = driverService.getActiveDrivers();
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER') or hasAuthority('DRIVER')")
     @GetMapping("/me")
     public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal User user) {
         Long userId = (user != null) ? user.getId() : 2L;

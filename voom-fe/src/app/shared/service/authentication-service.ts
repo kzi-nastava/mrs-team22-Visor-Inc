@@ -1,5 +1,5 @@
 import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
-import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
+import {BehaviorSubject, catchError, EMPTY, map, Observable, of, switchMap} from 'rxjs';
 import {TokenDto, User} from '../rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import ApiService from '../rest/api-service';
@@ -17,13 +17,8 @@ export class AuthenticationService {
 
   private refreshToken: string | null = null;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private apiService: ApiService) {
-    if (isPlatformBrowser(this.platformId)) {
-      console.log("Is platform browser")
-      this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
-    } else {
-      console.log("not platform browser")
-    }
+  constructor(private apiService: ApiService) {
+    this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
 
     if (this.isValid(this.refreshToken)) {
       this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
@@ -78,6 +73,19 @@ export class AuthenticationService {
   }
 
   public get accessToken() {
-    return of('');
+    return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
+      map(response => response.data),
+      catchError(() => {
+        this.logout();
+        return EMPTY;
+      }),
+      switchMap((token) => {
+      if (!token) {
+        this.logout();
+        return EMPTY;
+      }
+
+      return of(token.accessToken);
+    }));
   }
 }

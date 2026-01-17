@@ -14,6 +14,8 @@ import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
+import { map } from "rxjs";
+import {response} from 'express';
 
 export const ROUTE_USER_HOME = 'home';
 
@@ -339,8 +341,13 @@ export class UserHome implements AfterViewInit {
       freeDriversSnapshot: freeDriversSnapshot,
     };
 
-    this.rideApi.createRideRequest(payload).subscribe({
+    this.rideApi.createRideRequest(payload).pipe(
+      map(response => response.data),
+    ).subscribe({
       next: (res) => {
+        if (!res) {
+          return;
+        }
         if (res.status === 'ACCEPTED' && res.driver) {
           this.snackBar.open(
             `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
@@ -399,8 +406,14 @@ export class UserHome implements AfterViewInit {
     //   }
     // );
 
-    this.rideApi.getActiveDrivers().subscribe({
-      next: (drivers) => this.initDriverSimulation(drivers),
+    this.rideApi.getActiveDrivers().pipe(
+      map(response => response.data),
+    ).subscribe({
+      next: (drivers) => {
+        if (drivers) {
+          this.initDriverSimulation(drivers);
+        }
+     },
       error: (err) => console.error(err),
     });
   }

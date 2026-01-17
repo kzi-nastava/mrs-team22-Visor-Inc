@@ -1,5 +1,7 @@
 package inc.visor.voom_service.shared;
 
+import inc.visor.voom_service.auth.user.model.Permission;
+import inc.visor.voom_service.auth.user.repository.PermissionRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -20,6 +22,8 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 
+import java.util.Set;
+
 @Component
 @Profile({"dev", "local"})
 public class DataInitializer implements ApplicationRunner {
@@ -31,8 +35,9 @@ public class DataInitializer implements ApplicationRunner {
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PermissionRepository permissionRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -40,15 +45,33 @@ public class DataInitializer implements ApplicationRunner {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.passwordEncoder = passwordEncoder;
+        this.permissionRepository = permissionRepository;
     }
 
     @Override
     public void run(ApplicationArguments args) {
 
+        Permission userPermission = permissionRepository.readPermissionByPermissionName("USER").orElse(null);
+        Permission driverPermission = permissionRepository.readPermissionByPermissionName("DRIVER").orElse(null);
+        Permission adminPermission = permissionRepository.readPermissionByPermissionName("ADMIN").orElse(null);
+
+        if (userPermission == null) {
+            userPermission = permissionRepository.save(new Permission("USER"));
+        }
+
+        if (driverPermission == null) {
+            driverPermission = permissionRepository.save(new Permission("DRIVER"));
+        }
+
+        if (adminPermission == null) {
+            adminPermission = permissionRepository.save(new Permission("ADMIN"));
+        }
+
+
         if (userRoleRepository.count() == 0) {
-            createUserRole("ADMIN");
-            createUserRole("DRIVER");
-            createUserRole("PASSENGER");
+            createUserRole("ADMIN", adminPermission);
+            createUserRole("DRIVER", driverPermission);
+            createUserRole("USER", userPermission);
         }
 
         if (vehicleTypeRepository.count() == 0) {
@@ -63,16 +86,15 @@ public class DataInitializer implements ApplicationRunner {
 
     }
 
-    private void createUserRole(String name) {
-        UserRole role
-                = new UserRole();
+    private void createUserRole(String name, Permission permission) {
+        UserRole role = new UserRole();
         role.setRoleName(name);
+        role.setPermissions(Set.of(permission));
         userRoleRepository.save(role);
     }
 
     private void createVehicleType(String name) {
-        VehicleType type
-                = new VehicleType();
+        VehicleType type = new VehicleType();
         type.setType(name);
         vehicleTypeRepository.save(type);
     }
