@@ -28,6 +28,17 @@ export class RideTracking {
     showReport = false;
     message = "";
     reported = false;
+    rideFinished = false;
+
+    startAddress = "";
+    destinationAddress = "";
+
+    stars = [1, 2, 3, 4, 5];
+
+    driverRating: number = 0;
+    carRating: number = 0;
+    reviewComment: string = "";
+    reviewed = false;
 
     toggleReport(): void {
     this.showReport = !this.showReport;
@@ -36,6 +47,12 @@ export class RideTracking {
   report(): void {
     this.reported = true;
     this.toggleReport();
+    this.api.rideApi
+    .reportRide(this.rideId, { message: this.message })
+    .subscribe(() => {
+      this.reported = true;
+    });
+
   }
 
   constructor(
@@ -67,6 +84,9 @@ export class RideTracking {
       return;
     }
 
+    this.startAddress = ride.startAddress;
+    this.destinationAddress = ride.destinationAddress;
+
     this.driverId = ride.driverId;
 
     if (!this.driverId) {
@@ -93,6 +113,13 @@ private startTrackingDriver(ride: any): void {
     (pos) => {
       if (pos.driverId !== this.driverId) return;
 
+      console.log(pos);
+
+      if (pos.finished) {
+        this.rideFinished = true;
+        return;
+      }
+
       if (!this.rendered) {
         this.rendered = true;
 
@@ -113,5 +140,19 @@ private startTrackingDriver(ride: any): void {
   );
 }
 
+setDriverRating(rating: number): void {
+  this.driverRating = rating;
+  console.log("Driver rated with:", this.driverRating);
+}
+
+setCarRating(rating: number): void {
+  this.carRating = rating;
+  console.log("Car rated with:", this.carRating); 
+}
+
+submitReview(): void {
+  console.log("Submitting review - Driver Rating:", this.driverRating, "Car Rating:", this.carRating, "Comment:", this.reviewComment);
+  this.reviewed = true;
+}
 
 }

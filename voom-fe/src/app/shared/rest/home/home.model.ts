@@ -1,3 +1,8 @@
+export type RideReportRequestDto = {
+  message: string;
+};
+
+
 export type UserProfileResponseDto = {
   email: string;
   firstName: string;

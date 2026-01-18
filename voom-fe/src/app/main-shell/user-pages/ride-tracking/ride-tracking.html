@@ -3,6 +3,127 @@
   <app-map/>
 </div>
 
+@if(rideFinished) {
+    <div class="py-5 flex items-center justify-center px-1 w-full">
+  <div class="w-full max-w-sm flex flex-col items-center text-center space-y-6">
+
+    <div class="flex items-center justify-center">
+      <div class="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center">
+        <svg
+          class="w-8 h-8 text-white"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    </div>
+
+    <h2 class="text-lg font-semibold text-gray-900">
+      Your ride is complete!
+    </h2>
+
+    <p class="text-sm text-gray-500 flex items-center gap-1">
+      📍 {{startAddress}} - {{destinationAddress}}
+    </p>
+
+    
+
+    @if(reviewed) {
+        <p class="text-sm text-gray-600">
+        Thank you for your review.
+        </p>
+    }
+    @else {
+    
+
+    <p class="text-sm text-gray-600">
+      Please leave a review so that we can improve your future experience.
+    </p>
+
+<div class="w-full text-left space-y-1">
+  <p class="text-sm text-gray-700">Driver</p>
+
+  <div class="flex gap-1 text-4xl cursor-pointer">
+    @for (star of stars; track $index) {
+      <span
+        (click)="setDriverRating($index + 1)"
+        class="transition"
+        [class.text-blue-600]="$index < driverRating"
+        [class.text-blue-200]="$index >= driverRating"
+      >
+        ★
+      </span>
+    }
+  </div>
+</div>
+
+<div class="w-full text-left space-y-1">
+  <p class="text-sm text-gray-700">Car</p>
+
+  <div class="flex gap-1 text-4xl cursor-pointer">
+    @for (star of stars; track $index) {
+      <span
+        (click)="setCarRating($index + 1)"
+        class="transition"
+        [class.text-blue-600]="$index < carRating"
+        [class.text-blue-200]="$index >= carRating"
+      >
+        ★
+      </span>
+    }
+  </div>
+</div>
+
+
+    <div class="w-full space-y-1">
+      <p class="text-sm text-gray-700 text-left">Comment</p>
+      <textarea
+        rows="4"
+        placeholder="Write your comment..."
+        class="
+          w-full
+          resize-none
+          rounded-2xl
+          border-2
+          border-blue-300
+          px-4
+          py-3
+          text-sm
+          text-gray-700
+          outline-none
+          focus:border-blue-500
+        "
+        [(ngModel)]="reviewComment"
+      ></textarea>
+    </div>
+
+    <button
+      class="
+        mt-4
+        rounded-full
+        bg-blue-900
+        px-6
+        py-2
+        text-white
+        text-sm
+        font-medium
+        hover:bg-blue-950
+        transition
+        cursor-pointer
+      "
+        (click)="submitReview()"
+    >
+      Submit Review
+    </button>
+    }
+  </div>
+</div>
+
+}
+@else {
 <div class="max-w-[1200px] ml-auto mr-auto flex flex-col items-center gap-4 p-4">
     <div>
         <p class="text-center text-xl">Estimated time of arrival: 15 minutes</p>
@@ -92,3 +213,4 @@
 
 
 </div>
+}
