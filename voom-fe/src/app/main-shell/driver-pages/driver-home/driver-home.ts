@@ -16,8 +16,10 @@ import {DriverAssignedDto, DriverSummaryDto, PREDEFINED_ROUTES, RideApi} from '.
 import {RoutePoint} from '../../user-pages/home/home';
 import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
 import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {catchError, map} from 'rxjs';
+import {log} from 'node:util';
 
-export const ROUTE_DRIVER_HOME = 'driverHome';
+export const ROUTE_DRIVER_HOME = 'home';
 
 export type ChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -49,7 +51,7 @@ export class DriverHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private profileApi: UserProfileApi,
-    private driverSocket: DriverSimulationWsService,
+    // private driverSocket: DriverSimulationWsService,
     private snackBar: MatSnackBar
   ) {
     this.chartOptions = {
@@ -100,16 +102,22 @@ export class DriverHome implements AfterViewInit {
         this.myId.set(vehicle.driverId || null);
       },
     });
-    this.driverSocket.connect(
-      (route) => {
-        // this.map.applyDriverRoute(route.driverId, route.route);
-      },
-      () => {},
-      (assigned) => this.handleDriverAssigned(assigned)
-    );
+    // this.driverSocket.connect(
+    //   (route) => {
+    //     // this.map.applyDriverRoute(route.driverId, route.route);
+    //   },
+    //   () => {},
+    //   (assigned) => this.handleDriverAssigned(assigned)
+    // );
 
-    this.rideApi.getActiveDrivers().subscribe({
-      next: (drivers) => this.initDriversOnMap(drivers),
+    this.rideApi.getActiveDrivers().pipe(
+      map(response => response.data),
+    ).subscribe({
+      next: (drivers) => {
+        if (drivers) {
+          this.initDriversOnMap(drivers);
+        }
+      },
       error: (err) => console.error(err),
     });
   }
@@ -172,11 +180,11 @@ export class DriverHome implements AfterViewInit {
       //   status: 'FREE',
       // });
 
-      this.driverSocket.requestRoute({
-        driverId: driver.id,
-        start: routeDef.start,
-        end: routeDef.end,
-      });
+      // this.driverSocket.requestRoute({
+      //   driverId: driver.id,
+      //   start: routeDef.start,
+      //   end: routeDef.end,
+      // });
     });
   }
 

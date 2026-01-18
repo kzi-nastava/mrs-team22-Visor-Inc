@@ -6,7 +6,7 @@ export interface LoginDto {
 export interface TokenDto {
   user: User;
   refreshToken: string;
-  accessList: Access[];
+  accessToken: string;
 }
 
 export interface ResetPasswordDto {
@@ -21,6 +21,7 @@ export interface RegistrationDto {
   lastName: string;
   phoneNumber: string;
   address: string;
+  userType: string;
 }
 
 export interface User {
@@ -29,20 +30,5 @@ export interface User {
   lastName: string;
   email: string;
   role: string;
-}
-
-export interface Authority {
-  readonly contextId: number;
-  readonly contextName: string;
-  readonly mainContext: boolean;
-  readonly active: boolean;
-  readonly authenticationToken: string;
-  readonly roleNames: string[];
-  readonly permissions: string[];
-}
-
-export interface Access {
-  resource: string;
-  permissions: string[];
 }
 

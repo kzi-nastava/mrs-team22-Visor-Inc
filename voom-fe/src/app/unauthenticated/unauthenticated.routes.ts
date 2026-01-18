@@ -4,6 +4,7 @@ import {ResetPassword, ROUTE_RESET_PASSWORD} from './login/reset-password/reset-
 import {ForgotPassword, ROUTE_FORGOT_PASSWORD} from './login/forgot-password/forgot-password';
 import {Registration, ROUTE_REGISTRATION} from './registration/registration';
 import {Login, ROUTE_LOGIN} from './login/login';
+import {ROUTE_VERIFY_PROFILE, VerifyProfile} from './activate/verify-profile/verify-profile';
 
 export default [
   {
@@ -25,6 +26,10 @@ export default [
   {
     path: ROUTE_RESET_PASSWORD,
     component: ResetPassword,
+  },
+  {
+    path: ROUTE_VERIFY_PROFILE,
+    component: VerifyProfile,
   },
   {
     path: '**',

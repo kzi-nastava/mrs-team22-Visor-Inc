@@ -14,10 +14,12 @@ import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
+import { map } from "rxjs";
+import {response} from 'express';
 import ApiService from '../../../shared/rest/api-service';
 
 
-export const ROUTE_USER_HOME = 'user/home';
+export const ROUTE_USER_HOME = 'home';
 
 type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 
@@ -54,7 +56,7 @@ export class UserHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private snackBar: MatSnackBar,
-    private driverSocket: DriverSimulationWsService,
+    // private driverSocket: DriverSimulationWsService,
     private router: Router,
     private dialog: MatDialog,
     private apiService: ApiService
@@ -303,11 +305,11 @@ export class UserHome implements AfterViewInit {
 
     driver.status = 'GOING_TO_PICKUP';
 
-    this.driverSocket.requestRoute({
-      driverId,
-      start: driver.marker.getLatLng(),
-      end: { lat, lng },
-    });
+    // this.driverSocket.requestRoute({
+    //   driverId,
+    //   start: driver.marker.getLatLng(),
+    //   end: { lat, lng },
+    // });
   }
 
   confirmRide() {
@@ -347,8 +349,13 @@ export class UserHome implements AfterViewInit {
       freeDriversSnapshot: freeDriversSnapshot,
     };
 
-    this.rideApi.createRideRequest(payload).subscribe({
+    this.rideApi.createRideRequest(payload).pipe(
+      map(response => response.data),
+    ).subscribe({
       next: (res) => {
+        if (!res) {
+          return;
+        }
         if (res.status === 'ACCEPTED' && res.driver) {
           this.snackBar.open(
             `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
@@ -367,6 +374,79 @@ export class UserHome implements AfterViewInit {
       error: () => {
         this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
       },
+    });
+  }
+  private initDriverSimulation(drivers: DriverSummaryDto[]) {
+    drivers.forEach((driver, index) => {
+      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
+
+      this.map.addSimulatedDriver({
+        id: driver.id,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        start: routeDef.start,
+        status: 'FREE',
+      });
+      //
+      // this.driverSocket.requestRoute({
+      //   driverId: driver.id,
+      //   start: routeDef.start,
+      //   end: routeDef.end,
+      // });
+    });
+  }
+
+  ngAfterViewInit() {
+    const favoriteRoute = history.state?.favoriteRoute;
+
+    if (favoriteRoute) {
+      this.applyFavoriteRoute(favoriteRoute);
+
+      history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
+    }
+
+    // this.driverSocket.connect(
+    //   (route) => {
+    //     this.map.applyDriverRoute(route.driverId, route.route);
+    //   },
+    //   (scheduledRides) => {
+    //     this.handleScheduledRides(scheduledRides);
+    //   }
+    // );
+
+    this.rideApi.getActiveDrivers().pipe(
+      map(response => response.data),
+    ).subscribe({
+      next: (drivers) => {
+        if (drivers) {
+          this.initDriverSimulation(drivers);
+        }
+     },
+      error: (err) => console.error(err),
+    });
+  }
+
+  private applyFavoriteRoute(route: FavoriteRouteDto) {
+    const points = route.points
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((p) => ({
+        id: crypto.randomUUID(),
+        lat: p.lat,
+        lng: p.lng,
+        address: p.address,
+        type: p.type,
+        order: p.orderIndex,
+      }));
+
+    this.routePoints.set(points);
+
+    const pickup = points.find((p) => p.type === 'PICKUP');
+    const dropoff = points.find((p) => p.type === 'DROPOFF');
+
+    this.rideForm.patchValue({
+      pickup: pickup?.address ?? '',
+      dropoff: dropoff?.address ?? '',
     });
   }
 

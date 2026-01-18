@@ -15,7 +15,7 @@ import {ValueInputString} from '../../../shared/value-input/value-input-string/v
 import {ValueInputFile} from '../../../shared/value-input/value-input-file/value-input-file';
 import {RegisterDriverApi} from './register-driver.api';
 
-export const ROUTE_ADMIN_REGISTER_DRIVER = 'admin/register-driver';
+export const ROUTE_ADMIN_REGISTER_DRIVER = 'register-driver';
 
 @Component({
   selector: 'app-admin-register-driver',

@@ -1,8 +1,10 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, catchError, map, Observable, of} from 'rxjs';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
+import {BehaviorSubject, catchError, EMPTY, map, Observable, of, switchMap} from 'rxjs';
 import {TokenDto, User} from '../rest/authentication/authentication.model';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import ApiService from '../rest/api-service';
+import {HttpClient} from '@angular/common/http';
+import {isPlatformBrowser} from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +18,7 @@ export class AuthenticationService {
   private refreshToken: string | null = null;
 
   constructor(private apiService: ApiService) {
-    // this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
+    this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
 
     if (this.isValid(this.refreshToken)) {
       this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
@@ -39,7 +41,7 @@ export class AuthenticationService {
   }
 
   public isAuthenticated(): Observable<boolean> {
-    return of(this.isValid(this.refreshToken))
+    return of(this.isValid(this.refreshToken));
   }
 
   public setAuthentication(response: TokenDto) {
@@ -71,6 +73,19 @@ export class AuthenticationService {
   }
 
   public get accessToken() {
-    return of('');
+    return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
+      map(response => response.data),
+      catchError(() => {
+        this.logout();
+        return EMPTY;
+      }),
+      switchMap((token) => {
+      if (!token) {
+        this.logout();
+        return EMPTY;
+      }
+
+      return of(token.accessToken);
+    }));
   }
 }

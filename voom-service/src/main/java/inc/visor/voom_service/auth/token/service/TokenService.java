@@ -3,6 +3,8 @@ package inc.visor.voom_service.auth.token.service;
 import inc.visor.voom_service.auth.token.model.Token;
 import inc.visor.voom_service.auth.token.model.TokenType;
 import inc.visor.voom_service.auth.token.repository.TokenRepository;
+import inc.visor.voom_service.auth.user.model.User;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,8 +22,12 @@ public class TokenService {
         return tokenRepository.save(token);
     }
 
-    public Optional<Token> readToken(Long userId, TokenType tokenType) {
-        return tokenRepository.find(userId, tokenType);
+    public Token update(Token token) {
+        return tokenRepository.save(token);
+    }
+
+    public Optional<Token> readToken(User user, TokenType tokenType) {
+        return tokenRepository.findTokenByUserAndTokenType(user, tokenType);
     }
 
 }

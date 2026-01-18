@@ -1,6 +1,6 @@
 <mat-toolbar class="bg-white shadow-md h-20 px-6 flex justify-between sticky top-0 z-1000">
-  <div class="flex items-center cursor-pointer" routerLink="/">
-    <img src="../../../assets/images/logo.png" alt="Voom" class="h-12 ml-12" />
+  <div class="flex items-center cursor-pointer" (click)="goHome()">
+    <img [attr.src]="'assets/images/logo.png'" alt="Voom Logo" class="h-12 ml-12"/>
   </div>
 
   <div class="flex items-center space-x-2">

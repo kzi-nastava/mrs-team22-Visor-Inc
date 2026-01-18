@@ -7,7 +7,6 @@ export default [
   {
     path: ROUTE_USER_HOME,
     component: UserHome,
-    data: { roles: ['USER'] },
   },
   {
     path: ROUTE_USER_PROFILE,
@@ -16,7 +15,6 @@ export default [
   {
     path: ROUTE_FAVORITE_ROUTES,
     component: FavoriteRoutes,
-    data: { roles: ['USER'] },
   },
   {
     path: '**',

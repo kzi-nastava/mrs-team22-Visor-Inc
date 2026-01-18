@@ -25,15 +25,7 @@ public class JwtService {
     this.expiration = expiration;
     this.verificationExpiration = verificationExpiration;
   }
-
-  public long getExpiration() {
-    return expiration;
-  }
-
-  public long getVerificationExpiration() {
-    return verificationExpiration;
-  }
-
+  
   public String generateAccessToken(UserDetails userDetails, List<String> permissions) {
     return Jwts
             .builder()

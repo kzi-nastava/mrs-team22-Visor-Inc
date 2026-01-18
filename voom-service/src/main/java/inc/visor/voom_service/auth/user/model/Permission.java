@@ -22,6 +22,13 @@ public class Permission implements GrantedAuthority {
         return permissionName;
     }
 
+    public Permission() {
+    }
+
+    public Permission(String permissionName) {
+        this.permissionName = permissionName;
+    }
+
     public long getId() {
         return id;
     }

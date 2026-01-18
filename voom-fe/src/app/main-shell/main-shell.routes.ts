@@ -1,34 +1,26 @@
 import {Route} from '@angular/router';
-import {DriverPages} from './driver-pages/driver-pages';
-import {UserPages} from './user-pages/user-pages';
-import {AdminPages} from './admin-pages/admin-pages';
-import {roleGuard} from '../shared/guards/role-guard';
-
+import {DriverPages, ROUTE_DRIVER_PAGES} from './driver-pages/driver-pages';
+import {ROUTE_USER_PAGES, UserPages} from './user-pages/user-pages';
+import {AdminPages, ROUTE_ADMIN_PAGES} from './admin-pages/admin-pages';
 
 export default [
   {
-    path: '',
+    path: ROUTE_USER_PAGES,
     component: UserPages,
-    canActivate: [roleGuard],
     loadChildren: () => import('./user-pages/user-pages.routes'),
-    data: { roles: ['USER'] },
   },
   {
-    path: '',
+    path: ROUTE_DRIVER_PAGES,
     component: DriverPages,
-    canActivate: [roleGuard],
     loadChildren: () => import('./driver-pages/driver-pages.routes'),
-    data: { roles: ['DRIVER'] },
   },
   {
-    path: '',
+    path: ROUTE_ADMIN_PAGES,
     component: AdminPages,
-    canActivate: [roleGuard],
     loadChildren: () => import('./admin-pages/admin-pages.routes'),
-    data: { roles: ['ADMIN'] },
   },
   {
     path: "**",
-    redirectTo: '',
+    redirectTo: ROUTE_USER_PAGES,
   }
 ] satisfies Route[];
