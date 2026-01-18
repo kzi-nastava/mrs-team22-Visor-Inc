@@ -1,13 +1,16 @@
 package inc.visor.voom_service.ride.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom_service.rating.dto.RatingRequestDto;
 import inc.visor.voom_service.rating.service.RatingService;
 import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.RideReportService;
+import inc.visor.voom_service.ride.service.RideService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -35,12 +38,14 @@ public class RideController {
     private final FavoriteRouteService favoriteRouteService;
     private final RideReportService rideReportService;
     private final RatingService ratingService;
+    private final RideService rideService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService, RideService rideService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
         this.ratingService = ratingService;
+        this.rideService = rideService;
     }
 
     @PostMapping("/requests")
@@ -85,9 +90,26 @@ public class RideController {
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
 
-        RideHistoryDto ride = new RideHistoryDto();
+        List<RideHistoryDto> rides = new ArrayList<>();
 
-        return ResponseEntity.ok(List.of(ride));
+        List<Ride> ridesList = rideService.getDriverRides(driverId);
+
+
+        for (Ride ride : ridesList) {
+            RideHistoryDto rideHistoryDto = new RideHistoryDto();
+            rideHistoryDto.setId(ride.getId());
+            rideHistoryDto.setRideRequest(ride.getRideRequest());
+            rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
+            rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
+            rideHistoryDto.setPassengers(ride.getPassengers());
+            rideHistoryDto.setStatus(ride.getStatus());
+            rideHistoryDto.setFinishedAt(ride.getFinishedAt());
+            rideHistoryDto.setStartedAt(ride.getStartedAt());
+            rides.add(rideHistoryDto);
+        }
+
+
+        return ResponseEntity.ok(rides);
     }
 
     @GetMapping("/{id}")
