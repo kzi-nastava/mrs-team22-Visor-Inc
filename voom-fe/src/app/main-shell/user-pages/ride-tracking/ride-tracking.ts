@@ -77,7 +77,6 @@ export class RideTracking {
   this.api.rideApi.getRide(this.rideId).subscribe((res) => {
 
     const ride: RideResponseDto | null = res.data;
-
     console.log(ride);
 
     if (!ride) {
@@ -150,9 +149,16 @@ setCarRating(rating: number): void {
   console.log("Car rated with:", this.carRating); 
 }
 
-submitReview(): void {
-  console.log("Submitting review - Driver Rating:", this.driverRating, "Car Rating:", this.carRating, "Comment:", this.reviewComment);
-  this.reviewed = true;
+submitReview() {
+  console.log("Submitting review:", this.driverRating, this.carRating, this.reviewComment);
+  this.api.rideApi.rateRide(this.rideId, {
+    driverRating: this.driverRating,
+    vehicleRating: this.carRating,
+    comment: this.reviewComment,
+  }).subscribe(() => {
+    this.reviewed = true;
+  });
 }
+
 
 }

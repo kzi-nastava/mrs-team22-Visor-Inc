@@ -1,6 +1,11 @@
 export type RideReportRequestDto = {
   message: string;
 };
+export type RatingRequestDto = {
+  driverRating: number;
+  vehicleRating: number;
+  comment?: string;
+};
 
 
 export type UserProfileResponseDto = {

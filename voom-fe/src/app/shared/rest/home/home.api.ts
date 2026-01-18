@@ -1,6 +1,6 @@
 import { Api } from '../api';
 import { ApiClient } from '../api-client';
-import { DriverSummaryDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
+import { DriverSummaryDto, RatingRequestDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
 
@@ -64,5 +64,20 @@ export class RideApi extends Api {
     config
   );
 }
+
+rateRide(rideId: number, body: RatingRequestDto) {
+  const config: RequestConfig = {
+    headers: {
+      contentType: 'application/json',
+    },
+  };
+
+  return this.apiClient.post<RatingRequestDto, void>(
+    `/api/rides/${rideId}/rate`,
+    body,
+    config
+  );
+}
+
 
 }
