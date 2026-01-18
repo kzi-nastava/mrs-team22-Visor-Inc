@@ -29,6 +29,9 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/**"
                 ).permitAll()
+                    .requestMatchers("/api/drivers/**", "/ws/**",
+                            "/topic/**",
+                            "/app/**").permitAll()
                 .anyRequest().authenticated()
             ).sessionManagement(session -> session
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
