@@ -3,8 +3,12 @@ package inc.visor.voom_service.ride.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.service.RideReportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
-import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
-import inc.visor.voom_service.ride.dto.RideCancelDto;
-import inc.visor.voom_service.ride.dto.RideHistoryDto;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
-import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
-import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
@@ -34,10 +31,12 @@ public class RideController {
 
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
+    private final RideReportService rideReportService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
+        this.rideReportService = rideReportService;
     }
 
     @PostMapping("/requests")
@@ -200,6 +199,12 @@ public class RideController {
         );
 
         return ResponseEntity.ok(ride);
+    }
+
+    @PostMapping("/{id}/report")
+    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
+        rideReportService.reportRide(id, body.getMessage());
+        return ResponseEntity.noContent().build();
     }
 
 }
