@@ -22,11 +22,11 @@ export const authenticatedGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authenticationService = inject(AuthenticationService);
   return authenticationService.isAuthenticated().pipe(
-  map((authenticated) => {
-      console.log("AuthenticatedGuard:", authenticated);
-      return authenticated ? true : router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
-    })
-  )
+    map((authenticated) => {
+        console.log("AuthenticatedGuard:", authenticated);
+        return authenticated ? true : router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
+      })
+    )
 };
 
 export const roleGuard: CanActivateFn = (route, state) => {
@@ -39,7 +39,6 @@ export const roleGuard: CanActivateFn = (route, state) => {
       console.log("RoleGuard:", user, " required role:", route.data['role']);
 
       if (!user) {
-        authenticationService.logout();
         return router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
       }
 
