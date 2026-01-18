@@ -16,6 +16,8 @@ import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-di
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
 import { map } from "rxjs";
 import {response} from 'express';
+import ApiService from '../../../shared/rest/api-service';
+
 
 export const ROUTE_USER_HOME = 'home';
 
@@ -56,7 +58,8 @@ export class UserHome implements AfterViewInit {
     private snackBar: MatSnackBar,
     // private driverSocket: DriverSimulationWsService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private apiService: ApiService
   ) {}
 
   routePoints = signal<RoutePoint[]>([]);
@@ -67,6 +70,11 @@ export class UserHome implements AfterViewInit {
   scheduledRide = signal<ScheduledRideDto | null>(null);
   isRideLocked = signal<boolean>(false);
   scheduledDriverSent = signal<boolean>(false);
+
+  drivers: number[] = [];
+
+  renderedDrivers: number[] = [];
+
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -483,7 +491,88 @@ export class UserHome implements AfterViewInit {
     });
   }
 
+    loadActiveDrivers() {
+      this.apiService.rideApi.getActiveDrivers().subscribe((res) => {
+        const drivers: DriverSummaryDto[] = res.data ?? [];
+        if (drivers.length === 0) return;
+        
+        console.log('Loaded active drivers:', drivers);
+
+        this.driverSocket.connect(
+          (route) => {
+          this.map.applyDriverRoute(route.driverId, route.route);
+        },
+          (scheduledRides) => {
+            this.handleScheduledRides(scheduledRides);
+        },
+          undefined,
+          (pos) => {
+            if (!this.drivers.includes(pos.driverId)) {
+              this.drivers.push(pos.driverId);
+              const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
+              const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
+              const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
+              this.map.addSimulatedDriver({
+                id: pos.driverId,
+                firstName: name,
+                lastName: lastname,
+                start: {
+                  lat: pos.lat,
+                  lng: pos.lng,
+                },
+                status: status as any || 'FREE',
+              });
+            } else {
+              this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+            }
+          }
+        );
+      });
+  }
+  
+
+
+  private applyFavoriteRoute(route: FavoriteRouteDto) {
+    const points = route.points
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((p) => ({
+        id: crypto.randomUUID(),
+        lat: p.lat,
+        lng: p.lng,
+        address: p.address,
+        type: p.type,
+        order: p.orderIndex,
+      }));
+
+    this.routePoints.set(points);
+
+    const pickup = points.find((p) => p.type === 'PICKUP');
+    const dropoff = points.find((p) => p.type === 'DROPOFF');
+
+    this.rideForm.patchValue({
+      pickup: pickup?.address ?? '',
+      dropoff: dropoff?.address ?? '',
+    });
+  }
+
+  
+
   openFavoriteRoutes() {
     this.router.navigate(['/user/favorite-routes']);
+  }
+
+  ngAfterViewInit() {
+    const favoriteRoute = history.state?.favoriteRoute;
+
+    this.loadActiveDrivers();
+
+    if (favoriteRoute) {
+      this.applyFavoriteRoute(favoriteRoute);
+
+      history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
+    }
+
+    
   }
 }

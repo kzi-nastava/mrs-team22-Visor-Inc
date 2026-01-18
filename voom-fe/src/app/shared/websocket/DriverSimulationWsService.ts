@@ -8,7 +8,8 @@ export class DriverSimulationWsService {
   connect(
     onRoute: (msg: any) => void,
     onScheduledRide: (msg: any) => void,
-    onDriverAssigned?: (msg: any) => void
+    onDriverAssigned?: (msg: any) => void,
+    onDriverPosition?: (msg: any) => void
   ) {
     this.client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
@@ -31,6 +32,11 @@ export class DriverSimulationWsService {
         const payload = JSON.parse(message.body);
         console.log('[WS] Driver assigned:', payload);
         onDriverAssigned?.(payload);
+      });
+
+      this.client.subscribe('/topic/drivers-positions', (message) => {
+        const payload = JSON.parse(message.body);
+        onDriverPosition?.(payload);
       });
     };
 
