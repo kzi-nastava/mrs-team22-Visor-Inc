@@ -3,6 +3,8 @@ package inc.visor.voom_service.ride.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import inc.visor.voom_service.rating.dto.RatingRequestDto;
+import inc.visor.voom_service.rating.service.RatingService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.RideReportService;
@@ -32,11 +34,13 @@ public class RideController {
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
     private final RideReportService rideReportService;
+    private final RatingService ratingService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
+        this.ratingService = ratingService;
     }
 
     @PostMapping("/requests")
@@ -90,7 +94,7 @@ public class RideController {
     public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
 
         RideResponseDto ride = new RideResponseDto(
-                1001L,
+                1L,
                 RideStatus.ONGOING,
                 LocalDateTime.of(2026, 1, 15, 14, 30),
                 null,
@@ -204,6 +208,16 @@ public class RideController {
     @PostMapping("/{id}/report")
     public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
         rideReportService.reportRide(id, body.getMessage());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{rideId}/rate")
+    public ResponseEntity<Void> rateRide(
+            @PathVariable Long rideId,
+            @RequestBody RatingRequestDto request
+    ) {
+        ratingService.rateRide(rideId, request);
+        System.out.println(rideId);
         return ResponseEntity.noContent().build();
     }
 
