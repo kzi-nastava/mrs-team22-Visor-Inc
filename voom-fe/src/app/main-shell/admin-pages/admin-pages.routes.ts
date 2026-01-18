@@ -4,18 +4,30 @@ import {
   ActivateProfile,
   ROUTE_ACTIVATE_PROFILE
 } from '../../unauthenticated/activate/activate-profile/activate-profile';
+import {UserPages} from '../user-pages/user-pages';
+import {AdminPages} from './admin-pages';
 
 export default [
   {
-    path: ROUTE_ADMIN_REGISTER_DRIVER,
-    component: AdminRegisterDriver,
-  },
-  {
-    path: ROUTE_ACTIVATE_PROFILE,
-    component: ActivateProfile,
+    path: '',
+    component: AdminPages,
+    children: [
+      {
+        path: ROUTE_ADMIN_REGISTER_DRIVER,
+        component: AdminRegisterDriver,
+      },
+      {
+        path: ROUTE_ACTIVATE_PROFILE,
+        component: ActivateProfile,
+      },
+      {
+        path: '**',
+        redirectTo: ROUTE_ADMIN_REGISTER_DRIVER,
+      }
+    ]
   },
   {
     path: '**',
-    redirectTo: ROUTE_ADMIN_REGISTER_DRIVER,
+    redirectTo: '',
   }
 ] satisfies Route[];

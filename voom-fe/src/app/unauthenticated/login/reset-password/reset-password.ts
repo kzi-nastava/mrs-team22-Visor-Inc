@@ -7,6 +7,7 @@ import {ROUTE_HOME} from '../../home/home';
 import ApiService from '../../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {lookUpQueryParam} from '../../../shared/util/url-util';
+import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated-main';
 
 export const ROUTE_RESET_PASSWORD = 'resetPassword';
 
@@ -46,7 +47,7 @@ export class ResetPassword {
       map(result => result.data),
     ).subscribe(() => {
       console.log('Password reset successful');
-      this.router.navigate([ROUTE_HOME]);
+      this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_HOME]);
     });
   }
 }

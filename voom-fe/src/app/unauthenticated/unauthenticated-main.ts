@@ -1,10 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {Router, RouterOutlet} from '@angular/router';
 import {AuthenticationService} from '../shared/service/authentication-service';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {ROUTE_MAIN_SHELL} from '../main-shell/main-shell';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 
-export const ROUTE_UNAUTHENTICATED_MAIN = "";
+export const ROUTE_UNAUTHENTICATED_MAIN = "u";
 
 @Component({
   selector: 'app-unauthenticated-main',
@@ -16,14 +15,18 @@ export const ROUTE_UNAUTHENTICATED_MAIN = "";
 })
 export class UnauthenticatedMain {
 
-  constructor(private authenticationService: AuthenticationService, private router: Router) {
+  private authenticationService = inject(AuthenticationService);
+
+  user = toSignal(this.authenticationService.activeUser$);
+
+  constructor(private router: Router) {
     this.authenticationService.activeUser$.pipe(
       takeUntilDestroyed()
     ).subscribe((user) => {
       if (user) {
-        this.router.navigate([ROUTE_MAIN_SHELL, user.role.toLowerCase()]);
+        console.log("UnauthenticatedMain: navigating to main shell for user role", user.role);
+        this.router.navigate(["", user.role.toLowerCase()]);
       }
     });
   }
-
 }

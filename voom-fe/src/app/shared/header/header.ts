@@ -11,6 +11,9 @@ import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-
 import {ROUTE_DRIVER_RIDE_HISTORY} from '../../main-shell/driver-pages/ride-history/driver-ride-history';
 import {ROUTE_FAVORITE_ROUTES} from '../../main-shell/user-pages/favorite-routes/favorite-routes';
 import {ROUTE_HOME} from '../../unauthenticated/home/home';
+import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated/unauthenticated-main';
+import {ROUTE_USER_PAGES} from '../../main-shell/user-pages/user-pages';
+import {ROUTE_DRIVER_PAGES} from '../../main-shell/driver-pages/driver-pages';
 
 @Component({
   selector: 'app-header',
@@ -35,31 +38,33 @@ export class Header {
   }
 
   protected favoriteRoutes() {
-    this.router.navigate([ROUTE_FAVORITE_ROUTES]);
+    this.router.navigate([ROUTE_USER_PAGES, ROUTE_FAVORITE_ROUTES]);
   }
 
   protected rideHistory() {
-    this.router.navigate([ROUTE_DRIVER_RIDE_HISTORY]);
+    this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_DRIVER_RIDE_HISTORY]);
   }
 
   protected signOut() {
     this.authenticationService.logout();
-    this.router.navigate([ROUTE_HOME]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_HOME]);
   }
 
   protected profile() {
-    this.router.navigate([ROUTE_USER_PROFILE]);
+    this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_PROFILE]);
   }
 
   protected login() {
-    this.router.navigate([ROUTE_LOGIN]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_LOGIN]);
   }
 
   protected register() {
-    this.router.navigate([ROUTE_REGISTRATION]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_REGISTRATION]);
   }
 
   protected goHome() {
-    this.router.navigate([ROUTE_HOME]);
+    const user = this.user();
+
+    user ? this.router.navigate([user.role.toLowerCase()]) : this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
   }
 }
