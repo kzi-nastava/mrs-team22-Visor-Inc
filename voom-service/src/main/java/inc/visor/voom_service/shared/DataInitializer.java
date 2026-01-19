@@ -101,7 +101,7 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-        // generateRide();
+        // generateStuff();
 
     }
 
