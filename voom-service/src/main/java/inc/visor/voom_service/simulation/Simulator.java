@@ -52,9 +52,9 @@ public class Simulator implements ApplicationRunner {
         state.getAll().forEach(driver -> {
             LatLng pos = driver.nextPosition();
             if (pos != null) {
-                publisher.publishPosition(driver.getDriverId(), pos);
+                publisher.publishPosition(driver.getDriverId(), pos, false);
             } else {
-                publisher.publishPosition(driver.getDriverId(), driver.currentPosition());
+                publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), true);
             }
         });
     }

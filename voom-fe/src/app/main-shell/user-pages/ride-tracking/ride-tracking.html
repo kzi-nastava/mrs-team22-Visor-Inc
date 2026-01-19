@@ -1,0 +1,216 @@
+<app-header/>
+<div class="p-8 rounded-3xl">
+  <app-map/>
+</div>
+
+@if(rideFinished) {
+    <div class="py-5 flex items-center justify-center px-1 w-full">
+  <div class="w-full max-w-sm flex flex-col items-center text-center space-y-6">
+
+    <div class="flex items-center justify-center">
+      <div class="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center">
+        <svg
+          class="w-8 h-8 text-white"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    </div>
+
+    <h2 class="text-lg font-semibold text-gray-900">
+      Your ride is complete!
+    </h2>
+
+    <p class="text-sm text-gray-500 flex items-center gap-1">
+      📍 {{startAddress}} - {{destinationAddress}}
+    </p>
+
+    
+
+    @if(reviewed) {
+        <p class="text-sm text-gray-600">
+        Thank you for your review.
+        </p>
+    }
+    @else {
+    
+
+    <p class="text-sm text-gray-600">
+      Please leave a review so that we can improve your future experience.
+    </p>
+
+<div class="w-full text-left space-y-1">
+  <p class="text-sm text-gray-700">Driver</p>
+
+  <div class="flex gap-1 text-4xl cursor-pointer">
+    @for (star of stars; track $index) {
+      <span
+        (click)="setDriverRating($index + 1)"
+        class="transition"
+        [class.text-blue-600]="$index < driverRating"
+        [class.text-blue-200]="$index >= driverRating"
+      >
+        ★
+      </span>
+    }
+  </div>
+</div>
+
+<div class="w-full text-left space-y-1">
+  <p class="text-sm text-gray-700">Car</p>
+
+  <div class="flex gap-1 text-4xl cursor-pointer">
+    @for (star of stars; track $index) {
+      <span
+        (click)="setCarRating($index + 1)"
+        class="transition"
+        [class.text-blue-600]="$index < carRating"
+        [class.text-blue-200]="$index >= carRating"
+      >
+        ★
+      </span>
+    }
+  </div>
+</div>
+
+
+    <div class="w-full space-y-1">
+      <p class="text-sm text-gray-700 text-left">Comment</p>
+      <textarea
+        rows="4"
+        placeholder="Write your comment..."
+        class="
+          w-full
+          resize-none
+          rounded-2xl
+          border-2
+          border-blue-300
+          px-4
+          py-3
+          text-sm
+          text-gray-700
+          outline-none
+          focus:border-blue-500
+        "
+        [(ngModel)]="reviewComment"
+      ></textarea>
+    </div>
+
+    <button
+      class="
+        mt-4
+        rounded-full
+        bg-blue-900
+        px-6
+        py-2
+        text-white
+        text-sm
+        font-medium
+        hover:bg-blue-950
+        transition
+        cursor-pointer
+      "
+        (click)="submitReview()"
+    >
+      Submit Review
+    </button>
+    }
+  </div>
+</div>
+
+}
+@else {
+<div class="max-w-[1200px] ml-auto mr-auto flex flex-col items-center gap-4 p-4">
+    <div>
+        <p class="text-center text-xl">Estimated time of arrival: 15 minutes</p>
+    </div>
+        <p class="text-center text-gray-600">In case of emergency, press the PANIC button to alert authorities.</p>
+
+    <button
+  class="
+    bg-red-600
+    hover:bg-red-700
+    text-white
+    rounded-full
+    px-4
+    py-2
+    inline-flex
+    items-center
+    w-auto
+    cursor-pointer
+    mb-10
+  "
+>
+  PANIC
+</button>
+
+<div>
+    <div class="text-center text-gray-600">
+        @if(reported) {
+            Thank you for your report. We will look into the matter.
+        } 
+        @else {
+        If driver is driving unadequately you can report him <span class="text-blue-500 cursor-pointer" (click)="toggleReport()">here.</span>
+        }
+    </div>
+</div>
+
+<div class="w-[50%] mx-auto p-6 space-y-4">
+
+    @if(showReport) {
+        <div class="relative">
+    <label
+      class=" px-2 text-sm text-blue-800 mb-4"
+    >
+      Message
+    </label>
+
+    <textarea
+    rows="4"
+    placeholder="Enter your report message..."
+    class="
+      w-full
+      resize-none
+      rounded-2xl
+      border-2
+      border-blue-800
+      px-4
+      py-2
+      text-sm
+      text-gray-700
+      outline-none
+      focus:ring-0
+      focus:border-blue-900
+      mt-3
+    "
+    [(ngModel)]="message"
+  ></textarea>
+  </div>
+
+  <div class="flex justify-center gap-6 pt-2">
+    <button
+      type="button"
+      class="rounded-full bg-red-700 px-6 py-2 text-white font-medium hover:bg-red-800 transition cursor-pointer"
+    >
+      Cancel Ride
+    </button>
+
+    <button
+      type="button"
+      class="rounded-full bg-blue-900 px-6 py-2 text-white font-medium hover:bg-blue-950 transition cursor-pointer"
+      (click)="report()"
+    >
+      Report
+    </button>
+  </div>
+    }
+  
+</div>
+
+
+</div>
+}

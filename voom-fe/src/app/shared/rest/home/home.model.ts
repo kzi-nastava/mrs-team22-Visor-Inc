@@ -1,3 +1,13 @@
+export type RideReportRequestDto = {
+  message: string;
+};
+export type RatingRequestDto = {
+  driverRating: number;
+  vehicleRating: number;
+  comment?: string;
+};
+
+
 export type UserProfileResponseDto = {
   email: string;
   firstName: string;
@@ -61,6 +71,19 @@ export type ScheduledRideDto = {
     address: string;
   }[];
 };
+
+export type RideResponseDto = {
+  id: number;
+  status: 'CREATED' | 'ONGOING' | 'FINISHED' | 'CANCELLED';
+  startedAt: string;
+  finishedAt: string | null;
+  driverName: string;
+  passengerName: string;
+  driverId: number;
+  startAddress: string;
+  destinationAddress: string;
+};
+
 
 export type DriverAssignedDto = {
   driverId: number;

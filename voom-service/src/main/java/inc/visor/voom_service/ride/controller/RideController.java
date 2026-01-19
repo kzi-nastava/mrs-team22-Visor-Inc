@@ -1,10 +1,19 @@
 package inc.visor.voom_service.ride.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import inc.visor.voom_service.rating.dto.RatingRequestDto;
+import inc.visor.voom_service.rating.service.RatingService;
+import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.service.RideReportService;
+import inc.visor.voom_service.ride.service.RideService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +25,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.service.FavoriteRouteService;
+import inc.visor.voom_service.ride.service.RideRequestService;
+import jakarta.validation.Valid;
+
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
@@ -23,10 +37,6 @@ import inc.visor.voom_service.ride.dto.RideHistoryDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
-import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.ride.service.FavoriteRouteService;
-import inc.visor.voom_service.ride.service.RideRequestService;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -34,10 +44,16 @@ public class RideController {
 
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
+    private final RideReportService rideReportService;
+    private final RatingService ratingService;
+    private final RideService rideService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService, RideService rideService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
+        this.rideReportService = rideReportService;
+        this.ratingService = ratingService;
+        this.rideService = rideService;
     }
 
     @PostMapping("/requests")
@@ -82,9 +98,26 @@ public class RideController {
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
 
-        RideHistoryDto ride = new RideHistoryDto();
+        List<RideHistoryDto> rides = new ArrayList<>();
 
-        return ResponseEntity.ok(List.of(ride));
+        List<Ride> ridesList = rideService.getDriverRides(driverId);
+
+
+        for (Ride ride : ridesList) {
+            RideHistoryDto rideHistoryDto = new RideHistoryDto();
+            rideHistoryDto.setId(ride.getId());
+            rideHistoryDto.setRideRequest(ride.getRideRequest());
+            rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
+            rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
+            rideHistoryDto.setPassengers(ride.getPassengers());
+            rideHistoryDto.setStatus(ride.getStatus());
+            rideHistoryDto.setFinishedAt(ride.getFinishedAt());
+            rideHistoryDto.setStartedAt(ride.getStartedAt());
+            rides.add(rideHistoryDto);
+        }
+
+
+        return ResponseEntity.ok(rides);
     }
 
     @GetMapping("/{id}")
@@ -92,12 +125,16 @@ public class RideController {
 
         RideResponseDto ride = new RideResponseDto(
                 1L,
-                RideStatus.FINISHED,
-                LocalDateTime.now().minusMinutes(10),
-                LocalDateTime.now(),
-                "John Doe",
-                "Mark Smith"
+                RideStatus.ONGOING,
+                LocalDateTime.of(2026, 1, 15, 14, 30),
+                null,
+                "Marko Marković",
+                "Petar Petrović",
+                1L,
+                "Bulevar Oslobođenja 45, Novi Sad",
+                "Zmaj Jovina 12, Novi Sad"
         );
+
 
         return ResponseEntity.ok(ride);
     }
@@ -196,6 +233,22 @@ public class RideController {
         );
 
         return ResponseEntity.ok(ride);
+    }
+
+    @PostMapping("/{id}/report")
+    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
+        rideReportService.reportRide(id, body.getMessage());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{rideId}/rate")
+    public ResponseEntity<Void> rateRide(
+            @PathVariable Long rideId,
+            @RequestBody RatingRequestDto request
+    ) {
+        ratingService.rateRide(rideId, request);
+        System.out.println(rideId);
+        return ResponseEntity.noContent().build();
     }
 
 }
