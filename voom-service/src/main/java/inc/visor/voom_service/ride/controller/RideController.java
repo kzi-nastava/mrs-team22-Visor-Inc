@@ -30,6 +30,14 @@ import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
 import jakarta.validation.Valid;
 
+import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
+import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
+import inc.visor.voom_service.ride.dto.RideCancelDto;
+import inc.visor.voom_service.ride.dto.RideHistoryDto;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
+import inc.visor.voom_service.ride.dto.RideResponseDto;
+
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
