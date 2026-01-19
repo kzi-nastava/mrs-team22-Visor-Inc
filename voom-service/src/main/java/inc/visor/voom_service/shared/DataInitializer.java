@@ -101,7 +101,7 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-        // generateStuff();
+         // generateRide();
 
     }
 
@@ -206,7 +206,7 @@ public class DataInitializer implements ApplicationRunner {
         personRepository.saveAll(List.of(creatorPerson, passengerPerson));
 
         // ===== ROLES (ASSUMING THEY EXIST) =====
-        UserRole userRole = userRoleRepository.findByRoleName("PASSENGER")
+        UserRole userRole = userRoleRepository.findByRoleName("USER")
                 .orElseThrow();
 
         // ===== USERS =====
