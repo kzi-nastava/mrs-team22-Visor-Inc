@@ -9,13 +9,11 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {DriverSummaryDto, PREDEFINED_ROUTES, RideApi, RideRequestDto, ScheduledRideDto} from './home.api';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
-import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
 import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
-import { map } from "rxjs";
-import {response} from 'express';
+import {map} from "rxjs";
 import ApiService from '../../../shared/rest/api-service';
 
 

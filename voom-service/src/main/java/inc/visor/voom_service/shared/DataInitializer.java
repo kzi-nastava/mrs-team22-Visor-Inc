@@ -84,6 +84,23 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
+        UserRole adminRole = userRoleRepository.findByRoleName("ADMIN").orElseThrow();
+
+        Person person = new Person();
+        person.setFirstName("Admin");
+        person.setLastName("Lastname");
+        person.setAddress("Novi Sad, Street");
+        person.setPhoneNumber("+38160123456");
+        person = personRepository.save(person);
+
+        User user = new User();
+        user.setEmail("admin1@gmail.com");
+        user.setPassword(passwordEncoder.encode("test1234"));
+        user.setUserRole(adminRole);
+        user.setUserStatus(UserStatus.ACTIVE);
+        user.setPerson(person);
+        userRepository.save(user);
+
     }
 
     private void createUserRole(String name, Permission permission) {
@@ -101,10 +118,9 @@ public class DataInitializer implements ApplicationRunner {
 
     private void seedDrivers() {
 
-        final int NUMBER_OF_DRIVERS = 20;
+        final int NUMBER_OF_DRIVERS = 5;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
-
         VehicleType standard = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
         VehicleType van = vehicleTypeRepository.findByType("VAN").orElseThrow();
         VehicleType luxury = vehicleTypeRepository.findByType("LUXURY").orElseThrow();

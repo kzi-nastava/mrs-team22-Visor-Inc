@@ -3,7 +3,7 @@ import {Router, RouterOutlet} from '@angular/router';
 import {AuthenticationService} from '../shared/service/authentication-service';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 
-export const ROUTE_UNAUTHENTICATED_MAIN = "u";
+export const ROUTE_UNAUTHENTICATED_MAIN = "voom";
 
 @Component({
   selector: 'app-unauthenticated-main',

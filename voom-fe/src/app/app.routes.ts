@@ -1,7 +1,7 @@
 import {CanActivateFn, Router, Routes} from '@angular/router';
 import {AuthenticationService} from './shared/service/authentication-service';
 import {inject} from '@angular/core';
-import {map} from 'rxjs';
+import {filter, map, of, switchMap, take} from 'rxjs';
 import {ROUTE_UNAUTHENTICATED_MAIN, UnauthenticatedMain} from './unauthenticated/unauthenticated-main';
 import {MainShell} from './main-shell/main-shell';
 import {ROUTE_USER_PAGES} from './main-shell/user-pages/user-pages';
@@ -13,36 +13,53 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
   const authenticationService = inject(AuthenticationService);
   return authenticationService.isAuthenticated().pipe(
     map((authenticated) => {
+      console.log('UnauthenticatedGuard', authenticated);
       return authenticated ? router.createUrlTree([""]) : true;
     })
   )
 };
 
-export const authenticatedGuard: CanActivateFn = (route, state) => {
-  const router = inject(Router);
-  const authenticationService = inject(AuthenticationService);
-  return authenticationService.isAuthenticated().pipe(
-    map((authenticated) => {
-        console.log("AuthenticatedGuard:", authenticated);
-        return authenticated ? true : router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
-      })
-    )
-};
 
 export const roleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const authenticationService = inject(AuthenticationService);
 
-  return authenticationService.activeUser$.pipe(
-    map((user) => {
+  return authenticationService.isAuthenticated().pipe(
+    take(1),
+    switchMap((authenticated) => {
 
-      console.log("RoleGuard:", user, " required role:", route.data['role']);
+      console.log("RoleGuard:", authenticated);
 
-      if (!user) {
-        return router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
+      if (!authenticated) {
+        authenticationService.logout();
+        return of(router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]));
       }
 
-      return user.role === route.data['role'] ? true : router.createUrlTree([user.role.toLowerCase()]);
+      return authenticationService.isReady$.pipe(
+        filter(ready => ready),
+        take(1),
+        switchMap(() => authenticationService.activeUser$.pipe(take(1))),
+        map((user) => {
+
+          console.log("RoleGuard:", user, " required role:", route.data['role']);
+          console.log("Route", route)
+          console.log("stateUrl", state.url);
+
+          if (!user) {
+            authenticationService.logout();
+            return router.createUrlTree([ROUTE_UNAUTHENTICATED_MAIN]);
+          }
+
+          const stateUrl = state.url;
+          const requiredRole = route.data['role'];
+          const userRole = user.role.toLowerCase()
+          const urlPath = stateUrl.includes(userRole.toLowerCase()) ? stateUrl : userRole;
+
+          console.log("URL PATH", urlPath);
+
+          return user.role === requiredRole ? true : router.createUrlTree([urlPath]);
+        }),
+      );
     }),
   );
 }
@@ -57,7 +74,6 @@ export const routes: Routes = [
   {
     path: "",
     component: MainShell,
-    canActivate: [authenticatedGuard],
     children: [
       {
         path: ROUTE_USER_PAGES,

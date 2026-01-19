@@ -2,18 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {FavoriteRouteAccordion} from './favorite-routes-accordition/favorite-routes-accordition';
 import {FavoriteRouteDto, FavoriteRoutesApi} from './favorite-routes.api';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {FavoriteRoute} from './favorite-routes.data';
 
 export const ROUTE_FAVORITE_ROUTES = 'favorite';
-
-export interface FavoriteRoute {
-  dto: FavoriteRouteDto;
-  id: number;
-  name: string;
-  start: string;
-  end: string;
-  distanceKm: number;
-  stops: string[];
-}
 
 @Component({
   selector: 'app-favorite-routes',
