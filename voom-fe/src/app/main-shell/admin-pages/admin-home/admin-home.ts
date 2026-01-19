@@ -11,7 +11,7 @@ import {ROUTE_ADMIN_DRIVERS} from './admin-drivers/admin-drivers';
 import {ROUTE_ADMIN_PRICING} from './admin-pricing/admin-pricing';
 import {ROUTE_ADMIN_PAGES} from '../admin-pages';
 
-export const ROUTE_ADMIN_HOME = "admin-home"
+export const ROUTE_ADMIN_HOME = "home"
 
 @Component({
   selector: 'app-admin-home',

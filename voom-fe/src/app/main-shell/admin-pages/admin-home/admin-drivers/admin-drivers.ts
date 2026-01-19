@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {MatDivider} from '@angular/material/list';
@@ -9,6 +9,7 @@ import {ValueInputDate} from '../../../../shared/value-input/value-input-date/va
 import ApiService from '../../../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {DriverSummaryDto} from '../../../../shared/rest/home/home.model';
 
 export const ROUTE_ADMIN_DRIVERS = "drivers";
 
@@ -48,6 +49,7 @@ export class AdminDrivers {
   )
 
   drivers = toSignal(this.drivers$);
+  selectedDriver = signal<DriverSummaryDto | null>(null)
 
   constructor() {
   }
@@ -58,5 +60,11 @@ export class AdminDrivers {
 
   protected saveGeneralInfo() {
 
+  }
+
+  protected selectDriver(driver: DriverSummaryDto) {
+    console.log(driver);
+    this.selectedDriver.set(driver);
+    this.driverGeneralForm.patchValue(driver);
   }
 }

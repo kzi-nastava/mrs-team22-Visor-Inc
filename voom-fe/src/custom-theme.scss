@@ -151,4 +151,5 @@ app-ride-history-table {
 
 @include mat.card-overrides((
   outlined-outline-color: $primary,
+  filled-container-color: $secondary,
 ))
