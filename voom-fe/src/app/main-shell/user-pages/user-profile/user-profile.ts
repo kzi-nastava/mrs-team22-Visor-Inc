@@ -16,6 +16,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { UserProfileApi } from './user-profile.api';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../../../shared/service/authentication-service';
+import { ApiResponse } from '../../../shared/rest/rest.model';
+import { DriverVehicleResponseDto, UserProfileResponseDto } from '../home/home.api';
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -103,7 +105,7 @@ export class UserProfile {
     this.isAdmin = this.authService.hasRole('ADMIN');
 
     this.profileApi.getProfile().subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<UserProfileResponseDto>) => {
         const profile = res.data;
 
         this.profileForm.patchValue({
@@ -120,7 +122,7 @@ export class UserProfile {
 
     if (this.isDriver) {
       this.profileApi.getMyVehicle().subscribe({
-        next: (res) => {
+        next: (res: ApiResponse<DriverVehicleResponseDto>) => {
           const vehicle = res.data;
 
           this.vehicleForm.patchValue({
@@ -133,7 +135,7 @@ export class UserProfile {
           });
         },
 
-        error: (err) => {
+        error: (err: any) => {
           console.error('Failed to load vehicle info', err);
         },
       });

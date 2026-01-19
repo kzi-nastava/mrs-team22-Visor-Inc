@@ -67,8 +67,6 @@ export const roleGuard: CanActivateFn = (route) => {
   );
 };
 
-/* ================= ROUTES ================= */
-
 export const routes: Routes = [
   {
     path: ROUTE_UNAUTHENTICATED_MAIN,

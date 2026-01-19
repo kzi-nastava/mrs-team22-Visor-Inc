@@ -1,7 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {FavoriteRouteAccordion} from './favorite-routes-accordition/favorite-routes-accordition';
-import {FavoriteRouteDto, FavoriteRoutesApi} from './favorite-routes.api';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { Component, OnInit, signal } from '@angular/core';
+import { FavoriteRouteAccordion } from './favorite-routes-accordition/favorite-routes-accordition';
+import { FavoriteRouteDto, FavoriteRoutesApi } from './favorite-routes.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const ROUTE_FAVORITE_ROUTES = 'favorite';
 
@@ -22,48 +22,59 @@ export interface FavoriteRoute {
   styleUrl: './favorite-routes.css',
 })
 export class FavoriteRoutes implements OnInit {
-  routes: FavoriteRoute[] = [];
-  loading = true;
+  routes = signal<FavoriteRoute[]>([]);
+  loading = signal(true);
 
-  constructor(private api: FavoriteRoutesApi, private snackBar: MatSnackBar) {}
+  constructor(
+    private api: FavoriteRoutesApi,
+    private snackBar: MatSnackBar,
+  ) {}
 
   ngOnInit() {
     this.api.getFavoriteRoutes().subscribe({
-      next: (data) => {
-        this.routes = data.map(this.mapDto);
-        this.loading = false;
+      next: (res) => {
+        const mapped = res.data?.map((dto) => this.mapDto(dto)) || [];
+        this.routes.set(mapped);
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }
 
-  private mapDto(dto: any): FavoriteRoute {
-    const pickup = dto.points.find((p: any) => p.type === 'PICKUP');
-    const dropoff = dto.points.find((p: any) => p.type === 'DROPOFF');
+  private shortAddress(address?: string | null): string {
+    if (!address) return '';
+    const parts = address.split(',');
+    return parts.slice(0, 2).join(',').trim();
+  }
+
+  private mapDto(dto: FavoriteRouteDto): FavoriteRoute {
+    const pickup = dto.points.find((p) => p.type === 'PICKUP');
+    const dropoff = dto.points.find((p) => p.type === 'DROPOFF');
 
     return {
-      dto: dto,
+      dto,
       id: dto.id,
       name: dto.name,
-      start: pickup?.address ?? '',
-      end: dropoff?.address ?? '',
+      start: this.shortAddress(pickup?.address),
+      end: this.shortAddress(dropoff?.address),
       distanceKm: dto.totalDistanceKm,
-      stops: dto.points.filter((p: any) => p.type === 'STOP').map((p: any) => p.address),
+      stops: dto.points.filter((p) => p.type === 'STOP').map((p) => this.shortAddress(p.address)),
     };
   }
 
   fetch() {
-    this.loading = true;
+    this.loading.set(true);
 
     this.api.getFavoriteRoutes().subscribe({
-      next: (data) => {
-        this.routes = data.map(this.mapDto);
-        this.loading = false;
+      next: (res) => {
+        const mapped = res.data?.map((dto) => this.mapDto(dto)) || [];
+        this.routes.set(mapped);
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }

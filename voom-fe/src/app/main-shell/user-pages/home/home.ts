@@ -530,36 +530,8 @@ export class UserHome implements AfterViewInit {
       });
   }
 
-
-
-  // private applyFavoriteRoute(route: FavoriteRouteDto) {
-  //   const points = route.points
-  //     .slice()
-  //     .sort((a, b) => a.orderIndex - b.orderIndex)
-  //     .map((p) => ({
-  //       id: crypto.randomUUID(),
-  //       lat: p.lat,
-  //       lng: p.lng,
-  //       address: p.address,
-  //       type: p.type,
-  //       order: p.orderIndex,
-  //     }));
-  //
-  //   this.routePoints.set(points);
-  //
-  //   const pickup = points.find((p) => p.type === 'PICKUP');
-  //   const dropoff = points.find((p) => p.type === 'DROPOFF');
-  //
-  //   this.rideForm.patchValue({
-  //     pickup: pickup?.address ?? '',
-  //     dropoff: dropoff?.address ?? '',
-  //   });
-  // }
-
-
-
   openFavoriteRoutes() {
-    this.router.navigate(['/user/favorite-routes']);
+    this.router.navigate(['/user/favorite']);
   }
 
   // ngAfterViewInit() {

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
@@ -34,10 +36,12 @@ public class RideController {
 
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
+    private final UserProfileService userProfileService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, UserProfileService userProfileService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
+        this.userProfileService = userProfileService;
     }
 
     @PostMapping("/requests")
@@ -113,15 +117,13 @@ public class RideController {
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal User user, @Valid @RequestBody CreateFavoriteRouteRequest request) {
+    public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal VoomUserDetails userDetails, @Valid @RequestBody CreateFavoriteRouteRequest request) {
+
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
 
         if (user == null) {
-            long mockUserId = 2L;
-
-            favoriteRouteService.create(mockUserId, request);
-
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         favoriteRouteService.create(user.getId(), request);
@@ -130,14 +132,12 @@ public class RideController {
     }
 
     @GetMapping("/favorites")
-    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
         if (user == null) {
-            long mockUserId = 2L;
-
-            List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(mockUserId);
-
-            return ResponseEntity.ok(favoriteRoutes);
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
@@ -146,18 +146,16 @@ public class RideController {
     
     @DeleteMapping("/favorites/{favoriteRouteId}")
     public ResponseEntity<Void> deleteFavoriteRoute(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal VoomUserDetails userDetails,
             @PathVariable Long favoriteRouteId
     ) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
         if (user == null) {
-            long mockUserId = 2L;
-
-            favoriteRouteService.delete(mockUserId, favoriteRouteId);
-
-            return ResponseEntity.noContent().build();
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
+        
         favoriteRouteService.delete(user.getId(), favoriteRouteId);
 
         return ResponseEntity.noContent().build();

@@ -249,7 +249,7 @@ export type CreateFavoriteRouteDto = {
 
 @Injectable({ providedIn: 'root' })
 export class RideApi {
-  private readonly baseUrl = 'api/rides';
+  private readonly baseUrl = '/api/rides';
   private readonly driversBaseUrl = '/api/drivers';
 
   constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
