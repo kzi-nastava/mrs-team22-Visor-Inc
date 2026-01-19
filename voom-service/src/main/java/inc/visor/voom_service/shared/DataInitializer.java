@@ -101,7 +101,7 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-        // generateStuff();
+        // generateRide();
 
     }
 
@@ -181,7 +181,7 @@ public class DataInitializer implements ApplicationRunner {
         };
     }
 
-    private void generateStuff() {
+    private void generateRide() {
 
 //        enum ScheduleType {
 //            NOW,
