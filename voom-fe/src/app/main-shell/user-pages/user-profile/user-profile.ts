@@ -1,20 +1,21 @@
-import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatSelectModule} from '@angular/material/select';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
-import {ChangePasswordDialog} from '../../../shared/dialog/change-password-dialog/change-password-dialog';
-import {MatCheckbox} from '@angular/material/checkbox';
-import {UserProfileApi} from './user-profile.api';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { ChangePasswordDialog } from '../../../shared/dialog/change-password-dialog/change-password-dialog';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { UserProfileApi } from './user-profile.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthenticationService } from '../../../shared/service/authentication-service';
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -42,10 +43,13 @@ export class UserProfile {
   constructor(
     private dialog: MatDialog,
     private profileApi: UserProfileApi,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthenticationService,
   ) {}
 
-  userRole: 'Driver' | 'User' | 'Admin' = 'Driver';
+  isDriver = false;
+  isUser = false;
+  isAdmin = false;
 
   openChangePasswordDialog(): void {
     this.dialog.open(ChangePasswordDialog, {
@@ -93,33 +97,42 @@ export class UserProfile {
   });
 
   ngOnInit(): void {
+
+    this.isDriver = this.authService.hasRole('DRIVER');
+    this.isUser = this.authService.hasRole('USER');
+    this.isAdmin = this.authService.hasRole('ADMIN');
+
     this.profileApi.getProfile().subscribe({
-      next: (profile) => {
+      next: (res) => {
+        const profile = res.data;
+
         this.profileForm.patchValue({
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          phone: profile.phoneNumber,
-          address: profile.address,
-          email: profile.email,
+          firstName: profile?.firstName,
+          lastName: profile?.lastName,
+          phone: profile?.phoneNumber,
+          address: profile?.address,
+          email: profile?.email,
         });
 
         this.profileForm.controls.email.disable();
       },
     });
 
-    if (this.userRole === 'Driver') {
+    if (this.isDriver) {
       this.profileApi.getMyVehicle().subscribe({
-        next: (vehicle) => {
-          console.log('Loaded vehicle info:', vehicle);
+        next: (res) => {
+          const vehicle = res.data;
+
           this.vehicleForm.patchValue({
-            model: vehicle.model,
-            vehicleType: vehicle.vehicleType,
-            licensePlate: vehicle.licensePlate,
-            seats: vehicle.numberOfSeats,
-            babyTransportAllowed: vehicle.babySeat,
-            petsAllowed: vehicle.petFriendly,
+            model: vehicle?.model,
+            vehicleType: vehicle?.vehicleType,
+            licensePlate: vehicle?.licensePlate,
+            seats: vehicle?.numberOfSeats,
+            babyTransportAllowed: vehicle?.babySeat,
+            petsAllowed: vehicle?.petFriendly,
           });
         },
+
         error: (err) => {
           console.error('Failed to load vehicle info', err);
         },

@@ -98,8 +98,9 @@ export class DriverHome implements AfterViewInit {
 
   ngAfterViewInit() {
     this.profileApi.getMyVehicle().subscribe({
-      next: (vehicle) => {
-        this.myId.set(vehicle.driverId || null);
+      next: (response) => {
+
+        this.myId.set(response.data?.driverId || null);
       },
     });
     // this.driverSocket.connect(

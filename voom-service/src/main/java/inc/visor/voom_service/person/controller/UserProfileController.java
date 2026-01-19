@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
 import inc.visor.voom_service.person.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom_service.person.dto.UserProfileResponseDto;
@@ -32,12 +33,17 @@ public class UserProfileController {
 
     @GetMapping
     public ResponseEntity<UserProfileResponseDto> getProfile(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal VoomUserDetails userDetails
     ) {
+        System.out.println("Permissions: " + userDetails.getAuthorities());
+        String username = userDetails.getUsername();
+        User user = userProfileService.getUserByEmail(username);
 
-        Long userId = (user != null) ? user.getId() : 2L;
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-        return ResponseEntity.ok(userProfileService.getProfile(userId));
+        return ResponseEntity.ok(userProfileService.getProfile(user.getId()));
     }
 
     @PutMapping

@@ -41,7 +41,7 @@
         </button>
       </div>
 
-      @if (userRole === 'User') {
+      @if (isUser) {
       <div class="mt-14">
         <h2 class="text-sm font-semibold text-gray-500 tracking-widest mb-6">Favorite Routes</h2>
 
@@ -70,7 +70,7 @@
     </button>
   </div>
 
-  @if (userRole === 'Driver') {
+  @if (isDriver) {
   <div class="pt-20 space-y-10">
     <h3 class="text-xs font-semibold tracking-widest text-gray-500">VEHICLE INFORMATION</h3>
 

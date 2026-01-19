@@ -1,6 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { VoomApiService } from '../../../shared/rest/voom-api-service';
+import { ApiClient } from '../../../shared/rest/api-client';
+import { ApiResponse, RequestConfig } from '../../../shared/rest/rest.model';
 
 export type UserProfileResponseDto = {
   email: string;
@@ -44,27 +47,91 @@ export type UpdateDriverVehicleRequestDto = {
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileApi {
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = '/api/users';
+  private readonly driversBaseUrl = '/api/drivers';
 
-  constructor(private http: HttpClient) {}
+  constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
 
-  getProfile(): Observable<UserProfileResponseDto> {
-    return this.http.get<UserProfileResponseDto>(`${this.baseUrl}/users/me`);
+  getProfile(): Observable<ApiResponse<UserProfileResponseDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, UserProfileResponseDto>(
+      `${this.baseUrl}/me`,
+      config
+    );
   }
 
-  updateProfile(body: UpdateUserProfileRequestDto): Observable<UserProfileResponseDto> {
-    return this.http.put<UserProfileResponseDto>(`${this.baseUrl}/users/me`, body);
+  updateProfile(
+    body: UpdateUserProfileRequestDto
+  ): Observable<ApiResponse<UserProfileResponseDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.put<UpdateUserProfileRequestDto, UserProfileResponseDto>(
+      `${this.baseUrl}/me`,
+      body,
+      config
+    );
   }
 
-  getMyVehicle(): Observable<DriverVehicleResponseDto> {
-    return this.http.get<DriverVehicleResponseDto>(`${this.baseUrl}/drivers/me`);
+  updatePassword(
+    body: UpdateUserPasswordRequestDto
+  ): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.put<UpdateUserPasswordRequestDto, void>(
+      `${this.baseUrl}/me/password`,
+      body,
+      config
+    );
   }
 
-  updateMyVehicle(body: UpdateDriverVehicleRequestDto): Observable<DriverVehicleResponseDto> {
-    return this.http.put<DriverVehicleResponseDto>(`${this.baseUrl}/drivers/me`, body);
+  getMyVehicle(): Observable<ApiResponse<DriverVehicleResponseDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, DriverVehicleResponseDto>(
+      `${this.driversBaseUrl}/me`,
+      config
+    );
   }
 
-  updatePassword(body: UpdateUserPasswordRequestDto): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/users/me/password`, body);
+  updateMyVehicle(
+    body: UpdateDriverVehicleRequestDto
+  ): Observable<ApiResponse<DriverVehicleResponseDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.put<UpdateDriverVehicleRequestDto, DriverVehicleResponseDto>(
+      `${this.driversBaseUrl}/me`,
+      body,
+      config
+    );
   }
 }
+
