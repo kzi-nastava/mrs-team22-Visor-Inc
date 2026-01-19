@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -169,7 +168,7 @@ public class DriverService {
         user.setUserRole(userRole);
         user.setUserStatus(UserStatus.NOTACTIVATED);
 
-        String dummyPassword = UUID.randomUUID().toString();
+        String dummyPassword = "test1234";
         user.setPassword(passwordEncoder.encode(dummyPassword));
 
         userRepository.save(user);

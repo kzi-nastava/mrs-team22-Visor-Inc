@@ -13,12 +13,13 @@ export class AuthenticationService {
   private readonly REFRESH_TOKEN = 'VOOM_REFRESH_TOKEN';
 
   private _activeUser$ = new BehaviorSubject<User | null>(null);
+  private _isReady$ = new BehaviorSubject<boolean>(false);
 
   private refreshToken: string | null = null;
+  private tokenDto: TokenDto | null = null;
 
   constructor(private apiService: ApiService) {
     this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
-
     if (this.isValid(this.refreshToken)) {
       this.apiService.authenticationApi
         .refreshToken(this.refreshToken ?? '')
@@ -26,11 +27,13 @@ export class AuthenticationService {
           map((response) => response.data),
           catchError(() => {
             this.logout();
+            this._isReady$.next(true);
             return of(null);
           }),
         )
         .subscribe((token) => {
           if (!token) {
+            this._isReady$.next(true);
             this.logout();
             return;
           }
@@ -38,6 +41,7 @@ export class AuthenticationService {
           this.initiateAuthenticatedState(token);
         });
     } else {
+      this._isReady$.next(true);
       this.logout();
     }
   }
@@ -54,6 +58,8 @@ export class AuthenticationService {
 
   private initiateAuthenticatedState(response: TokenDto) {
     this._activeUser$.next(response.user);
+    this.tokenDto = response;
+    this._isReady$.next(true);
   }
 
   public logout() {
@@ -74,22 +80,32 @@ export class AuthenticationService {
     return this._activeUser$;
   }
 
+  public get isReady$() {
+    return this._isReady$.asObservable();
+  }
+
   public get accessToken() {
-    return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
-      map((response) => response.data),
-      catchError(() => {
-        this.logout();
-        return EMPTY;
-      }),
-      switchMap((token) => {
-        if (!token) {
+    if (this.tokenDto && this.isValid(this.tokenDto.accessToken)) {
+      return of(this.tokenDto.accessToken);
+    } else {
+      return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
+        map((response) => response.data),
+        catchError(() => {
           this.logout();
           return EMPTY;
-        }
+        }),
+        switchMap((token) => {
+          if (!token) {
+            this.logout();
+            return EMPTY;
+          }
 
-        return of(token.accessToken);
-      }),
-    );
+          this.tokenDto = token;
+
+          return of(token.accessToken);
+        }),
+      );
+    }
   }
 
   public hasRole(role: 'USER' | 'DRIVER' | 'ADMIN'): boolean {

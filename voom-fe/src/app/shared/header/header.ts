@@ -51,7 +51,11 @@ export class Header {
   }
 
   protected profile() {
-    this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_PROFILE]);
+    if (this.authenticationService.hasRole('DRIVER')) {
+      this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_USER_PROFILE]);
+    } else {
+      this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_PROFILE]);
+    }
   }
 
   protected login() {

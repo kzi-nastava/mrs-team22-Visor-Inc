@@ -1,5 +1,6 @@
 package inc.visor.voom_service.person.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,11 +61,16 @@ public class UserProfileController {
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(
         @Valid @RequestBody ChangePasswordRequestDto request,
-        @AuthenticationPrincipal User user
+        @AuthenticationPrincipal VoomUserDetails userDetails
     ) {
-        Long userId = (user != null) ? user.getId() : 2L;
+        String username = userDetails.getUsername();
+        User user = userProfileService.getUserByEmail(username);
+        
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        userProfileService.changePassword(userId, request);
+        userProfileService.changePassword(user.getId(), request);
 
         return ResponseEntity.ok().build();
     }
