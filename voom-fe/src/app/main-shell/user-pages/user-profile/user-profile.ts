@@ -20,6 +20,8 @@ import { ApiResponse } from '../../../shared/rest/rest.model';
 import { DriverVehicleResponseDto, UserProfileResponseDto } from '../home/home.api';
 import { FavoriteRouteDto, FavoriteRoutesApi } from '../favorite-routes/favorite-routes.api';
 import { FavoriteRoute } from '../favorite-routes/favorite-routes';
+import { RouterModule } from '@angular/router';
+
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -39,6 +41,7 @@ export const ROUTE_USER_PROFILE = 'profile';
     MatDialogModule,
     MatCheckbox,
     MatSnackBarModule,
+    RouterModule,
   ],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
