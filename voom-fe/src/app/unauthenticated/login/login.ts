@@ -5,12 +5,10 @@ import {MatButton} from '@angular/material/button';
 import {Router} from '@angular/router';
 import {ROUTE_REGISTRATION} from '../registration/registration';
 import {ROUTE_FORGOT_PASSWORD} from './forgot-password/forgot-password';
-import {ROUTE_HOME} from '../home/home';
 import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {AuthenticationService} from '../../shared/service/authentication-service';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {ROUTE_MAIN_SHELL} from '../../main-shell/main-shell';
+import {ROUTE_UNAUTHENTICATED_MAIN} from '../unauthenticated-main';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -40,7 +38,7 @@ export class Login {
   }
 
   forgotPassword() {
-    this.router.navigate([ROUTE_FORGOT_PASSWORD]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_FORGOT_PASSWORD]);
   }
 
   login() {
@@ -50,6 +48,9 @@ export class Login {
     }).pipe(
       map(response => response.data),
     ).subscribe((signInResponse) => {
+
+      console.log("Login successful:", signInResponse);
+
       if (!signInResponse) {
         return;
       }
@@ -59,6 +60,6 @@ export class Login {
   }
 
   registration() {
-    this.router.navigate([ROUTE_REGISTRATION]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_REGISTRATION]);
   }
 }

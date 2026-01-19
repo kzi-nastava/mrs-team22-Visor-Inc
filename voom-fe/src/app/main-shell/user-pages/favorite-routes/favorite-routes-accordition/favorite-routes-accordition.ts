@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { MatButton, MatButtonModule } from '@angular/material/button';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { Router } from '@angular/router';
-import { FavoriteRoute } from '../favorite-routes';
-import { FavoriteRoutesApi } from '../favorite-routes.api';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {Router} from '@angular/router';
+import {FavoriteRoute} from '../favorite-routes';
+import {FavoriteRoutesApi} from '../favorite-routes.api';
+import {ROUTE_USER_PAGES} from '../../user-pages';
 
 @Component({
   selector: 'app-favorite-route-accordion',
@@ -21,7 +22,7 @@ export class FavoriteRouteAccordion {
   constructor(private router: Router, private api: FavoriteRoutesApi) {}
 
   pickRoute(route: FavoriteRoute) {
-    this.router.navigate(['/user/home'], {
+    this.router.navigate([ROUTE_USER_PAGES], {
       state: {
         favoriteRoute: route.dto,
       },

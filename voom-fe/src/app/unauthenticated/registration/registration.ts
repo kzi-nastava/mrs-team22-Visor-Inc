@@ -10,6 +10,7 @@ import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-
 import {ValueInputFile} from '../../shared/value-input/value-input-file/value-input-file';
 import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
+import {ROUTE_UNAUTHENTICATED_MAIN} from '../unauthenticated-main';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -67,12 +68,12 @@ export class Registration {
     this.apiService.authenticationApi.register(registrationData).pipe(
       map(response => response.data),
     ).subscribe(() => {
-      this.router.navigate([ROUTE_LOGIN]);
+      this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_LOGIN]);
     });
   }
 
   login() {
-    this.router.navigate([ROUTE_LOGIN]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_LOGIN]);
   }
 
 }

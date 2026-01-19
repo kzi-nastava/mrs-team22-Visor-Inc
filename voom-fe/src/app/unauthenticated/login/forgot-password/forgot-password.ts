@@ -7,6 +7,7 @@ import {ROUTE_RESET_PASSWORD} from '../reset-password/reset-password';
 import ApiService from '../../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {ROUTE_HOME} from '../../home/home';
+import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated-main';
 
 export const ROUTE_FORGOT_PASSWORD = 'forgotPassword';
 
@@ -39,7 +40,7 @@ export class ForgotPassword {
     this.apiService.authenticationApi.forgotPassword(email).pipe(
       map(result => result.data),
     ).subscribe(() => {
-      this.router.navigate([ROUTE_HOME]);
+      this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_HOME]);
     });
   }
 
