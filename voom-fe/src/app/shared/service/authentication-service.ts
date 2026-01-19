@@ -83,7 +83,7 @@ export class AuthenticationService {
   }
 
   public get accessToken() {
-    if (this.tokenDto && this.tokenDto.accessToken) {
+    if (this.tokenDto && this.isValid(this.tokenDto.accessToken)) {
       return of(this.tokenDto.accessToken);
     } else {
       return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
