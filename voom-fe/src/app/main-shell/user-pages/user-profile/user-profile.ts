@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -18,6 +18,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../../../shared/service/authentication-service';
 import { ApiResponse } from '../../../shared/rest/rest.model';
 import { DriverVehicleResponseDto, UserProfileResponseDto } from '../home/home.api';
+import { FavoriteRouteDto, FavoriteRoutesApi } from '../favorite-routes/favorite-routes.api';
+import { FavoriteRoute } from '../favorite-routes/favorite-routes';
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -45,6 +47,7 @@ export class UserProfile {
   constructor(
     private dialog: MatDialog,
     private profileApi: UserProfileApi,
+    private favoriteRoutesApi: FavoriteRoutesApi,
     private snackBar: MatSnackBar,
     private authService: AuthenticationService,
   ) {}
@@ -52,6 +55,11 @@ export class UserProfile {
   isDriver = false;
   isUser = false;
   isAdmin = false;
+  favoriteRoutes = signal<FavoriteRoute[]>([]);
+  topFavoriteRoutes = computed(() =>
+  this.favoriteRoutes().slice(0, 3)
+);
+
 
   openChangePasswordDialog(): void {
     this.dialog.open(ChangePasswordDialog, {
@@ -118,6 +126,17 @@ export class UserProfile {
 
         this.profileForm.controls.email.disable();
       },
+    
+    });
+
+    this.favoriteRoutesApi.getFavoriteRoutes().subscribe({
+      next: (res) => {
+        const mapped = res.data?.map((dto) => this.mapDto(dto)) || [];
+        this.favoriteRoutes.set(mapped);
+      },
+      error: () => {
+        this.favoriteRoutes.set([]);
+      },
     });
 
     if (this.isDriver) {
@@ -141,6 +160,27 @@ export class UserProfile {
       });
     }
   }
+
+  shortAddress(address?: string | null): string {
+    if (!address) return '';
+    const parts = address.split(',');
+    return parts.slice(0, 2).join(',').trim();
+  }
+
+  mapDto(dto: FavoriteRouteDto): FavoriteRoute {
+      const pickup = dto.points.find((p) => p.type === 'PICKUP');
+      const dropoff = dto.points.find((p) => p.type === 'DROPOFF');
+  
+      return {
+        dto,
+        id: dto.id,
+        name: dto.name,
+        start: this.shortAddress(pickup?.address),
+        end: this.shortAddress(dropoff?.address),
+        distanceKm: dto.totalDistanceKm,
+        stops: dto.points.filter((p) => p.type === 'STOP').map((p) => this.shortAddress(p.address)),
+      };
+    }
 
   submit() {
     if (this.profileForm.invalid) {
