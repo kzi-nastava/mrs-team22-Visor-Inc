@@ -1,0 +1,13 @@
+<div class="p-4 flex flex-col justify-center">
+  <app-map/>
+  <div class="flex justify-end py-4">
+    <mat-card appearance="outlined" class="px-8 py-2 cursor-pointer" (click)="openSupportChat()">
+      <div>Live Support</div>
+    </mat-card>
+  </div>
+</div>
+@if (isOpen()) {
+  <div class="support-chat-container">
+    <app-admin-support-chat/>
+  </div>
+}

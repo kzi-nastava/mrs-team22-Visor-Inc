@@ -2,9 +2,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {Router} from '@angular/router';
-import {FavoriteRoute} from '../favorite-routes';
 import {FavoriteRoutesApi} from '../favorite-routes.api';
 import {ROUTE_USER_PAGES} from '../../user-pages';
+import {FavoriteRoute} from '../favorite-routes.data';
 
 @Component({
   selector: 'app-favorite-route-accordion',

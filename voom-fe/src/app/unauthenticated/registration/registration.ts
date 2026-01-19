@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
 import {Router} from '@angular/router';
@@ -6,7 +6,6 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ROUTE_LOGIN} from '../login/login';
 import {MatStep, MatStepLabel, MatStepper, MatStepperNext, MatStepperPrevious} from '@angular/material/stepper';
 import {ValueInputDate} from '../../shared/value-input/value-input-date/value-input-date';
-import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-profile';
 import {ValueInputFile} from '../../shared/value-input/value-input-file/value-input-file';
 import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';

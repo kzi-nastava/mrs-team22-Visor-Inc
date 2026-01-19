@@ -1,16 +1,17 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { BehaviorSubject, catchError, EMPTY, map, Observable, of, switchMap } from 'rxjs';
-import { TokenDto, User } from '../rest/authentication/authentication.model';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
+import {BehaviorSubject, catchError, EMPTY, map, Observable, of, switchMap} from 'rxjs';
+import {TokenDto, User} from '../rest/authentication/authentication.model';
+import {jwtDecode, JwtPayload} from 'jwt-decode';
 import ApiService from '../rest/api-service';
-import { HttpClient } from '@angular/common/http';
-import { isPlatformBrowser } from '@angular/common';
+import {HttpClient} from '@angular/common/http';
+import {isPlatformBrowser} from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private readonly REFRESH_TOKEN = 'VOOM_REFRESH_TOKEN';
+
+  private readonly REFRESH_TOKEN = "VOOM_REFRESH_TOKEN";
 
   private _activeUser$ = new BehaviorSubject<User | null>(null);
   private _isReady$ = new BehaviorSubject<boolean>(false);
@@ -21,25 +22,22 @@ export class AuthenticationService {
   constructor(private apiService: ApiService) {
     this.refreshToken = localStorage.getItem(this.REFRESH_TOKEN) ?? null;
     if (this.isValid(this.refreshToken)) {
-      this.apiService.authenticationApi
-        .refreshToken(this.refreshToken ?? '')
-        .pipe(
-          map((response) => response.data),
-          catchError(() => {
-            this.logout();
-            this._isReady$.next(true);
-            return of(null);
-          }),
-        )
-        .subscribe((token) => {
-          if (!token) {
-            this._isReady$.next(true);
-            this.logout();
-            return;
-          }
+      this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
+        map(response => response.data),
+        catchError(() => {
+          this.logout();
+          this._isReady$.next(true);
+          return of(null);
+        }),
+      ).subscribe(token => {
+        if (!token) {
+          this._isReady$.next(true);
+          this.logout();
+          return;
+        }
 
-          this.initiateAuthenticatedState(token);
-        });
+        this.initiateAuthenticatedState(token);
+      });
     } else {
       this._isReady$.next(true);
       this.logout();
@@ -85,11 +83,11 @@ export class AuthenticationService {
   }
 
   public get accessToken() {
-    if (this.tokenDto && this.isValid(this.tokenDto.accessToken)) {
+    if (this.tokenDto && this.tokenDto.accessToken) {
       return of(this.tokenDto.accessToken);
     } else {
       return this.apiService.authenticationApi.refreshToken(this.refreshToken ?? '').pipe(
-        map((response) => response.data),
+        map(response => response.data),
         catchError(() => {
           this.logout();
           return EMPTY;
@@ -103,15 +101,8 @@ export class AuthenticationService {
           this.tokenDto = token;
 
           return of(token.accessToken);
-        }),
+        })
       );
     }
-  }
-
-  public hasRole(role: 'USER' | 'DRIVER' | 'ADMIN'): boolean {
-    const user = this._activeUser$.value;
-    if (!user) return false;
-
-    return user.role === role;
   }
 }
