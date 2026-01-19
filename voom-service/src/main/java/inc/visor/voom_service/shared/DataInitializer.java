@@ -181,7 +181,7 @@ public class DataInitializer implements ApplicationRunner {
         };
     }
 
-    private void generateRide() {
+    private void generateStuff() {
 
 //        enum ScheduleType {
 //            NOW,
