@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.driver.dto.ActivateDriverRequestDto;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.ReportDriverRequestDto;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
@@ -33,10 +34,12 @@ public class DriverController {
 
     private final DriverService driverService;
     private final ActivationTokenService activationTokenService;
+    private final UserProfileService userProfileService;
 
-    public DriverController(DriverService driverService, ActivationTokenService activationTokenService) {
+    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserProfileService userProfileService) {
         this.driverService = driverService;
         this.activationTokenService = activationTokenService;
+        this.userProfileService = userProfileService;
     }
 
     @PostMapping
@@ -61,15 +64,29 @@ public class DriverController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal User user) {
-        Long userId = (user != null) ? user.getId() : 2L;
+    public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = user.getId();
 
         return ResponseEntity.ok(driverService.getVehicle(userId));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<VehicleSummaryDto> updateMyDriverInfo(@AuthenticationPrincipal User user, @RequestBody VehicleSummaryDto request) {
-        Long userId = (user != null) ? user.getId() : 2L;
+    public ResponseEntity<VehicleSummaryDto> updateMyDriverInfo(@AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody VehicleSummaryDto request) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = user.getId();
 
         return ResponseEntity.ok(driverService.updateVehicle(userId, request));
     }

@@ -47,13 +47,17 @@ public class RideController {
     @PostMapping("/requests")
     public ResponseEntity<RideRequestResponseDto> createRideRequest(
             @Valid @RequestBody RideRequestCreateDTO request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal VoomUserDetails userDetails
     ) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
 
-        Long userId = (user != null) ? user.getId() : 1L;
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         RideRequestResponseDto response
-                = rideRequestService.createRideRequest(request, userId);
+                = rideRequestService.createRideRequest(request, user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -155,7 +159,7 @@ public class RideController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         favoriteRouteService.delete(user.getId(), favoriteRouteId);
 
         return ResponseEntity.noContent().build();
