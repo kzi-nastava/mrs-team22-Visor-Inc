@@ -247,6 +247,12 @@ export type CreateFavoriteRouteDto = {
   points: RideRoutePointDto[];
 };
 
+export type ActiveRideDto = {
+  rideId: number;
+  status: string;
+  routePoints: RideRoutePointDto[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class RideApi {
   private readonly baseUrl = '/api/rides';
@@ -289,4 +295,16 @@ export class RideApi {
 
     return this.apiClient.get<void, DriverSummaryDto[]>(`${this.driversBaseUrl}/active`, config);
   }
+
+  getActiveRide(): Observable<ApiResponse<ActiveRideDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+    return this.apiClient.get<void, ActiveRideDto>(`${this.driversBaseUrl}/active-ride`, config);
+  }
+
 }

@@ -24,6 +24,7 @@ import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.ReportDriverRequestDto;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
@@ -89,6 +90,22 @@ public class DriverController {
         Long userId = user.getId();
 
         return ResponseEntity.ok(driverService.updateVehicle(userId, request));
+    }
+
+    @GetMapping("/active-ride")
+    public ResponseEntity<ActiveRideDto> getActiveRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = user.getId();
+
+        ActiveRideDto response = driverService.getActiveRide(userId);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{driverId}/report")

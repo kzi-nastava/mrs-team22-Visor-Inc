@@ -1,0 +1,34 @@
+<h2 mat-dialog-title class="text-xl font-medium text-gray-800 mb-10 text-center">
+  Start ride
+</h2>
+
+<hr />
+
+<mat-dialog-content class="px-2 pt-10">
+  <div class="flex flex-col gap-4 text-gray-700 text-center">
+    <p class="text-base">
+      You have arrived at the pickup location.
+    </p>
+
+    <p class="text-sm text-gray-500">
+      Start the ride if all passengers have entered the vehicle.
+    </p>
+
+    <p
+      *ngIf="data?.pickupAddress"
+      class="text-sm text-gray-500"
+    >
+      {{ data?.pickupAddress }}
+    </p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex justify-center mt-12">
+  <button
+    type="button"
+    class="h-[56px] px-16 rounded-full text-base font-medium transition-colors bg-blue-950 text-white cursor-pointer"
+    (click)="start()"
+  >
+    Start ride
+  </button>
+</mat-dialog-actions>

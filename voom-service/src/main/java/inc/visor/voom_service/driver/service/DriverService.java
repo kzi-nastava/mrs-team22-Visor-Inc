@@ -25,8 +25,10 @@ import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.service.RideService;
@@ -311,5 +313,20 @@ public class DriverService {
                     );
                 }))
                 .orElse(null);
+    }
+
+    public ActiveRideDto getActiveRide(Long userId) {
+        Ride activeRide = rideService.findActiveRide(userId);
+        if (activeRide == null) {
+            return null;
+        }
+        ActiveRideDto dto = new ActiveRideDto();
+        dto.setRideId(activeRide.getId());
+        dto.setStatus(activeRide.getStatus());
+        dto.setRoutePoints(
+                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(p -> p.toDto()).toList()
+        );
+
+        return dto;
     }
 }

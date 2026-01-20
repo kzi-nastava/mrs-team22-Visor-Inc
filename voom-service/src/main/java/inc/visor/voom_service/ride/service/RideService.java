@@ -118,4 +118,13 @@ public class RideService {
         );
     }
 
+    public Ride findActiveRide(Long userId) {
+        List<Ride> rides = rideRepository.findByDriverId(userId);
+
+        return rides.stream()
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

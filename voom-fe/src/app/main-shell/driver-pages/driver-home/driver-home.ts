@@ -24,6 +24,8 @@ import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimul
 import { catchError, map } from 'rxjs';
 import { log } from 'node:util';
 import { Map } from '../../../shared/map/map';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ArrivalDialog } from '../arrival-dialog/arrival-dialog';
 
 export const ROUTE_DRIVER_HOME = 'home';
 
@@ -41,7 +43,15 @@ export type ChartOptions = {
 
 @Component({
   selector: 'app-driver-home',
-  imports: [MatSlideToggle, NgApexchartsModule, MatIcon, MatSnackBarModule, Map],
+  imports: [
+    MatSlideToggle,
+    NgApexchartsModule,
+    MatIcon,
+    MatSnackBarModule,
+    Map,
+    MatDialogModule,
+    ArrivalDialog,
+  ],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
@@ -51,6 +61,8 @@ export class DriverHome implements AfterViewInit {
   myId = signal<number | null>(null);
   routePoints = signal<RoutePoint[]>([]);
   toastMessage = signal<string | null>(null);
+  hasArrived = signal(false);
+  pickupPoint = signal<{ lat: number; lng: number } | null>(null);
 
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -60,6 +72,7 @@ export class DriverHome implements AfterViewInit {
     private profileApi: UserProfileApi,
     private driverSocket: DriverSimulationWsService,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
   ) {
     this.chartOptions = {
       series: [3, 2],
@@ -107,23 +120,24 @@ export class DriverHome implements AfterViewInit {
   private followEnabled = true;
 
   private focusMyDriver(id: number) {
-  this.map.focusDriver(id, 16); // zoom level po želji
-}
+    this.map.focusDriver(id, 16); // zoom level po želji
+  }
 
-private followMyDriver(id: number, lat: number, lng: number) {
-  // varijanta 1: samo pan (ne menja zoom stalno)
-  this.map.panTo(lat, lng);
+  private followMyDriver(id: number, lat: number, lng: number) {
+    // varijanta 1: samo pan (ne menja zoom stalno)
+    this.map.panTo(lat, lng);
 
-  // varijanta 2: setView ako hoćeš i zoom da zaključavaš
-  // this.map.setView(lat, lng, 16);
-}
-
+    // varijanta 2: setView ako hoćeš i zoom da zaključavaš
+    // this.map.setView(lat, lng, 16);
+  }
 
   ngAfterViewInit() {
     this.profileApi.getMyVehicle().subscribe({
       next: (response) => {
         const id = response.data?.driverId || null;
         this.myId.set(id);
+
+        this.loadActiveRideFromApi();
 
         if (id && this.followEnabled) {
           this.focusMyDriver(id);
@@ -167,6 +181,17 @@ private followMyDriver(id: number, lat: number, lng: number) {
                 if (my && pos.driverId === my && this.followEnabled) {
                   this.followMyDriver(pos.driverId, pos.lat, pos.lng);
                 }
+                if (this.pickupPoint() && !this.hasArrived()) {
+                  const dist = this.distanceMeters(
+                    { lat: pos.lat, lng: pos.lng },
+                    this.pickupPoint()!,
+                  );
+
+                  if (dist <= 30) {
+                    this.hasArrived.set(true);
+                    this.openArrivalDialog();
+                  }
+                }
               }
             },
           );
@@ -175,23 +200,39 @@ private followMyDriver(id: number, lat: number, lng: number) {
       });
   }
 
+  private openArrivalDialog() {
+    const ref = this.dialog.open(ArrivalDialog, {
+      width: '380px',
+      disableClose: true,
+      data: {
+        pickupAddress: this.routePoints().find((p) => p.type === 'PICKUP')?.address ?? '',
+      },
+    });
+
+    ref.afterClosed().subscribe((res) => {
+      if (res?.action === 'START') {
+        this.startRide();
+      }
+    });
+  }
+
+  private startRide() {
+    console.log('Ride started');
+  }
+
   private handleDriverAssigned(payload: DriverAssignedDto) {
     const myDriverId = this.myId();
 
     if (!myDriverId) return;
     const pickup = payload.route.find((p: any) => p.type === 'PICKUP');
-    if (!pickup) return;
 
-    // const driver = this.map.getDriver(payload.driverId);
-    // if (driver) {
-    //   driver.status = 'GOING_TO_PICKUP';
-    // }
-    //
-    // this.driverSocket.requestRoute({
-    //   driverId: myDriverId,
-    //   start: driver?.marker.getLatLng(),
-    //   end: { lat: pickup.lat, lng: pickup.lng },
-    // });
+    this.pickupPoint.set({
+      lat: pickup?.lat || 0,
+      lng: pickup?.lng || 0,
+    });
+    this.hasArrived.set(false);
+
+    if (!pickup) return;
 
     if (payload.driverId !== myDriverId) return;
 
@@ -221,26 +262,6 @@ private followMyDriver(id: number, lat: number, lng: number) {
     );
   }
 
-  private initDriversOnMap(drivers: DriverSummaryDto[]) {
-    drivers.forEach((driver, index) => {
-      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
-
-      // this.map.addSimulatedDriver({
-      //   id: driver.id,
-      //   firstName: driver.firstName,
-      //   lastName: driver.lastName,
-      //   start: routeDef.start,
-      //   status: 'FREE',
-      // });
-
-      // this.driverSocket.requestRoute({
-      //   driverId: driver.id,
-      //   start: routeDef.start,
-      //   end: routeDef.end,
-      // });
-    });
-  }
-
   onToggleChange(event: MatSlideToggleChange) {
     this.isPassive.set(event.checked);
   }
@@ -256,4 +277,51 @@ private followMyDriver(id: number, lat: number, lng: number) {
   }
 
   protected readonly Date = Date;
+
+  distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+    const R = 6371000;
+    const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+    const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+
+    const sa = Math.sin(dLat / 2);
+    const sb = Math.sin(dLng / 2);
+
+    const c =
+      sa * sa + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * sb * sb;
+
+    return 2 * R * Math.atan2(Math.sqrt(c), Math.sqrt(1 - c));
+  }
+
+  private loadActiveRideFromApi() {
+    this.rideApi.getActiveRide().subscribe({
+      next: (res) => {
+        if (!res.data) return;
+
+        const activeRide = res.data;
+        const points: RoutePoint[] = activeRide.routePoints
+          .slice()
+          .sort((a, b) => a.orderIndex - b.orderIndex)
+          .map((p) => ({
+            id: crypto.randomUUID(),
+            lat: p.lat,
+            lng: p.lng,
+            address: p.address,
+            type: p.type,
+            order: p.orderIndex,
+          }));
+
+        this.routePoints.set(points);
+
+        const pickup = points.find((p) => p.type === 'PICKUP');
+        if (pickup) {
+          this.pickupPoint.set({ lat: pickup.lat, lng: pickup.lng });
+        }
+
+        console.log('[DriverHome] Active ride restored from API');
+      },
+      error: (err) => {
+        console.error('[DriverHome] Failed to load active ride', err);
+      },
+    });
+  }
 }
