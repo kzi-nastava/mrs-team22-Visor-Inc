@@ -21,6 +21,7 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
@@ -239,6 +240,7 @@ public class DriverService {
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
 
@@ -251,7 +253,10 @@ public class DriverService {
                 .toList();
 
         if (!freeDrivers.isEmpty()) {
-            return nearestDriver(freeDrivers, pickup, locMap);
+            Driver choosenDriver = nearestDriver(freeDrivers, pickup, locMap);
+            choosenDriver.setStatus(DriverStatus.BUSY);
+            driverRepository.save(choosenDriver);
+            return choosenDriver;
         }
 
         List<Driver> finishingSoon = candidates.stream()
@@ -259,7 +264,10 @@ public class DriverService {
                 .toList();
 
         if (!finishingSoon.isEmpty()) {
-            return nearestDriver(finishingSoon, pickup, locMap);
+            Driver choosenDriver = nearestDriver(finishingSoon, pickup, locMap);
+            choosenDriver.setStatus(DriverStatus.BUSY);
+            driverRepository.save(choosenDriver);
+            return choosenDriver;
         }
 
         return null;

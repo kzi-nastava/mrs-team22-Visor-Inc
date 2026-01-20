@@ -63,6 +63,7 @@ export class DriverHome implements AfterViewInit {
   toastMessage = signal<string | null>(null);
   hasArrived = signal(false);
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
+  activeRideId = signal<number | null>(null);
 
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -120,15 +121,11 @@ export class DriverHome implements AfterViewInit {
   private followEnabled = true;
 
   private focusMyDriver(id: number) {
-    this.map.focusDriver(id, 16); // zoom level po želji
+    this.map.focusDriver(id, 16);
   }
 
   private followMyDriver(id: number, lat: number, lng: number) {
-    // varijanta 1: samo pan (ne menja zoom stalno)
     this.map.panTo(lat, lng);
-
-    // varijanta 2: setView ako hoćeš i zoom da zaključavaš
-    // this.map.setView(lat, lng, 16);
   }
 
   ngAfterViewInit() {
@@ -210,14 +207,31 @@ export class DriverHome implements AfterViewInit {
     });
 
     ref.afterClosed().subscribe((res) => {
-      if (res?.action === 'START') {
+      if (res === 'START') {
         this.startRide();
       }
     });
   }
 
   private startRide() {
-    console.log('Ride started');
+    const rideId = this.activeRideId();
+
+    if (!rideId) {
+      console.error('No active ride id');
+      return;
+    }
+
+    this.rideApi.startRide(rideId).subscribe({
+      next: () => {
+        this.snackBar.open('Ride started', 'OK', { duration: 3000 });
+
+        this.hasArrived.set(true);
+      },
+      error: (err) => {
+        console.error('Failed to start ride', err);
+        this.snackBar.open('Failed to start ride', 'OK', { duration: 3000 });
+      },
+    });
   }
 
   private handleDriverAssigned(payload: DriverAssignedDto) {
@@ -235,6 +249,8 @@ export class DriverHome implements AfterViewInit {
     if (!pickup) return;
 
     if (payload.driverId !== myDriverId) return;
+
+    this.activeRideId.set(payload.rideId);
 
     this.snackBar.open(
       `You are assigned to ride, pickup adress is ${
@@ -316,6 +332,8 @@ export class DriverHome implements AfterViewInit {
         if (pickup) {
           this.pickupPoint.set({ lat: pickup.lat, lng: pickup.lng });
         }
+
+        this.activeRideId.set(activeRide.rideId);
 
         console.log('[DriverHome] Active ride restored from API');
       },

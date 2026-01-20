@@ -284,6 +284,17 @@ export class RideApi {
     return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
   }
 
+  startRide(rideId: number): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+    return this.apiClient.post<void, void>(`${this.baseUrl}/${rideId}/start`, undefined, config);
+  }
+
   getActiveDrivers(): Observable<ApiResponse<DriverSummaryDto[]>> {
     const config: RequestConfig = {
       headers: {

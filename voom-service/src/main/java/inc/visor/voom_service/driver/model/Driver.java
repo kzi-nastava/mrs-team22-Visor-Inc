@@ -3,9 +3,12 @@ package inc.visor.voom_service.driver.model;
 import java.util.Objects;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.person.model.Person;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +33,9 @@ public class Driver {
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private DriverStatus status;
 
     public long getId() {
         return id;
@@ -53,6 +59,14 @@ public class Driver {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public DriverStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DriverStatus status) {
+        this.status = status;
     }
 
 

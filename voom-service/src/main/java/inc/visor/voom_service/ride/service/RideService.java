@@ -127,4 +127,11 @@ public class RideService {
                 .orElse(null);
     }
 
+    public void startRide(long rideId) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        ride.setStartedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.ONGOING);
+        rideRepository.save(ride);
+    }
+
 }

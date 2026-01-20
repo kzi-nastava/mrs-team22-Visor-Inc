@@ -28,20 +28,27 @@ import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
+import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.simulation.RideSimulationService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
 
+    private final RideSimulationService rideSimulationService;
+
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
     private final UserProfileService userProfileService;
+    private final RideService rideService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, UserProfileService userProfileService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, UserProfileService userProfileService, RideService rideService, RideSimulationService rideSimulationService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.userProfileService = userProfileService;
+        this.rideService = rideService;
+        this.rideSimulationService = rideSimulationService;
     }
 
     @PostMapping("/requests")
@@ -147,7 +154,7 @@ public class RideController {
         List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
         return ResponseEntity.ok(favoriteRoutes);
     }
-    
+
     @DeleteMapping("/favorites/{favoriteRouteId}")
     public ResponseEntity<Void> deleteFavoriteRoute(
             @AuthenticationPrincipal VoomUserDetails userDetails,
@@ -164,7 +171,7 @@ public class RideController {
 
         return ResponseEntity.noContent().build();
     }
-    
+
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
 
@@ -181,8 +188,18 @@ public class RideController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<String> startRide(@PathVariable Long id) {
-        return ResponseEntity.ok("Ride started successfully.");
+    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        rideService.startRide(id);
+        rideSimulationService.startRide(user.getId(), id);
+        
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/stop")
