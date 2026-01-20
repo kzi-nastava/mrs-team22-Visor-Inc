@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, signal} from '@angular/core';
-import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
+import { AfterViewInit, Component, signal, ViewChild } from '@angular/core';
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import {
   ApexChart,
   ApexDataLabels,
@@ -10,14 +10,20 @@ import {
   ApexXAxis,
   NgApexchartsModule,
 } from 'ng-apexcharts';
-import {MatIcon} from '@angular/material/icon';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
-import {DriverAssignedDto, DriverSummaryDto, PREDEFINED_ROUTES, RideApi} from '../../user-pages/home/home.api';
-import {RoutePoint} from '../../user-pages/home/home';
-import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
-import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {catchError, map} from 'rxjs';
-import {log} from 'node:util';
+import { MatIcon } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import {
+  DriverAssignedDto,
+  DriverSummaryDto,
+  PREDEFINED_ROUTES,
+  RideApi,
+} from '../../user-pages/home/home.api';
+import { RoutePoint } from '../../user-pages/home/home';
+import { UserProfileApi } from '../../user-pages/user-profile/user-profile.api';
+import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
+import { catchError, map } from 'rxjs';
+import { log } from 'node:util';
+import { Map } from '../../../shared/map/map';
 
 export const ROUTE_DRIVER_HOME = 'home';
 
@@ -35,11 +41,12 @@ export type ChartOptions = {
 
 @Component({
   selector: 'app-driver-home',
-  imports: [MatSlideToggle, NgApexchartsModule, MatIcon, MatSnackBarModule],
+  imports: [MatSlideToggle, NgApexchartsModule, MatIcon, MatSnackBarModule, Map],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
 export class DriverHome implements AfterViewInit {
+  @ViewChild(Map) map!: Map;
   isPassive = signal<boolean>(false);
   myId = signal<number | null>(null);
   routePoints = signal<RoutePoint[]>([]);
@@ -51,8 +58,8 @@ export class DriverHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private profileApi: UserProfileApi,
-    // private driverSocket: DriverSimulationWsService,
-    private snackBar: MatSnackBar
+    private driverSocket: DriverSimulationWsService,
+    private snackBar: MatSnackBar,
   ) {
     this.chartOptions = {
       series: [3, 2],
@@ -96,31 +103,76 @@ export class DriverHome implements AfterViewInit {
     };
   }
 
+  renderedDrivers: number[] = [];
+  private followEnabled = true;
+
+  private focusMyDriver(id: number) {
+  this.map.focusDriver(id, 16); // zoom level po želji
+}
+
+private followMyDriver(id: number, lat: number, lng: number) {
+  // varijanta 1: samo pan (ne menja zoom stalno)
+  this.map.panTo(lat, lng);
+
+  // varijanta 2: setView ako hoćeš i zoom da zaključavaš
+  // this.map.setView(lat, lng, 16);
+}
+
+
   ngAfterViewInit() {
     this.profileApi.getMyVehicle().subscribe({
       next: (response) => {
+        const id = response.data?.driverId || null;
+        this.myId.set(id);
 
-        this.myId.set(response.data?.driverId || null);
-      },
-    });
-    // this.driverSocket.connect(
-    //   (route) => {
-    //     // this.map.applyDriverRoute(route.driverId, route.route);
-    //   },
-    //   () => {},
-    //   (assigned) => this.handleDriverAssigned(assigned)
-    // );
-
-    this.rideApi.getActiveDrivers().pipe(
-      map(response => response.data),
-    ).subscribe({
-      next: (drivers) => {
-        if (drivers) {
-          this.initDriversOnMap(drivers);
+        if (id && this.followEnabled) {
+          this.focusMyDriver(id);
         }
       },
-      error: (err) => console.error(err),
     });
+
+    this.rideApi
+      .getActiveDrivers()
+      .pipe(map((r) => r.data ?? []))
+      .subscribe({
+        next: (drivers) => {
+          if (!drivers.length) return;
+
+          this.driverSocket.connect(
+            () => {},
+            () => {},
+            (assigned) => this.handleDriverAssigned(assigned),
+            (pos) => {
+              const driver = drivers.find((d) => d.id === pos.driverId);
+
+              if (!this.renderedDrivers.includes(pos.driverId)) {
+                this.renderedDrivers.push(pos.driverId);
+
+                this.map.addSimulatedDriver({
+                  id: pos.driverId,
+                  firstName: driver?.firstName ?? '',
+                  lastName: driver?.lastName ?? '',
+                  start: { lat: pos.lat, lng: pos.lng },
+                  status: (driver?.status as any) || 'FREE',
+                });
+
+                const my = this.myId();
+                if (my && pos.driverId === my && this.followEnabled) {
+                  this.focusMyDriver(my);
+                }
+              } else {
+                this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+
+                const my = this.myId();
+                if (my && pos.driverId === my && this.followEnabled) {
+                  this.followMyDriver(pos.driverId, pos.lat, pos.lng);
+                }
+              }
+            },
+          );
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   private handleDriverAssigned(payload: DriverAssignedDto) {
@@ -152,7 +204,7 @@ export class DriverHome implements AfterViewInit {
         duration: 5000,
         verticalPosition: 'bottom',
         horizontalPosition: 'center',
-      }
+      },
     );
 
     this.routePoints.set(
@@ -165,7 +217,7 @@ export class DriverHome implements AfterViewInit {
           address: '',
           type: p.type,
           order: p.order,
-        }))
+        })),
     );
   }
 

@@ -109,13 +109,17 @@ export class Map implements AfterViewInit, OnChanges {
     });
   }
 
-  private focusDriver(driver: Driver) {
-    const pos = driver.marker.getLatLng();
+  focusDriver(driverId: number, zoom = 16) {
+  const d = this.getDriver(driverId);
+  if (!d) return;
+  const ll = d.marker.getLatLng();
+  this.map.setView(ll, zoom, { animate: true });
+}
 
-    this.map.setView(pos, this.FOCUSED_ZOOM, {
-      animate: true,
-    });
-  }
+panTo(lat: number, lng: number) {
+  this.map.panTo({ lat, lng }, { animate: true });
+}
+
 
   applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
     const driver = this.drivers.find((d) => d.id === driverId);
@@ -126,7 +130,7 @@ export class Map implements AfterViewInit, OnChanges {
     driver.direction = 1;
 
     if (this.focusedDriverId === driver.id) {
-      this.focusDriver(driver);
+      this.focusDriver(driver.id);
     }
 
     this.startSimulation();
