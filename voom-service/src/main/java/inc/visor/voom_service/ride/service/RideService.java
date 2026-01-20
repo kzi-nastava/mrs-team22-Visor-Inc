@@ -13,6 +13,7 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.shared.RoutePointDto;
 
 @Service
 public class RideService {
@@ -127,7 +128,7 @@ public class RideService {
                 .orElse(null);
     }
 
-    public void startRide(long rideId) {
+    public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStartedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.ONGOING);

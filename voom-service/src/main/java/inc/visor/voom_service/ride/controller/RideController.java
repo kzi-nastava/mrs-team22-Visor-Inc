@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
@@ -25,30 +26,30 @@ import inc.visor.voom_service.ride.dto.RideHistoryDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.ride.dto.StartRideDto;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
 import inc.visor.voom_service.ride.service.RideService;
-import inc.visor.voom_service.simulation.RideSimulationService;
+import inc.visor.voom_service.simulation.Simulator;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
 
-    private final RideSimulationService rideSimulationService;
-
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
     private final UserProfileService userProfileService;
     private final RideService rideService;
+    private final Simulator simulatorService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, UserProfileService userProfileService, RideService rideService, RideSimulationService rideSimulationService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, UserProfileService userProfileService, RideService rideService, Simulator simulatorService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.userProfileService = userProfileService;
         this.rideService = rideService;
-        this.rideSimulationService = rideSimulationService;
+        this.simulatorService = simulatorService;
     }
 
     @PostMapping("/requests")
@@ -188,7 +189,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails) {
+    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody StartRideDto request) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userProfileService.getUserByEmail(username);
 
@@ -196,9 +197,14 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        rideService.startRide(id);
-        rideSimulationService.startRide(user.getId(), id);
-        
+        rideService.startRide(id, user.getId(), request.getRoutePoints());
+
+        List<LatLng> latLngPoints = request.getRoutePoints().stream()
+                .map(point -> new LatLng(point.getLat(), point.getLng()))
+                .toList();
+
+        simulatorService.changeDriverRouteMultiplePoints(user.getId(), latLngPoints);
+
         return ResponseEntity.ok().build();
     }
 

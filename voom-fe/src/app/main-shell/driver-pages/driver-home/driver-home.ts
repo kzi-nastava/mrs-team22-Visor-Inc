@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, effect, signal, ViewChild } from '@angular/core';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import {
   ApexChart,
@@ -41,6 +41,8 @@ export type ChartOptions = {
   xaxis?: ApexXAxis;
 };
 
+type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED';
+
 @Component({
   selector: 'app-driver-home',
   imports: [
@@ -64,6 +66,7 @@ export class DriverHome implements AfterViewInit {
   hasArrived = signal(false);
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
+  ridePhase = signal<RidePhase>('IDLE');
 
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -115,6 +118,12 @@ export class DriverHome implements AfterViewInit {
         max: 100,
       },
     };
+
+    effect(() => {
+      if (this.ridePhase() === 'AT_PICKUP') {
+        this.openArrivalDialog();
+      }
+    });
   }
 
   renderedDrivers: number[] = [];
@@ -185,8 +194,7 @@ export class DriverHome implements AfterViewInit {
                   );
 
                   if (dist <= 30) {
-                    this.hasArrived.set(true);
-                    this.openArrivalDialog();
+                    this.ridePhase.set('AT_PICKUP');
                   }
                 }
               }
@@ -215,17 +223,26 @@ export class DriverHome implements AfterViewInit {
 
   private startRide() {
     const rideId = this.activeRideId();
-
     if (!rideId) {
       console.error('No active ride id');
       return;
     }
 
-    this.rideApi.startRide(rideId).subscribe({
+    const payload = {
+      routePoints: this.routePoints().map((p) => ({
+        lat: p.lat,
+        lng: p.lng,
+        orderIndex: p.order,
+        type: p.type,
+        address: p.address,
+      })),
+    };
+
+    this.rideApi.startRide(rideId, payload).subscribe({
       next: () => {
         this.snackBar.open('Ride started', 'OK', { duration: 3000 });
-
         this.hasArrived.set(true);
+        this.pickupPoint.set(null);
       },
       error: (err) => {
         console.error('Failed to start ride', err);
@@ -251,6 +268,7 @@ export class DriverHome implements AfterViewInit {
     if (payload.driverId !== myDriverId) return;
 
     this.activeRideId.set(payload.rideId);
+    this.hasArrived.set(false);
 
     this.snackBar.open(
       `You are assigned to ride, pickup adress is ${

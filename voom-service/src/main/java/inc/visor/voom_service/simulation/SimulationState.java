@@ -1,12 +1,12 @@
 package inc.visor.voom_service.simulation;
 
-import inc.visor.voom_service.osrm.dto.LatLng;
-import inc.visor.voom_service.osrm.service.OsrmService;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.osrm.service.OsrmService;
 
 @Component
 public class SimulationState {
@@ -37,5 +37,21 @@ public class SimulationState {
 
         drivers.add(new SimulatedDriver(existing.getDriver(), newWaypoints));
     }
+
+    public void replaceRouteMultiplePoints(long driverId, List<LatLng> newPoints, OsrmService osrm) {
+        SimulatedDriver existing = drivers.stream()
+                .filter(d -> d.getDriverId() == driverId)
+                .findFirst()
+                .orElse(null);
+
+        if (existing == null) return;
+        drivers.remove(existing);
+
+        List<LatLng> newWaypoints =
+                osrm.getRoute(newPoints);
+
+        drivers.add(new SimulatedDriver(existing.getDriver(), newWaypoints));
+    }
+    
 }
 
