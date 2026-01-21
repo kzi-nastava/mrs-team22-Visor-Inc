@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimulationPublisher {
 
-    private record LocationDto(long driverId, double lat, double lng) {}
+    private record LocationDto(long driverId, double lat, double lng, boolean finished) {}
 
     private final SimpMessagingTemplate messaging;
 
@@ -15,10 +15,10 @@ public class SimulationPublisher {
         this.messaging = messaging;
     }
 
-    public void publishPosition(long driverId, LatLng pos) {
+    public void publishPosition(long driverId, LatLng pos, boolean finished) {
         messaging.convertAndSend(
                 "/topic/drivers-positions",
-                new LocationDto(driverId, pos.lat(), pos.lng())
+                new LocationDto(driverId, pos.lat(), pos.lng(), finished)
         );
     }
 }

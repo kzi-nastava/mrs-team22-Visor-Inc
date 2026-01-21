@@ -7,7 +7,7 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 
@@ -410,4 +410,34 @@ panTo(lat: number, lng: number) {
 
     requestAnimationFrame(animate);
   }
+
+  searchAddress(address: string): Observable<{ lat: number; lng: number }> {
+  return this.http
+    .get<any>(
+      `https://nominatim.openstreetmap.org/search` +
+        `?format=json&q=${encodeURIComponent(address)}&limit=1`
+    )
+    .pipe(
+      map((res) => ({
+        lat: parseFloat(res[0].lat),
+        lng: parseFloat(res[0].lon),
+      }))
+    );
+}
+
+drawRouteFromAddresses(startAddress: string, endAddress: string) {
+  forkJoin({
+    start: this.searchAddress(startAddress),
+    end: this.searchAddress(endAddress),
+  }).subscribe(({ start, end }) => {
+    this.points = [
+      { lat: start.lat, lng: start.lng, type: 'PICKUP', order: 0 },
+      { lat: end.lat, lng: end.lng, type: 'DROPOFF', order: 1 },
+    ];
+
+    this.syncFromPoints(); // reuse existing logic
+  });
+}
+
+
 }

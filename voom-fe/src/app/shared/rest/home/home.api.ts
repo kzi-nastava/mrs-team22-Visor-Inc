@@ -1,6 +1,6 @@
 import { Api } from '../api';
 import { ApiClient } from '../api-client';
-import { DriverSummaryDto, RideRequestDto, RideRequestResponseDto } from './home.model';
+import { DriverSummaryDto, RatingRequestDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
 
@@ -8,6 +8,19 @@ export class RideApi extends Api {
 
   constructor(apiClient: ApiClient) {
     super(apiClient);
+  }
+
+  getRide(id: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+    };
+
+    return this.apiClient.get<void, RideResponseDto>(
+      `/api/rides/${id}`,
+      config
+    );
   }
 
   getActiveDrivers() {
@@ -37,4 +50,34 @@ export class RideApi extends Api {
       config
     );
   }
+
+  reportRide(rideId: number, body: RideReportRequestDto) {
+  const config: RequestConfig = {
+    headers: {
+      contentType: 'application/json',
+    },
+  };
+
+  return this.apiClient.post<RideReportRequestDto, void>(
+    `/api/rides/${rideId}/report`,
+    body,
+    config
+  );
+}
+
+rateRide(rideId: number, body: RatingRequestDto) {
+  const config: RequestConfig = {
+    headers: {
+      contentType: 'application/json',
+    },
+  };
+
+  return this.apiClient.post<RatingRequestDto, void>(
+    `/api/rides/${rideId}/rate`,
+    body,
+    config
+  );
+}
+
+
 }

@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/**"
                 ).permitAll()
-                    .requestMatchers("/api/drivers/**", "/ws/**",
+                    .requestMatchers("/api/**", "/ws/**",
                             "/topic/**",
                             "/app/**").permitAll()
                 .anyRequest().authenticated()

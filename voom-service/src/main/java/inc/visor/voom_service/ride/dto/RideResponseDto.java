@@ -16,12 +16,26 @@ public class RideResponseDto {
     private String driverName;
     private String passengerName;
 
+    private Long driverId;
+
     private List<String> passengerNames;
 
     private String startAddress;
     private String destinationAddress;
 
     public RideResponseDto() {
+    }
+
+    public RideResponseDto(Long id, RideStatus status, LocalDateTime startedAt, LocalDateTime finishedAt, String driverName, String passengerName, Long driverId, String startAddress, String destinationAddress) {
+        this.id = id;
+        this.status = status;
+        this.startedAt = startedAt;
+        this.finishedAt = finishedAt;
+        this.driverName = driverName;
+        this.passengerName = passengerName;
+        this.driverId = driverId;
+        this.startAddress = startAddress;
+        this.destinationAddress = destinationAddress;
     }
 
     public RideResponseDto(
@@ -122,5 +136,13 @@ public class RideResponseDto {
 
     public void setDestinationAddress(String destinationAddress) {
         this.destinationAddress = destinationAddress;
+    }
+
+    public Long getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
     }
 }
