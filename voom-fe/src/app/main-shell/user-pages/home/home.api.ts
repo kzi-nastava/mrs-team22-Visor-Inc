@@ -257,6 +257,12 @@ export type StartRideDto = {
   routePoints: RideRoutePointDto[];
 }
 
+export type StartScheduledRideDto = {
+  driverId: number;
+  lat: number;
+  lng: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RideApi {
   private readonly baseUrl = '/api/rides';
@@ -297,6 +303,17 @@ export class RideApi {
       authenticated: true,
     }
     return this.apiClient.post<StartRideDto, void>(`${this.baseUrl}/${rideId}/start`, payload, config);
+  }
+
+  startScheduleRide(rideId: number, payload: StartScheduledRideDto): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    }
+    return this.apiClient.post<StartScheduledRideDto, void>(`${this.baseUrl}/scheduled/${rideId}`, payload, config);
   }
 
   getActiveDrivers(): Observable<ApiResponse<DriverSummaryDto[]>> {

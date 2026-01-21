@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
@@ -133,6 +134,16 @@ public class RideService {
         ride.setStartedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.ONGOING);
         rideRepository.save(ride);
+    }
+
+    public void startScheduleRide(long rideId) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        ride.setStartedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.ONGOING);
+        rideRepository.save(ride);
+
+        Driver driver = ride.getDriver();
+        driver.setStatus(DriverStatus.BUSY);
     }
 
 }

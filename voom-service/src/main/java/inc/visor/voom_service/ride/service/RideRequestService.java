@@ -113,12 +113,14 @@ public class RideRequestService {
         ride.setPassengers(passengers);
 
         
-        if (driverFound) {
+        if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
         DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             rideRepository.save(ride);
             rideWsService.sendDriverAssigned(driverAssignedDto);
         
             driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());
+        } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
+            rideRepository.save(ride);
         }
 
         return RideRequestResponseDto.from(

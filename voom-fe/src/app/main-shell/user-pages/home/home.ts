@@ -172,10 +172,23 @@ export class UserHome implements AfterViewInit {
 
     if (ride.driverId && !this.scheduledDriverSent()) {
       const pickup = ride.route.find((p) => p.type === 'PICKUP');
-      if (pickup) {
-        this.sendDriverToPickup(ride.driverId, pickup.lat, pickup.lng);
-        this.scheduledDriverSent.set(true);
-      }
+      if (!pickup) return;
+
+      const payload = {
+        driverId: ride.driverId,
+        lat: pickup.lat,
+        lng: pickup.lng,
+      };
+
+      this.rideApi.startScheduleRide(ride.rideId, payload).subscribe({
+        next: () => {
+          console.log('[SCHEDULE] Ride started on backend');
+          this.scheduledDriverSent.set(true);
+        },
+        error: (err) => {
+          console.error('[SCHEDULE] Failed to start ride', err);
+        },
+      });
     }
 
     if (this.isRideLocked()) {
@@ -308,12 +321,6 @@ export class UserHome implements AfterViewInit {
     if (!driver) return;
 
     driver.status = 'GOING_TO_PICKUP';
-
-    // this.driverSocket.requestRoute({
-    //   driverId,
-    //   start: driver.marker.getLatLng(),
-    //   end: { lat, lng },
-    // });
   }
 
   confirmRide() {
@@ -380,25 +387,6 @@ export class UserHome implements AfterViewInit {
           this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
         },
       });
-  }
-  private initDriverSimulation(drivers: DriverSummaryDto[]) {
-    drivers.forEach((driver, index) => {
-      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
-
-      this.map.addSimulatedDriver({
-        id: driver.id,
-        firstName: driver.firstName,
-        lastName: driver.lastName,
-        start: routeDef.start,
-        status: 'FREE',
-      });
-      //
-      // this.driverSocket.requestRoute({
-      //   driverId: driver.id,
-      //   start: routeDef.start,
-      //   end: routeDef.end,
-      // });
-    });
   }
 
   ngAfterViewInit() {
@@ -487,7 +475,10 @@ export class UserHome implements AfterViewInit {
 
       this.driverSocket.connect(
         () => {},
-        () => {},
+        (rides) => {
+          console.log('[WS] Scheduled rides received:', rides);
+          this.handleScheduledRides(rides);
+        },
         undefined,
         (pos) => {
           const driver = drivers.find((d) => d.id === pos.driverId);

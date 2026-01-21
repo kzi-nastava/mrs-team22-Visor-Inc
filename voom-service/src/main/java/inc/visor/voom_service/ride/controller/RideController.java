@@ -27,6 +27,7 @@ import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.ride.dto.StartRideDto;
+import inc.visor.voom_service.ride.dto.StartScheduleRideDto;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideRequestService;
@@ -118,14 +119,14 @@ public class RideController {
         return ResponseEntity.ok(ride);
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<RideRequestResponseDto> updateRide(@PathVariable Long id, @Valid @RequestBody RideRequestResponseDto request) {
-        return ResponseEntity.ok(request);
-    }
+    @PostMapping("/scheduled/{id}")
+    public ResponseEntity<Void> scheduleRide(@PathVariable Long id, @Valid @RequestBody StartScheduleRideDto request) {
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRide(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        rideService.startScheduleRide(id);
+
+        simulatorService.changeDriverRoute(request.getDriverId(), request.getLat(), request.getLng());
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/favorites")
