@@ -53,7 +53,7 @@ export class AdminDrivers {
   );
 
   drivers = toSignal(this.drivers$);
-  selectedDriver = signal<DriverDto | null>(null)
+  selectedDriver = signal<DriverDto | null>(null);
 
   constructor() {
   }
