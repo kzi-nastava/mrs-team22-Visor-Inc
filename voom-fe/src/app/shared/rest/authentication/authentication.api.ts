@@ -3,7 +3,6 @@ import {ApiClient} from '../api-client';
 import {LoginDto, TokenDto, RegistrationDto, ResetPasswordDto, User} from './authentication.model';
 import {RequestConfig} from '../rest.model';
 
-
 export class AuthenticationApi extends Api {
 
   constructor(apiClient: ApiClient) {

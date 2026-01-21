@@ -2,11 +2,7 @@ package inc.visor.voom_service.driver.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -141,7 +137,7 @@ public class DriverService {
     }
 
     @Transactional
-    public void createDriver(CreateDriverDto request) {
+    public Driver createDriver(CreateDriverDto request) {
 
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
@@ -161,7 +157,7 @@ public class DriverService {
         person.setPhoneNumber(request.getPhoneNumber());
         person.setAddress(request.getAddress());
 
-        personRepository.save(person);
+        person = personRepository.save(person);
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -172,13 +168,12 @@ public class DriverService {
         String dummyPassword = UUID.randomUUID().toString();
         user.setPassword(passwordEncoder.encode(dummyPassword));
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         Driver driver = new Driver();
         driver.setUser(user);
-        driver.setPerson(person);
 
-        driverRepository.save(driver);
+        driver = driverRepository.save(driver);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setDriver(driver);
@@ -195,13 +190,30 @@ public class DriverService {
                 = activationTokenService.createForUser(user);
 
         String activationLink
-                = "http://localhost:4200/activate?token=" + activationToken.getToken();
+                = "http://localhost:4200/voom/activate?token=" + activationToken.getToken();
 
         emailService.sendActivationEmail(
                 user.getEmail(),
                 activationLink
         );
 
+        return driver;
+    }
+
+    public List<Driver> getDrivers() {
+        return driverRepository.findAll();
+    }
+
+    public Optional<Driver> getDriver(long driverId) {
+        return driverRepository.findById(driverId);
+    }
+
+    public Driver updateDriver(Driver driver) {
+        return driverRepository.save(driver);
+    }
+
+    public void deleteDriver(long driverId) {
+        driverRepository.deleteById(driverId);
     }
 
     public List<DriverSummaryDto> getActiveDrivers() {
@@ -211,15 +223,9 @@ public class DriverService {
                 .filter(driver -> driver.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .toList();
 
-        List<DriverSummaryDto> driverDtos = activeDrivers.stream()
-                .map(driver -> new DriverSummaryDto(
-                driver.getId(),
-                driver.getPerson().getFirstName(),
-                driver.getPerson().getLastName()
-        ))
+        return activeDrivers.stream()
+                .map(DriverSummaryDto::new)
                 .toList();
-
-        return driverDtos;
     }
 
     public Driver findDriverForRideRequest(

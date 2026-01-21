@@ -19,7 +19,7 @@ public class UserRoleService {
         return userRoleRepository.save(userRole);
     }
 
-    public Optional<UserRole> read(String roleName) {
+    public Optional<UserRole> getUserRole(String roleName) {
         return userRoleRepository.findByRoleName(roleName);
     }
 

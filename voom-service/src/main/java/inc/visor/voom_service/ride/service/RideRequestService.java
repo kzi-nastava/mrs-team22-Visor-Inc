@@ -119,7 +119,7 @@ public class RideRequestService {
                 rideRequest,
                 estimate.distanceKm(),
                 driverFound
-                        ? DriverSummaryDto.from(driver)
+                        ? new DriverSummaryDto(driver)
                         : null
         );
     }
