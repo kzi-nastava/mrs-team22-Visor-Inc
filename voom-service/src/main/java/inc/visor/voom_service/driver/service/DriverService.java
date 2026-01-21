@@ -2,6 +2,7 @@ package inc.visor.voom_service.driver.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,7 @@ public class DriverService {
     }
 
     @Transactional
-    public void createDriver(CreateDriverDto request) {
+    public Driver createDriver(CreateDriverDto request) {
 
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
@@ -163,7 +164,7 @@ public class DriverService {
         person.setPhoneNumber(request.getPhoneNumber());
         person.setAddress(request.getAddress());
 
-        personRepository.save(person);
+        person = personRepository.save(person);
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -174,13 +175,12 @@ public class DriverService {
         String dummyPassword = "test1234";
         user.setPassword(passwordEncoder.encode(dummyPassword));
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         Driver driver = new Driver();
         driver.setUser(user);
-        driver.setPerson(person);
 
-        driverRepository.save(driver);
+        driver = driverRepository.save(driver);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setDriver(driver);
@@ -197,13 +197,30 @@ public class DriverService {
                 = activationTokenService.createForUser(user);
 
         String activationLink
-                = "http://localhost:4200/activate?token=" + activationToken.getToken();
+                = "http://localhost:4200/voom/activate?token=" + activationToken.getToken();
 
         emailService.sendActivationEmail(
                 user.getEmail(),
                 activationLink
         );
 
+        return driver;
+    }
+
+    public List<Driver> getDrivers() {
+        return driverRepository.findAll();
+    }
+
+    public Optional<Driver> getDriver(long driverId) {
+        return driverRepository.findById(driverId);
+    }
+
+    public Driver updateDriver(Driver driver) {
+        return driverRepository.save(driver);
+    }
+
+    public void deleteDriver(long driverId) {
+        driverRepository.deleteById(driverId);
     }
 
     public List<DriverSummaryDto> getActiveDrivers() {
@@ -240,7 +257,6 @@ public class DriverService {
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
-                .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
 
@@ -253,10 +269,7 @@ public class DriverService {
                 .toList();
 
         if (!freeDrivers.isEmpty()) {
-            Driver choosenDriver = nearestDriver(freeDrivers, pickup, locMap);
-            choosenDriver.setStatus(DriverStatus.BUSY);
-            driverRepository.save(choosenDriver);
-            return choosenDriver;
+            return nearestDriver(freeDrivers, pickup, locMap);
         }
 
         List<Driver> finishingSoon = candidates.stream()
@@ -264,10 +277,7 @@ public class DriverService {
                 .toList();
 
         if (!finishingSoon.isEmpty()) {
-            Driver choosenDriver = nearestDriver(finishingSoon, pickup, locMap);
-            choosenDriver.setStatus(DriverStatus.BUSY);
-            driverRepository.save(choosenDriver);
-            return choosenDriver;
+            return nearestDriver(finishingSoon, pickup, locMap);
         }
 
         return null;
@@ -321,20 +331,5 @@ public class DriverService {
                     );
                 }))
                 .orElse(null);
-    }
-
-    public ActiveRideDto getActiveRide(Long userId) {
-        Ride activeRide = rideService.findActiveRide(userId);
-        if (activeRide == null) {
-            return null;
-        }
-        ActiveRideDto dto = new ActiveRideDto();
-        dto.setRideId(activeRide.getId());
-        dto.setStatus(activeRide.getStatus());
-        dto.setRoutePoints(
-                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(p -> p.toDto()).toList()
-        );
-
-        return dto;
     }
 }

@@ -1,17 +1,24 @@
 package inc.visor.voom_service.person.model;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import inc.visor.voom_service.auth.dto.RegistrationDto;
+import inc.visor.voom_service.auth.user.dto.UserProfileDto;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "person")
+@Getter
+@Setter
 public class Person {
 
     @Id
@@ -31,6 +38,9 @@ public class Person {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "birth_date", nullable = false)
+    private LocalDateTime birthDate;
+
     public Person() {}
 
     public Person(RegistrationDto dto) {
@@ -38,53 +48,25 @@ public class Person {
         this.lastName = dto.getLastName();
         this.phoneNumber = dto.getPhoneNumber();
         this.address = dto.getAddress();
+        this.birthDate = dto.getBirthDate();
     }
 
-    public long getId() {
-        return id;
+    public Person(long personId, DriverSummaryDto dto) {
+        this.id = personId;
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.address = dto.getAddress();
+        this.birthDate = dto.getBirthDate();
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Person(String firstName, String lastName, String phoneNumber, String address) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
+    public Person(long personId, UserProfileDto dto) {
+        this.id = personId;
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.address = dto.getAddress();
+        this.birthDate = dto.getBirthDate();
     }
 
     @Override
@@ -95,6 +77,7 @@ public class Person {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", address='" + address + '\'' +
+                ", birthDate=" + birthDate +
                 '}';
     }
 
@@ -102,11 +85,11 @@ public class Person {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return id == person.id && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(phoneNumber, person.phoneNumber) && Objects.equals(address, person.address);
+        return id == person.id && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(phoneNumber, person.phoneNumber) && Objects.equals(address, person.address) && Objects.equals(birthDate, person.birthDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, phoneNumber, address);
+        return Objects.hash(id, firstName, lastName, phoneNumber, address, birthDate);
     }
 }

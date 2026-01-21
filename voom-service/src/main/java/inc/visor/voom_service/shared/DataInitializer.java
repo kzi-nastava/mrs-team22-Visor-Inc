@@ -22,6 +22,7 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Component
@@ -91,6 +92,7 @@ public class DataInitializer implements ApplicationRunner {
         person.setLastName("Lastname");
         person.setAddress("Novi Sad, Street");
         person.setPhoneNumber("+38160123456");
+        person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
         person = personRepository.save(person);
 
         User user = new User();
@@ -134,6 +136,7 @@ public class DataInitializer implements ApplicationRunner {
             person.setLastName("Lastname" + i);
             person.setAddress("Novi Sad, Street " + i);
             person.setPhoneNumber("+38160123456" + i);
+            person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
             personRepository.save(person);
 
             User user = new User();
@@ -146,7 +149,6 @@ public class DataInitializer implements ApplicationRunner {
 
             Driver driver = new Driver();
             driver.setUser(user);
-            driver.setPerson(person);
             driverRepository.save(driver);
 
             Vehicle vehicle = new Vehicle();

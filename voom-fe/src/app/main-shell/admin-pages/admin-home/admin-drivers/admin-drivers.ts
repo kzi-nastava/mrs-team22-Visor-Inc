@@ -10,6 +10,9 @@ import ApiService from '../../../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {DriverSummaryDto} from '../../../../shared/rest/home/home.model';
+import {DriverDto} from '../../../../shared/rest/driver/driver.model';
+import {response} from 'express';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 export const ROUTE_ADMIN_DRIVERS = "drivers";
 
@@ -43,13 +46,14 @@ export class AdminDrivers {
   });
 
   private apiService = inject(ApiService);
+  private snackBar = inject(MatSnackBar);
 
-  drivers$ = this.apiService.rideApi.getActiveDrivers().pipe(
+  drivers$ = this.apiService.driverApi.getDrivers().pipe(
     map(response => response.data),
   )
 
   drivers = toSignal(this.drivers$);
-  selectedDriver = signal<DriverSummaryDto | null>(null)
+  selectedDriver = signal<DriverDto | null>(null)
 
   constructor() {
   }
@@ -59,11 +63,30 @@ export class AdminDrivers {
   }
 
   protected saveGeneralInfo() {
+    const driver = this.selectedDriver();
 
+    if (!driver) {
+      return;
+    }
+
+    const updatedDriverDto: DriverDto = {
+      id: driver.id,
+      firstName: driver.firstName,
+      lastName: driver.lastName,
+      birthDate: driver.birthDate,
+      email: driver.email,
+      address: driver.address,
+      phoneNumber: driver.phoneNumber,
+    }
+
+    this.apiService.driverApi.updateDriver(driver.id!, updatedDriverDto).pipe(
+      map(response => response.data),
+    ).subscribe((driver) => {
+      driver ? this.snackBar.open("Driver updated successfully") : this.snackBar.open("Driver update failed");
+    });
   }
 
-  protected selectDriver(driver: DriverSummaryDto) {
-    console.log(driver);
+  protected selectDriver(driver: DriverDto) {
     this.selectedDriver.set(driver);
     this.driverGeneralForm.patchValue(driver);
   }
