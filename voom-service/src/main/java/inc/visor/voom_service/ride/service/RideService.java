@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
@@ -13,6 +14,7 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.shared.RoutePointDto;
 
 @Service
 public class RideService {
@@ -118,5 +120,30 @@ public class RideService {
         );
     }
 
+    public Ride findActiveRide(Long userId) {
+        List<Ride> rides = rideRepository.findByDriverId(userId);
+
+        return rides.stream()
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        ride.setStartedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.ONGOING);
+        rideRepository.save(ride);
+    }
+
+    public void startScheduleRide(long rideId) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        ride.setStartedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.ONGOING);
+        rideRepository.save(ride);
+
+        Driver driver = ride.getDriver();
+        driver.setStatus(DriverStatus.BUSY);
+    }
 
 }

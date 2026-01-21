@@ -1,56 +1,75 @@
 package inc.visor.voom_service.auth.user.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class VoomUserDetails implements UserDetails {
 
-  private final User user;
+    private final User user;
 
-  public VoomUserDetails(User user) {
-    this.user = user;
-  }
+    public VoomUserDetails(User user) {
+        this.user = user;
+    }
 
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return user.getUserRole().getPermissions();
-  }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
 
-  @Override
-  public String getPassword() {
-    return user.getPassword();
-  }
+        authorities.add(
+                new SimpleGrantedAuthority(
+                        "ROLE_" + user.getUserRole().getRoleName()
+                )
+        );
 
-  @Override
-  public String getUsername() {
-    return user.getEmail();
-  }
+        authorities.addAll(
+                user.getUserRole().getPermissions()
+        );
 
-  @Override
-  public boolean isAccountNonExpired() {
-    return true;
-  }
+        return authorities;
+    }
 
-  @Override
-  public boolean isAccountNonLocked() {
-    return switch (user.getUserStatus()) {
-      case INACTIVE, PENDING, ACTIVE -> true;
-      case SUSPENDED, NOTACTIVATED -> false;
-    };
-  }
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
 
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return true;
-  }
+    @Override
+    public String getUsername() {
+        return user.getEmail();
+    }
 
-  @Override
-  public boolean isEnabled() {
-    return switch (user.getUserStatus()) {
-      case ACTIVE -> true;
-      case INACTIVE, PENDING, SUSPENDED, NOTACTIVATED -> false;
-    };
-  }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return switch (user.getUserStatus()) {
+            case INACTIVE, PENDING, ACTIVE ->
+                true;
+            case SUSPENDED, NOTACTIVATED ->
+                false;
+        };
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return switch (user.getUserStatus()) {
+            case ACTIVE ->
+                true;
+            case INACTIVE, PENDING, SUSPENDED, NOTACTIVATED ->
+                false;
+        };
+    }
 }

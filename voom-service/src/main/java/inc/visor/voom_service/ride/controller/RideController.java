@@ -4,16 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import inc.visor.voom_service.rating.dto.RatingRequestDto;
-import inc.visor.voom_service.rating.service.RatingService;
-import inc.visor.voom_service.ride.dto.*;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.repository.RideRepository;
-import inc.visor.voom_service.ride.service.RideReportService;
-import inc.visor.voom_service.ride.service.RideService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,18 +17,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.ride.service.FavoriteRouteService;
-import inc.visor.voom_service.ride.service.RideRequestService;
-import jakarta.validation.Valid;
-
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.rating.dto.RatingRequestDto;
+import inc.visor.voom_service.rating.service.RatingService;
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
 import inc.visor.voom_service.ride.dto.RideHistoryDto;
+import inc.visor.voom_service.ride.dto.RideReportRequestDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.ride.dto.StartRideDto;
+import inc.visor.voom_service.ride.dto.StartScheduleRideDto;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.service.FavoriteRouteService;
+import inc.visor.voom_service.ride.service.RideReportService;
+import inc.visor.voom_service.ride.service.RideRequestService;
+import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.simulation.Simulator;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -44,28 +47,36 @@ public class RideController {
 
     private final RideRequestService rideRequestService;
     private final FavoriteRouteService favoriteRouteService;
+    private final UserProfileService userProfileService;
+    private final Simulator simulatorService;
     private final RideReportService rideReportService;
     private final RatingService ratingService;
     private final RideService rideService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService, RideService rideService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
         this.ratingService = ratingService;
         this.rideService = rideService;
+        this.userProfileService = userProfileService;
+        this.simulatorService = simulatorService;
     }
 
     @PostMapping("/requests")
     public ResponseEntity<RideRequestResponseDto> createRideRequest(
             @Valid @RequestBody RideRequestCreateDTO request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal VoomUserDetails userDetails
     ) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
 
-        Long userId = (user != null) ? user.getId() : 1L;
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         RideRequestResponseDto response
-                = rideRequestService.createRideRequest(request, userId);
+                = rideRequestService.createRideRequest(request, user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -139,26 +150,24 @@ public class RideController {
         return ResponseEntity.ok(ride);
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<RideRequestResponseDto> updateRide(@PathVariable Long id, @Valid @RequestBody RideRequestResponseDto request) {
-        return ResponseEntity.ok(request);
-    }
+    @PostMapping("/scheduled/{id}")
+    public ResponseEntity<Void> scheduleRide(@PathVariable Long id, @Valid @RequestBody StartScheduleRideDto request) {
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRide(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        rideService.startScheduleRide(id);
+
+        simulatorService.changeDriverRoute(request.getDriverId(), request.getLat(), request.getLng());
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal User user, @Valid @RequestBody CreateFavoriteRouteRequest request) {
+    public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal VoomUserDetails userDetails, @Valid @RequestBody CreateFavoriteRouteRequest request) {
+
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
 
         if (user == null) {
-            long mockUserId = 2L;
-
-            favoriteRouteService.create(mockUserId, request);
-
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         favoriteRouteService.create(user.getId(), request);
@@ -167,39 +176,35 @@ public class RideController {
     }
 
     @GetMapping("/favorites")
-    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
         if (user == null) {
-            long mockUserId = 2L;
-
-            List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(mockUserId);
-
-            return ResponseEntity.ok(favoriteRoutes);
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
         return ResponseEntity.ok(favoriteRoutes);
     }
-    
+
     @DeleteMapping("/favorites/{favoriteRouteId}")
     public ResponseEntity<Void> deleteFavoriteRoute(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal VoomUserDetails userDetails,
             @PathVariable Long favoriteRouteId
     ) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
         if (user == null) {
-            long mockUserId = 2L;
-
-            favoriteRouteService.delete(mockUserId, favoriteRouteId);
-
-            return ResponseEntity.noContent().build();
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         favoriteRouteService.delete(user.getId(), favoriteRouteId);
 
         return ResponseEntity.noContent().build();
     }
-    
+
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
 
@@ -216,8 +221,23 @@ public class RideController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<String> startRide(@PathVariable Long id) {
-        return ResponseEntity.ok("Ride started successfully.");
+    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody StartRideDto request) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        rideService.startRide(id, user.getId(), request.getRoutePoints());
+
+        List<LatLng> latLngPoints = request.getRoutePoints().stream()
+                .map(point -> new LatLng(point.getLat(), point.getLng()))
+                .toList();
+
+        simulatorService.changeDriverRouteMultiplePoints(user.getId(), latLngPoints);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/stop")

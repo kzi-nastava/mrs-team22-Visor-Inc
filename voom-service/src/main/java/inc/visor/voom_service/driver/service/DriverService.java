@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,12 +21,15 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.service.RideService;
@@ -169,7 +171,7 @@ public class DriverService {
         user.setUserRole(userRole);
         user.setUserStatus(UserStatus.NOTACTIVATED);
 
-        String dummyPassword = UUID.randomUUID().toString();
+        String dummyPassword = "test1234";
         user.setPassword(passwordEncoder.encode(dummyPassword));
 
         userRepository.save(user);
@@ -238,6 +240,7 @@ public class DriverService {
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
 
@@ -250,7 +253,10 @@ public class DriverService {
                 .toList();
 
         if (!freeDrivers.isEmpty()) {
-            return nearestDriver(freeDrivers, pickup, locMap);
+            Driver choosenDriver = nearestDriver(freeDrivers, pickup, locMap);
+            choosenDriver.setStatus(DriverStatus.BUSY);
+            driverRepository.save(choosenDriver);
+            return choosenDriver;
         }
 
         List<Driver> finishingSoon = candidates.stream()
@@ -258,7 +264,10 @@ public class DriverService {
                 .toList();
 
         if (!finishingSoon.isEmpty()) {
-            return nearestDriver(finishingSoon, pickup, locMap);
+            Driver choosenDriver = nearestDriver(finishingSoon, pickup, locMap);
+            choosenDriver.setStatus(DriverStatus.BUSY);
+            driverRepository.save(choosenDriver);
+            return choosenDriver;
         }
 
         return null;
@@ -312,5 +321,20 @@ public class DriverService {
                     );
                 }))
                 .orElse(null);
+    }
+
+    public ActiveRideDto getActiveRide(Long userId) {
+        Ride activeRide = rideService.findActiveRide(userId);
+        if (activeRide == null) {
+            return null;
+        }
+        ActiveRideDto dto = new ActiveRideDto();
+        dto.setRideId(activeRide.getId());
+        dto.setStatus(activeRide.getStatus());
+        dto.setRoutePoints(
+                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(p -> p.toDto()).toList()
+        );
+
+        return dto;
     }
 }

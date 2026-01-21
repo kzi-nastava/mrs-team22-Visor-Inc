@@ -1,0 +1,56 @@
+.arrival-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px 8px;
+
+    .arrival-icon {
+      font-size: 32px;
+      color: #4a68d2;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+
+  .content {
+    padding: 8px 24px 16px;
+
+    .primary {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .address {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+
+      mat-icon {
+        font-size: 18px;
+      }
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #888;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 8px 24px 16px;
+  }
+}

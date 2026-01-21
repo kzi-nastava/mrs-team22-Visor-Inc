@@ -1,6 +1,7 @@
 package inc.visor.voom_service.ride.model;
 
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
+import inc.visor.voom_service.shared.RoutePointDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -84,6 +85,15 @@ public class RoutePoint {
 
     public void setPointType(RoutePointType pointType) {
         this.pointType = pointType;
+    }
+
+    public RoutePointDto toDto() {
+        RoutePointDto dto = new RoutePointDto();
+        dto.setLat(this.latitude);
+        dto.setLng(this.longitude);
+        dto.setAddress(this.address);
+        dto.setType(this.pointType);
+        return dto;
     }
 
 }

@@ -23,6 +23,7 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
+import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 
@@ -36,6 +37,7 @@ public class RideRequestService {
     private final UserRepository userRepository;
     private final DriverService driverService;
     private final RideWsService rideWsService;
+    private final Simulator driverSimulator;
 
     public RideRequestService(
             RideRequestRepository rideRequestRepository,
@@ -44,7 +46,8 @@ public class RideRequestService {
             UserRepository userRepository,
             DriverService driverService,
             RideRepository rideRepository,
-            RideWsService rideWsService
+            RideWsService rideWsService,
+            Simulator driverSimulator
     ) {
         this.rideRequestRepository = rideRequestRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -53,6 +56,7 @@ public class RideRequestService {
         this.driverService = driverService;
         this.rideRepository = rideRepository;
         this.rideWsService = rideWsService;
+        this.driverSimulator = driverSimulator;
     }
 
     public RideRequestResponseDto createRideRequest(
@@ -109,10 +113,14 @@ public class RideRequestService {
         ride.setPassengers(passengers);
 
         
-        if (driverFound) {
+        if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
         DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             rideRepository.save(ride);
             rideWsService.sendDriverAssigned(driverAssignedDto);
+        
+            driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());
+        } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
+            rideRepository.save(ride);
         }
 
         return RideRequestResponseDto.from(

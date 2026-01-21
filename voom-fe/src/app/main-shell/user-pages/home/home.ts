@@ -1,23 +1,28 @@
-import {AfterViewInit, Component, computed, signal, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Map} from '../../../shared/map/map';
-import {Dropdown} from '../../../shared/dropdown/dropdown';
-import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
-import {MatButton} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {DriverSummaryDto, PREDEFINED_ROUTES, RideApi, RideRequestDto, ScheduledRideDto} from './home.api';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
-import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
-import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
-import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
-import { map } from "rxjs";
-import {response} from 'express';
+import { AfterViewInit, Component, computed, signal, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Map } from '../../../shared/map/map';
+import { Dropdown } from '../../../shared/dropdown/dropdown';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { MatButton } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import {
+  DriverSummaryDto,
+  PREDEFINED_ROUTES,
+  RideApi,
+  RideRequestDto,
+  ScheduledRideDto,
+} from './home.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
+import { FavoriteRouteDto } from '../favorite-routes/favorite-routes.api';
+import { map } from 'rxjs';
+import { response } from 'express';
 import ApiService from '../../../shared/rest/api-service';
-
 
 export const ROUTE_USER_HOME = 'home';
 
@@ -56,10 +61,10 @@ export class UserHome implements AfterViewInit {
   constructor(
     private rideApi: RideApi,
     private snackBar: MatSnackBar,
-    // private driverSocket: DriverSimulationWsService,
+    private driverSocket: DriverSimulationWsService,
     private router: Router,
     private dialog: MatDialog,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {}
 
   routePoints = signal<RoutePoint[]>([]);
@@ -74,7 +79,6 @@ export class UserHome implements AfterViewInit {
   drivers: number[] = [];
 
   renderedDrivers: number[] = [];
-
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -102,7 +106,7 @@ export class UserHome implements AfterViewInit {
       .map((p) => ({
         ...p,
         cleanAddress: p.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim(),
-      }))
+      })),
   );
 
   get isLaterSelected(): boolean {
@@ -158,7 +162,7 @@ export class UserHome implements AfterViewInit {
           address: '',
           type: p.type,
           order: p.order,
-        }))
+        })),
     );
 
     this.rideForm.patchValue({
@@ -168,10 +172,23 @@ export class UserHome implements AfterViewInit {
 
     if (ride.driverId && !this.scheduledDriverSent()) {
       const pickup = ride.route.find((p) => p.type === 'PICKUP');
-      if (pickup) {
-        this.sendDriverToPickup(ride.driverId, pickup.lat, pickup.lng);
-        this.scheduledDriverSent.set(true);
-      }
+      if (!pickup) return;
+
+      const payload = {
+        driverId: ride.driverId,
+        lat: pickup.lat,
+        lng: pickup.lng,
+      };
+
+      this.rideApi.startScheduleRide(ride.rideId, payload).subscribe({
+        next: () => {
+          console.log('[SCHEDULE] Ride started on backend');
+          this.scheduledDriverSent.set(true);
+        },
+        error: (err) => {
+          console.error('[SCHEDULE] Failed to start ride', err);
+        },
+      });
     }
 
     if (this.isRideLocked()) {
@@ -219,7 +236,7 @@ export class UserHome implements AfterViewInit {
     }
 
     const updated = points.map((p) =>
-      p.type === 'DROPOFF' ? { ...p, type: 'STOP' as RoutePointType } : p
+      p.type === 'DROPOFF' ? { ...p, type: 'STOP' as RoutePointType } : p,
     );
 
     updated.push({
@@ -257,7 +274,7 @@ export class UserHome implements AfterViewInit {
     this.routePoints.set(
       this.routePoints()
         .filter((p) => p.id !== id)
-        .map((p, i) => ({ ...p, order: i }))
+        .map((p, i) => ({ ...p, order: i })),
     );
   }
 
@@ -304,12 +321,6 @@ export class UserHome implements AfterViewInit {
     if (!driver) return;
 
     driver.status = 'GOING_TO_PICKUP';
-
-    // this.driverSocket.requestRoute({
-    //   driverId,
-    //   start: driver.marker.getLatLng(),
-    //   end: { lat, lng },
-    // });
   }
 
   confirmRide() {
@@ -349,51 +360,33 @@ export class UserHome implements AfterViewInit {
       freeDriversSnapshot: freeDriversSnapshot,
     };
 
-    this.rideApi.createRideRequest(payload).pipe(
-      map(response => response.data),
-    ).subscribe({
-      next: (res) => {
-        if (!res) {
-          return;
-        }
-        if (res.status === 'ACCEPTED' && res.driver) {
-          this.snackBar.open(
-            `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
-            'Close',
-            { duration: 4000 }
-          );
-          if (res.pickupLat && res.pickupLng && res.scheduledTime === null) {
-            this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
+    this.rideApi
+      .createRideRequest(payload)
+      .pipe(map((response) => response.data))
+      .subscribe({
+        next: (res) => {
+          if (!res) {
+            return;
           }
-          this.isRideLocked.set(true);
-          this.rideForm.disable({ emitEvent: false });
-        } else {
-          this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
-        }
-      },
-      error: () => {
-        this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
-      },
-    });
-  }
-  private initDriverSimulation(drivers: DriverSummaryDto[]) {
-    drivers.forEach((driver, index) => {
-      const routeDef = PREDEFINED_ROUTES[index % PREDEFINED_ROUTES.length];
-
-      this.map.addSimulatedDriver({
-        id: driver.id,
-        firstName: driver.firstName,
-        lastName: driver.lastName,
-        start: routeDef.start,
-        status: 'FREE',
+          if (res.status === 'ACCEPTED' && res.driver) {
+            this.snackBar.open(
+              `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
+              'Close',
+              { duration: 4000 },
+            );
+            if (res.pickupLat && res.pickupLng && res.scheduledTime === null) {
+              this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
+            }
+            this.isRideLocked.set(true);
+            this.rideForm.disable({ emitEvent: false });
+          } else {
+            this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
+          }
+        },
+        error: () => {
+          this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
+        },
       });
-      //
-      // this.driverSocket.requestRoute({
-      //   driverId: driver.id,
-      //   start: routeDef.start,
-      //   end: routeDef.end,
-      // });
-    });
   }
 
   ngAfterViewInit() {
@@ -405,25 +398,7 @@ export class UserHome implements AfterViewInit {
       history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
     }
 
-    // this.driverSocket.connect(
-    //   (route) => {
-    //     this.map.applyDriverRoute(route.driverId, route.route);
-    //   },
-    //   (scheduledRides) => {
-    //     this.handleScheduledRides(scheduledRides);
-    //   }
-    // );
-
-    this.rideApi.getActiveDrivers().pipe(
-      map(response => response.data),
-    ).subscribe({
-      next: (drivers) => {
-        if (drivers) {
-          this.initDriverSimulation(drivers);
-        }
-     },
-      error: (err) => console.error(err),
-    });
+    this.loadActiveDrivers();
   }
 
   private applyFavoriteRoute(route: FavoriteRouteDto) {
@@ -491,86 +466,45 @@ export class UserHome implements AfterViewInit {
     });
   }
 
-    loadActiveDrivers() {
-      this.apiService.rideApi.getActiveDrivers().subscribe((res) => {
-        const drivers: DriverSummaryDto[] = res.data ?? [];
-        if (drivers.length === 0) return;
+  private loadActiveDrivers(): void {
+    this.apiService.rideApi.getActiveDrivers().subscribe((res) => {
+      const drivers: DriverSummaryDto[] = res.data ?? [];
+      if (drivers.length === 0) return;
 
-        console.log('Loaded active drivers:', drivers);
+      console.log('Loaded active drivers (USER):', drivers);
 
-        // this.driverSocket.connect(
-        //   (route) => {
-        //   this.map.applyDriverRoute(route.driverId, route.route);
-        // },
-        //   (scheduledRides) => {
-        //     this.handleScheduledRides(scheduledRides);
-        // },
-        //   undefined,
-        //   (pos) => {
-        //     if (!this.drivers.includes(pos.driverId)) {
-        //       this.drivers.push(pos.driverId);
-        //       const name = drivers.filter((d) => d.id === pos.driverId).at(0)?.firstName ?? '';
-        //       const lastname = drivers.filter((d) => d.id === pos.driverId).at(0)?.lastName ?? '';
-        //       const status = drivers.filter((d) => d.id === pos.driverId).at(0)?.status;
-        //       this.map.addSimulatedDriver({
-        //         id: pos.driverId,
-        //         firstName: name,
-        //         lastName: lastname,
-        //         start: {
-        //           lat: pos.lat,
-        //           lng: pos.lng,
-        //         },
-        //         status: status as any || 'FREE',
-        //       });
-        //     } else {
-        //       this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
-        //     }
-        //   }
-        // );
-      });
+      this.driverSocket.connect(
+        () => {},
+        (rides) => {
+          console.log('[WS] Scheduled rides received:', rides);
+          this.handleScheduledRides(rides);
+        },
+        undefined,
+        (pos) => {
+          const driver = drivers.find((d) => d.id === pos.driverId);
+
+          if (!this.renderedDrivers.includes(pos.driverId)) {
+            this.renderedDrivers.push(pos.driverId);
+
+            this.map.addSimulatedDriver({
+              id: pos.driverId,
+              firstName: driver?.firstName ?? '',
+              lastName: driver?.lastName ?? '',
+              start: {
+                lat: pos.lat,
+                lng: pos.lng,
+              },
+              status: (driver?.status as any) || 'FREE',
+            });
+          } else {
+            this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+          }
+        },
+      );
+    });
   }
-
-
-
-  // private applyFavoriteRoute(route: FavoriteRouteDto) {
-  //   const points = route.points
-  //     .slice()
-  //     .sort((a, b) => a.orderIndex - b.orderIndex)
-  //     .map((p) => ({
-  //       id: crypto.randomUUID(),
-  //       lat: p.lat,
-  //       lng: p.lng,
-  //       address: p.address,
-  //       type: p.type,
-  //       order: p.orderIndex,
-  //     }));
-  //
-  //   this.routePoints.set(points);
-  //
-  //   const pickup = points.find((p) => p.type === 'PICKUP');
-  //   const dropoff = points.find((p) => p.type === 'DROPOFF');
-  //
-  //   this.rideForm.patchValue({
-  //     pickup: pickup?.address ?? '',
-  //     dropoff: dropoff?.address ?? '',
-  //   });
-  // }
-
-
 
   openFavoriteRoutes() {
-    this.router.navigate(['/user/favorite-routes']);
+    this.router.navigate(['/user/favorite']);
   }
-
-  // ngAfterViewInit() {
-  //   const favoriteRoute = history.state?.favoriteRoute;
-  //
-  //   this.loadActiveDrivers();
-  //
-  //   if (favoriteRoute) {
-  //     this.applyFavoriteRoute(favoriteRoute);
-  //
-  //     history.replaceState({ ...history.state, favoriteRoute: undefined }, document.title);
-  //   }
-  // }
 }

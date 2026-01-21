@@ -247,9 +247,25 @@ export type CreateFavoriteRouteDto = {
   points: RideRoutePointDto[];
 };
 
+export type ActiveRideDto = {
+  rideId: number;
+  status: string;
+  routePoints: RideRoutePointDto[];
+}
+
+export type StartRideDto = {
+  routePoints: RideRoutePointDto[];
+}
+
+export type StartScheduledRideDto = {
+  driverId: number;
+  lat: number;
+  lng: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RideApi {
-  private readonly baseUrl = 'api/rides';
+  private readonly baseUrl = '/api/rides';
   private readonly driversBaseUrl = '/api/drivers';
 
   constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
@@ -278,6 +294,28 @@ export class RideApi {
     return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
   }
 
+  startRide(rideId: number, payload: StartRideDto): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    }
+    return this.apiClient.post<StartRideDto, void>(`${this.baseUrl}/${rideId}/start`, payload, config);
+  }
+
+  startScheduleRide(rideId: number, payload: StartScheduledRideDto): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    }
+    return this.apiClient.post<StartScheduledRideDto, void>(`${this.baseUrl}/scheduled/${rideId}`, payload, config);
+  }
+
   getActiveDrivers(): Observable<ApiResponse<DriverSummaryDto[]>> {
     const config: RequestConfig = {
       headers: {
@@ -289,4 +327,16 @@ export class RideApi {
 
     return this.apiClient.get<void, DriverSummaryDto[]>(`${this.driversBaseUrl}/active`, config);
   }
+
+  getActiveRide(): Observable<ApiResponse<ActiveRideDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+    return this.apiClient.get<void, ActiveRideDto>(`${this.driversBaseUrl}/active-ride`, config);
+  }
+
 }

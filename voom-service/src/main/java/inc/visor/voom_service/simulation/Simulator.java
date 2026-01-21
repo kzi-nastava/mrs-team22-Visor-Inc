@@ -1,18 +1,18 @@
 package inc.visor.voom_service.simulation;
 
+import java.util.List;
+
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.shared.PredefinedRoutes;
 import inc.visor.voom_service.shared.PredefinedRoutes.Route;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class Simulator implements ApplicationRunner {
@@ -62,4 +62,9 @@ public class Simulator implements ApplicationRunner {
     public void changeDriverRoute(long driverId, double lat, double lng) {
         state.replaceRoute(driverId, new LatLng(lat, lng), osrmService);
     }
+
+    public void changeDriverRouteMultiplePoints(long driverId, List<LatLng> newPoints) {
+        state.replaceRouteMultiplePoints(driverId, newPoints, osrmService);
+    }
+
 }

@@ -41,22 +41,24 @@
         </button>
       </div>
 
-      @if (userRole === 'User') {
-      <div class="mt-14">
-        <h2 class="text-sm font-semibold text-gray-500 tracking-widest mb-6">Favorite Routes</h2>
+      @if (isUser) {
+        <div class="mt-14">
+          <h2 class="text-sm font-semibold text-gray-500 tracking-widest mb-6">Favorite Routes</h2>
 
-        <div class="flex items-center justify-between text-sm mb-2">
-          <span class="text-gray-700">Address Num 12 - Another Address</span>
-          <mat-icon class="cursor-pointer">close</mat-icon>
+          @for (route of topFavoriteRoutes(); track route.id) {
+            <div class="flex items-center justify-between text-sm mb-2">
+              <span class="text-gray-700"> {{ route.start }} - {{ route.end }} </span>
+            </div>
+          }
+
+          @if (topFavoriteRoutes().length === 0) {
+            <div class="text-sm text-gray-400 italic">No favorite routes yet.</div>
+          }
+
+          <button mat-stroked-button routerLink="/home" class="mt-4 rounded-full px-6 text-sm">
+            Add Route +
+          </button>
         </div>
-
-        <div class="flex items-center justify-between text-sm mb-2">
-          <span class="text-gray-700">Address Num 12 - Another Address</span>
-          <mat-icon class="cursor-pointer">close</mat-icon>
-        </div>
-
-        <button mat-stroked-button class="mt-4 rounded-full px-6 text-sm">Add Route +</button>
-      </div>
       }
     </div>
   </div>
@@ -70,61 +72,64 @@
     </button>
   </div>
 
-  @if (userRole === 'Driver') {
-  <div class="pt-20 space-y-10">
-    <h3 class="text-xs font-semibold tracking-widest text-gray-500">VEHICLE INFORMATION</h3>
+  @if (isDriver) {
+    <div class="pt-20 space-y-10">
+      <h3 class="text-xs font-semibold tracking-widest text-gray-500">VEHICLE INFORMATION</h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <app-value-input-string label="Vehicle model" [formControl]="vehicleForm.controls.model" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <app-value-input-string label="Vehicle model" [formControl]="vehicleForm.controls.model" />
 
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-select
-          placeholder="Select vehicle type"
-          [formControl]="vehicleForm.controls.vehicleType"
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-select
+            placeholder="Select vehicle type"
+            [formControl]="vehicleForm.controls.vehicleType"
+          >
+            <mat-option value="STANDARD">Standard</mat-option>
+            <mat-option value="LUXURY">Luxury</mat-option>
+            <mat-option value="VAN">Van</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <app-value-input-string
+          label="License plate"
+          [formControl]="vehicleForm.controls.licensePlate"
+        />
+        <app-value-input-string
+          label="Number of seats"
+          [formControl]="vehicleForm.controls.seats"
+        />
+      </div>
+
+      <div class="flex flex-col md:flex-row md:justify-between gap-10">
+        <div class="flex flex-col space-y-4">
+          <label class="flex items-center gap-3 text-sm text-gray-700">
+            <mat-checkbox [formControl]="vehicleForm.controls.babyTransportAllowed" />
+            Baby transport allowed
+          </label>
+
+          <label class="flex items-center gap-3 text-sm text-gray-700">
+            <mat-checkbox [formControl]="vehicleForm.controls.petsAllowed" />
+            Pets allowed
+          </label>
+        </div>
+
+        <div class="text-sm text-gray-700">
+          <div>Active hours (last 24h):</div>
+          <div class="font-semibold mt-1">6.5h</div>
+        </div>
+      </div>
+
+      <div class="text-xs text-gray-500 italic text-center">
+        Changes made by drivers require administrator approval.
+      </div>
+
+      <div class="flex justify-center">
+        <button
+          (click)="vehicleSubmit()"
+          class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
         >
-          <mat-option value="STANDARD">Standard</mat-option>
-          <mat-option value="LUXURY">Luxury</mat-option>
-          <mat-option value="VAN">Van</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <app-value-input-string
-        label="License plate"
-        [formControl]="vehicleForm.controls.licensePlate"
-      />
-      <app-value-input-string label="Number of seats" [formControl]="vehicleForm.controls.seats" />
-    </div>
-
-    <div class="flex flex-col md:flex-row md:justify-between gap-10">
-      <div class="flex flex-col space-y-4">
-        <label class="flex items-center gap-3 text-sm text-gray-700">
-          <mat-checkbox [formControl]="vehicleForm.controls.babyTransportAllowed" />
-          Baby transport allowed
-        </label>
-
-        <label class="flex items-center gap-3 text-sm text-gray-700">
-          <mat-checkbox [formControl]="vehicleForm.controls.petsAllowed" />
-          Pets allowed
-        </label>
-      </div>
-
-      <div class="text-sm text-gray-700">
-        <div>Active hours (last 24h):</div>
-        <div class="font-semibold mt-1">6.5h</div>
+          Save Vehicle Information
+        </button>
       </div>
     </div>
-
-    <div class="text-xs text-gray-500 italic text-center">
-      Changes made by drivers require administrator approval.
-    </div>
-
-    <div class="flex justify-center">
-      <button
-        (click)="vehicleSubmit()"
-        class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
-      >
-        Save Vehicle Information
-      </button>
-    </div>
-  </div>
   }
 </div>
