@@ -1,6 +1,7 @@
 package inc.visor.voom_service.person.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ public class UserProfileController {
         User user = userProfileService.getUserByEmail(username);
 
         if (user == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatusCode.valueOf(403)).build();
         }
 
         return ResponseEntity.ok(userProfileService.getProfile(user.getId()));

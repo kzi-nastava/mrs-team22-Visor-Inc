@@ -35,15 +35,17 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.contains("/api");
+    }
+
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        logger.info("=== JWT FILTER ===");
-        logger.info("Request URI: {}", request.getRequestURI());
-        logger.info("Method: {}", request.getMethod());
-        logger.info("Authorization header: {}", request.getHeader("Authorization"));
         final String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
-            logger.info("Response status after filter: {}", response.getStatus());
             return;
         }
 
@@ -66,11 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
-            logger.error("Exception in JwtFilter: ", e);
-            SecurityContextHolder.clearContext();
-            chain.doFilter(request, response);
+            exceptionResolver.resolveException(request, response, null, e);
         }
-
     }
 
 }

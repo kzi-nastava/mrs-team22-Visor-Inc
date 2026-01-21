@@ -520,11 +520,9 @@ export class UserHome implements AfterViewInit {
   }
 
   private loadActiveDrivers(): void {
-    this.apiService.rideApi.getActiveDrivers().subscribe((res) => {
+    this.rideApi.getActiveDrivers().subscribe((res) => {
       const drivers: DriverSummaryDto[] = res.data ?? [];
       if (drivers.length === 0) return;
-
-      console.log('Loaded active drivers (USER):', drivers);
 
       this.driverSocket.connect(
         () => {},
