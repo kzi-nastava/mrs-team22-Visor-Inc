@@ -120,7 +120,9 @@ export class DriverHome implements AfterViewInit {
     };
 
     effect(() => {
-      if (this.ridePhase() === 'AT_PICKUP') {
+      if (
+        this.ridePhase() === 'AT_PICKUP'
+      ) {
         this.openArrivalDialog();
       }
     });
@@ -206,27 +208,44 @@ export class DriverHome implements AfterViewInit {
   }
 
   private openArrivalDialog() {
-    const ref = this.dialog.open(ArrivalDialog, {
-      width: '380px',
-      disableClose: true,
-      data: {
-        pickupAddress: this.routePoints().find((p) => p.type === 'PICKUP')?.address ?? '',
-      },
-    });
+    this.rideApi.getActiveRide().subscribe({
+      next: (res) => {
+        if (!res.data) {
+          console.error('No active ride on arrival');
+          return;
+        }
 
-    ref.afterClosed().subscribe((res) => {
-      if (res === 'START') {
-        this.startRide();
-      }
+        this.activeRideId.set(res.data.rideId);
+
+        const ref = this.dialog.open(ArrivalDialog, {
+          width: '380px',
+          disableClose: true,
+          data: {
+            pickupAddress: res.data.routePoints.find((p) => p.type === 'PICKUP')?.address ?? '',
+          },
+        });
+
+        ref.afterClosed().subscribe((res) => {
+          if (res === 'START') {
+            this.startRide();
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to refresh active ride', err);
+      },
     });
   }
 
   private startRide() {
     const rideId = this.activeRideId();
+    console.log('Active ride id:', rideId);
     if (!rideId) {
       console.error('No active ride id');
       return;
     }
+
+    console.log('Starting ride...');
 
     const payload = {
       routePoints: this.routePoints().map((p) => ({
