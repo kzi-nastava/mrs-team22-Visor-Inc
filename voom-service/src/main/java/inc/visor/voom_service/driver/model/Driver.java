@@ -15,9 +15,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "drivers")
+@Getter
+@Setter
 public class Driver {
 
     @Id
@@ -29,53 +33,16 @@ public class Driver {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @OneToOne
-    @JoinColumn(name = "person_id", nullable = false, unique = true)
-    private Person person;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "driver_status", nullable = false)
     private DriverStatus status;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public DriverStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DriverStatus status) {
-        this.status = status;
-    }
-
 
     @Override
     public String toString() {
         return "Driver{" +
                 "id=" + id +
                 ", user=" + user +
-                ", person=" + person +
+                ", status=" + status +
                 '}';
     }
 
@@ -83,11 +50,11 @@ public class Driver {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Driver driver = (Driver) o;
-        return id == driver.id && Objects.equals(user, driver.user) && Objects.equals(person, driver.person);
+        return id == driver.id && Objects.equals(user, driver.user) && status == driver.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, person);
+        return Objects.hash(id, user, status);
     }
 }

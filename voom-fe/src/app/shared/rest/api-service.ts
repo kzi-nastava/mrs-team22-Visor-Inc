@@ -13,6 +13,7 @@ class ApiService {
   public readonly driverApi: DriverApi;
   public readonly authenticationApi;
   public readonly rideApi;
+  public readonly profileApi;
 
   constructor(@Inject(VoomApiService) private apiClient: ApiClient) {
     this.authenticationApi = new AuthenticationApi(this.apiClient);

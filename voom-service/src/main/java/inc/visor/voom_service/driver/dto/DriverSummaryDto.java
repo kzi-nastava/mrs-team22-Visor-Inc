@@ -2,7 +2,7 @@ package inc.visor.voom_service.driver.dto;
 
 import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverActivityStatus;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +16,7 @@ public class DriverSummaryDto {
     private String firstName;
     private String lastName;
     private String pfpUrl;
-    private DriverActivityStatus status;
+    private DriverStatus status;
     private UserStatus userStatus;
     private String email;
     private String phoneNumber;
@@ -35,6 +35,7 @@ public class DriverSummaryDto {
         this.birthDate = driver.getUser().getPerson().getBirthDate();
         this.userStatus = driver.getUser().getUserStatus();
         this.address = driver.getUser().getPerson().getAddress();
+        this.status = driver.getStatus();
     }
 
     @Override

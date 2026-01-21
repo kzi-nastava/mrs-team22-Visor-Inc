@@ -22,15 +22,12 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
-import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
-import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.service.RideService;
@@ -230,15 +227,7 @@ public class DriverService {
                 .filter(driver -> driver.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .toList();
 
-        List<DriverSummaryDto> driverDtos = activeDrivers.stream()
-                .map(driver -> new DriverSummaryDto(
-                driver.getId(),
-                driver.getPerson().getFirstName(),
-                driver.getPerson().getLastName()
-        ))
-                .toList();
-
-        return driverDtos;
+        return activeDrivers.stream().map(DriverSummaryDto::new).toList();
     }
 
     public Driver findDriverForRideRequest(

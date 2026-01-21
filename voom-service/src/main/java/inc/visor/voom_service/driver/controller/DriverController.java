@@ -34,16 +34,13 @@ public class DriverController {
 
     private final DriverService driverService;
     private final ActivationTokenService activationTokenService;
-    private final UserProfileService userProfileService;
     private final UserService userService;
     private final PersonService personService;
     private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
 
-    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserProfileService userProfileService) {
     public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService) {
         this.driverService = driverService;
         this.activationTokenService = activationTokenService;
-        this.userProfileService = userProfileService;
         this.userService = userService;
         this.personService = personService;
     }
@@ -79,7 +76,7 @@ public class DriverController {
     }
 
     @PutMapping("/{driverId}")
-    public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, DriverSummaryDto driverSummaryDto) {
+    public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, @RequestBody DriverSummaryDto driverSummaryDto) {
         Driver driver = this.driverService.getDriver(driverId).orElseThrow(NotFoundException::new);
         logger.info("Dto: {}", driverSummaryDto);
         Person person = new Person(driver.getUser().getPerson().getId(), driverSummaryDto);
@@ -101,11 +98,7 @@ public class DriverController {
     @GetMapping("/me")
     public ResponseEntity<VehicleSummaryDto> getMyDriverInfo(@AuthenticationPrincipal VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
-        User user = userProfileService.getUserByEmail(username);
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        User user = userService.getUser(username).orElseThrow(NotFoundException::new);
 
         Long userId = user.getId();
 
@@ -115,7 +108,7 @@ public class DriverController {
     @PutMapping("/me")
     public ResponseEntity<VehicleSummaryDto> updateMyDriverInfo(@AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody VehicleSummaryDto request) {
         String username = userDetails != null ? userDetails.getUsername() : null;
-        User user = userProfileService.getUserByEmail(username);
+        User user = userService.getUser(username).orElseThrow(NotFoundException::new);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -124,22 +117,6 @@ public class DriverController {
         Long userId = user.getId();
 
         return ResponseEntity.ok(driverService.updateVehicle(userId, request));
-    }
-
-    @GetMapping("/active-ride")
-    public ResponseEntity<ActiveRideDto> getActiveRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
-        String username = userDetails != null ? userDetails.getUsername() : null;
-        User user = userProfileService.getUserByEmail(username);
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Long userId = user.getId();
-
-        ActiveRideDto response = driverService.getActiveRide(userId);
-
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{driverId}/report")

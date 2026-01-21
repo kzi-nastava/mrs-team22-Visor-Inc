@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long personId, UserProfileDto userProfileDto) {
+    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long personId, @RequestBody UserProfileDto userProfileDto) {
         User user = this.userService.getUser(personId).orElseThrow(NotFoundException::new);
         Person person = new Person(user.getPerson().getId(), userProfileDto);
         this.personService.update(person);

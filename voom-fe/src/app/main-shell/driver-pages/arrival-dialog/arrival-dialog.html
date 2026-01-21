@@ -15,12 +15,11 @@
       Start the ride if all passengers have entered the vehicle.
     </p>
 
-    <p
-      *ngIf="data?.pickupAddress"
-      class="text-sm text-gray-500 italic"
-    >
-      {{ data?.pickupAddress }}
-    </p>
+    @if (data?.pickupAddress) {
+      <p class="text-sm text-gray-500 italic">
+        {{ data?.pickupAddress }}
+      </p>
+    }
   </div>
 </mat-dialog-content>
 

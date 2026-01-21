@@ -2,6 +2,7 @@ package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.auth.user.model.Permission;
 import inc.visor.voom_service.auth.user.repository.PermissionRepository;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -149,6 +150,7 @@ public class DataInitializer implements ApplicationRunner {
 
             Driver driver = new Driver();
             driver.setUser(user);
+            driver.setStatus(DriverStatus.AVAILABLE);
             driverRepository.save(driver);
 
             Vehicle vehicle = new Vehicle();

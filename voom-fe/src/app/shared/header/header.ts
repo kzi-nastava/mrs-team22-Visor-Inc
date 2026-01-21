@@ -50,7 +50,8 @@ export class Header {
   }
 
   protected profile() {
-    if (this.authenticationService.hasRole('DRIVER')) {
+    const user = this.authenticationService.activeUser$.value;
+    if (user?.role === 'DRIVER') {
       this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_USER_PROFILE]);
     } else {
       this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_PROFILE]);
