@@ -15,6 +15,8 @@ import inc.visor.voom_service.person.service.PersonService;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,6 +33,7 @@ public class DriverController {
     private final ActivationTokenService activationTokenService;
     private final UserService userService;
     private final PersonService personService;
+    private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
 
     public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService) {
         this.driverService = driverService;
@@ -72,8 +75,11 @@ public class DriverController {
     @PutMapping("/{driverId}")
     public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, DriverSummaryDto driverSummaryDto) {
         Driver driver = this.driverService.getDriver(driverId).orElseThrow(NotFoundException::new);
+        logger.info("Dto: {}", driverSummaryDto);
         Person person = new Person(driver.getUser().getPerson().getId(), driverSummaryDto);
         User user = new User(driver.getUser().getId(), driverSummaryDto);
+        logger.info("User: {}", user);
+        logger.info("Person: {}", person);
         this.personService.update(person);
         this.userService.update(user);
         return ResponseEntity.ok(driverSummaryDto);

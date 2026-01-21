@@ -15,7 +15,7 @@ export class DriverApi extends Api {
       }
     };
 
-    return this.apiClient.get<void, DriverDto>('/api/drivers', config);
+    return this.apiClient.get<void, DriverDto[]>('/api/drivers', config);
   }
 
   getDriver(driverId: number) {

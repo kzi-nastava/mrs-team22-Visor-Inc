@@ -50,7 +50,7 @@ export class AdminDrivers {
 
   drivers$ = this.apiService.driverApi.getDrivers().pipe(
     map(response => response.data),
-  )
+  );
 
   drivers = toSignal(this.drivers$);
   selectedDriver = signal<DriverDto | null>(null)
@@ -71,18 +71,26 @@ export class AdminDrivers {
 
     const updatedDriverDto: DriverDto = {
       id: driver.id,
-      firstName: driver.firstName,
-      lastName: driver.lastName,
-      birthDate: driver.birthDate,
-      email: driver.email,
-      address: driver.address,
-      phoneNumber: driver.phoneNumber,
+      firstName: this.driverGeneralForm.value.firstName!,
+      lastName: this.driverGeneralForm.value.lastName!,
+      birthDate: this.driverGeneralForm.value.birthDate!,
+      email: this.driverGeneralForm.value.email!,
+      address: this.driverGeneralForm.value.address!,
+      phoneNumber: this.driverGeneralForm.value.phoneNumber!,
     }
+
+    console.log(updatedDriverDto);
 
     this.apiService.driverApi.updateDriver(driver.id!, updatedDriverDto).pipe(
       map(response => response.data),
     ).subscribe((driver) => {
-      driver ? this.snackBar.open("Driver updated successfully") : this.snackBar.open("Driver update failed");
+      if (driver) {
+        this.snackBar.open("Driver updated successfully");
+        this.driverGeneralForm.patchValue(driver);
+        //TODO on update update drivers$
+      } else {
+        this.snackBar.open("Driver update failed");
+      }
     });
   }
 

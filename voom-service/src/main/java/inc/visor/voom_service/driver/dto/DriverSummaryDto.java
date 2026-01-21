@@ -36,4 +36,20 @@ public class DriverSummaryDto {
         this.userStatus = driver.getUser().getUserStatus();
         this.address = driver.getUser().getPerson().getAddress();
     }
+
+    @Override
+    public String toString() {
+        return "DriverSummaryDto{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", pfpUrl='" + pfpUrl + '\'' +
+                ", status=" + status +
+                ", userStatus=" + userStatus +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", birthDate=" + birthDate +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }
