@@ -79,8 +79,6 @@ export class AdminDrivers {
       phoneNumber: this.driverGeneralForm.value.phoneNumber!,
     }
 
-    console.log(updatedDriverDto);
-
     this.apiService.driverApi.updateDriver(driver.id!, updatedDriverDto).pipe(
       map(response => response.data),
     ).subscribe((driver) => {
