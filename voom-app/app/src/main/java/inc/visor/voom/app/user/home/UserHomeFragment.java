@@ -24,6 +24,7 @@ import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
+import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -60,6 +61,10 @@ public class UserHomeFragment extends Fragment {
         setupMapClickListener();
         setupClearButton();
         observeViewModel();
+
+        requireView().findViewById(R.id.btn_confirm)
+                .setOnClickListener(v -> buildAndLogPayload());
+
 
         AutoCompleteTextView ddVehicle = requireView().findViewById(R.id.dd_vehicle);
 
@@ -319,6 +324,101 @@ public class UserHomeFragment extends Fragment {
             group.addView(chip);
         }
     }
+
+    private void buildAndLogPayload() {
+
+        List<RoutePoint> points = viewModel.getRoutePoints().getValue();
+        if (points == null || points.size() < 2) {
+            android.util.Log.d("RIDE", "Route not valid");
+            return;
+        }
+
+        Integer vehicleId = viewModel.getSelectedVehicleId().getValue();
+        if (vehicleId == null) {
+            android.util.Log.d("RIDE", "Vehicle not selected");
+            return;
+        }
+
+        RideRequestDto payload = new RideRequestDto();
+
+        RideRequestDto.Route route = new RideRequestDto.Route();
+        route.points = new ArrayList<>();
+
+        for (RoutePoint p : points) {
+
+            RideRequestDto.Point dto = new RideRequestDto.Point();
+            dto.lat = p.lat;
+            dto.lng = p.lng;
+            dto.orderIndex = p.orderIndex;
+            dto.type = p.type.name();
+            dto.address = p.address;
+
+            route.points.add(dto);
+        }
+
+        payload.route = route;
+
+        RideRequestDto.Schedule schedule = new RideRequestDto.Schedule();
+
+        UserHomeViewModel.ScheduleType type =
+                viewModel.getSelectedScheduleType().getValue();
+
+        schedule.type = type.name();
+
+        if (type == UserHomeViewModel.ScheduleType.LATER) {
+            schedule.startAt = buildScheduledIso();
+        } else {
+            schedule.startAt = java.time.Instant.now().toString();
+        }
+
+        payload.schedule = schedule;
+
+        payload.vehicleTypeId = vehicleId;
+
+        RideRequestDto.Preferences preferences =
+                new RideRequestDto.Preferences();
+
+        preferences.pets = ((android.widget.CheckBox)
+                requireView().findViewById(R.id.cb_pets)).isChecked();
+
+        preferences.baby = ((android.widget.CheckBox)
+                requireView().findViewById(R.id.cb_baby)).isChecked();
+
+        payload.preferences = preferences;
+
+        payload.linkedPassengers =
+                viewModel.getPassengerEmails().getValue();
+
+        com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+
+        String json = gson.toJson(payload);
+
+        android.util.Log.d("RIDE_PAYLOAD", json);
+    }
+
+    private String buildScheduledIso() {
+
+        String hhmm = viewModel.getScheduledTime().getValue();
+        if (hhmm == null) return java.time.Instant.now().toString();
+
+        String[] parts = hhmm.split(":");
+        int h = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);
+
+        java.time.LocalDateTime dateTime =
+                java.time.LocalDateTime.now()
+                        .withHour(h)
+                        .withMinute(m)
+                        .withSecond(0);
+
+        return dateTime
+                .atZone(java.time.ZoneId.systemDefault())
+                .toInstant()
+                .toString();
+    }
+
 
     @Override
     public void onResume() {
