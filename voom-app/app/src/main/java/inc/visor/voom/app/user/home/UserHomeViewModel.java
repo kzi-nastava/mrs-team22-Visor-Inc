@@ -43,7 +43,7 @@ public class UserHomeViewModel extends ViewModel {
         rideLocked.setValue(false);
     }
 
-    public void handleMapClick(double lat, double lng) {
+    public void handleMapClick(double lat, double lng, String adress) {
 
         List<RoutePoint> current = new ArrayList<>(routePoints.getValue());
 
@@ -52,7 +52,7 @@ public class UserHomeViewModel extends ViewModel {
             current.add(new RoutePoint(
                     lat,
                     lng,
-                    null,
+                    adress,
                     0,
                     RoutePoint.PointType.PICKUP
             ));
@@ -66,8 +66,8 @@ public class UserHomeViewModel extends ViewModel {
             current.add(new RoutePoint(
                     lat,
                     lng,
-                    null,
-                    current.size(), // orderIndex = novi index
+                    adress,
+                    current.size(),
                     RoutePoint.PointType.DROPOFF
             ));
         }
@@ -115,7 +115,5 @@ public class UserHomeViewModel extends ViewModel {
 
         routePoints.setValue(current);
     }
-
-
 
 }
