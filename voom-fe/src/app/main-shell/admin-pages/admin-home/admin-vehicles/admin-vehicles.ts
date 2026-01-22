@@ -83,14 +83,6 @@ export class AdminVehicles {
   constructor() {
   }
 
-  protected openProfilePictureDialog() {
-
-  }
-
-  protected saveGeneralInfo() {
-
-  }
-
   protected selectVehicle(vehicle: VehicleDto) {
     const vehicleTypes = this.vehicleTypes();
 
@@ -129,4 +121,15 @@ export class AdminVehicles {
 
   }
 
+  protected addVehicle() {
+
+  }
+
+  protected saveVehicle() {
+
+  }
+
+  protected deleteVehicle() {
+
+  }
 }

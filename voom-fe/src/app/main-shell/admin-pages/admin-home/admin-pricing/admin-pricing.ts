@@ -97,4 +97,16 @@ export class AdminPricing {
     this.selectedVehicleType.set(vehicleType);
     this.selectedPrice.set(price);
   }
+
+  protected addVehicleType() {
+
+  }
+
+  protected savePrice() {
+
+  }
+
+  protected deleteVehicleType() {
+
+  }
 }

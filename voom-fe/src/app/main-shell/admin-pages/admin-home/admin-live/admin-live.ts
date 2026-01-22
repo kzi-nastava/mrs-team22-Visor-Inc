@@ -17,7 +17,7 @@ export const ROUTE_ADMIN_LIVE = "live"
 })
 export class AdminLive {
 
-  isOpen = signal<boolean>(true);
+  isOpen = signal<boolean>(false);
 
   constructor() {
   }
