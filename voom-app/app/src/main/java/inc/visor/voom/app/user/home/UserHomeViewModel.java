@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
@@ -44,6 +45,11 @@ public class UserHomeViewModel extends ViewModel {
 
     public void setVehicle(Integer id) { selectedVehicleId.setValue(id); }
 
+    private final DriverSimulationManager simulationManager = new DriverSimulationManager();
+
+    public DriverSimulationManager getSimulationManager() {
+        return simulationManager;
+    }
     public void setScheduleType(ScheduleType t) {
         selectedScheduleType.setValue(t);
         if (t == ScheduleType.NOW) {

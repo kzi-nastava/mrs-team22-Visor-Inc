@@ -8,33 +8,47 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import inc.visor.voom.app.R;
+import inc.visor.voom.app.shared.component.DriverInfoWindow;
+import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
 public class MapRendererService {
 
     private final MapView mapView;
     private Polyline routeLine;
+    private final List<Marker> routeMarkers = new ArrayList<>();
+    private final Map<Long, Marker> driverMarkers = new HashMap<>();
+
 
     public MapRendererService(MapView mapView) {
         this.mapView = mapView;
     }
-
     public void renderMarkers(List<RoutePoint> points, Drawable icon) {
 
-        mapView.getOverlays().removeIf(o -> o instanceof Marker);
+        for (Marker m : routeMarkers) {
+            mapView.getOverlays().remove(m);
+        }
+        routeMarkers.clear();
 
         for (RoutePoint p : points) {
             Marker marker = new Marker(mapView);
             marker.setPosition(new GeoPoint(p.lat, p.lng));
             marker.setIcon(icon);
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
             mapView.getOverlays().add(marker);
+            routeMarkers.add(marker);
         }
 
         mapView.invalidate();
     }
+
 
     public void renderRoute(List<GeoPoint> geoPoints) {
 
@@ -56,5 +70,50 @@ public class MapRendererService {
             mapView.invalidate();
         }
     }
+    
+    public void renderDrivers(List<SimulatedDriver> drivers) {
+
+        for (SimulatedDriver driver : drivers) {
+
+            if (driver.currentPosition == null) continue;
+
+            Marker marker = driverMarkers.get(driver.id);
+
+            if (marker == null) {
+
+                marker = new Marker(mapView);
+                marker.setIcon(
+                        mapView.getContext()
+                                .getDrawable(R.drawable.ic_driver)
+                );
+                marker.setAnchor(
+                        Marker.ANCHOR_CENTER,
+                        Marker.ANCHOR_CENTER
+                );
+                marker.setRelatedObject(driver);
+                marker.setInfoWindow(new DriverInfoWindow(mapView));
+
+                marker.setOnMarkerClickListener((m, mapView) -> {
+
+                    if (m.isInfoWindowShown()) {
+                        m.closeInfoWindow();
+                    } else {
+                        m.showInfoWindow();
+                    }
+
+                    return true;
+                });
+
+                mapView.getOverlays().add(marker);
+                driverMarkers.put(driver.id, marker);
+            }
+
+            marker.setPosition(driver.currentPosition);
+        }
+
+        mapView.invalidate();
+    }
+
+
 }
 

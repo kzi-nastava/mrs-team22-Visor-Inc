@@ -27,7 +27,9 @@ import inc.visor.voom.app.R;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
+import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
+import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
@@ -41,6 +43,9 @@ public class UserHomeFragment extends Fragment {
     private MapRendererService mapRenderer;
     private RouteRepository routeRepository;
     private LocationRepository locationRepository;
+    private DriverSimulationManager simulationManager;
+    private DriverSimulationWsService wsService;
+
 
     public UserHomeFragment() {
         super(R.layout.fragment_user_home);
@@ -61,6 +66,14 @@ public class UserHomeFragment extends Fragment {
         mapRenderer = new MapRendererService(mapView);
         routeRepository = new RouteRepository();
         locationRepository = new LocationRepository(requireContext());
+
+        simulationManager = viewModel.getSimulationManager();
+
+        simulationManager.startInterpolationLoop();
+
+        wsService = new DriverSimulationWsService(simulationManager);
+        wsService.connect();
+
 
         setupMapClickListener();
         setupClearButton();
@@ -155,6 +168,12 @@ public class UserHomeFragment extends Fragment {
 
             etEmail.setEnabled(emails.size() < 3);
         });
+        simulationManager.getDrivers()
+                .observe(getViewLifecycleOwner(), drivers -> {
+
+                    mapRenderer.renderDrivers(drivers);
+                });
+
     }
 
     private void setupMapClickListener() {
@@ -344,12 +363,12 @@ public class UserHomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
+        simulationManager.startInterpolationLoop();
     }
 
     @Override
     public void onPause() {
-        mapView.onPause();
         super.onPause();
     }
+
 }
