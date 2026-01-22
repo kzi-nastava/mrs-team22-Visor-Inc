@@ -7,9 +7,9 @@ import {ROUTE_ADMIN_LIVE} from './admin-live/admin-live';
 import {ROUTE_ADMIN_ACTIVITY} from './admin-activity/admin-activity';
 import {MatRipple} from '@angular/material/core';
 import {ROUTE_ADMIN_USERS} from './admin-users/admin-users';
-import {ROUTE_ADMIN_DRIVERS} from './admin-drivers/admin-drivers';
 import {ROUTE_ADMIN_PRICING} from './admin-pricing/admin-pricing';
 import {ROUTE_ADMIN_PAGES} from '../admin-pages';
+import {ROUTE_ADMIN_VEHICLES} from './admin-vehicles/admin-vehicles';
 
 export const ROUTE_ADMIN_HOME = "home"
 
@@ -46,8 +46,8 @@ export class AdminHome {
     },
     {
       icon: 'local_taxi',
-      title: 'Drivers',
-      routerLink: ROUTE_ADMIN_DRIVERS,
+      title: 'Vehicles',
+      routerLink: ROUTE_ADMIN_VEHICLES,
     },
     {
       icon: 'attach_money',

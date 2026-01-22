@@ -206,7 +206,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @Valid @RequestBody RideCancelDto request) {
+    public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long Id, @RequestBody RideCancelDto request) {
 
         RideResponseDto ride = new RideResponseDto(
                 1L,

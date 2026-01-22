@@ -1,7 +1,6 @@
 import {Api} from '../api';
 import {ApiClient} from '../api-client';
 import {RequestConfig} from '../rest.model';
-import {UserProfileDto} from './user.model';
 import {UserRoleDto} from './user-role.model';
 
 export class UserRoleApi extends Api {

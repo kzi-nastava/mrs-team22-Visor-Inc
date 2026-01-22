@@ -38,7 +38,7 @@ public class PriceController {
     @PostMapping
     public ResponseEntity<PriceDto> createPrice(@RequestBody CreatePriceDto dto) {
         VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.getVehicleTypeId()).orElseThrow(NotFoundException::new);
-        Price price = new Price(dto, vehicleType);
+        Price price = new Price(dto.getPricePerKm(), vehicleType);
         return ResponseEntity.ok(new PriceDto(price));
     }
 
@@ -48,13 +48,6 @@ public class PriceController {
         price.setPricePerKm(dto.getPricePerKm());
         price = this.priceService.update(price);
         return ResponseEntity.ok(new PriceDto(price));
-    }
-
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletePrice(@PathVariable Long id) {
-        Price price = priceService.getPrice(id).orElseThrow(NotFoundException::new);
-        this.priceService.delete(price.getPriceId());
-        return ResponseEntity.noContent().build();
     }
 
 }

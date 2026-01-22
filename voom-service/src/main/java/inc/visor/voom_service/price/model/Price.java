@@ -17,6 +17,7 @@ public class Price {
 
     @Id
     @Column(name = "price")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long priceId;
 
     @OneToOne
@@ -29,9 +30,9 @@ public class Price {
     public Price() {
     }
 
-    public Price(CreatePriceDto dto, VehicleType vehicleType) {
+    public Price(Double pricePerKm, VehicleType vehicleType) {
         this.vehicleType = vehicleType;
-        this.pricePerKm = dto.getPricePerKm();
+        this.pricePerKm = pricePerKm;
     }
 
     public Price(PriceDto dto, VehicleType vehicleType) {

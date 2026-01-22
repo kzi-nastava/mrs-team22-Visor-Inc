@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminDrivers } from './admin-drivers';
+import { AdminVehicles } from './admin-vehicles';
 
-describe('AdminDrivers', () => {
-  let component: AdminDrivers;
-  let fixture: ComponentFixture<AdminDrivers>;
+describe('AdminVehicles', () => {
+  let component: AdminVehicles;
+  let fixture: ComponentFixture<AdminVehicles>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminDrivers]
+      imports: [AdminVehicles]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminDrivers);
+    fixture = TestBed.createComponent(AdminVehicles);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

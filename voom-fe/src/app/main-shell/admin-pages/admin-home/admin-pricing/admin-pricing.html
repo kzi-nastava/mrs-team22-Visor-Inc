@@ -1,32 +1,49 @@
 <mat-drawer-container class="w-full h-full">
-  <mat-drawer mode="side" opened class="pt-2">
+  <mat-drawer mode="side" opened class="pt-2 py-2 min-w-64">
     <div class="p-2 space-y-2">
-      <div class="flex items-center pb-4">
-        <app-value-input-string [label]="'Search'"/>
-      </div>
-      <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
-        <div class="text-lg px-2">John Doe</div>
-      </mat-card>
-      <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined">
-        <div class="text-lg px-2">Jane Doe</div>
-      </mat-card>
+      @if (vehicleTypes(); as vehicleTypes) {
+        <div class="flex items-center pb-4">
+          <app-value-input-string [label]="'Search'"/>
+        </div>
+        @for (vehicleType of vehicleTypes; track vehicleType) {
+          @if (vehicleType.id === selectedVehicleType()?.id) {
+            <mat-card appearance="filled" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicleType(vehicleType)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2 text-white">{{ vehicleType.type }}</div>
+              </div>
+            </mat-card>
+          } @else {
+            <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicleType(vehicleType)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2">{{ vehicleType.type }}</div>
+              </div>
+            </mat-card>
+          }
+        }
+      } @else {
+        <div>No vehicles found yet</div>
+      }
     </div>
   </mat-drawer>
   <mat-drawer-content class="flex flex-col space-y-4 p-8">
-    <mat-card appearance="outlined" class="">
-      <mat-card-title class="p-4">
-        <div class="flex justify-between items-center">
-          <div class="font-medium text-xl">General</div>
-          <mat-icon class="cursor-pointer" (click)="savePricing()">save</mat-icon>
-        </div>
-      </mat-card-title>
-      <mat-divider/>
-      <mat-card-content>
-        <form [formGroup]="pricingGeneralForm" class="p-4 flex space-x-2 justify-center" >
-          <app-value-input-string [label]="'Type'" [hide]="false" formControlName="type"/>
-          <app-value-input-numeric [label]="'Price'" formControlName="price" />
-        </form>
-      </mat-card-content>
-    </mat-card>
+    @if (selectedVehicleType(); as vehicle) {
+      <mat-card appearance="outlined" class="">
+        <mat-card-title class="p-4">
+          <div class="flex justify-between items-center">
+            <div class="font-medium text-xl">Pricing</div>
+            <mat-icon class="cursor-pointer">save</mat-icon>
+          </div>
+        </mat-card-title>
+        <mat-divider/>
+        <mat-card-content>
+          <form [formGroup]="priceForm" class="p-4 flex justify-center space-x-2 gap-y-4" >
+            <app-value-input-string [label]="'Vehicle type'" [hide]="false" formControlName="type"/>
+            <app-value-input-numeric [label]="'Price'" formControlName="price" />
+          </form>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="text-center text-xl">Vehicle not selected</div>
+    }
   </mat-drawer-content>
 </mat-drawer-container>

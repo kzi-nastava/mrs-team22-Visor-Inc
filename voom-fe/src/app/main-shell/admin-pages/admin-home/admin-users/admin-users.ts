@@ -51,9 +51,12 @@ export class AdminUsers {
     map(response => response.data),
   );
 
-  // userRoles$ =
+  userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(
+    map(response => response.data),
+  );
 
   users = toSignal(this.users$);
+  userRoles = toSignal(this.userRoles$);
   selectedUser = signal<UserProfileDto | null>(null);
 
   protected openProfilePictureDialog() {
