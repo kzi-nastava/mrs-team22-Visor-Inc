@@ -1,13 +1,17 @@
 package inc.visor.voom.app.user.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.gson.GsonBuilder;
 
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.events.MapEventsReceiver;
@@ -63,7 +67,7 @@ public class UserHomeFragment extends Fragment {
         observeViewModel();
 
         requireView().findViewById(R.id.btn_confirm)
-                .setOnClickListener(v -> buildAndLogPayload());
+                .setOnClickListener(v -> onConfirmClicked());
 
 
         AutoCompleteTextView ddVehicle = requireView().findViewById(R.id.dd_vehicle);
@@ -227,23 +231,8 @@ public class UserHomeFragment extends Fragment {
 
     private void drawRoute(List<RoutePoint> points) {
 
-        List<RoutePoint> sorted = new ArrayList<>(points);
-        Collections.sort(sorted, Comparator.comparingInt(p -> p.orderIndex));
-
-        StringBuilder coordsBuilder = new StringBuilder();
-
-        for (int i = 0; i < sorted.size(); i++) {
-            coordsBuilder.append(sorted.get(i).lng)
-                    .append(",")
-                    .append(sorted.get(i).lat);
-
-            if (i < sorted.size() - 1) {
-                coordsBuilder.append(";");
-            }
-        }
-
-        routeRepository.fetchRoute(
-                coordsBuilder.toString(),
+        routeRepository.fetchRouteFromPoints(
+                points,
                 new Callback<OsrmResponse>() {
 
                     @Override
@@ -272,6 +261,7 @@ public class UserHomeFragment extends Fragment {
                 }
         );
     }
+
 
     private void renderForm(List<RoutePoint> points) {
 
@@ -325,100 +315,31 @@ public class UserHomeFragment extends Fragment {
         }
     }
 
-    private void buildAndLogPayload() {
+    private void onConfirmClicked() {
 
         List<RoutePoint> points = viewModel.getRoutePoints().getValue();
-        if (points == null || points.size() < 2) {
-            android.util.Log.d("RIDE", "Route not valid");
-            return;
-        }
 
-        Integer vehicleId = viewModel.getSelectedVehicleId().getValue();
-        if (vehicleId == null) {
-            android.util.Log.d("RIDE", "Vehicle not selected");
-            return;
-        }
-
-        RideRequestDto payload = new RideRequestDto();
-
-        RideRequestDto.Route route = new RideRequestDto.Route();
-        route.points = new ArrayList<>();
-
-        for (RoutePoint p : points) {
-
-            RideRequestDto.Point dto = new RideRequestDto.Point();
-            dto.lat = p.lat;
-            dto.lng = p.lng;
-            dto.orderIndex = p.orderIndex;
-            dto.type = p.type.name();
-            dto.address = p.address;
-
-            route.points.add(dto);
-        }
-
-        payload.route = route;
-
-        RideRequestDto.Schedule schedule = new RideRequestDto.Schedule();
-
-        UserHomeViewModel.ScheduleType type =
-                viewModel.getSelectedScheduleType().getValue();
-
-        schedule.type = type.name();
-
-        if (type == UserHomeViewModel.ScheduleType.LATER) {
-            schedule.startAt = buildScheduledIso();
-        } else {
-            schedule.startAt = java.time.Instant.now().toString();
-        }
-
-        payload.schedule = schedule;
-
-        payload.vehicleTypeId = vehicleId;
-
-        RideRequestDto.Preferences preferences =
-                new RideRequestDto.Preferences();
-
-        preferences.pets = ((android.widget.CheckBox)
+        boolean pets = ((CheckBox)
                 requireView().findViewById(R.id.cb_pets)).isChecked();
 
-        preferences.baby = ((android.widget.CheckBox)
+        boolean baby = ((CheckBox)
                 requireView().findViewById(R.id.cb_baby)).isChecked();
 
-        payload.preferences = preferences;
+        RideRequestDto payload =
+                viewModel.buildRideRequest(points, pets, baby);
 
-        payload.linkedPassengers =
-                viewModel.getPassengerEmails().getValue();
+        if (payload == null) {
+            Log.d("RIDE", "Invalid ride");
+            return;
+        }
 
-        com.google.gson.Gson gson = new com.google.gson.GsonBuilder()
+        String json = new GsonBuilder()
                 .setPrettyPrinting()
-                .create();
+                .create()
+                .toJson(payload);
 
-        String json = gson.toJson(payload);
-
-        android.util.Log.d("RIDE_PAYLOAD", json);
+        Log.d("RIDE_PAYLOAD", json);
     }
-
-    private String buildScheduledIso() {
-
-        String hhmm = viewModel.getScheduledTime().getValue();
-        if (hhmm == null) return java.time.Instant.now().toString();
-
-        String[] parts = hhmm.split(":");
-        int h = Integer.parseInt(parts[0]);
-        int m = Integer.parseInt(parts[1]);
-
-        java.time.LocalDateTime dateTime =
-                java.time.LocalDateTime.now()
-                        .withHour(h)
-                        .withMinute(m)
-                        .withSecond(0);
-
-        return dateTime
-                .atZone(java.time.ZoneId.systemDefault())
-                .toInstant()
-                .toString();
-    }
-
 
     @Override
     public void onResume() {

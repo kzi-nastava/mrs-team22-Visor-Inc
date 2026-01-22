@@ -5,8 +5,11 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
 public class UserHomeViewModel extends ViewModel {
@@ -98,6 +101,88 @@ public class UserHomeViewModel extends ViewModel {
         current.add(point);
         routePoints.setValue(current);
     }
+    public RideRequestDto buildRideRequest(
+            List<RoutePoint> points,
+            boolean pets,
+            boolean baby
+    ) {
+
+        if (points == null || points.size() < 2) return null;
+        if (selectedVehicleId.getValue() == null) return null;
+
+        RideRequestDto payload = new RideRequestDto();
+
+        payload.route = mapRoute(points);
+        payload.schedule = mapSchedule();
+        payload.vehicleTypeId = selectedVehicleId.getValue();
+        payload.preferences = new RideRequestDto.Preferences();
+        payload.preferences.pets = pets;
+        payload.preferences.baby = baby;
+        payload.linkedPassengers = passengerEmails.getValue();
+
+        return payload;
+    }
+
+    private RideRequestDto.Route mapRoute(List<RoutePoint> points) {
+
+        List<RoutePoint> sorted = new ArrayList<>(points);
+        Collections.sort(sorted, Comparator.comparingInt(p -> p.orderIndex));
+
+        RideRequestDto.Route route = new RideRequestDto.Route();
+        route.points = new ArrayList<>();
+
+        for (RoutePoint p : sorted) {
+            RideRequestDto.Point dto = new RideRequestDto.Point();
+            dto.lat = p.lat;
+            dto.lng = p.lng;
+            dto.orderIndex = p.orderIndex;
+            dto.type = p.type.name();
+            dto.address = p.address;
+            route.points.add(dto);
+        }
+
+        return route;
+    }
+
+    private RideRequestDto.Schedule mapSchedule() {
+
+        RideRequestDto.Schedule schedule = new RideRequestDto.Schedule();
+
+        ScheduleType type = selectedScheduleType.getValue();
+        schedule.type = type.name();
+
+        if (type == ScheduleType.LATER) {
+            schedule.startAt = buildScheduledIso();
+        } else {
+            schedule.startAt = java.time.Instant.now().toString();
+        }
+
+        return schedule;
+    }
+
+    private String buildScheduledIso() {
+
+        String hhmm = scheduledTime.getValue();
+        if (hhmm == null) return java.time.Instant.now().toString();
+
+        String[] parts = hhmm.split(":");
+        int h = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);
+
+        java.time.LocalDateTime dateTime =
+                java.time.LocalDateTime.now()
+                        .withHour(h)
+                        .withMinute(m)
+                        .withSecond(0);
+
+        return dateTime
+                .atZone(java.time.ZoneId.systemDefault())
+                .toInstant()
+                .toString();
+    }
+
+
+
 
     public void clearRoute() {
         routePoints.setValue(new ArrayList<>());
