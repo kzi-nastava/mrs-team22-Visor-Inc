@@ -10,4 +10,5 @@ import inc.visor.voom_service.vehicle.model.Vehicle;
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     Optional<Vehicle> findByDriverId(Long driverId);
+
 }

@@ -16,11 +16,11 @@ public class VehicleTypeService {
         this.vehicleTypeRepository = vehicleTypeRepository;
     }
 
-    public List<VehicleType> getVehicles() {
+    public List<VehicleType> getVehicleTypes() {
         return this.vehicleTypeRepository.findAll();
     }
 
-    public Optional<VehicleType> getVehicle(Long id) {
+    public Optional<VehicleType> getVehicleType(Long id) {
         return this.vehicleTypeRepository.findById(id);
     }
 
@@ -30,6 +30,10 @@ public class VehicleTypeService {
 
     public VehicleType update(VehicleType vehicleType) {
         return this.vehicleTypeRepository.save(vehicleType);
+    }
+
+    public void delete(long vehicleTypeId) {
+        this.vehicleTypeRepository.deleteById(vehicleTypeId);
     }
 
 }

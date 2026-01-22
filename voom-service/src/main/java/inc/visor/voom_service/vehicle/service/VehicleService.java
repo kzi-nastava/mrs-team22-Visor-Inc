@@ -32,4 +32,8 @@ public class VehicleService {
         return this.vehicleRepository.save(vehicle);
     }
 
+    public void delete(long vehicleId) {
+        this.vehicleRepository.deleteById(vehicleId);
+    }
+
 }
