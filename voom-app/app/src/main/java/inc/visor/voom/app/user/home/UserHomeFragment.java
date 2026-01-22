@@ -12,17 +12,34 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Polyline;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import retrofit2.Callback;
+
+
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.shared.dto.OsrmResponse;
+import inc.visor.voom.app.shared.service.OsrmService;
 import inc.visor.voom.app.user.home.model.RoutePoint;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserHomeFragment extends Fragment {
 
     private MapView mapView;
     private UserHomeViewModel viewModel;
+
+    private OsrmService osrmService;
+
+    private Polyline routeLine;
 
     public UserHomeFragment() {
         super(R.layout.fragment_user_home);
@@ -40,6 +57,13 @@ public class UserHomeFragment extends Fragment {
         GeoPoint noviSad = new GeoPoint(45.2396, 19.8227);
         mapView.getController().setZoom(14.0);
         mapView.getController().setCenter(noviSad);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://router.project-osrm.org/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        osrmService = retrofit.create(OsrmService.class);
 
         mapView.getOverlays().add(new org.osmdroid.views.overlay.MapEventsOverlay(
                 new MapEventsReceiver() {
@@ -79,7 +103,9 @@ public class UserHomeFragment extends Fragment {
         ));
 
         requireView().findViewById(R.id.btn_clear_route)
-                .setOnClickListener(v -> viewModel.clearRoute());
+                .setOnClickListener((v) -> {
+                    viewModel.clearRoute();
+                });
 
 
         observeViewModel();
@@ -93,6 +119,7 @@ public class UserHomeFragment extends Fragment {
             renderForm(points);
             renderPitstops(points);
 
+            drawRoute(points);
         });
 
         viewModel.isRideLocked().observe(getViewLifecycleOwner(), locked -> {
@@ -100,10 +127,8 @@ public class UserHomeFragment extends Fragment {
             requireView().findViewById(R.id.btn_confirm).setEnabled(!locked);
             requireView().findViewById(R.id.dd_vehicle).setEnabled(!locked);
             requireView().findViewById(R.id.dd_time).setEnabled(!locked);
-
         });
     }
-
     private void renderMarkers(List<RoutePoint> points) {
 
         mapView.getOverlays().removeIf(o ->
@@ -208,6 +233,76 @@ public class UserHomeFragment extends Fragment {
 
         return null;
     }
+
+    private void drawRoute(List<RoutePoint> points) {
+
+        if (points.size() < 2) {
+
+            if (routeLine != null) {
+                mapView.getOverlays().remove(routeLine);
+                routeLine = null;
+                mapView.invalidate();
+            }
+
+            return;
+        }
+
+
+        List<RoutePoint> sorted = new ArrayList<>(points);
+        Collections.sort(sorted, Comparator.comparingInt(p -> p.orderIndex));
+
+        StringBuilder coordsBuilder = new StringBuilder();
+
+        for (int i = 0; i < sorted.size(); i++) {
+            coordsBuilder.append(sorted.get(i).lng)
+                    .append(",")
+                    .append(sorted.get(i).lat);
+
+            if (i < sorted.size() - 1) {
+                coordsBuilder.append(";");
+            }
+        }
+
+        osrmService.getRoute(
+                coordsBuilder.toString(),
+                "full",
+                "geojson"
+        ).enqueue(new Callback<OsrmResponse>() {
+
+            @Override
+            public void onResponse(Call<OsrmResponse> call, Response<OsrmResponse> response) {
+
+                if (!response.isSuccessful() || response.body() == null) return;
+
+                List<List<Double>> coords =
+                        response.body().routes.get(0).geometry.coordinates;
+
+                List<GeoPoint> geoPoints = new ArrayList<>();
+
+                for (List<Double> c : coords) {
+                    geoPoints.add(new GeoPoint(c.get(1), c.get(0)));
+                }
+
+                if (routeLine != null) {
+                    mapView.getOverlays().remove(routeLine);
+                }
+
+                routeLine = new org.osmdroid.views.overlay.Polyline();
+                routeLine.setPoints(geoPoints);
+                routeLine.setColor(android.graphics.Color.parseColor("#2563eb"));
+                routeLine.setWidth(8f);
+
+                mapView.getOverlays().add(routeLine);
+                mapView.invalidate();
+            }
+
+            @Override
+            public void onFailure(Call<OsrmResponse> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
 
     @Override
     public void onResume() {
