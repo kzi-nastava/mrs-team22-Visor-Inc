@@ -1,41 +1,33 @@
 package inc.visor.voom_service.shared;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
+import inc.visor.voom_service.auth.user.model.Permission;
+import inc.visor.voom_service.auth.user.repository.PermissionRepository;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.price.dto.CreatePriceDto;
+import inc.visor.voom_service.price.model.Price;
+import inc.visor.voom_service.price.repository.PriceRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import inc.visor.voom_service.auth.user.model.Permission;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.repository.PermissionRepository;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.RideRequest;
-import inc.visor.voom_service.ride.model.RideRoute;
-import inc.visor.voom_service.ride.model.RoutePoint;
-import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
-import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.ride.model.enums.RoutePointType;
-import inc.visor.voom_service.ride.model.enums.ScheduleType;
-import inc.visor.voom_service.ride.repository.RideRepository;
-import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
+
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Component
 @Profile({"dev", "local"})
@@ -48,11 +40,10 @@ public class DataInitializer implements ApplicationRunner {
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RideRequestRepository rideRequestRepository;
-    private final RideRepository rideRepository;
     private final PermissionRepository permissionRepository;
+    private final PriceRepository priceRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, RideRequestRepository rideRequestRepository, RideRepository rideRepository, PermissionRepository permissionRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, PriceRepository priceRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -60,9 +51,8 @@ public class DataInitializer implements ApplicationRunner {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.passwordEncoder = passwordEncoder;
-        this.rideRequestRepository = rideRequestRepository;
-        this.rideRepository = rideRepository;
         this.permissionRepository = permissionRepository;
+        this.priceRepository = priceRepository;
     }
 
     @Override
@@ -101,7 +91,25 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
-         // generateRide();
+        seedUser();
+
+        UserRole adminRole = userRoleRepository.findByRoleName("ADMIN").orElseThrow();
+
+        Person person = new Person();
+        person.setFirstName("Admin");
+        person.setLastName("Lastname");
+        person.setAddress("Novi Sad, Street");
+        person.setPhoneNumber("+38160123456");
+        person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
+        person = personRepository.save(person);
+
+        User user = new User();
+        user.setEmail("admin1@gmail.com");
+        user.setPassword(passwordEncoder.encode("test1234"));
+        user.setUserRole(adminRole);
+        user.setUserStatus(UserStatus.ACTIVE);
+        user.setPerson(person);
+        userRepository.save(user);
 
     }
 
@@ -115,15 +123,14 @@ public class DataInitializer implements ApplicationRunner {
     private void createVehicleType(String name) {
         VehicleType type = new VehicleType();
         type.setType(name);
-        vehicleTypeRepository.save(type);
+        type = vehicleTypeRepository.save(type);
+        priceRepository.save(new Price(10.0, type));
     }
 
     private void seedDrivers() {
-
-        final int NUMBER_OF_DRIVERS = 20;
+        final int NUMBER_OF_DRIVERS = 5;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
-
         VehicleType standard = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
         VehicleType van = vehicleTypeRepository.findByType("VAN").orElseThrow();
         VehicleType luxury = vehicleTypeRepository.findByType("LUXURY").orElseThrow();
@@ -137,6 +144,7 @@ public class DataInitializer implements ApplicationRunner {
             person.setLastName("Lastname" + i);
             person.setAddress("Novi Sad, Street " + i);
             person.setPhoneNumber("+38160123456" + i);
+            person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
             personRepository.save(person);
 
             User user = new User();
@@ -149,7 +157,6 @@ public class DataInitializer implements ApplicationRunner {
 
             Driver driver = new Driver();
             driver.setUser(user);
-            driver.setPerson(person);
             driver.setStatus(DriverStatus.AVAILABLE);
             driverRepository.save(driver);
 
@@ -167,6 +174,31 @@ public class DataInitializer implements ApplicationRunner {
         }
     }
 
+    private void seedUser() {
+        final int NUMBER_OF_USERS = 5;
+
+        UserRole userRole = userRoleRepository.findByRoleName("USER").orElseThrow();
+
+        for (int i = 1; i <= NUMBER_OF_USERS; i++) {
+
+            Person person = new Person();
+            person.setFirstName("User" + i);
+            person.setLastName("Lastname" + i);
+            person.setAddress("Novi Sad, Street " + i);
+            person.setPhoneNumber("+38160123456" + i);
+            person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
+            personRepository.save(person);
+
+            User user = new User();
+            user.setEmail("user" + i + "@gmail.com");
+            user.setPassword(passwordEncoder.encode("test1234"));
+            user.setUserRole(userRole);
+            user.setUserStatus(UserStatus.ACTIVE);
+            user.setPerson(person);
+            userRepository.save(user);
+        }
+    }
+
     private String getVehicleModel(int i) {
         return switch (i % 5) {
             case 0 ->
@@ -181,102 +213,5 @@ public class DataInitializer implements ApplicationRunner {
                 "Mercedes C200";
         };
     }
-
-    private void generateRide() {
-
-//        enum ScheduleType {
-//            NOW,
-//            LATER
-//        }
-
-        // ===== PERSONS =====
-        Person creatorPerson = new Person(
-                "Marko",
-                "Marković",
-                "061111111",
-                "Bulevar Oslobođenja 45, Novi Sad"
-        );
-
-        Person passengerPerson = new Person(
-                "Petar",
-                "Petrović",
-                "062222222",
-                "Zmaj Jovina 12, Novi Sad"
-        );
-
-        personRepository.saveAll(List.of(creatorPerson, passengerPerson));
-
-        // ===== ROLES (ASSUMING THEY EXIST) =====
-        UserRole userRole = userRoleRepository.findByRoleName("USER")
-                .orElseThrow();
-
-        // ===== USERS =====
-        User creator = new User(
-                "marko@test.com",
-                "password123",              // dummy
-                UserStatus.ACTIVE,
-                userRole,
-                creatorPerson
-        );
-
-        User passenger = new User(
-                "petar@test.com",
-                "password321",
-                UserStatus.ACTIVE,
-                userRole,
-                passengerPerson
-        );
-
-        userRepository.saveAll(List.of(creator, passenger));
-
-        // ===== VEHICLE TYPE =====
-        VehicleType vehicleType = vehicleTypeRepository.findByType("STANDARD")
-                .orElseThrow(); // assume exists
-
-        // ===== ROUTE POINTS =====
-        RoutePoint pickup = new RoutePoint();
-        pickup.setOrderIndex(0);
-        pickup.setPointType(RoutePointType.PICKUP);
-        pickup.setAddress("Bulevar Oslobođenja 45, Novi Sad");
-
-        RoutePoint dropoff = new RoutePoint();
-        dropoff.setOrderIndex(1);
-        dropoff.setPointType(RoutePointType.DROPOFF);
-        dropoff.setAddress("Zmaj Jovina 12, Novi Sad");
-
-        // ===== RIDE ROUTE =====
-        RideRoute route = new RideRoute();
-        route.setTotalDistanceKm(5.4);
-        route.setRoutePoints(List.of(pickup, dropoff));
-
-        // ===== RIDE REQUEST =====
-        RideRequest rideRequest = new RideRequest();
-        rideRequest.setCreator(creator);
-        rideRequest.setRideRoute(route);
-        rideRequest.setStatus(RideRequestStatus.ACCEPTED);
-        rideRequest.setScheduleType(ScheduleType.NOW);
-        rideRequest.setVehicleType(vehicleType);
-        rideRequest.setCalculatedPrice(850);
-        rideRequest.setBabyTransport(false);
-        rideRequest.setPetTransport(false);
-        rideRequest.setLinkedPassengerEmails(List.of(passenger.getEmail()));
-
-        rideRequestRepository.save(rideRequest);
-
-        // ===== EXISTING DRIVER (ID = 1) =====
-        Driver driver = driverRepository.findById(1L)
-                .orElseThrow(() -> new IllegalStateException("Driver 1 does not exist"));
-
-        // ===== RIDE =====
-        Ride ride = new Ride();
-        ride.setRideRequest(rideRequest);
-        ride.setDriver(driver);
-        ride.setStatus(RideStatus.ONGOING);
-        ride.setStartedAt(LocalDateTime.now());
-        ride.setPassengers(List.of(creator, passenger));
-
-        rideRepository.save(ride);
-    }
-
 
 }

@@ -2,6 +2,7 @@ package inc.visor.voom_service.driver.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +22,12 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
-import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
-import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.service.RideService;
@@ -87,6 +85,7 @@ public class DriverService {
 
     public VehicleSummaryDto getVehicle(Long userId) {
 
+        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -109,6 +108,7 @@ public class DriverService {
 
     public VehicleSummaryDto updateVehicle(Long userId, VehicleSummaryDto request) {
 
+        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -143,8 +143,9 @@ public class DriverService {
     }
 
     @Transactional
-    public void createDriver(CreateDriverDto request) {
+    public Driver createDriver(CreateDriverDto request) {
 
+        //FIXME @nikola0234
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
                 .orElseThrow(()
@@ -163,7 +164,7 @@ public class DriverService {
         person.setPhoneNumber(request.getPhoneNumber());
         person.setAddress(request.getAddress());
 
-        personRepository.save(person);
+        person = personRepository.save(person);
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -174,13 +175,12 @@ public class DriverService {
         String dummyPassword = "test1234";
         user.setPassword(passwordEncoder.encode(dummyPassword));
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         Driver driver = new Driver();
         driver.setUser(user);
-        driver.setPerson(person);
 
-        driverRepository.save(driver);
+        driver = driverRepository.save(driver);
 
         Vehicle vehicle = new Vehicle();
         vehicle.setDriver(driver);
@@ -197,13 +197,30 @@ public class DriverService {
                 = activationTokenService.createForUser(user);
 
         String activationLink
-                = "http://localhost:4200/activate?token=" + activationToken.getToken();
+                = "http://localhost:4200/voom/activate?token=" + activationToken.getToken();
 
         emailService.sendActivationEmail(
                 user.getEmail(),
                 activationLink
         );
 
+        return driver;
+    }
+
+    public List<Driver> getDrivers() {
+        return driverRepository.findAll();
+    }
+
+    public Optional<Driver> getDriver(long driverId) {
+        return driverRepository.findById(driverId);
+    }
+
+    public Driver updateDriver(Driver driver) {
+        return driverRepository.save(driver);
+    }
+
+    public void deleteDriver(long driverId) {
+        driverRepository.deleteById(driverId);
     }
 
     public List<DriverSummaryDto> getActiveDrivers() {
@@ -213,15 +230,7 @@ public class DriverService {
                 .filter(driver -> driver.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .toList();
 
-        List<DriverSummaryDto> driverDtos = activeDrivers.stream()
-                .map(driver -> new DriverSummaryDto(
-                driver.getId(),
-                driver.getPerson().getFirstName(),
-                driver.getPerson().getLastName()
-        ))
-                .toList();
-
-        return driverDtos;
+        return activeDrivers.stream().map(DriverSummaryDto::new).toList();
     }
 
     public Driver findDriverForRideRequest(
@@ -229,6 +238,8 @@ public class DriverService {
             List<RideRequestCreateDTO.DriverLocationDTO> snapshot
     ) {
 
+
+        //FIXME @nikola0234 move to Ride
         if (snapshot == null || snapshot.isEmpty()) {
             return null;
         }
@@ -240,7 +251,6 @@ public class DriverService {
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
-                .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
 
@@ -253,10 +263,7 @@ public class DriverService {
                 .toList();
 
         if (!freeDrivers.isEmpty()) {
-            Driver choosenDriver = nearestDriver(freeDrivers, pickup, locMap);
-            choosenDriver.setStatus(DriverStatus.BUSY);
-            driverRepository.save(choosenDriver);
-            return choosenDriver;
+            return nearestDriver(freeDrivers, pickup, locMap);
         }
 
         List<Driver> finishingSoon = candidates.stream()
@@ -264,10 +271,7 @@ public class DriverService {
                 .toList();
 
         if (!finishingSoon.isEmpty()) {
-            Driver choosenDriver = nearestDriver(finishingSoon, pickup, locMap);
-            choosenDriver.setStatus(DriverStatus.BUSY);
-            driverRepository.save(choosenDriver);
-            return choosenDriver;
+            return nearestDriver(finishingSoon, pickup, locMap);
         }
 
         return null;
@@ -283,6 +287,7 @@ public class DriverService {
     }
 
     private boolean vehicleMatches(Driver driver, RideRequest req) {
+        //FIXME @nikola0234 move to Vehicle/Ride
         Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
                 .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
 
@@ -321,20 +326,5 @@ public class DriverService {
                     );
                 }))
                 .orElse(null);
-    }
-
-    public ActiveRideDto getActiveRide(Long userId) {
-        Ride activeRide = rideService.findActiveRide(userId);
-        if (activeRide == null) {
-            return null;
-        }
-        ActiveRideDto dto = new ActiveRideDto();
-        dto.setRideId(activeRide.getId());
-        dto.setStatus(activeRide.getStatus());
-        dto.setRoutePoints(
-                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(p -> p.toDto()).toList()
-        );
-
-        return dto;
     }
 }

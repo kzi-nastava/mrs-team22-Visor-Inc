@@ -8,6 +8,7 @@ import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,8 +30,20 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> readByEmail(String email) {
+    public Optional<User> getUser(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> getUser(long id) {
+        return userRepository.findById(id);
+    }
+
+    public List<User> getUsers() {
+        return this.userRepository.findAll();
+    }
+
+    public void deleteUser(long userId) {
+        this.userRepository.deleteById(userId);
     }
 
     @Transactional

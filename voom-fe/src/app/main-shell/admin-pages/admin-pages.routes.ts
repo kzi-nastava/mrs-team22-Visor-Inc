@@ -1,17 +1,19 @@
 import {AdminRegisterDriver, ROUTE_ADMIN_REGISTER_DRIVER} from './register-driver/register-driver';
 import {Route} from '@angular/router';
-import {
-  ActivateProfile,
-  ROUTE_ACTIVATE_PROFILE
-} from '../../unauthenticated/activate/activate-profile/activate-profile';
-import {UserPages} from '../user-pages/user-pages';
+import {ActivateProfile, ROUTE_ACTIVATE_PROFILE} from '../../unauthenticated/activate/activate-profile/activate-profile';
 import {AdminPages} from './admin-pages';
+import {AdminHome, ROUTE_ADMIN_HOME} from './admin-home/admin-home';
 
 export default [
   {
     path: '',
     component: AdminPages,
     children: [
+      {
+        path: ROUTE_ADMIN_HOME,
+        component: AdminHome,
+        loadChildren: () => import("./admin-home/admin-home.routes"),
+      },
       {
         path: ROUTE_ADMIN_REGISTER_DRIVER,
         component: AdminRegisterDriver,
@@ -22,7 +24,7 @@ export default [
       },
       {
         path: '**',
-        redirectTo: ROUTE_ADMIN_REGISTER_DRIVER,
+        redirectTo: ROUTE_ADMIN_HOME,
       }
     ]
   },

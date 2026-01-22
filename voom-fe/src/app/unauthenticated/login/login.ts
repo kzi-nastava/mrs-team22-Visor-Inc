@@ -3,7 +3,6 @@ import {ValueInputString} from '../../shared/value-input/value-input-string/valu
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
 import {Router} from '@angular/router';
-import {ROUTE_REGISTRATION} from '../registration/registration';
 import {ROUTE_FORGOT_PASSWORD} from './forgot-password/forgot-password';
 import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
@@ -60,6 +59,6 @@ export class Login {
   }
 
   registration() {
-    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_REGISTRATION]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, "register"]);
   }
 }

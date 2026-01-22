@@ -1,0 +1,63 @@
+<mat-drawer-container class="w-full h-full">
+  <mat-drawer mode="side" opened class="pt-2 py-2 min-w-64">
+    <div class="p-2 space-y-2">
+      @if (vehicles(); as vehicles) {
+        <div class="flex items-center space-x-4 pb-4">
+          <app-value-input-string class="w-44" [label]="'Search'"/>
+          <mat-icon class="cursor-pointer scale-150" (click)="addVehicle()">add_circle</mat-icon>
+        </div>
+        @for (vehicle of vehicles; track vehicle) {
+          @if (vehicle.id === selectedVehicle()?.id) {
+            <mat-card appearance="filled" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicle(vehicle)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2 text-white">{{ vehicle.model }}</div>
+              </div>
+            </mat-card>
+          } @else {
+            <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicle(vehicle)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2">{{ vehicle.model }}</div>
+              </div>
+            </mat-card>
+          }
+        }
+      } @else {
+        <div>No vehicles found yet</div>
+      }
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="flex flex-col space-y-4 p-8">
+    @if (selectedVehicle(); as vehicle) {
+      <mat-card appearance="outlined" class="">
+        <mat-card-title class="p-4">
+          <div class="flex justify-between items-center">
+            <div class="font-medium text-xl">Vehicle</div>
+            <div class="flex space-x-4">
+              <mat-icon class="cursor-pointer" (click)="saveVehicle()">save</mat-icon>
+              <mat-icon class="cursor-pointer" (click)="deleteVehicle()">delete</mat-icon>
+            </div>
+          </div>
+        </mat-card-title>
+        <mat-divider/>
+        <mat-card-content>
+          <form [formGroup]="vehicleForm" class="p-4 grid space-x-2 grid-rows-2 grid-cols-3 gap-y-4" >
+            <app-value-input-string [label]="'Driver'" formControlName="driver"/>
+            <app-value-input-string [label]="'Vehicle type'" formControlName="vehicleType"/>
+            <app-value-input-string [label]="'Model'" formControlName="model"/>
+            <app-value-input-numeric [label]="'Year'" formControlName="year"/>
+            <app-value-input-string [label]="'License plate'" formControlName="licensePlate"/>
+            <app-value-input-numeric [label]="'Seats'" formControlName="numberOfSeats"/>
+            <mat-checkbox formControlName="babySeat">
+              <div>Baby seat</div>
+            </mat-checkbox>
+            <mat-checkbox formControlName="petFriendly">
+              <div>Pet friendly</div>
+            </mat-checkbox>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="text-center text-xl">Vehicle not selected</div>
+    }
+  </mat-drawer-content>
+</mat-drawer-container>

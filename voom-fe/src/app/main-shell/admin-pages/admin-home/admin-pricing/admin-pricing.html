@@ -1,0 +1,52 @@
+<mat-drawer-container class="w-full h-full">
+  <mat-drawer mode="side" opened class="pt-2 py-2 min-w-64">
+    <div class="p-2 space-y-2">
+      @if (vehicleTypes(); as vehicleTypes) {
+        <div class="flex items-center space-x-4 pb-4">
+          <app-value-input-string class="w-44" [label]="'Search'"/>
+          <mat-icon class="cursor-pointer scale-150" (click)="addVehicleType()">add_circle</mat-icon>
+        </div>
+        @for (vehicleType of vehicleTypes; track vehicleType) {
+          @if (vehicleType.id === selectedVehicleType()?.id) {
+            <mat-card appearance="filled" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicleType(vehicleType)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2 text-white">{{ vehicleType.type }}</div>
+              </div>
+            </mat-card>
+          } @else {
+            <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicleType(vehicleType)">
+              <div class="flex justify-center items-center">
+                <div class="text-lg px-2">{{ vehicleType.type }}</div>
+              </div>
+            </mat-card>
+          }
+        }
+      } @else {
+        <div>No vehicles found yet</div>
+      }
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="flex flex-col space-y-4 p-8">
+    @if (selectedVehicleType(); as vehicle) {
+      <mat-card appearance="outlined" class="">
+        <mat-card-title class="p-4">
+          <div class="flex justify-between items-center">
+            <div class="font-medium text-xl">Vehicle type</div>
+            <div class="flex space-x-4">
+              <mat-icon class="cursor-pointer" (click)="savePrice()">save</mat-icon>
+            </div>
+          </div>
+        </mat-card-title>
+        <mat-divider/>
+        <mat-card-content>
+          <form [formGroup]="priceForm" class="p-4 flex justify-center space-x-2 gap-y-4" >
+            <app-value-input-string [label]="'Vehicle type'" [hide]="false" formControlName="type"/>
+            <app-value-input-numeric [label]="'Price'" formControlName="price" />
+          </form>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="text-center text-xl">Vehicle not selected</div>
+    }
+  </mat-drawer-content>
+</mat-drawer-container>

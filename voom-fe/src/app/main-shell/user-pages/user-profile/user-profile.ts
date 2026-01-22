@@ -47,6 +47,7 @@ export const ROUTE_USER_PROFILE = 'profile';
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
+
   constructor(
     private dialog: MatDialog,
     private profileApi: UserProfileApi,
@@ -62,7 +63,6 @@ export class UserProfile {
   topFavoriteRoutes = computed(() =>
   this.favoriteRoutes().slice(0, 3)
 );
-
 
   openChangePasswordDialog(): void {
     this.dialog.open(ChangePasswordDialog, {
@@ -111,9 +111,12 @@ export class UserProfile {
 
   ngOnInit(): void {
 
-    this.isDriver = this.authService.hasRole('DRIVER');
-    this.isUser = this.authService.hasRole('USER');
-    this.isAdmin = this.authService.hasRole('ADMIN');
+    const user = this.authService.activeUser$.value;
+
+
+    this.isDriver = user?.role == 'DRIVER';
+    this.isUser = user?.role == 'USER';
+    this.isAdmin = user?.role == 'ADMIN';
 
     this.profileApi.getProfile().subscribe({
       next: (res: ApiResponse<UserProfileResponseDto>) => {
@@ -129,7 +132,7 @@ export class UserProfile {
 
         this.profileForm.controls.email.disable();
       },
-    
+
     });
 
     this.favoriteRoutesApi.getFavoriteRoutes().subscribe({
@@ -173,7 +176,7 @@ export class UserProfile {
   mapDto(dto: FavoriteRouteDto): FavoriteRoute {
       const pickup = dto.points.find((p) => p.type === 'PICKUP');
       const dropoff = dto.points.find((p) => p.type === 'DROPOFF');
-  
+
       return {
         dto,
         id: dto.id,

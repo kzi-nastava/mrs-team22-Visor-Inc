@@ -1,4 +1,3 @@
-
 (window as any).global = window;
 
 import { bootstrapApplication } from '@angular/platform-browser';

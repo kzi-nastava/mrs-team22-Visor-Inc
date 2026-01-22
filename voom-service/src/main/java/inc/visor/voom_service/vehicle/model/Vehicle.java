@@ -3,6 +3,8 @@ package inc.visor.voom_service.vehicle.model;
 import java.util.Objects;
 
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.vehicle.dto.CreateVehicleDto;
+import inc.visor.voom_service.vehicle.dto.VehicleDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,9 +14,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "vehicles")
+@Getter
+@Setter
 public class Vehicle {
 
     @Id
@@ -48,80 +54,21 @@ public class Vehicle {
     @Column(name = "number_of_seats", nullable = false)
     private int numberOfSeats;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
+    public Vehicle(CreateVehicleDto dto, VehicleType vehicleType, Driver driver) {
         this.driver = driver;
-    }
-
-    public VehicleType getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
+        this.year = dto.getYear();
+        this.model = dto.getModel();
+        this.licensePlate = dto.getLicensePlate();
+        this.babySeat = dto.isBabySeat();
+        this.petFriendly = dto.isPetFriendly();
+        this.numberOfSeats = dto.getNumberOfSeats();
     }
 
-    public void setVehicleType(String vehicleType) {
-        this.vehicleType = new VehicleType(vehicleType);
+    public Vehicle(VehicleDto dto, VehicleType vehicleType, Driver driver) {
     }
 
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
-    }
-
-    public boolean isBabySeat() {
-        return babySeat;
-    }
-
-    public void setBabySeat(boolean babySeat) {
-        this.babySeat = babySeat;
-    }
-
-    public boolean isPetFriendly() {
-        return petFriendly;
-    }
-
-    public void setPetFriendly(boolean petFriendly) {
-        this.petFriendly = petFriendly;
-    }
-
-    public int getNumberOfSeats() {
-        return numberOfSeats;
-    }
-
-    public void setNumberOfSeats(int numberOfSeats) {
-        this.numberOfSeats = numberOfSeats;
+    public Vehicle() {
     }
 
     @Override

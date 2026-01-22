@@ -1,7 +1,10 @@
 package inc.visor.voom_service.vehicle.controller;
 
+import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.vehicle.dto.CreateVehicleTypeDto;
+import inc.visor.voom_service.vehicle.dto.VehicleTypeDto;
 import inc.visor.voom_service.vehicle.model.VehicleType;
+import inc.visor.voom_service.vehicle.service.VehicleTypeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,31 +14,43 @@ import java.util.List;
 @RequestMapping("api/vehicleTypes")
 public class VehicleTypeController {
 
-    VehicleTypeController() {}
+    private final VehicleTypeService vehicleTypeService;
 
-    @GetMapping("")
-    public ResponseEntity<List<VehicleType>> getVehicleTypes() {
-        return ResponseEntity.ok(List.of());
+    public VehicleTypeController(VehicleTypeService vehicleTypeService) {
+        this.vehicleTypeService = vehicleTypeService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<VehicleType> getVehicleType(@RequestParam long id) {
-        return ResponseEntity.ok(new VehicleType());
+    @GetMapping
+    public ResponseEntity<List<VehicleTypeDto>> getVehicleTypes() {
+        return ResponseEntity.ok(vehicleTypeService.getVehicleTypes().stream().map(VehicleTypeDto::new).toList());
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<VehicleType> createVehicleType(@PathVariable long id, @RequestBody CreateVehicleTypeDto vehicleTypeDto) {
-        return ResponseEntity.ok(new VehicleType());
+    @GetMapping("{id}")
+    public ResponseEntity<VehicleTypeDto> getVehicleType(@RequestParam long id) {
+        VehicleType vehicleType = vehicleTypeService.getVehicleType(id).orElseThrow(NotFoundException::new);
+        return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VehicleType> updateVehicleType(@PathVariable long id, @RequestBody VehicleType vehicleTypeDto) {
-        return ResponseEntity.ok(vehicleTypeDto);
+    @PostMapping
+    public ResponseEntity<VehicleTypeDto> createVehicleType(@RequestBody CreateVehicleTypeDto dto) {
+        VehicleType vehicleType = new VehicleType(dto.getType());
+        vehicleType = vehicleTypeService.create(vehicleType);
+        return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("{id}")
+    public ResponseEntity<VehicleTypeDto> updateVehicleType(@PathVariable long id, @RequestBody VehicleTypeDto dto) {
+        VehicleType vehicleType = vehicleTypeService.getVehicleType(id).orElseThrow(NotFoundException::new);
+        vehicleType.setType(dto.getType());
+        vehicleType = vehicleTypeService.update(vehicleType);
+        return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
+    }
+
+    @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteVehicleType(@PathVariable long id) {
-        return ResponseEntity.ok().build();
+        VehicleType vehicleType = vehicleTypeService.getVehicleType(id).orElseThrow(NotFoundException::new);
+        vehicleTypeService.delete(vehicleType.getId());
+        return ResponseEntity.noContent().build();
     }
 
 }

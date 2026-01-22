@@ -10,7 +10,6 @@ import {ROUTE_LOGIN} from '../../unauthenticated/login/login';
 import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-profile';
 import {ROUTE_DRIVER_RIDE_HISTORY} from '../../main-shell/driver-pages/ride-history/driver-ride-history';
 import {ROUTE_FAVORITE_ROUTES} from '../../main-shell/user-pages/favorite-routes/favorite-routes';
-import {ROUTE_HOME} from '../../unauthenticated/home/home';
 import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated/unauthenticated-main';
 import {ROUTE_USER_PAGES} from '../../main-shell/user-pages/user-pages';
 import {ROUTE_DRIVER_PAGES} from '../../main-shell/driver-pages/driver-pages';
@@ -47,11 +46,12 @@ export class Header {
 
   protected signOut() {
     this.authenticationService.logout();
-    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_HOME]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
   }
 
   protected profile() {
-    if (this.authenticationService.hasRole('DRIVER')) {
+    const user = this.authenticationService.activeUser$.value;
+    if (user?.role === 'DRIVER') {
       this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_USER_PROFILE]);
     } else {
       this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_PROFILE]);

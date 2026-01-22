@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, effect, signal, ViewChild } from '@angular/core';
-import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
+import {AfterViewInit, Component, effect, signal, ViewChild} from '@angular/core';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {
   ApexChart,
   ApexDataLabels,
@@ -10,22 +10,16 @@ import {
   ApexXAxis,
   NgApexchartsModule,
 } from 'ng-apexcharts';
-import { MatIcon } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import {
-  DriverAssignedDto,
-  DriverSummaryDto,
-  PREDEFINED_ROUTES,
-  RideApi,
-} from '../../user-pages/home/home.api';
-import { RoutePoint } from '../../user-pages/home/home';
-import { UserProfileApi } from '../../user-pages/user-profile/user-profile.api';
-import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import { catchError, map } from 'rxjs';
-import { log } from 'node:util';
-import { Map } from '../../../shared/map/map';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ArrivalDialog } from '../arrival-dialog/arrival-dialog';
+import {MatIcon} from '@angular/material/icon';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {DriverAssignedDto, RideApi,} from '../../user-pages/home/home.api';
+import {RoutePoint} from '../../user-pages/home/home';
+import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
+import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {map} from 'rxjs';
+import {Map} from '../../../shared/map/map';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ArrivalDialog} from '../arrival-dialog/arrival-dialog';
 
 export const ROUTE_DRIVER_HOME = 'home';
 
@@ -52,7 +46,6 @@ type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED';
     MatSnackBarModule,
     Map,
     MatDialogModule,
-    ArrivalDialog,
   ],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',

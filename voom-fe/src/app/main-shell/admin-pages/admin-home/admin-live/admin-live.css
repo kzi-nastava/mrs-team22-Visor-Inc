@@ -1,0 +1,10 @@
+.support-chat-container {
+  position: fixed;
+  bottom: 256px;
+  right: 16px;
+
+  width: 400px;
+  height: 440px;
+
+  z-index: 1000; /* above map/cards */
+}

@@ -14,11 +14,11 @@ export class DriverSimulationWsService {
     this.client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       reconnectDelay: 5000,
-      debug: (msg) => console.log('[STOMP]', msg),
+      // debug: (msg) => console.log('[STOMP]', msg),
     });
 
     this.client.onConnect = () => {
-      console.log('[WS] connected');
+      // console.log('[WS] connected');
 
       this.client.subscribe('/topic/route', (message) => {
         onRoute(JSON.parse(message.body));
@@ -30,7 +30,7 @@ export class DriverSimulationWsService {
 
       this.client.subscribe('/topic/driver-assigned', (message) => {
         const payload = JSON.parse(message.body);
-        console.log('[WS] Driver assigned:', payload);
+        // console.log('[WS] Driver assigned:', payload);
         onDriverAssigned?.(payload);
       });
 

@@ -1,9 +1,10 @@
 import {ApiClient} from './api-client';
+import ApiService from './api-service';
 
 export abstract class Api {
   protected apiClient: ApiClient;
 
-  protected constructor(apiClient: ApiClient) {
+  constructor(apiClient: ApiClient) {
     this.apiClient = apiClient;
   }
 

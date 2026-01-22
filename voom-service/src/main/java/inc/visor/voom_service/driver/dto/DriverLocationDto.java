@@ -1,6 +1,6 @@
 package inc.visor.voom_service.driver.dto;
 
-import inc.visor.voom_service.driver.model.enums.DriverActivityStatus;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import lombok.Data;
 
 @Data
@@ -8,6 +8,6 @@ public class DriverLocationDto {
     Long driverId;
     Double lat;
     Double lng;
-    DriverActivityStatus status;
+    DriverStatus status;
     Integer etaSecondsUntilFinished;
 }
