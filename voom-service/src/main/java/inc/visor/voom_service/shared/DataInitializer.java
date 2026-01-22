@@ -150,7 +150,6 @@ public class DataInitializer implements ApplicationRunner {
             Driver driver = new Driver();
             driver.setUser(user);
             driver.setPerson(person);
-            driver.setStatus(DriverStatus.AVAILABLE);
             driverRepository.save(driver);
 
             Vehicle vehicle = new Vehicle();

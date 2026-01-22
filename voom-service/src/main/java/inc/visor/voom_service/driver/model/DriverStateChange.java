@@ -3,12 +3,16 @@ package inc.visor.voom_service.driver.model;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.enums.DriverState;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "driver_state_changes")
+@Getter
+@Setter
 public class DriverStateChange {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,38 +29,6 @@ public class DriverStateChange {
 
     @Column(name = "performed_at", nullable = false)
     private LocalDateTime performedAt;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public User getDriver() {
-        return driver;
-    }
-
-    public void setDriver(User driver) {
-        this.driver = driver;
-    }
-
-    public DriverState getCurrentState() {
-        return currentState;
-    }
-
-    public void setCurrentState(DriverState currentState) {
-        this.currentState = currentState;
-    }
-
-    public LocalDateTime getPerformedAt() {
-        return performedAt;
-    }
-
-    public void setPerformedAt(LocalDateTime performedAt) {
-        this.performedAt = performedAt;
-    }
 
     @Override
     public String toString() {

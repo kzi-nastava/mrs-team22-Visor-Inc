@@ -15,9 +15,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "drivers")
+@Getter
+@Setter
 public class Driver {
 
     @Id
@@ -33,42 +37,9 @@ public class Driver {
     @JoinColumn(name = "person_id", nullable = false, unique = true)
     private Person person;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private DriverStatus status;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public void setPerson(Person person) {
-        this.person = person;
-    }
-
-    public DriverStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DriverStatus status) {
-        this.status = status;
-    }
-
 
     @Override
     public String toString() {
