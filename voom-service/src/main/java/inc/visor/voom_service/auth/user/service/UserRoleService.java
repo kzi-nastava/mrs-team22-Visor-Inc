@@ -4,6 +4,7 @@ import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,6 +18,10 @@ public class UserRoleService {
 
     public UserRole create(UserRole userRole) {
         return userRoleRepository.save(userRole);
+    }
+
+    public List<UserRole> getUserRoles() {
+        return userRoleRepository.findAll();
     }
 
     public Optional<UserRole> getUserRole(String roleName) {
