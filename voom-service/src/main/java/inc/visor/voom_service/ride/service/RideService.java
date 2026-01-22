@@ -1,12 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
@@ -15,6 +10,10 @@ import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class RideService {

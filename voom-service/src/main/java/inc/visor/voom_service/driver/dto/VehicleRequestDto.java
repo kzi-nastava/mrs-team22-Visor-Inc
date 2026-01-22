@@ -5,7 +5,11 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class VehicleRequestDto {
 
     @NotBlank(message="Model is required")
@@ -27,54 +31,5 @@ public class VehicleRequestDto {
     private Boolean petTransport;
 
     public VehicleRequestDto() {};
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public VehicleType getType() {
-        return type;
-    }
-
-    public void setType(VehicleType type) {
-        this.type = type;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
-    }
-
-    public Integer getNumberOfSeats() {
-        return numberOfSeats;
-    }
-
-    public void setNumberOfSeats(Integer numberOfSeats) {
-        this.numberOfSeats = numberOfSeats;
-    }
-
-    public Boolean getBabyTransport() {
-        return babyTransport;
-    }
-
-    public void setBabyTransport(Boolean babyTransport) {
-        this.babyTransport = babyTransport;
-    }
-
-    public Boolean getPetTransport() {
-        return petTransport;
-    }
-
-    public void setPetTransport(Boolean petTransport) {
-        this.petTransport = petTransport;
-    }
-
     
 }

@@ -2,7 +2,9 @@ package inc.visor.voom_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -10,6 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
@@ -26,12 +29,8 @@ public class SecurityConfig {
             .addFilter(corsFilter)
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/auth/**"
-                ).permitAll()
-                    .requestMatchers("/api/**", "/ws/**",
-                            "/topic/**",
-                            "/app/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/drivers/active", "/ws/**", "/topic/**", "/app/**").permitAll()
                 .anyRequest().authenticated()
             ).sessionManagement(session -> session
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)

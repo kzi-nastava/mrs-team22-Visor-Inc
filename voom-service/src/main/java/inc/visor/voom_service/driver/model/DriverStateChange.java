@@ -1,7 +1,7 @@
 package inc.visor.voom_service.driver.model;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.driver.model.enums.DriverState;
+import inc.visor.voom_service.driver.dto.DriverStateChangeDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,15 +20,24 @@ public class DriverStateChange {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User driver;
+    @JoinColumn(name = "driver_id", nullable = false)
+    private Driver driver;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "current_state", nullable = false)
+    @Column(name = "state", nullable = false)
     private DriverState currentState;
 
     @Column(name = "performed_at", nullable = false)
     private LocalDateTime performedAt;
+
+    public DriverStateChange(Driver driver, DriverStateChangeDto dto) {
+        this.driver = driver;
+        this.currentState = DriverState.valueOf(dto.getCurrentState());
+        this.performedAt = dto.getPerformedAt();
+    }
+
+    public DriverStateChange() {
+    }
 
     @Override
     public String toString() {

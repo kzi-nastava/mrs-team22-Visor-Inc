@@ -2,7 +2,7 @@ package inc.visor.voom_service.driver.dto;
 
 import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import lombok.Getter;
 import lombok.Setter;
 
