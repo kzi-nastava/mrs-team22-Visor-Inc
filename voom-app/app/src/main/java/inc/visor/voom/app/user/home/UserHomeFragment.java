@@ -2,6 +2,7 @@ package inc.visor.voom.app.user.home;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,7 +33,6 @@ public class UserHomeFragment extends Fragment {
 
     private MapView mapView;
     private UserHomeViewModel viewModel;
-
     private MapRendererService mapRenderer;
     private RouteRepository routeRepository;
     private LocationRepository locationRepository;
@@ -60,6 +60,92 @@ public class UserHomeFragment extends Fragment {
         setupMapClickListener();
         setupClearButton();
         observeViewModel();
+
+        AutoCompleteTextView ddVehicle = requireView().findViewById(R.id.dd_vehicle);
+
+        String[] vehicleLabels = {"Standard", "Luxury", "Van"};
+        Integer[] vehicleValues = {1, 3, 2};
+
+        ddVehicle.setAdapter(new android.widget.ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_list_item_1,
+                vehicleLabels
+        ));
+
+        ddVehicle.setOnItemClickListener((parent, v, position, id) -> {
+            viewModel.setVehicle(vehicleValues[position]);
+        });
+
+        AutoCompleteTextView ddTime = requireView().findViewById(R.id.dd_time);
+        View tilScheduled = requireView().findViewById(R.id.til_scheduled_time);
+        View tvTimeError = requireView().findViewById(R.id.tv_time_error);
+        com.google.android.material.textfield.TextInputEditText etScheduled =
+                requireView().findViewById(R.id.et_scheduled_time);
+
+        String[] timeLabels = {"Now", "Later"};
+        ddTime.setAdapter(new android.widget.ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_list_item_1,
+                timeLabels
+        ));
+
+        ddTime.setOnItemClickListener((parent, v, position, id) -> {
+            viewModel.setScheduleType(position == 0
+                    ? UserHomeViewModel.ScheduleType.NOW
+                    : UserHomeViewModel.ScheduleType.LATER
+            );
+        });
+
+        etScheduled.setOnClickListener(v -> {
+            java.util.Calendar now = java.util.Calendar.getInstance();
+            int h = now.get(java.util.Calendar.HOUR_OF_DAY);
+            int m = now.get(java.util.Calendar.MINUTE);
+
+            new android.app.TimePickerDialog(requireContext(), (picker, hourOfDay, minute) -> {
+                String hhmm = String.format(java.util.Locale.US, "%02d:%02d", hourOfDay, minute);
+                viewModel.setScheduledTime(hhmm);
+            }, h, m, true).show();
+        });
+
+        viewModel.getSelectedScheduleType().observe(getViewLifecycleOwner(), t -> {
+            boolean later = t == UserHomeViewModel.ScheduleType.LATER;
+            tilScheduled.setVisibility(later ? View.VISIBLE : View.GONE);
+        });
+
+        viewModel.getScheduledTime().observe(getViewLifecycleOwner(), hhmm -> {
+            etScheduled.setText(hhmm == null ? "" : hhmm);
+        });
+
+        viewModel.isScheduledTimeValid().observe(getViewLifecycleOwner(), ok -> {
+            tvTimeError.setVisibility(Boolean.TRUE.equals(ok) ? View.GONE : View.VISIBLE);
+        });
+
+        com.google.android.material.textfield.TextInputEditText etEmail =
+                requireView().findViewById(R.id.et_passenger_email);
+        com.google.android.material.chip.ChipGroup chipPassengers =
+                requireView().findViewById(R.id.chip_passengers);
+
+        etEmail.setOnEditorActionListener((v, actionId, event) -> {
+            String email = v.getText() == null ? "" : v.getText().toString();
+            boolean added = viewModel.addPassengerEmail(email);
+            if (added) v.setText("");
+            return true;
+        });
+
+        viewModel.getPassengerEmails().observe(getViewLifecycleOwner(), emails -> {
+            chipPassengers.removeAllViews();
+
+            for (String e : emails) {
+                com.google.android.material.chip.Chip chip =
+                        new com.google.android.material.chip.Chip(requireContext());
+                chip.setText(e);
+                chip.setCloseIconVisible(true);
+                chip.setOnCloseIconClickListener(v -> viewModel.removePassengerEmail(e));
+                chipPassengers.addView(chip);
+            }
+
+            etEmail.setEnabled(emails.size() < 3);
+        });
     }
 
     private void setupMapClickListener() {
