@@ -21,6 +21,21 @@
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_clear_route"
+            android:layout_width="30dp"
+            android:layout_height="35dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            app:icon="@drawable/close"
+            android:backgroundTint="@android:color/white"
+            app:cornerRadius="20dp"
+            app:iconTint="@null"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:strokeWidth="0dp"/>
+
     </FrameLayout>
 
     <androidx.core.widget.NestedScrollView
