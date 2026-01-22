@@ -25,6 +25,74 @@ public class UserHomeViewModel extends ViewModel {
         return rideLocked;
     }
 
+    public enum ScheduleType { NOW, LATER }
+
+    private final MutableLiveData<Integer> selectedVehicleId = new MutableLiveData<>(null);
+    private final MutableLiveData<ScheduleType> selectedScheduleType = new MutableLiveData<>(ScheduleType.NOW);
+    private final MutableLiveData<String> scheduledTime = new MutableLiveData<>(null); // "HH:mm"
+    private final MutableLiveData<List<String>> passengerEmails = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<Boolean> scheduledTimeValid = new MutableLiveData<>(true);
+
+    public LiveData<Integer> getSelectedVehicleId() { return selectedVehicleId; }
+    public LiveData<ScheduleType> getSelectedScheduleType() { return selectedScheduleType; }
+    public LiveData<String> getScheduledTime() { return scheduledTime; }
+    public LiveData<List<String>> getPassengerEmails() { return passengerEmails; }
+    public LiveData<Boolean> isScheduledTimeValid() { return scheduledTimeValid; }
+
+    public void setVehicle(Integer id) { selectedVehicleId.setValue(id); }
+
+    public void setScheduleType(ScheduleType t) {
+        selectedScheduleType.setValue(t);
+        if (t == ScheduleType.NOW) {
+            scheduledTime.setValue(null);
+            scheduledTimeValid.setValue(true);
+        }
+    }
+
+    public void setScheduledTime(String hhmm) {
+        scheduledTime.setValue(hhmm);
+        scheduledTimeValid.setValue(isWithinNext5Hours(hhmm));
+    }
+
+    public boolean addPassengerEmail(String email) {
+        email = email == null ? "" : email.trim();
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return false;
+
+        List<String> cur = new ArrayList<>(passengerEmails.getValue());
+        if (cur.size() >= 3) return false;
+        if (cur.contains(email)) return false;
+
+        cur.add(email);
+        passengerEmails.setValue(cur);
+        return true;
+    }
+
+    public void removePassengerEmail(String email) {
+        List<String> cur = new ArrayList<>(passengerEmails.getValue());
+        cur.remove(email);
+        passengerEmails.setValue(cur);
+    }
+
+    private boolean isWithinNext5Hours(String hhmm) {
+        if (hhmm == null) return false;
+        String[] parts = hhmm.split(":");
+        if (parts.length != 2) return false;
+
+        int h = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);
+
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        java.util.Calendar selected = (java.util.Calendar) now.clone();
+        selected.set(java.util.Calendar.HOUR_OF_DAY, h);
+        selected.set(java.util.Calendar.MINUTE, m);
+        selected.set(java.util.Calendar.SECOND, 0);
+
+        long diffMs = selected.getTimeInMillis() - now.getTimeInMillis();
+        long diffMin = diffMs / 60000;
+
+        return diffMin >= 0 && diffMin <= 300;
+    }
+
     public void addPoint(RoutePoint point) {
         List<RoutePoint> current = new ArrayList<>(routePoints.getValue());
         current.add(point);
