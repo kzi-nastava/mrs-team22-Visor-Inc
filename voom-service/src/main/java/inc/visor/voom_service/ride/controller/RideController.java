@@ -50,14 +50,12 @@ public class RideController {
     private final UserProfileService userProfileService;
     private final Simulator simulatorService;
     private final RideReportService rideReportService;
-    private final RatingService ratingService;
     private final RideService rideService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RatingService ratingService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
-        this.ratingService = ratingService;
         this.rideService = rideService;
         this.userProfileService = userProfileService;
         this.simulatorService = simulatorService;
@@ -160,6 +158,8 @@ public class RideController {
         return ResponseEntity.ok().build();
     }
 
+    //FIXME @nikola0231 move to FavoriteRouteController
+
     @PostMapping("/favorites")
     public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal VoomUserDetails userDetails, @Valid @RequestBody CreateFavoriteRouteRequest request) {
 
@@ -175,6 +175,8 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    //FIXME @nikola0231 move to FavoriteRouteController
+
     @GetMapping("/favorites")
     public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
@@ -187,6 +189,8 @@ public class RideController {
         List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
         return ResponseEntity.ok(favoriteRoutes);
     }
+
+    //FIXME @nikola0231 move to FavoriteRouteController
 
     @DeleteMapping("/favorites/{favoriteRouteId}")
     public ResponseEntity<Void> deleteFavoriteRoute(
@@ -258,16 +262,6 @@ public class RideController {
     @PostMapping("/{id}/report")
     public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
         rideReportService.reportRide(id, body.getMessage());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{rideId}/rate")
-    public ResponseEntity<Void> rateRide(
-            @PathVariable Long rideId,
-            @RequestBody RatingRequestDto request
-    ) {
-        ratingService.rateRide(rideId, request);
-        System.out.println(rideId);
         return ResponseEntity.noContent().build();
     }
 

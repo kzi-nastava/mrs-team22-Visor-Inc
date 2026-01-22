@@ -19,11 +19,9 @@ public class RatingController {
         this.ratingService = ratingService;
     }
 
-    @PostMapping("/rating/{rideId}")
-    public ResponseEntity<Void> rateRide(
-            @PathVariable Long rideId,
-            @RequestBody RatingRequestDto request
-    ) {
+    @PostMapping("{rideId}")
+    public ResponseEntity<Void> rateRide(@PathVariable Long rideId, @RequestBody RatingRequestDto request) {
+        //FIXME check if ride exists first
         ratingService.rateRide(rideId, request);
         System.out.println(rideId);
         return ResponseEntity.noContent().build();

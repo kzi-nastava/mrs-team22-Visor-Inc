@@ -73,7 +73,7 @@ rateRide(rideId: number, body: RatingRequestDto) {
   };
 
   return this.apiClient.post<RatingRequestDto, void>(
-    `/api/rides/${rideId}/rate`,
+    `/api/rating/${rideId}/rate`,
     body,
     config
   );
