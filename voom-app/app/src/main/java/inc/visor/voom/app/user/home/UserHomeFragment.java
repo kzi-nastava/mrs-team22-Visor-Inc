@@ -60,6 +60,9 @@ public class UserHomeFragment extends Fragment {
                 }
         ));
 
+        requireView().findViewById(R.id.btn_clear_route)
+                .setOnClickListener(v -> viewModel.clearRoute());
+
 
         observeViewModel();
     }
@@ -96,23 +99,21 @@ public class UserHomeFragment extends Fragment {
 
             marker.setPosition(new GeoPoint(p.lat, p.lng));
 
-            switch (p.type) {
-                case PICKUP:
-                    marker.setTitle("Pickup");
-                    break;
-                case STOP:
-                    marker.setTitle("Stop");
-                    break;
-                case DROPOFF:
-                    marker.setTitle("Dropoff");
-                    break;
-            }
+            marker.setIcon(
+                    requireContext().getDrawable(R.drawable.ic_location_24)
+            );
+
+            marker.setAnchor(
+                    org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,
+                    org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM
+            );
 
             mapView.getOverlays().add(marker);
         }
 
         mapView.invalidate();
     }
+
 
     private void renderForm(List<RoutePoint> points) {
 
