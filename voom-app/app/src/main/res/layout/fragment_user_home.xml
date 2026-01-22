@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toTopOf="@id/form_scroll"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.45">
+        app:layout_constraintHeight_percent="0.55">
 
         <org.osmdroid.views.MapView
             android:id="@+id/mapView"

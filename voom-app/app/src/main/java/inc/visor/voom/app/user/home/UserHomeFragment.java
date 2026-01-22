@@ -45,14 +45,32 @@ public class UserHomeFragment extends Fragment {
                 new MapEventsReceiver() {
                     @Override
                     public boolean singleTapConfirmedHelper(GeoPoint p) {
+
                         if (Boolean.TRUE.equals(viewModel.isRideLocked().getValue())) {
                             return false;
                         }
 
-                        viewModel.handleMapClick(p.getLatitude(), p.getLongitude());
+                        String address = getAddressFromLatLng(
+                                p.getLatitude(),
+                                p.getLongitude()
+                        );
+
+                        RoutePoint point = new RoutePoint(
+                                p.getLatitude(),
+                                p.getLongitude(),
+                                address,
+                                0,
+                                RoutePoint.PointType.DROPOFF
+                        );
+
+                        viewModel.handleMapClick(
+                                p.getLatitude(),
+                                p.getLongitude(),
+                                address
+                        );
+
                         return true;
                     }
-
                     @Override
                     public boolean longPressHelper(GeoPoint p) {
                         return false;
@@ -131,12 +149,12 @@ public class UserHomeFragment extends Fragment {
         }
 
         ((android.widget.EditText) pickup)
-                .setText("Lat: " + points.get(0).lat);
+                .setText(points.get(0).address);
 
         if (points.size() > 1) {
             RoutePoint last = points.get(points.size() - 1);
             ((android.widget.EditText) dropoff)
-                    .setText("Lat: " + last.lat);
+                    .setText(last.address);
         } else {
             ((android.widget.EditText) dropoff).setText("");
         }
@@ -172,6 +190,24 @@ public class UserHomeFragment extends Fragment {
         }
     }
 
+    private String getAddressFromLatLng(double lat, double lng) {
+        try {
+            android.location.Geocoder geocoder =
+                    new android.location.Geocoder(requireContext());
+
+            List<android.location.Address> addresses =
+                    geocoder.getFromLocation(lat, lng, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+                android.location.Address address = addresses.get(0);
+                return address.getAddressLine(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     @Override
     public void onResume() {
