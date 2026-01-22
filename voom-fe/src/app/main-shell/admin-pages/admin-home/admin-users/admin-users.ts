@@ -47,11 +47,13 @@ export class AdminUsers {
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
-  drivers$ = this.apiService.userApi.getUsers().pipe(
+  users$ = this.apiService.userApi.getUsers().pipe(
     map(response => response.data),
   );
 
-  users = toSignal(this.drivers$);
+  // userRoles$ =
+
+  users = toSignal(this.users$);
   selectedUser = signal<UserProfileDto | null>(null);
 
   protected openProfilePictureDialog() {
@@ -75,6 +77,7 @@ export class AdminUsers {
       phoneNumber: this.userGeneralForm.value.phoneNumber!,
       userStatus: UserStatus.INACTIVE,
       pfpUrl: null,
+      userRoleId: user.userRoleId,
     }
 
     this.apiService.userApi.updateUser(user.id!, updatedUserDto).pipe(

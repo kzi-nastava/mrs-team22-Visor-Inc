@@ -85,6 +85,7 @@ public class DriverService {
 
     public VehicleSummaryDto getVehicle(Long userId) {
 
+        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -107,6 +108,7 @@ public class DriverService {
 
     public VehicleSummaryDto updateVehicle(Long userId, VehicleSummaryDto request) {
 
+        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -143,6 +145,7 @@ public class DriverService {
     @Transactional
     public Driver createDriver(CreateDriverDto request) {
 
+        //FIXME @nikola0234
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
                 .orElseThrow(()
@@ -235,6 +238,8 @@ public class DriverService {
             List<RideRequestCreateDTO.DriverLocationDTO> snapshot
     ) {
 
+
+        //FIXME @nikola0234 move to Ride
         if (snapshot == null || snapshot.isEmpty()) {
             return null;
         }
@@ -282,6 +287,7 @@ public class DriverService {
     }
 
     private boolean vehicleMatches(Driver driver, RideRequest req) {
+        //FIXME @nikola0234 move to Vehicle/Ride
         Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
                 .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
 

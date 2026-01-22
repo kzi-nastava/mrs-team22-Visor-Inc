@@ -10,8 +10,6 @@ import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.ReportDriverRequestDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.person.service.UserProfileService;
-import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;

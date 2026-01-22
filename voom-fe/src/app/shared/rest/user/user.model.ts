@@ -16,4 +16,5 @@ export interface UserProfileDto {
   phoneNumber: string;
   birthDate: Date;
   address: string;
+  userRoleId: number;
 }

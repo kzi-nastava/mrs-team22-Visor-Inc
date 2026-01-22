@@ -1,4 +1,3 @@
-import ApiService from '../api-service';
 import {Api} from '../api';
 import {RequestConfig} from '../rest.model';
 import {UserProfileDto} from './user.model';

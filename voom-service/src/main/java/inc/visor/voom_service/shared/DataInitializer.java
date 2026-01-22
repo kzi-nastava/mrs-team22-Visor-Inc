@@ -86,6 +86,8 @@ public class DataInitializer implements ApplicationRunner {
             seedDrivers();
         }
 
+        seedUser();
+
         UserRole adminRole = userRoleRepository.findByRoleName("ADMIN").orElseThrow();
 
         Person person = new Person();
@@ -120,7 +122,6 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void seedDrivers() {
-
         final int NUMBER_OF_DRIVERS = 5;
 
         UserRole driverRole = userRoleRepository.findByRoleName("DRIVER").orElseThrow();
@@ -164,6 +165,31 @@ public class DataInitializer implements ApplicationRunner {
             vehicle.setVehicleType(vehicleTypes[i % vehicleTypes.length]);
 
             vehicleRepository.save(vehicle);
+        }
+    }
+
+    private void seedUser() {
+        final int NUMBER_OF_USERS = 5;
+
+        UserRole userRole = userRoleRepository.findByRoleName("USER").orElseThrow();
+
+        for (int i = 1; i <= NUMBER_OF_USERS; i++) {
+
+            Person person = new Person();
+            person.setFirstName("User" + i);
+            person.setLastName("Lastname" + i);
+            person.setAddress("Novi Sad, Street " + i);
+            person.setPhoneNumber("+38160123456" + i);
+            person.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
+            personRepository.save(person);
+
+            User user = new User();
+            user.setEmail("user" + i + "@gmail.com");
+            user.setPassword(passwordEncoder.encode("test1234"));
+            user.setUserRole(userRole);
+            user.setUserStatus(UserStatus.ACTIVE);
+            user.setPerson(person);
+            userRepository.save(user);
         }
     }
 

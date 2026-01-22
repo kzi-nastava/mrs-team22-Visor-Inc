@@ -23,5 +23,9 @@ public class UserRoleService {
         return userRoleRepository.findByRoleName(roleName);
     }
 
+    public Optional<UserRole> getUserRole(int roleId) {
+        return userRoleRepository.findById(roleId);
+    }
+
 
 }

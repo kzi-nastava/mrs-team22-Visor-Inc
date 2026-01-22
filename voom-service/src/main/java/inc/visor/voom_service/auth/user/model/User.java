@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.user.model;
 
+import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.person.model.Person;
 import jakarta.persistence.*;
@@ -55,10 +56,17 @@ public class User {
 
     public User() {}
 
-    public User(long userId, DriverSummaryDto driverSummaryDto) {
+    public User(long userId, DriverSummaryDto dto) {
         this.id = userId;
-        this.email = driverSummaryDto.getEmail();
-        this.userStatus = driverSummaryDto.getUserStatus();
+        this.email = dto.getEmail();
+        this.userStatus = dto.getUserStatus();
+    }
+
+    public User(long userId, Person person, UserStatus userStatus, UserRole userRole) {
+        this.userStatus = userStatus;
+        this.id = userId;
+        this.person = person;
+        this.userRole = userRole;
     }
 
     @Override
