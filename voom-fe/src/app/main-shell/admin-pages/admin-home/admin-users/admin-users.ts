@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatIcon} from '@angular/material/icon';
@@ -6,7 +6,7 @@ import {MatDivider} from '@angular/material/list';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ValueInputDate} from '../../../../shared/value-input/value-input-date/value-input-date';
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
-import { BehaviorSubject, filter, map, merge, scan } from 'rxjs';
+import { BehaviorSubject, filter, map, merge, scan, startWith } from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -47,6 +47,9 @@ export class AdminUsers {
     phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
   });
 
+  searchFormControl = new FormControl<string>('');
+  searchTerm = toSignal(this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())));
+
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
@@ -85,12 +88,20 @@ export class AdminUsers {
   );
 
   users = toSignal(this.users$);
+
+  filteredUsers = computed(() => {
+    const searchTerm = this.searchTerm();
+    const users = this.users();
+
+    if (!users || !searchTerm || !searchTerm.length) {
+      return users;
+    }
+
+    return users.filter(user => user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || user.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
+
   userRoles = toSignal(this.userRoles$);
   selectedUser = signal<UserProfileDto | null>(null);
-
-  protected openProfilePictureDialog() {
-
-  }
 
   protected saveGeneralInfo() {
     const user = this.selectedUser();

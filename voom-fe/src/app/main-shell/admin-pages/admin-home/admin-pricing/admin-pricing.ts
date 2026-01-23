@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {MatDivider} from '@angular/material/list';
@@ -7,7 +7,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { BehaviorSubject, catchError, filter, map, merge, Observable, of, scan } from 'rxjs';
+import { BehaviorSubject, catchError, filter, map, merge, Observable, of, scan, startWith } from 'rxjs';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
@@ -42,6 +42,9 @@ export class AdminPricing {
     price: new FormControl<number | null>({value: null, disabled: false}, [Validators.required]),
   });
 
+  searchFormControl = new FormControl<string>('');
+  searchTerm = toSignal(this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())));
+
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
@@ -73,6 +76,17 @@ export class AdminPricing {
   )
 
   vehicleTypes = toSignal(this.vehicleTypes$);
+
+  filteredVehicleTypes = computed(() => {
+    const searchTerm = this.searchTerm();
+    const vehicles = this.vehicleTypes();
+
+    if (!vehicles || !searchTerm || !searchTerm.length) {
+      return vehicles;
+    }
+
+    return vehicles.filter(vehicleType => vehicleType.type.toLowerCase().includes(searchTerm));
+  });
 
   selectedVehicleType = signal<VehicleTypeDto | null>(null);
 
