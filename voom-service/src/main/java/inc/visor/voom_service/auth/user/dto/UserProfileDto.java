@@ -22,6 +22,8 @@ public class UserProfileDto {
     private String address;
     private int userRoleId;
 
+    public UserProfileDto() {}
+
     public UserProfileDto(User user) {
         this.id = user.getId();
         this.firstName = user.getPerson().getFirstName();

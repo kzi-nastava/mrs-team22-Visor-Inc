@@ -11,7 +11,8 @@ import {map} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
-import {PriceDto} from '../../../../shared/rest/price/price.model';
+import {MatDialog} from '@angular/material/dialog';
+import {AdminPricingDialog} from './admin-pricing-dialog/admin-pricing-dialog';
 
 export const ROUTE_ADMIN_PRICING = "pricing"
 
@@ -52,54 +53,34 @@ export class AdminPricing {
     map(response => response.data),
   );
 
-  prices$ = this.apiService.priceApi.getPrices().pipe(
-    map(response => response.data),
-  );
-
   vehicleTypes = toSignal(this.vehicleTypes$);
-  prices = toSignal(this.prices$);
 
   selectedVehicleType = signal<VehicleTypeDto | null>(null);
-  selectedPrice = signal<PriceDto | null>(null)
 
-  constructor() {
-  }
-
-  protected openProfilePictureDialog() {
-
-  }
-
-  protected saveGeneralInfo() {
-
+  constructor(private dialog: MatDialog) {
   }
 
   protected selectVehicleType(vehicleType: VehicleTypeDto) {
-    const prices = this.prices();
 
-    if (!prices || !vehicleType) {
-      return;
-    }
-
-    const price = prices.find(price => price.vehicleTypeId === vehicleType.id) ?? null;
-
-    if (!price) {
+    if (!vehicleType) {
       return;
     }
 
     this.priceForm.setValue({
       type: vehicleType.type,
-      price: price.pricePerKm
+      price: vehicleType.price
     });
 
     this.priceForm.get("type")?.disable();
     this.priceForm.get("price")?.enable();
 
     this.selectedVehicleType.set(vehicleType);
-    this.selectedPrice.set(price);
   }
 
   protected addVehicleType() {
+    this.dialog.open(AdminPricingDialog).afterClosed().subscribe((vehicleType) => {
 
+    })
   }
 
   protected savePrice() {

@@ -84,6 +84,10 @@ public class DriverService {
         return;
     }
 
+    public Driver create(Driver driver) {
+        return driverRepository.save(driver);
+    }
+
     public VehicleSummaryDto getVehicle(Long userId) {
 
         //FIXME @nikola0234

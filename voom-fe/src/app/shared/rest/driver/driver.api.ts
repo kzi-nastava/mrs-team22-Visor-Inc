@@ -1,4 +1,4 @@
-import {DriverDto} from './driver.model';
+import {AdminCreateDriverDto, DriverDto} from './driver.model';
 import {Api} from '../api';
 import {ApiClient} from '../api-client';
 import {RequestConfig} from '../rest.model';
@@ -29,6 +29,18 @@ export class DriverApi extends Api {
     };
 
     return this.apiClient.get<void, DriverDto>(`/api/drivers/${driverId}`, config);
+  }
+
+  createDriver(dto: AdminCreateDriverDto) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.put<AdminCreateDriverDto, DriverDto>(`/api/drivers/admin`, dto, config);
   }
 
   updateDriver(driverId: number, driverDto: DriverDto) {

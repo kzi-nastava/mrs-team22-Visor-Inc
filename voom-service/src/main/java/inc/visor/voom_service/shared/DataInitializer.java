@@ -1,28 +1,30 @@
 package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.auth.user.model.Permission;
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserRole;
-import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.repository.PermissionRepository;
-import inc.visor.voom_service.auth.user.repository.UserRepository;
-import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
-import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverStatus;
-import inc.visor.voom_service.driver.repository.DriverRepository;
-import inc.visor.voom_service.person.model.Person;
-import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.price.dto.CreatePriceDto;
 import inc.visor.voom_service.price.model.Price;
 import inc.visor.voom_service.price.repository.PriceRepository;
-import inc.visor.voom_service.vehicle.model.Vehicle;
-import inc.visor.voom_service.vehicle.model.VehicleType;
-import inc.visor.voom_service.vehicle.repository.VehicleRepository;
-import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.repository.UserRepository;
+import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.person.model.Person;
+import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.vehicle.model.Vehicle;
+import inc.visor.voom_service.vehicle.model.VehicleType;
+import inc.visor.voom_service.vehicle.repository.VehicleRepository;
+import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -39,9 +41,8 @@ public class DataInitializer implements ApplicationRunner {
     private final DriverRepository driverRepository;
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
-    private final PriceRepository priceRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, PriceRepository priceRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -50,7 +51,6 @@ public class DataInitializer implements ApplicationRunner {
         this.driverRepository = driverRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.priceRepository = priceRepository;
     }
 
     @Override
@@ -121,8 +121,8 @@ public class DataInitializer implements ApplicationRunner {
     private void createVehicleType(String name) {
         VehicleType type = new VehicleType();
         type.setType(name);
+        type.setPrice(10.0);
         type = vehicleTypeRepository.save(type);
-        priceRepository.save(new Price(10.0, type));
     }
 
     private void seedDrivers() {

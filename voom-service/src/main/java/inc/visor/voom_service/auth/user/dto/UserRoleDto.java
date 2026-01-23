@@ -10,6 +10,9 @@ public class UserRoleDto {
     private int id;
     private String roleName;
 
+    public UserRoleDto() {
+    }
+
     public UserRoleDto(UserRole userRole) {
         this.id = userRole.getId();
         this.roleName = userRole.getRoleName();

@@ -1,15 +1,14 @@
 package inc.visor.voom_service.ride.service;
 
-import java.util.Comparator;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.utils.GeoUtil;
 import inc.visor.voom_service.vehicle.model.VehicleType;
+import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class RideEstimateService {
@@ -23,9 +22,7 @@ public class RideEstimateService {
         validateRoute(dto);
 
         double distanceKm = calculateTotalDistance(dto.route.points);
-        double price =
-            vehicleType.getBasePrice()
-            + distanceKm * PRICE_PER_KM;
+        double price = vehicleType.getPrice()+ distanceKm * PRICE_PER_KM;
 
         return new RideEstimationResult(
             round2(distanceKm),
@@ -41,7 +38,7 @@ public class RideEstimateService {
 
         if (dto.route.points.size() < 2) {
             throw new IllegalArgumentException(
-                "Route must contain at least pickup and dropoff"
+                "Route must contain at least pickup and drop off"
             );
         }
     }
@@ -75,7 +72,7 @@ public class RideEstimateService {
     ) {
         List<RoutePointDto> points =
             dto.stream()
-                .sorted(Comparator.comparingInt(p -> p.getOrderIndex()))
+                .sorted(Comparator.comparingInt(RoutePointDto::getOrderIndex))
                 .toList();
 
         double total = 0.0;

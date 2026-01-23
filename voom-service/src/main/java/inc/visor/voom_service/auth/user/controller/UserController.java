@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.user.controller;
 
+import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
@@ -41,7 +42,14 @@ public class UserController {
         return ResponseEntity.ok(new UserProfileDto(user));
     }
 
-    //TODO add createUser;
+    @PostMapping
+    public ResponseEntity<UserProfileDto> createUser(@RequestBody CreateUserDto dto) {
+        Person person = new Person(dto);
+        person = this.personService.create(person);
+        UserRole userRole = userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
+        User user = new User(dto, person, userRole);
+        return ResponseEntity.ok(new UserProfileDto(user));
+    }
 
     @PutMapping("{userId}")
     public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long personId, @RequestBody UserProfileDto dto) {
