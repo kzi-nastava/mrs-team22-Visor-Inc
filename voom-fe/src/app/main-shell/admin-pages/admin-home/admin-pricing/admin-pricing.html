@@ -1,11 +1,11 @@
 <mat-drawer-container class="w-full h-full">
   <mat-drawer mode="side" opened class="pt-2 py-2 min-w-64">
     <div class="p-2 space-y-2">
-      @if (vehicleTypes(); as vehicleTypes) {
         <div class="flex items-center space-x-4 pb-4">
-          <app-value-input-string class="w-44" [label]="'Search'"/>
+          <app-value-input-string class="w-44" [label]="'Search'" [formControl]="searchFormControl"/>
           <mat-icon class="cursor-pointer scale-150" (click)="addVehicleType()">add_circle</mat-icon>
         </div>
+      @if (filteredVehicleTypes(); as vehicleTypes) {
         @for (vehicleType of vehicleTypes; track vehicleType) {
           @if (vehicleType.id === selectedVehicleType()?.id) {
             <mat-card appearance="filled" class="py-4 px-2 cursor-pointer outlined" (click)="selectVehicleType(vehicleType)">

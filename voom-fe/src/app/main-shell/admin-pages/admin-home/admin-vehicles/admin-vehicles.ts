@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatDivider} from '@angular/material/list';
@@ -7,7 +7,7 @@ import {MatIcon} from '@angular/material/icon';
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { BehaviorSubject, catchError, filter, map, merge, of, scan } from 'rxjs';
+import { BehaviorSubject, catchError, filter, map, merge, of, scan, startWith } from 'rxjs';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {VehicleDto} from '../../../../shared/rest/vehicle/vehicle.model';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
@@ -67,6 +67,9 @@ export class AdminVehicles {
     ])
   });
 
+  searchFormControl = new FormControl<string>('');
+  searchTerm = toSignal(this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())));
+
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
@@ -102,6 +105,18 @@ export class AdminVehicles {
   );
 
   vehicles = toSignal(this.vehicles$);
+
+  filteredVehicles = computed(() => {
+    const searchTerm = this.searchTerm();
+    const vehicles = this.vehicles();
+
+    if (!vehicles || !searchTerm || !searchTerm.length) {
+      return vehicles;
+    }
+
+    return vehicles.filter(vehicle => vehicle.model.toLowerCase().includes(searchTerm));
+  });
+
   vehicleTypes = toSignal(this.vehicleTypes$);
 
   selectedVehicle = signal<VehicleDto | null>(null);
