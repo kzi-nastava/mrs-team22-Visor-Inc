@@ -8,7 +8,7 @@ import {ValueInputString} from '../../../../shared/value-input/value-input-strin
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { BehaviorSubject, catchError, filter, map, merge, Observable, of, scan } from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
 import {MatDialog} from '@angular/material/dialog';
@@ -54,9 +54,10 @@ export class AdminPricing {
 
   vehicleTypes$= merge(
     this.initialVehicleTypes$.pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'initial', value: response} })),
-    this.vehicleTypeCreate$.asObservable().pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'create', value: [response]} })),
-    this.vehicleTypeUpdate$.asObservable().pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'update', value: [response]} })),
+    this.vehicleTypeCreate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicleType => !!vehicleType), map(response => { return {type:'create', value: [response]} })),
+    this.vehicleTypeUpdate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicleType => !!vehicleType), map(response => { return {type:'update', value: [response]} })),
   ).pipe(
+    takeUntilDestroyed(),
     scan((acc, obj) => {
       switch (obj.type) {
         case 'initial':
@@ -84,7 +85,7 @@ export class AdminPricing {
       return;
     }
 
-    this.priceForm.setValue({
+    this.priceForm.patchValue({
       type: vehicleType.type,
       price: vehicleType.price
     });
@@ -98,10 +99,10 @@ export class AdminPricing {
   protected addVehicleType() {
     this.dialog.open(AdminPricingDialog).afterClosed().subscribe((vehicleType) => {
       if (vehicleType) {
-        this.snackBar.open("Vehicle type added successfully", '', {horizontalPosition: "right"});
+        this.snackBar.open("Vehicle type added successfully", '', {horizontalPosition: "right", duration : 3000});
         this.vehicleTypeCreate$.next(vehicleType);
       } else {
-        this.snackBar.open("Vehicle type add failed", '', {horizontalPosition: "right"});
+        this.snackBar.open("Vehicle type add failed", '', {horizontalPosition: "right", duration : 3000});
       }
     });
   }
@@ -119,15 +120,15 @@ export class AdminPricing {
     this.apiService.vehicleTypeApi.updateVehicleType(vehicleType.id, vehicleType).pipe(
       map(response => response.data),
       catchError(error => {
-        this.snackBar.open(error, '', {horizontalPosition: "right"});
+        this.snackBar.open(error, '', {horizontalPosition: "right", duration : 3000});
         return of(null);
       }),
     ).subscribe((vehicleType) => {
       if (vehicleType) {
-        this.snackBar.open("Vehicle type updated successfully", '', {horizontalPosition: "right"});
+        this.snackBar.open("Vehicle type updated successfully", '', {horizontalPosition: "right", duration : 3000});
         this.vehicleTypeUpdate$.next(vehicleType);
       } else {
-        this.snackBar.open("Vehicle type update failed", '', {horizontalPosition: "right"});
+        this.snackBar.open("Vehicle type update failed", '', {horizontalPosition: "right", duration : 3000});
       }
     });
   }

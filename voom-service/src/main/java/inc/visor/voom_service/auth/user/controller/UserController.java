@@ -52,12 +52,12 @@ public class UserController {
     }
 
     @PutMapping("{userId}")
-    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long personId, @RequestBody UserProfileDto dto) {
-        User user = this.userService.getUser(personId).orElseThrow(NotFoundException::new);
+    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long userId, @RequestBody UserProfileDto dto) {
+        User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         UserRole userRole = this.userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
         Person person = new Person(user.getPerson().getId(), dto);
         person = this.personService.update(person);
-        user = new User(personId, person, UserStatus.valueOf(dto.getUserStatus()), userRole);
+        user = new User(person, dto, userRole);
         user = this.userService.update(user);
         return ResponseEntity.ok(new UserProfileDto(user));
     }

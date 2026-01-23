@@ -6,13 +6,14 @@ import {MatDivider} from '@angular/material/list';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ValueInputDate} from '../../../../shared/value-input/value-input-date/value-input-date';
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
-import {map} from 'rxjs';
+import { BehaviorSubject, filter, map, merge, scan } from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {toSignal} from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {UserProfileDto, UserStatus} from '../../../../shared/rest/user/user.model';
 import {MatDialog} from '@angular/material/dialog';
 import {AdminUsersDialog} from './admin-users-dialog/admin-users-dialog';
+import { VehicleTypeDto } from '../../../../shared/rest/vehicle/vehicle-type.model';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -52,9 +53,31 @@ export class AdminUsers {
   constructor(private dialog: MatDialog) {
   }
 
-
-  users$ = this.apiService.userApi.getUsers().pipe(
+  initialUsers$ = this.apiService.userApi.getUsers().pipe(
     map(response => response.data),
+  );
+
+  userCreate$ = new BehaviorSubject<UserProfileDto | null>(null);
+  userUpdate$ = new BehaviorSubject<UserProfileDto | null>(null);
+
+  users$= merge(
+    this.initialUsers$.pipe(filter(user => !!user), map(response => { return {type:'initial', value: response} })),
+    this.userCreate$.asObservable().pipe(takeUntilDestroyed(), filter(user => !!user), map(response => { return {type:'create', value: [response]} })),
+    this.userUpdate$.asObservable().pipe(takeUntilDestroyed(), filter(user => !!user), map(response => { return {type:'update', value: [response]} })),
+  ).pipe(
+    takeUntilDestroyed(),
+    scan((acc, obj) => {
+      switch (obj.type) {
+        case 'initial':
+          return obj.value;
+        case 'create':
+          return [...acc, ...obj.value];
+        case 'update':
+          return [...acc.filter(user => user.id !== obj.value[0].id), obj.value[0]];
+        default:
+          return [];
+      }
+    }, [] as UserProfileDto[]),
   );
 
   userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(
@@ -80,11 +103,11 @@ export class AdminUsers {
       id: user.id,
       firstName: this.userGeneralForm.value.firstName!,
       lastName: this.userGeneralForm.value.lastName!,
-      birthDate: this.userGeneralForm.value.birthDate!,
+      birthDate: this.userGeneralForm.value.birthDate!.toISOString(),
       email: this.userGeneralForm.value.email!,
       address: this.userGeneralForm.value.address!,
       phoneNumber: this.userGeneralForm.value.phoneNumber!,
-      userStatus: UserStatus.INACTIVE,
+      userStatus: 'INACTIVE',
       pfpUrl: null,
       userRoleId: user.userRoleId,
     }
@@ -93,24 +116,33 @@ export class AdminUsers {
       map(response => response.data),
     ).subscribe((user) => {
       if (user) {
-        this.snackBar.open("User updated successfully");
-        this.userGeneralForm.patchValue(user);
-        //TODO on update update users$
+        this.snackBar.open("User updated successfully", '', {horizontalPosition: "right", duration : 3000});
+        this.userUpdate$.next(user);
       } else {
-        this.snackBar.open("User update failed");
+        this.snackBar.open("User update failed",'', {horizontalPosition: "right", duration : 3000});
       }
     });
   }
 
   protected selectUser(user: UserProfileDto) {
     this.selectedUser.set(user);
-    this.userGeneralForm.patchValue(user);
-  }
+    this.userGeneralForm.patchValue({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      birthDate: user.birthDate ? new Date(user.birthDate) : null,
+      email: user.email,
+      address: user.address,
+      phoneNumber: user.phoneNumber,
+    });
+ }
 
   protected addUser() {
-    this.dialog.open(AdminUsersDialog).afterClosed().subscribe((result) => {
-      if (result) {
-        //TODO on update update users$
+    this.dialog.open(AdminUsersDialog).afterClosed().subscribe((user) => {
+      if (user) {
+        this.snackBar.open("User added successfully", '', {horizontalPosition: "right", duration : 3000});
+        this.userCreate$.next(user);
+      } else {
+        this.snackBar.open("User add failed",'', {horizontalPosition: "right", duration : 3000});
       }
     })
   }

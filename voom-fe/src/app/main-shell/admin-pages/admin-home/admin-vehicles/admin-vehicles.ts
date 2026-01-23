@@ -7,8 +7,8 @@ import {MatIcon} from '@angular/material/icon';
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {map} from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
+import { BehaviorSubject, catchError, filter, map, merge, of, scan } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {VehicleDto} from '../../../../shared/rest/vehicle/vehicle.model';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
@@ -17,6 +17,7 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {AdminUsersDialog} from '../admin-users/admin-users-dialog/admin-users-dialog';
 import {AdminVehiclesDialog} from './admin-vehicles-dialog/admin-vehicles-dialog';
+import { UserProfileDto } from '../../../../shared/rest/user/user.model';
 
 export const ROUTE_ADMIN_VEHICLES = "vehicles";
 
@@ -69,8 +70,31 @@ export class AdminVehicles {
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
-  vehicles$ = this.apiService.vehicleApi.getVehicles().pipe(
+  initialVehicles$ = this.apiService.vehicleApi.getVehicles().pipe(
     map(response => response.data),
+  );
+
+  vehicleCreate$ = new BehaviorSubject<VehicleDto | null>(null);
+  vehicleUpdate$ = new BehaviorSubject<VehicleDto | null>(null);
+
+  vehicles$= merge(
+    this.initialVehicles$.pipe(filter(vehicle => !!vehicle), map(response => { return {type:'initial', value: response} })),
+    this.vehicleCreate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicle => !!vehicle), map(response => { return {type:'create', value: [response]} })),
+    this.vehicleUpdate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicle => !!vehicle), map(response => { return {type:'update', value: [response]} })),
+  ).pipe(
+    takeUntilDestroyed(),
+    scan((acc, obj) => {
+      switch (obj.type) {
+        case 'initial':
+          return obj.value;
+        case 'create':
+          return [...acc, ...obj.value];
+        case 'update':
+          return [...acc.filter(vehicle => vehicle.id !== obj.value[0].id), obj.value[0]];
+        default:
+          return [];
+      }
+    }, [] as VehicleDto[]),
   );
 
   vehicleTypes$ = this.apiService.vehicleTypeApi.getVehicleTypes().pipe(
@@ -102,7 +126,7 @@ export class AdminVehicles {
     this.selectedVehicleType.set(vehicleType);
     this.selectedVehicle.set(vehicle);
 
-    this.vehicleForm.setValue({
+    this.vehicleForm.patchValue({
       driver: vehicle.driverId.toString(),
       vehicleType: vehicleType.type,
       year: vehicle.year,
@@ -121,22 +145,50 @@ export class AdminVehicles {
     this.vehicleForm.get("babySeat")?.enable();
     this.vehicleForm.get("petFriendly")?.enable();
     this.vehicleForm.get("numberOfSeats")?.enable();
-
   }
 
   protected addVehicle() {
-    this.dialog.open(AdminVehiclesDialog).afterClosed().subscribe((result) => {
-      if (result) {
-        //TODO implement update
+    this.dialog.open(AdminVehiclesDialog).afterClosed().subscribe((vehicle) => {
+      if (vehicle) {
+        this.snackBar.open("Vehicle added successfully", '', {horizontalPosition: "right", duration : 3000});
+        this.vehicleCreate$.next(vehicle);
+      } else {
+        this.snackBar.open("Vehicle add failed",'', {horizontalPosition: "right", duration : 3000});
       }
-    })
+    });
   }
 
   protected saveVehicle() {
+    const vehicle = this.selectedVehicle();
+    const vehicleType = this.selectedVehicleType();
+
+    if (!vehicle || !vehicleType) {
+      return;
+    }
+
+    vehicle.model = this.vehicleForm.get("model")?.value!;
+    vehicle.year = this.vehicleForm.get("year")?.value!;
+    vehicle.licensePlate = this.vehicleForm.get("licensePlate")?.value!;
+    vehicle.numberOfSeats = this.vehicleForm.get("numberOfSeats")?.value!;
+    vehicle.babySeat = this.vehicleForm.get("babySeat")?.value!;
+    vehicle.petFriendly = this.vehicleForm.get("petFriendly")?.value!;
+
+    this.apiService.vehicleApi.updateVehicle(vehicle.id, vehicle).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.snackBar.open(error, '', {horizontalPosition: "right", duration : 3000});
+        return of(null);
+      }),
+    ).subscribe((vehicleType) => {
+      if (vehicleType) {
+        this.snackBar.open("Vehicle updated successfully", '', {horizontalPosition: "right", duration : 3000});
+        this.vehicleUpdate$.next(vehicleType);
+      } else {
+        this.snackBar.open("Vehicle update failed", '', {horizontalPosition: "right", duration : 3000});
+      }
+    });
+
 
   }
 
-  protected deleteVehicle() {
-
-  }
 }
