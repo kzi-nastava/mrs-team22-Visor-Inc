@@ -7,7 +7,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import { BehaviorSubject, catchError, map, merge, Observable, of, scan } from 'rxjs';
+import { BehaviorSubject, catchError, filter, map, merge, Observable, of, scan } from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
@@ -53,22 +53,22 @@ export class AdminPricing {
   vehicleTypeUpdate$ = new BehaviorSubject<VehicleTypeDto | null>(null);
 
   vehicleTypes$= merge(
-    this.initialVehicleTypes$.pipe(map(response => { return {type:'initial', value: response} })),
-    this.vehicleTypeCreate$.asObservable().pipe(map(response => { return {type:'create', value: [response]} })),
-    this.vehicleTypeUpdate$.asObservable().pipe(map(response => { return {type:'update', value: [response]} })),
-  // ).pipe(
-  //   scan((acc, obj) => {
-  //     switch (obj.type) {
-  //       case 'initial':
-  //         return obj.value;
-  //       case 'create':
-  //         return [...acc, ...obj.value];
-  //       case 'update':
-  //         return acc.filter();
-  //       default:
-  //         return [];
-  //     }
-  //   }, [] as VehicleTypeDto[]),
+    this.initialVehicleTypes$.pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'initial', value: response} })),
+    this.vehicleTypeCreate$.asObservable().pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'create', value: [response]} })),
+    this.vehicleTypeUpdate$.asObservable().pipe(filter(vehicleType => !!vehicleType), map(response => { return {type:'update', value: [response]} })),
+  ).pipe(
+    scan((acc, obj) => {
+      switch (obj.type) {
+        case 'initial':
+          return obj.value;
+        case 'create':
+          return [...acc, ...obj.value];
+        case 'update':
+          return [...acc.filter(vehicleType => vehicleType.id !== obj.value[0].id), obj.value[0]];
+        default:
+          return [];
+      }
+    }, [] as VehicleTypeDto[]),
   )
 
   vehicleTypes = toSignal(this.vehicleTypes$);
