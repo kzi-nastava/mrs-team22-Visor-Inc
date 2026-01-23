@@ -18,11 +18,11 @@ export class AdminVehiclesDialog {
   constructor(private dialogRef: MatDialogRef<AdminVehiclesDialog>) {
   }
 
-  protected submit() {
+  protected cancel() {
     this.dialogRef.close();
   }
 
-  protected cancel() {
+  protected submit() {
     this.dialogRef.close();
   }
 }

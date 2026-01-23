@@ -7,7 +7,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {map} from 'rxjs';
+import { BehaviorSubject, catchError, map, merge, Observable, of, scan } from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
@@ -39,19 +39,37 @@ export class AdminPricing {
 
   priceForm = new FormGroup({
     type: new FormControl<string>({value: '', disabled: true}, [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-      price: new FormControl<number | null>({value: null, disabled: false}, [Validators.required]),
+    price: new FormControl<number | null>({value: null, disabled: false}, [Validators.required]),
   });
 
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
-  protected savePricing() {
-
-  }
-
-  vehicleTypes$ = this.apiService.vehicleTypeApi.getVehicleTypes().pipe(
+  initialVehicleTypes$ = this.apiService.vehicleTypeApi.getVehicleTypes().pipe(
     map(response => response.data),
   );
+
+  vehicleTypeCreate$ = new BehaviorSubject<VehicleTypeDto | null>(null);
+  vehicleTypeUpdate$ = new BehaviorSubject<VehicleTypeDto | null>(null);
+
+  vehicleTypes$= merge(
+    this.initialVehicleTypes$.pipe(map(response => { return {type:'initial', value: response} })),
+    this.vehicleTypeCreate$.asObservable().pipe(map(response => { return {type:'create', value: [response]} })),
+    this.vehicleTypeUpdate$.asObservable().pipe(map(response => { return {type:'update', value: [response]} })),
+  // ).pipe(
+  //   scan((acc, obj) => {
+  //     switch (obj.type) {
+  //       case 'initial':
+  //         return obj.value;
+  //       case 'create':
+  //         return [...acc, ...obj.value];
+  //       case 'update':
+  //         return acc.filter();
+  //       default:
+  //         return [];
+  //     }
+  //   }, [] as VehicleTypeDto[]),
+  )
 
   vehicleTypes = toSignal(this.vehicleTypes$);
 
@@ -79,15 +97,38 @@ export class AdminPricing {
 
   protected addVehicleType() {
     this.dialog.open(AdminPricingDialog).afterClosed().subscribe((vehicleType) => {
-
-    })
+      if (vehicleType) {
+        this.snackBar.open("Vehicle type added successfully", '', {horizontalPosition: "right"});
+        this.vehicleTypeCreate$.next(vehicleType);
+      } else {
+        this.snackBar.open("Vehicle type add failed", '', {horizontalPosition: "right"});
+      }
+    });
   }
 
   protected savePrice() {
+    const vehicleType = this.selectedVehicleType();
+    const price = this.priceForm.get("price")?.value;
 
-  }
+    if (!vehicleType || !price) {
+      return;
+    }
 
-  protected deleteVehicleType() {
+    vehicleType.price = price;
 
+    this.apiService.vehicleTypeApi.updateVehicleType(vehicleType.id, vehicleType).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.snackBar.open(error, '', {horizontalPosition: "right"});
+        return of(null);
+      }),
+    ).subscribe((vehicleType) => {
+      if (vehicleType) {
+        this.snackBar.open("Vehicle type updated successfully", '', {horizontalPosition: "right"});
+        this.vehicleTypeUpdate$.next(vehicleType);
+      } else {
+        this.snackBar.open("Vehicle type update failed", '', {horizontalPosition: "right"});
+      }
+    });
   }
 }
