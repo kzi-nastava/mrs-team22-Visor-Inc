@@ -13,6 +13,8 @@ import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
+import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
@@ -34,13 +36,15 @@ public class DriverController {
     private final ActivationTokenService activationTokenService;
     private final UserService userService;
     private final PersonService personService;
+    private final UserProfileService userProfileService;
     private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
 
-    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService) {
+    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService, UserProfileService userProfileService) {
         this.driverService = driverService;
         this.activationTokenService = activationTokenService;
         this.userService = userService;
         this.personService = personService;
+        this.userProfileService = userProfileService;
     }
 
     @PostMapping
@@ -156,6 +160,22 @@ public class DriverController {
     @PutMapping("/{driverId}/status")
     public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, @RequestParam String status) {
         DriverSummaryDto response = new DriverSummaryDto();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/active-ride")
+    public ResponseEntity<ActiveRideDto> getActiveRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = user.getId();
+
+        ActiveRideDto response = driverService.getActiveRide(userId);
+
         return ResponseEntity.ok(response);
     }
 

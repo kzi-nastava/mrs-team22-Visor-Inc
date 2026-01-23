@@ -19,15 +19,17 @@ public class RideLocationBroadcaster {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @Scheduled(fixedRate = UPDATE_RATE)
-    public void broadcastRideLocation() {
-
-        // we will also use simulation here with actual ride waypoints for update
-
-        messagingTemplate.convertAndSend(
-                "/topic/rides/" + activeRide.getRideId() + "/location",
-                activeRide
-        );
-    }
+//    @Scheduled(fixedRate = UPDATE_RATE)
+//    public void broadcastRideLocation() {
+//
+//        // we will also use simulation here with actual ride waypoints for update
+//
+//        System.out.println("Broadcasting Ride Location");
+//
+//        messagingTemplate.convertAndSend(
+//                "/topic/rides/" + activeRide.getRideId() + "/location",
+//                activeRide
+//        );
+//    }
 
 }
