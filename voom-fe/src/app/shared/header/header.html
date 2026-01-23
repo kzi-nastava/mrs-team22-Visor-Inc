@@ -5,13 +5,19 @@
 
   <div class="flex items-center space-x-2">
     @if (isAuthenticated()) {
-      <button mat-button (click)="favoriteRoutes()">Favorite Routes</button>
-      <button mat-button (click)="rideHistory()">Ride History</button>
-      <button mat-button (click)="signOut()">Sign Out</button>
-      <button mat-button class="flex items-center space-x-2" (click)="profile()">
-        <mat-icon>account_circle</mat-icon>
-        <div>Profile</div>
-      </button>
+      @if (user(); as user) {
+        @if (user.role === 'USER') {
+          <button mat-button (click)="favoriteRoutes()">Favorite Routes</button>
+        }
+        @if (user.role === 'USER' || user.role === 'DRIVER') {
+          <button mat-button (click)="rideHistory()">Ride History</button>
+        }
+        <button mat-button (click)="signOut()">Sign Out</button>
+        <button mat-button class="flex items-center space-x-2" (click)="profile()">
+          <mat-icon>account_circle</mat-icon>
+          <div>Profile</div>
+        </button>
+      }
     } @else {
       <button mat-button (click)="register()">Register</button>
       <button mat-flat-button (click)="login()">Login</button>
