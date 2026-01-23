@@ -16,7 +16,7 @@ public class SimulationPublisher {
     }
 
     public void publishPosition(long driverId, LatLng pos, boolean finished) {
-        System.out.println("sending");
+//        System.out.println("sending");
         messaging.convertAndSend(
                 "/topic/drivers-positions",
                 new LocationDto(driverId, pos.lat(), pos.lng(), finished)
