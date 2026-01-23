@@ -5,6 +5,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
   private final HandlerExceptionResolver exceptionResolver;
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public JwtFilter(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver, JwtService jwtService, UserDetailsService userDetailsService) {
     this.exceptionResolver = exceptionResolver;
@@ -57,6 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
       chain.doFilter(request, response);
     } catch (Exception e) {
+      logger.error("Exception in JwtFilter: ", e);  // Add this line
       exceptionResolver.resolveException(request, response, null, e);
     }
   }

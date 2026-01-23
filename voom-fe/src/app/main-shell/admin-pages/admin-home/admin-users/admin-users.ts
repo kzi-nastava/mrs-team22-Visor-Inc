@@ -11,7 +11,6 @@ import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {UserProfileDto, UserStatus} from '../../../../shared/rest/user/user.model';
-import {MatMiniFabButton} from '@angular/material/button';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -29,8 +28,7 @@ export const ROUTE_ADMIN_USERS = "users";
     MatDivider,
     ValueInputDate,
     FormsModule,
-    ReactiveFormsModule,
-    MatMiniFabButton
+    ReactiveFormsModule
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',

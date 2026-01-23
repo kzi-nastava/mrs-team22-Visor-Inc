@@ -54,7 +54,7 @@
   </div>
   <div class="flex justify-center items-center space-x-4">
     <span class="text-lg text-primary font-medium">PASSIVE</span>
-    <mat-slide-toggle (change)="onToggleChange($event)"></mat-slide-toggle>
+    <mat-slide-toggle [checked]="driverState() === 'ACTIVE'" (change)="onToggleChange($event)"></mat-slide-toggle>
     <span class="text-lg text-primary font-medium">ACTIVE</span>
   </div>
 </div>

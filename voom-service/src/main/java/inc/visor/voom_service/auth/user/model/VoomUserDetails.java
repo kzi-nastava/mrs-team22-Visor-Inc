@@ -20,15 +20,8 @@ public class VoomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        authorities.add(
-                new SimpleGrantedAuthority(
-                        "ROLE_" + user.getUserRole().getRoleName()
-                )
-        );
-
-        authorities.addAll(
-                user.getUserRole().getPermissions()
-        );
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().getRoleName()));
+        authorities.addAll(user.getUserRole().getPermissions());
 
         return authorities;
     }

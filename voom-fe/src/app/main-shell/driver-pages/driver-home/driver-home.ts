@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, effect, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, inject, signal, ViewChild} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {
   ApexChart,
@@ -16,10 +16,14 @@ import {DriverAssignedDto, RideApi,} from '../../user-pages/home/home.api';
 import {RoutePoint} from '../../user-pages/home/home';
 import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
 import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {map} from 'rxjs';
+import {BehaviorSubject, catchError, filter, map, merge, of, switchMap} from 'rxjs';
 import {Map} from '../../../shared/map/map';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ArrivalDialog} from '../arrival-dialog/arrival-dialog';
+import {DriverState, DriverStateChangeDto} from '../../../shared/rest/driver/driver-activity.model';
+import ApiService from '../../../shared/rest/api-service';
+import {AuthenticationService} from '../../../shared/service/authentication-service';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 
 export const ROUTE_DRIVER_HOME = 'home';
 
@@ -60,6 +64,36 @@ export class DriverHome implements AfterViewInit {
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
   ridePhase = signal<RidePhase>('IDLE');
+
+  private apiService = inject(ApiService);
+  private authenticationService = inject(AuthenticationService);
+
+  driver = toSignal(this.authenticationService.activeUser$);
+
+  initialDriverState$ = this.authenticationService.activeUser$.pipe(
+    filter(user => !!user),
+    takeUntilDestroyed(),
+    switchMap((user) => {
+      return this.apiService.driverActivityApi.getDriverState(user.id).pipe(
+        map(response => response.data),
+        catchError(error => {
+          this.snackBar.open("There was an error", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
+          return of(null);
+        }),
+      );
+    }),
+  );
+
+  driverStateUpdate = new BehaviorSubject<DriverStateChangeDto | null>(null);
+
+  driverState$ = merge(
+    this.initialDriverState$,
+    this.driverStateUpdate.asObservable(),
+  ).pipe(
+    map((driverState) => driverState?.currentState ?? 'INACTIVE'),
+  );
+
+  driverState = toSignal(this.driverState$);
 
   public chartOptions: Partial<ChartOptions>;
   public activeTimeOptions: Partial<ChartOptions>;
@@ -119,6 +153,38 @@ export class DriverHome implements AfterViewInit {
         this.openArrivalDialog();
       }
     });
+  }
+
+
+  onToggleChange(event: MatSlideToggleChange) {
+    const user = this.driver();
+
+    if (!user) {
+      return;
+    }
+
+    const dto: DriverStateChangeDto = {
+      userId: user.id,
+      currentState: event.checked ? 'ACTIVE' : 'INACTIVE',
+      performedAt: new Date().toISOString(),
+    }
+
+    this.apiService.driverActivityApi.changeDriverState(dto).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.snackBar.open("There was an error, ", error);
+        return of(null);
+      }),
+    ).subscribe((driverActivityState) => {
+      if (driverActivityState) {
+        this.snackBar.open("Driver state updated successfully", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
+      } else {
+        this.snackBar.open("Driver state update failed", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
+      }
+      this.driverStateUpdate.next(driverActivityState);
+    });
+
+    this.isPassive.set(event.checked);
   }
 
   renderedDrivers: number[] = [];
@@ -308,10 +374,6 @@ export class DriverHome implements AfterViewInit {
     );
   }
 
-  onToggleChange(event: MatSlideToggleChange) {
-    this.isPassive.set(event.checked);
-  }
-
   getFormattedDate() {
     const date = new Date();
     return `Today - ${date.toLocaleDateString('en-US', {
@@ -372,4 +434,6 @@ export class DriverHome implements AfterViewInit {
       },
     });
   }
+
+  protected readonly DriverState = DriverState;
 }

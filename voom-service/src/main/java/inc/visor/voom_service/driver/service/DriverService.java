@@ -215,6 +215,10 @@ public class DriverService {
         return driverRepository.findById(driverId);
     }
 
+    public Optional<Driver> getDriverFromUser(long userId) {
+        return driverRepository.findByUserId(userId);
+    }
+
     public Driver updateDriver(Driver driver) {
         return driverRepository.save(driver);
     }

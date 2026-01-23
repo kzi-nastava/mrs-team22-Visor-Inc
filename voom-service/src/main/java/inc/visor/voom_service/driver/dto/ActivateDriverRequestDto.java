@@ -5,7 +5,11 @@ import inc.visor.voom_service.driver.validation.PasswordMatch;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @PasswordMatch(message = "Password and confirm password do not match")
 public class ActivateDriverRequestDto implements  PasswordConfirmable{
 
@@ -25,30 +29,4 @@ public class ActivateDriverRequestDto implements  PasswordConfirmable{
     private String confirmPassword;
 
     public ActivateDriverRequestDto() {}
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
 }
