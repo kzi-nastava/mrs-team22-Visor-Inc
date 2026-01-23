@@ -14,4 +14,7 @@ public class CreateVehicleDto {
     private boolean babySeat;
     private boolean petFriendly;
     private int numberOfSeats;
+
+    public CreateVehicleDto() {
+    }
 }

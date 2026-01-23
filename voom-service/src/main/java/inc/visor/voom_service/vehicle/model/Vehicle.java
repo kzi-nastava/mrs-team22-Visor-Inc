@@ -42,7 +42,7 @@ public class Vehicle {
     @Column(name = "model", nullable = false)
     private String model;
 
-    @Column(name = "licensePlate", nullable = false, unique = true)
+    @Column(name = "licensePlate", nullable = false)
     private String licensePlate;
 
     @Column(name = "baby_seat", nullable = false)
@@ -66,6 +66,15 @@ public class Vehicle {
     }
 
     public Vehicle(VehicleDto dto, VehicleType vehicleType, Driver driver) {
+        this.id = dto.getId();
+        this.driver = driver;
+        this.vehicleType = vehicleType;
+        this.year = dto.getYear();
+        this.model = dto.getModel();
+        this.licensePlate = dto.getLicensePlate();
+        this.babySeat = dto.isBabySeat();
+        this.petFriendly = dto.isPetFriendly();
+        this.numberOfSeats = dto.getNumberOfSeats();
     }
 
     public Vehicle() {

@@ -11,10 +11,10 @@ export interface UserProfileDto {
   firstName: string;
   lastName: string;
   pfpUrl: string | null;
-  userStatus: UserStatus;
+  userStatus: string;
   email: string;
   phoneNumber: string;
-  birthDate: Date;
+  birthDate: string;
   address: string;
   userRoleId: number;
 }
