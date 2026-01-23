@@ -11,7 +11,8 @@ import ApiService from '../../../../shared/rest/api-service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {UserProfileDto, UserStatus} from '../../../../shared/rest/user/user.model';
-import {MatMiniFabButton} from '@angular/material/button';
+import {MatDialog} from '@angular/material/dialog';
+import {AdminUsersDialog} from './admin-users-dialog/admin-users-dialog';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -29,8 +30,7 @@ export const ROUTE_ADMIN_USERS = "users";
     MatDivider,
     ValueInputDate,
     FormsModule,
-    ReactiveFormsModule,
-    MatMiniFabButton
+    ReactiveFormsModule
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
@@ -48,6 +48,10 @@ export class AdminUsers {
 
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
+
+  constructor(private dialog: MatDialog) {
+  }
+
 
   users$ = this.apiService.userApi.getUsers().pipe(
     map(response => response.data),
@@ -104,7 +108,11 @@ export class AdminUsers {
   }
 
   protected addUser() {
-
+    this.dialog.open(AdminUsersDialog).afterClosed().subscribe((result) => {
+      if (result) {
+        //TODO on update update users$
+      }
+    })
   }
 
   protected deleteUser() {

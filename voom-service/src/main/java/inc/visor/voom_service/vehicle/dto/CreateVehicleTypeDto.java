@@ -7,4 +7,8 @@ import lombok.Setter;
 @Setter
 public class CreateVehicleTypeDto {
     private String type;
+    private Double price;
+
+    public CreateVehicleTypeDto() {
+    }
 }

@@ -1,0 +1,11 @@
+<form class="flex flex-col flex-auto gap-y-8 p-4 dialog-content" [formGroup]="pricingForm" (submit)="submit(); $event.preventDefault()">
+  <div class="text-lg">Add vehicle type</div>
+  <div class="flex flex-col flex-auto gap-y-4">
+    <app-value-input-string label="Type" formControlName="type"/>
+    <app-value-input-numeric label="Price" formControlName="price"/>
+  </div>
+  <div class="flex flex-row flex-auto gap-x-2 justify-end">
+    <button matButton type="button" (click)="cancel()">Cancel</button>
+    <button (click)="submit(); $event.preventDefault()" [disabled]="pricingForm.invalid" matButton="filled" type="submit">Submit</button>
+  </div>
+</form>

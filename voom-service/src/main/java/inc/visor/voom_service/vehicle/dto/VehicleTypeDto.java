@@ -9,9 +9,14 @@ import lombok.Setter;
 public class VehicleTypeDto {
     private long id;
     private String type;
+    private Double price;
 
     public VehicleTypeDto(VehicleType vehicleType) {
         this.id = vehicleType.getId();
         this.type = vehicleType.getType();
+        this.price = vehicleType.getPrice();
+    }
+
+    public VehicleTypeDto() {
     }
 }

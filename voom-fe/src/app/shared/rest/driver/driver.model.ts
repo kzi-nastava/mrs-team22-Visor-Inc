@@ -10,3 +10,15 @@ export interface DriverDto {
   birthDate: Date;
   address: string;
 }
+
+export interface AdminCreateDriverDto {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  birthDate: string;
+  email: string;
+  password: string;
+  userStatus: string;
+  userRoleId: number;
+}

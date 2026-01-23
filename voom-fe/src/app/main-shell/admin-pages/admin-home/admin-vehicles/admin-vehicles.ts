@@ -14,6 +14,9 @@ import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model
 import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
 import {DriverDto} from '../../../../shared/rest/driver/driver.model';
 import {MatCheckbox} from '@angular/material/checkbox';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {AdminUsersDialog} from '../admin-users/admin-users-dialog/admin-users-dialog';
+import {AdminVehiclesDialog} from './admin-vehicles-dialog/admin-vehicles-dialog';
 
 export const ROUTE_ADMIN_VEHICLES = "vehicles";
 
@@ -80,7 +83,7 @@ export class AdminVehicles {
   selectedVehicle = signal<VehicleDto | null>(null);
   selectedVehicleType = signal<VehicleTypeDto | null>(null);
 
-  constructor() {
+  constructor(private dialog: MatDialog) {
   }
 
   protected selectVehicle(vehicle: VehicleDto) {
@@ -122,7 +125,11 @@ export class AdminVehicles {
   }
 
   protected addVehicle() {
-
+    this.dialog.open(AdminVehiclesDialog).afterClosed().subscribe((result) => {
+      if (result) {
+        //TODO implement update
+      }
+    })
   }
 
   protected saveVehicle() {

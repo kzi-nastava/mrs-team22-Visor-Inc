@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import inc.visor.voom_service.auth.dto.RegistrationDto;
+import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
+import inc.visor.voom_service.driver.dto.AdminCreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,6 +64,22 @@ public class Person {
 
     public Person(long personId, UserProfileDto dto) {
         this.id = personId;
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.address = dto.getAddress();
+        this.birthDate = dto.getBirthDate();
+    }
+
+    public Person(CreateUserDto dto) {
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.address = dto.getAddress();
+        this.birthDate = dto.getBirthDate();
+    }
+
+    public Person(AdminCreateDriverDto dto) {
         this.firstName = dto.getFirstName();
         this.lastName = dto.getLastName();
         this.phoneNumber = dto.getPhoneNumber();

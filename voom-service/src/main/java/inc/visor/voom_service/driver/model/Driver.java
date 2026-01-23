@@ -37,6 +37,14 @@ public class Driver {
     @Column(name = "driver_status", nullable = false)
     private DriverStatus status;
 
+    public Driver() {
+    }
+
+    public Driver(User user, DriverStatus status) {
+        this.user = user;
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Driver{" +

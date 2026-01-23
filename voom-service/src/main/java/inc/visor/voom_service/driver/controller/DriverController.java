@@ -2,13 +2,13 @@ package inc.visor.voom_service.driver.controller;
 
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
-import inc.visor.voom_service.driver.dto.ActivateDriverRequestDto;
-import inc.visor.voom_service.driver.dto.CreateDriverDto;
-import inc.visor.voom_service.driver.dto.DriverSummaryDto;
-import inc.visor.voom_service.driver.dto.ReportDriverRequestDto;
+import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
@@ -34,19 +34,32 @@ public class DriverController {
     private final ActivationTokenService activationTokenService;
     private final UserService userService;
     private final PersonService personService;
+    private final UserRoleService userRoleService;
     private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
 
-    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService) {
+    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService, UserRoleService userRoleService) {
         this.driverService = driverService;
         this.activationTokenService = activationTokenService;
         this.userService = userService;
         this.personService = personService;
+      this.userRoleService = userRoleService;
     }
 
     @PostMapping
     public ResponseEntity<DriverSummaryDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
         Driver driver = driverService.createDriver(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new DriverSummaryDto(driver));
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<DriverSummaryDto> adminCreateDriver(@RequestBody AdminCreateDriverDto dto) {
+        Person person = new Person(dto);
+        person = this.personService.create(person);
+        UserRole userRole = this.userRoleService.getUserRole("DRIVER").orElseThrow(NotFoundException::new);
+        User user = new User(dto, person, userRole);
+        Driver driver = new Driver(user, DriverStatus.BUSY);
+        driver = driverService.create(driver);
+        return ResponseEntity.ok(new DriverSummaryDto(driver));
     }
 
     // we would use message mapping in real world if driver location came from actual driver and not from simulation
