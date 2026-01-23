@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
+import inc.visor.voom_service.ride.model.Ride;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -312,6 +314,22 @@ public class DriverService {
         }
 
         return true;
+    }
+
+    public ActiveRideDto getActiveRide(Long userId) {
+        Ride activeRide = rideService.findActiveRide(userId);
+
+        if (activeRide == null) {
+            return null;
+        }
+        ActiveRideDto dto = new ActiveRideDto();
+        dto.setRideId(activeRide.getId());
+        dto.setStatus(activeRide.getStatus());
+        dto.setRoutePoints(
+                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
+        );
+
+        return dto;
     }
 
     private Driver nearestDriver(
