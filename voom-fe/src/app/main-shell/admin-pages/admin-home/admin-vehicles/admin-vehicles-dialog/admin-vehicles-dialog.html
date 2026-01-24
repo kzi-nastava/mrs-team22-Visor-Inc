@@ -1,10 +1,29 @@
-<form class="flex flex-col flex-auto gap-y-8 p-4 dialog-content" (submit)="submit(); $event.preventDefault()">
+<form class="flex flex-col flex-auto gap-y-8 p-4 dialog-content" [formGroup]="vehicleForm" (submit)="submit(); $event.preventDefault()">
   <div class="text-lg">Add vehicle</div>
   <div class="flex flex-col flex-auto gap-y-4">
-
+    <mat-form-field class="w-full">
+      <mat-label>Choose vehicle type</mat-label>
+      <mat-select formControlName="vehicleType">
+        @for (vehicleType of this.vehicleTypes(); track vehicleType) {
+          <mat-option [value]="vehicleType">{{ vehicleType.type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <app-value-input-string [label]="'Model'" formControlName="model"/>
+    <app-value-input-numeric [label]="'Year'" formControlName="year"/>
+    <app-value-input-string [label]="'License plate'" formControlName="licensePlate"/>
+    <app-value-input-numeric [label]="'Seats'" formControlName="numberOfSeats"/>
+    <div class="flex justify-center space-x-4">
+      <mat-checkbox formControlName="babySeat">
+        <div>Baby seat</div>
+      </mat-checkbox>
+      <mat-checkbox formControlName="petFriendly">
+        <div>Pet friendly</div>
+      </mat-checkbox>
+    </div>
   </div>
   <div class="flex flex-row flex-auto gap-x-2 justify-end">
     <button matButton type="button" (click)="cancel()">Cancel</button>
-    <button (click)="submit(); $event.preventDefault()" matButton="filled" type="submit">Submit</button>
+    <button (click)="submit(); $event.preventDefault()" [disabled]="vehicleForm.invalid" matButton="filled" type="submit">Submit</button>
   </div>
 </form>

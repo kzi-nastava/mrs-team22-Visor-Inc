@@ -2,8 +2,7 @@
   <mat-drawer mode="side" opened class="pt-2 py-2 min-w-64">
     <div class="p-2 space-y-2">
         <div class="flex items-center space-x-4 pb-4">
-          <app-value-input-string class="w-44" [label]="'Search'" [formControl]="searchFormControl"/>
-          <mat-icon class="cursor-pointer scale-150" (click)="addVehicle()">add_circle</mat-icon>
+          <app-value-input-string [label]="'Search'" [formControl]="searchFormControl"/>
         </div>
       @if (filteredVehicles(); as vehicles) {
         @for (vehicle of vehicles; track vehicle) {
@@ -22,12 +21,12 @@
           }
         }
       } @else {
-        <div>No vehicles found yet</div>
+        <div class="text-center text-xl">No vehicles found yet</div>
       }
     </div>
   </mat-drawer>
   <mat-drawer-content class="flex flex-col space-y-4 p-8">
-    @if (selectedVehicle(); as vehicle) {
+    @if (selectedVehicle()) {
       <mat-card appearance="outlined" class="">
         <mat-card-title class="p-4">
           <div class="flex justify-between items-center">

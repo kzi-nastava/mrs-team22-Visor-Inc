@@ -1,23 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
-import {MatDivider} from '@angular/material/list';
-import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {MatIcon} from '@angular/material/icon';
-import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
+import { MatDivider } from '@angular/material/list';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { MatIcon } from '@angular/material/icon';
+import { ValueInputString } from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, catchError, filter, map, merge, of, scan, startWith } from 'rxjs';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import {VehicleDto} from '../../../../shared/rest/vehicle/vehicle.model';
-import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
-import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
-import {DriverDto} from '../../../../shared/rest/driver/driver.model';
-import {MatCheckbox} from '@angular/material/checkbox';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {AdminUsersDialog} from '../admin-users/admin-users-dialog/admin-users-dialog';
-import {AdminVehiclesDialog} from './admin-vehicles-dialog/admin-vehicles-dialog';
-import { UserProfileDto } from '../../../../shared/rest/user/user.model';
+import { VehicleDto } from '../../../../shared/rest/vehicle/vehicle.model';
+import { VehicleTypeDto } from '../../../../shared/rest/vehicle/vehicle-type.model';
+import { ValueInputNumeric } from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 export const ROUTE_ADMIN_VEHICLES = "vehicles";
 
@@ -122,7 +117,7 @@ export class AdminVehicles {
   selectedVehicle = signal<VehicleDto | null>(null);
   selectedVehicleType = signal<VehicleTypeDto | null>(null);
 
-  constructor(private dialog: MatDialog) {
+  constructor() {
   }
 
   protected selectVehicle(vehicle: VehicleDto) {
@@ -162,17 +157,6 @@ export class AdminVehicles {
     this.vehicleForm.get("numberOfSeats")?.enable();
   }
 
-  protected addVehicle() {
-    this.dialog.open(AdminVehiclesDialog).afterClosed().subscribe((vehicle) => {
-      if (vehicle) {
-        this.snackBar.open("Vehicle added successfully", '', {horizontalPosition: "right", duration : 3000});
-        this.vehicleCreate$.next(vehicle);
-      } else {
-        this.snackBar.open("Vehicle add failed",'', {horizontalPosition: "right", duration : 3000});
-      }
-    });
-  }
-
   protected saveVehicle() {
     const vehicle = this.selectedVehicle();
     const vehicleType = this.selectedVehicleType();
@@ -202,8 +186,5 @@ export class AdminVehicles {
         this.snackBar.open("Vehicle update failed", '', {horizontalPosition: "right", duration : 3000});
       }
     });
-
-
   }
-
 }
