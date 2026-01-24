@@ -136,3 +136,21 @@ export type RideRequestResponseDto = {
   pickupLat: number | null;
   pickupLng: number | null;
 };
+
+export type RideStatus = 'SCHEDULED' | 'ONGOING' | 'CANCELLED' | 'FINISHED' | 'PANIC';
+
+
+export interface RoutePointDto {
+  address: string;
+  lat: number;
+  lng: number;
+  orderIndex: number | null; 
+  type: RoutePointType;
+}
+
+export interface OngoingRideDto {
+  rideId: number;
+  status: RideStatus;
+  routePoints: RoutePointDto[];
+  driverId: number;
+}

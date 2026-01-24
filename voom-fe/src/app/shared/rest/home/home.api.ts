@@ -1,6 +1,6 @@
 import { Api } from '../api';
 import { ApiClient } from '../api-client';
-import { DriverSummaryDto, RatingRequestDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
+import { DriverSummaryDto, OngoingRideDto, RatingRequestDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
 
@@ -15,10 +15,11 @@ export class RideApi extends Api {
       headers: {
         accept: 'application/json',
       },
+      authenticated: true,
     };
 
-    return this.apiClient.get<void, RideResponseDto>(
-      `/api/rides/${id}`,
+    return this.apiClient.get<void, OngoingRideDto>(
+      `/api/rides/ongoing`,
       config
     );
   }
@@ -56,6 +57,7 @@ export class RideApi extends Api {
     headers: {
       contentType: 'application/json',
     },
+    authenticated: true,
   };
 
   return this.apiClient.post<RideReportRequestDto, void>(
@@ -70,11 +72,27 @@ rateRide(rideId: number, body: RatingRequestDto) {
     headers: {
       contentType: 'application/json',
     },
+    authenticated: true,
   };
 
   return this.apiClient.post<RatingRequestDto, void>(
-    `/api/rating/${rideId}/rate`,
+    `/api/rating/${rideId}`,
     body,
+    config
+  );
+}
+
+finishOngoingRide() {
+  const config: RequestConfig = {
+    headers: {
+      accept: 'application/json',
+    },
+    authenticated: true, 
+  };
+
+  return this.apiClient.post<void, OngoingRideDto>(
+    '/api/rides/finish-ongoing',
+    undefined,
     config
   );
 }

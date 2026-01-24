@@ -56,6 +56,8 @@ export interface RoutePoint {
   styleUrl: './home.css',
 })
 export class UserHome implements AfterViewInit {
+
+
   @ViewChild(Map) map!: Map;
 
   constructor(
@@ -108,6 +110,11 @@ export class UserHome implements AfterViewInit {
         cleanAddress: p.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim(),
       })),
   );
+
+  ridePage() {
+    console.log('Navigating to ride tracking page');
+    this.router.navigate(['/user/ride/tracking/']);
+  }
 
   get isLaterSelected(): boolean {
     return this.selectedTime === 'LATER';
@@ -453,6 +460,8 @@ export class UserHome implements AfterViewInit {
         pickup: pickup?.address ?? '',
         dropoff: dropoff?.address ?? '',
       });
+
+      console.log(activeRide)
 
       this.isRideLocked.set(true);
       this.rideForm.disable({ emitEvent: false });
