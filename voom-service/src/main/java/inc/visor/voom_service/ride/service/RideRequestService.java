@@ -9,6 +9,7 @@ import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
@@ -90,6 +91,8 @@ public class RideRequestService {
         boolean driverFound = driver != null;
 
         if (driverFound) {
+            driver.setStatus(DriverStatus.BUSY);
+            driverService.updateDriver(driver);
             rideRequest.setStatus(RideRequestStatus.ACCEPTED);
         } else {
             rideRequest.setStatus(RideRequestStatus.REJECTED);
@@ -112,12 +115,11 @@ public class RideRequestService {
         }
         ride.setPassengers(passengers);
 
-        
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
-        DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
+            DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             rideRepository.save(ride);
             rideWsService.sendDriverAssigned(driverAssignedDto);
-        
+
             driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());
         } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
             rideRepository.save(ride);
