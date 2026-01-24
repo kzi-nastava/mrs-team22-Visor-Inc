@@ -339,4 +339,15 @@ export class RideApi {
     return this.apiClient.get<void, ActiveRideDto>(`${this.driversBaseUrl}/active-ride`, config);
   }
 
+  getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+    return this.apiClient.get<void, ActiveRideDto>(`${this.baseUrl}/ongoing`, config);
+  }
+
 }
