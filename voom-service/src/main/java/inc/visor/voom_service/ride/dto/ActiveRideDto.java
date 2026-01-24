@@ -9,6 +9,8 @@ public class ActiveRideDto {
     private Long rideId;
     private RideStatus status;
     private List<RoutePointDto> routePoints;
+    private Long driverId;
+    private String driverName;
 
     public ActiveRideDto() {  }
 
@@ -34,5 +36,18 @@ public class ActiveRideDto {
 
     public void setRoutePoints(List<RoutePointDto> routePoints) {
         this.routePoints = routePoints;
+    }
+    public Long getDriverId() {
+        return driverId;
+    }
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
+    }
+
+    public String getDriverName() {
+        return driverName;
+    }
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
     }
 }

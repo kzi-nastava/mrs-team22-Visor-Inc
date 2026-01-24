@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.shared.PredefinedRoutes;
 import inc.visor.voom_service.shared.PredefinedRoutes.Route;
 
+@Order(2)
 @Service
 public class Simulator implements ApplicationRunner {
 
@@ -23,6 +25,8 @@ public class Simulator implements ApplicationRunner {
     private final SimulationPublisher publisher;
 
     private final List<Route> predefinedRoutes = PredefinedRoutes.PREDEFINED_ROUTES;
+
+    private volatile boolean initialized = false;
 
     public Simulator(
             DriverService driverService,
@@ -39,25 +43,36 @@ public class Simulator implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         List<DriverSummaryDto> drivers = driverService.getActiveDrivers();
-
+        System.out.println("Driver size: on run: " + drivers.size());
         drivers.forEach(driver -> {
             Route route = predefinedRoutes.get((int) (driver.getId() % predefinedRoutes.size()));
             List<LatLng> waypoints = osrmService.getRoute(route.start(), route.end());
             state.add(new SimulatedDriver(driver, waypoints));
         });
+        this.initialized = true;
+
     }
 
     @Scheduled(fixedRate = 3000)
     public void tick() {
 
-        System.out.println("tick");
+        if (!initialized) {
+            return;
+        }
+
+        List<DriverSummaryDto> driversFromDb = driverService.getActiveDrivers();
+
+        state.syncDriversWithDatabase(driversFromDb, osrmService, predefinedRoutes);
+
+        List<SimulatedDriver> activeDrivers = state.getAll();
+        System.out.println("tick - active drivers: " + activeDrivers.size());
 
         state.getAll().forEach(driver -> {
             LatLng pos = driver.nextPosition();
             if (pos != null) {
-                publisher.publishPosition(driver.getDriverId(), pos, false);
+                publisher.publishPosition(driver.getDriverId(), pos, driver.isFinishedRide());
             } else {
-                publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), true);
+                publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), driver.isFinishedRide());
             }
         });
     }
@@ -68,6 +83,10 @@ public class Simulator implements ApplicationRunner {
 
     public void changeDriverRouteMultiplePoints(long driverId, List<LatLng> newPoints) {
         state.replaceRouteMultiplePoints(driverId, newPoints, osrmService);
+    }
+
+    public void setFinishedRide(long driverId) {
+        state.setFinishedRide(driverId);
     }
 
 }

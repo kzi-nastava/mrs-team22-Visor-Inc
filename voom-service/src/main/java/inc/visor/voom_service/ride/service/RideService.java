@@ -168,6 +168,8 @@ public class RideService {
         dto.setRoutePoints(
                 ride.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
         );
+        dto.setDriverId(ride.getDriver().getId());
+        dto.setDriverName(ride.getDriver().getUser().getPerson().getFirstName() + " " + ride.getDriver().getUser().getPerson().getLastName());
 
         return dto;
     }
