@@ -1,14 +1,20 @@
 package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.auth.user.model.Permission;
+import inc.visor.voom_service.auth.user.repository.PermissionRepository;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.repository.PermissionRepository;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
@@ -16,11 +22,6 @@ import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Set;

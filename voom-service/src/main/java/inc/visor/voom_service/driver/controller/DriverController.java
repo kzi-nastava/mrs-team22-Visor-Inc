@@ -2,17 +2,17 @@ package inc.visor.voom_service.driver.controller;
 
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.model.enums.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
-import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
@@ -167,22 +167,6 @@ public class DriverController {
     @PutMapping("/{driverId}/status")
     public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, @RequestParam String status) {
         DriverSummaryDto response = new DriverSummaryDto();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/active-ride")
-    public ResponseEntity<ActiveRideDto> getActiveRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
-        String username = userDetails != null ? userDetails.getUsername() : null;
-        User user = this.userService.getUser(username).orElseThrow(NotFoundException::new);
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Long userId = user.getId();
-
-        ActiveRideDto response = driverService.getActiveRide(userId);
-
         return ResponseEntity.ok(response);
     }
 
