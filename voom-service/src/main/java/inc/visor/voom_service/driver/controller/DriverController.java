@@ -68,7 +68,6 @@ public class DriverController {
 //    public DriverLocationDto updateLocation(@Payload DriverLocationDto request) {
 //        return request;
 //    }
-
     @GetMapping("/active")
     public ResponseEntity<List<DriverSummaryDto>> getActiveDrivers() {
         List<DriverSummaryDto> response = driverService.getActiveDrivers();
@@ -117,17 +116,16 @@ public class DriverController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<VehicleSummaryDto> updateMyDriverInfo(@AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody VehicleSummaryDto request) {
+    public ResponseEntity<Void> requestVehicleUpdate(
+            @AuthenticationPrincipal VoomUserDetails userDetails,
+            @RequestBody VehicleSummaryDto request
+    ) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userService.getUser(username).orElseThrow(NotFoundException::new);
 
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        driverService.createVehicleChangeRequest(user.getId(), request);
 
-        Long userId = user.getId();
-
-        return ResponseEntity.ok(driverService.updateVehicle(userId, request));
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{driverId}/report")
