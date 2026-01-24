@@ -45,12 +45,21 @@
         <mat-divider/>
         <mat-card-content>
           <form [formGroup]="userGeneralForm" class="p-4 grid space-x-2 grid-rows-2 grid-cols-3 gap-y-4">
+
             <app-value-input-string [label]="'First name'" [hide]="false" formControlName="firstName"/>
             <app-value-input-string [label]="'Last name'" [hide]="false" formControlName="lastName"/>
             <app-value-input-date [label]="'Date of birth'" formControlName="birthDate"/>
             <app-value-input-string [label]="'Phone number'" [hide]="false" formControlName="phoneNumber"/>
             <app-value-input-string [label]="'Address'" [hide]="false" formControlName="address"/>
             <app-value-input-string [label]="'Email'" [hide]="false" formControlName="email"/>
+            <mat-form-field class="w-full">
+              <mat-label>Choose user status</mat-label>
+              <mat-select formControlName="userStatus">
+                @for (userStatus of Object.values(UserStatus) ; track userStatus) {
+                  <mat-option [value]="userStatus">{{ userStatus.toString() }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </form>
         </mat-card-content>
       </mat-card>

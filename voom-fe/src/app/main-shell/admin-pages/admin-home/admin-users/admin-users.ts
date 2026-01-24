@@ -10,10 +10,13 @@ import { BehaviorSubject, filter, map, merge, scan, startWith } from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { UserProfileDto } from '../../../../shared/rest/user/user.model';
+import { UserProfileDto, UserStatus } from '../../../../shared/rest/user/user.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AdminUsersDialog } from './admin-users-dialog/admin-users-dialog';
 import { AdminVehiclesDialog } from '../admin-vehicles/admin-vehicles-dialog/admin-vehicles-dialog';
+import { MatFormField, MatLabel } from '@angular/material/input';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -31,7 +34,11 @@ export const ROUTE_ADMIN_USERS = "users";
     MatDivider,
     ValueInputDate,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatOption,
+    MatSelect
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
@@ -39,6 +46,7 @@ export const ROUTE_ADMIN_USERS = "users";
 export class AdminUsers {
 
   userGeneralForm = new FormGroup({
+    userStatus: new FormControl<UserStatus | null>({ value: null, disabled: false }, Validators.required),
     firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
     birthDate: new FormControl<Date | null>(null, [Validators.required]),
@@ -105,6 +113,7 @@ export class AdminUsers {
 
   protected saveGeneralInfo() {
     const user = this.selectedUser();
+    const userForm = this.userGeneralForm.value;
 
     if (!user) {
       return;
@@ -112,13 +121,13 @@ export class AdminUsers {
 
     const updatedUserDto: UserProfileDto = {
       id: user.id,
-      firstName: this.userGeneralForm.value.firstName!,
-      lastName: this.userGeneralForm.value.lastName!,
-      birthDate: this.userGeneralForm.value.birthDate!.toISOString(),
-      email: this.userGeneralForm.value.email!,
-      address: this.userGeneralForm.value.address!,
-      phoneNumber: this.userGeneralForm.value.phoneNumber!,
-      userStatus: 'INACTIVE',
+      firstName: userForm.firstName!,
+      lastName: userForm.lastName!,
+      birthDate: userForm.birthDate!.toISOString(),
+      email: userForm.email!,
+      address: userForm.address!,
+      phoneNumber: userForm.phoneNumber!,
+      userStatus: userForm.userStatus!.toString(),
       pfpUrl: null,
       userRoleId: user.userRoleId,
     }
@@ -138,6 +147,7 @@ export class AdminUsers {
   protected selectUser(user: UserProfileDto) {
     this.selectedUser.set(user);
     this.userGeneralForm.patchValue({
+      userStatus: UserStatus[user.userStatus as keyof typeof UserStatus],
       firstName: user.firstName,
       lastName: user.lastName,
       birthDate: user.birthDate ? new Date(user.birthDate) : null,
@@ -173,4 +183,6 @@ export class AdminUsers {
     })
   }
 
+  protected readonly UserStatus = UserStatus;
+  protected readonly Object = Object;
 }
