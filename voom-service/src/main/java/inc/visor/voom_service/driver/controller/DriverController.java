@@ -1,41 +1,30 @@
 package inc.visor.voom_service.driver.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
-import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -184,7 +173,7 @@ public class DriverController {
     @GetMapping("/active-ride")
     public ResponseEntity<ActiveRideDto> getActiveRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
-        User user = userProfileService.getUserByEmail(username);
+        User user = this.userService.getUser(username).orElseThrow(NotFoundException::new);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
