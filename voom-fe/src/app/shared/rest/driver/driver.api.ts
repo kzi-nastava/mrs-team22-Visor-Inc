@@ -40,7 +40,7 @@ export class DriverApi extends Api {
       authenticated: true,
     };
 
-    return this.apiClient.put<AdminCreateDriverDto, DriverDto>(`/api/drivers/admin`, dto, config);
+    return this.apiClient.post<AdminCreateDriverDto, DriverDto>(`/api/drivers/admin`, dto, config);
   }
 
   updateDriver(driverId: number, driverDto: DriverDto) {

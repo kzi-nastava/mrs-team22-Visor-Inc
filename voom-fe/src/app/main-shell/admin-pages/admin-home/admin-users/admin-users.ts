@@ -1,19 +1,19 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
-import {MatIcon} from '@angular/material/icon';
-import {MatDivider} from '@angular/material/list';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ValueInputDate} from '../../../../shared/value-input/value-input-date/value-input-date';
-import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/list';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ValueInputDate } from '../../../../shared/value-input/value-input-date/value-input-date';
+import { ValueInputString } from '../../../../shared/value-input/value-input-string/value-input-string';
 import { BehaviorSubject, filter, map, merge, scan, startWith } from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import {UserProfileDto, UserStatus} from '../../../../shared/rest/user/user.model';
-import {MatDialog} from '@angular/material/dialog';
-import {AdminUsersDialog} from './admin-users-dialog/admin-users-dialog';
-import { VehicleTypeDto } from '../../../../shared/rest/vehicle/vehicle-type.model';
+import { UserProfileDto } from '../../../../shared/rest/user/user.model';
+import { MatDialog } from '@angular/material/dialog';
+import { AdminUsersDialog } from './admin-users-dialog/admin-users-dialog';
+import { AdminVehiclesDialog } from '../admin-vehicles/admin-vehicles-dialog/admin-vehicles-dialog';
 
 export const ROUTE_ADMIN_USERS = "users";
 
@@ -148,17 +148,29 @@ export class AdminUsers {
  }
 
   protected addUser() {
-    this.dialog.open(AdminUsersDialog).afterClosed().subscribe((user) => {
+    const userRoles = this.userRoles();
+
+    if (!userRoles) {
+      return;
+    }
+
+    this.dialog.open(AdminUsersDialog, { data: userRoles}).afterClosed().subscribe((user) => {
       if (user) {
         this.snackBar.open("User added successfully", '', {horizontalPosition: "right", duration : 3000});
         this.userCreate$.next(user);
+        if (user.userRoleId === userRoles.filter(userRole => userRole.roleName === 'DRIVER').at(0)?.id) {
+          this.dialog.open(AdminVehiclesDialog, { data: user }).afterClosed().subscribe((vehicle) => {
+            if (vehicle) {
+              this.snackBar.open("Vehicle added successfully", '', {horizontalPosition: "right", duration : 3000});
+            } else {
+              this.snackBar.open("Vehicle add failed", '', {horizontalPosition: "right", duration : 3000});
+            }
+          });
+        }
       } else {
         this.snackBar.open("User add failed",'', {horizontalPosition: "right", duration : 3000});
       }
     })
   }
 
-  protected deleteUser() {
-
-  }
 }

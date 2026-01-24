@@ -41,7 +41,7 @@ export class UserApi extends Api {
       authenticated: true,
     };
 
-    return this.apiClient.put<CreateUserDto, UserProfileDto>(`/api/users`, dto, config);
+    return this.apiClient.post<CreateUserDto, UserProfileDto>(`/api/users`, dto, config);
   }
 
   updateUser(id: number, userDto: UserProfileDto) {

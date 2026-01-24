@@ -48,6 +48,7 @@ public class UserController {
         person = this.personService.create(person);
         UserRole userRole = userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
         User user = new User(dto, person, userRole);
+        user = this.userService.create(user);
         return ResponseEntity.ok(new UserProfileDto(user));
     }
 

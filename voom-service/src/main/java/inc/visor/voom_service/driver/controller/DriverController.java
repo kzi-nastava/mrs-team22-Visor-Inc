@@ -53,7 +53,8 @@ public class DriverController {
         this.activationTokenService = activationTokenService;
         this.userService = userService;
         this.personService = personService;
-      this.userRoleService = userRoleService;
+        this.userRoleService = userRoleService;
+
     }
 
     @PostMapping
@@ -64,10 +65,7 @@ public class DriverController {
 
     @PostMapping("/admin")
     public ResponseEntity<DriverSummaryDto> adminCreateDriver(@RequestBody AdminCreateDriverDto dto) {
-        Person person = new Person(dto);
-        person = this.personService.create(person);
-        UserRole userRole = this.userRoleService.getUserRole("DRIVER").orElseThrow(NotFoundException::new);
-        User user = new User(dto, person, userRole);
+        User user = this.userService.getUser(dto.getUserId()).orElseThrow(NotFoundException::new);
         Driver driver = new Driver(user, DriverStatus.BUSY);
         driver = driverService.create(driver);
         return ResponseEntity.ok(new DriverSummaryDto(driver));

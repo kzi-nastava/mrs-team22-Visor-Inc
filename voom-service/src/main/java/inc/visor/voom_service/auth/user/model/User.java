@@ -2,7 +2,6 @@ package inc.visor.voom_service.auth.user.model;
 
 import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
-import inc.visor.voom_service.driver.dto.AdminCreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.person.model.Person;
 import jakarta.persistence.*;
@@ -65,14 +64,6 @@ public class User {
     }
 
     public User(CreateUserDto dto, Person person, UserRole userRole) {
-        this.email = dto.getEmail();
-        this.password = dto.getPassword();
-        this.userStatus = UserStatus.valueOf(dto.getUserStatus());
-        this.userRole = userRole;
-        this.person = person;
-    }
-
-    public User(AdminCreateDriverDto dto, Person person, UserRole userRole) {
         this.email = dto.getEmail();
         this.password = dto.getPassword();
         this.userStatus = UserStatus.valueOf(dto.getUserStatus());
