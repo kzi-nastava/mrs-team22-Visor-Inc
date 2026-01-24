@@ -110,9 +110,7 @@ export class UserProfile {
   });
 
   ngOnInit(): void {
-
     const user = this.authService.activeUser$.value;
-
 
     this.isDriver = user?.role == 'DRIVER';
     this.isUser = user?.role == 'USER';

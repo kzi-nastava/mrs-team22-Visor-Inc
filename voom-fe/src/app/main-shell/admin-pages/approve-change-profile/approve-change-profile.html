@@ -1,0 +1,69 @@
+<div class="py-16 flex justify-center">
+  <div class="max-w-xl w-full space-y-8 bg-white p-10 rounded-xl shadow">
+
+    <h1 class="text-xl font-semibold text-center">
+      Vehicle Change Request
+    </h1>
+
+    @if (loading()) {
+      <div class="text-center text-gray-500 italic">
+        Loading...
+      </div>
+    }
+
+    @if (!loading() && request()) {
+      <div class="space-y-4 text-sm text-gray-700">
+
+        <div>
+          <strong>Driver:</strong>
+          {{ request()!.driverFullName }}
+        </div>
+
+        <div>
+          <strong>Model:</strong>
+          {{ request()!.model }}
+        </div>
+
+        <div>
+          <strong>License Plate:</strong>
+          {{ request()!.licensePlate }}
+        </div>
+
+        <div>
+          <strong>Seats:</strong>
+          {{ request()!.numberOfSeats }}
+        </div>
+
+        <div>
+          <strong>Baby Seat:</strong>
+          {{ request()!.babySeat ? 'Yes' : 'No' }}
+        </div>
+
+        <div>
+          <strong>Pet Friendly:</strong>
+          {{ request()!.petFriendly ? 'Yes' : 'No' }}
+        </div>
+
+      </div>
+
+      <div class="flex gap-6 justify-center pt-8">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="approve()"
+        >
+          Approve
+        </button>
+
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="reject()"
+        >
+          Reject
+        </button>
+      </div>
+    }
+
+  </div>
+</div>

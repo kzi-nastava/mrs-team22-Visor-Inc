@@ -1,12 +1,12 @@
 package inc.visor.voom_service.driver.service;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-
-import inc.visor.voom_service.ride.dto.ActiveRideDto;
-import inc.visor.voom_service.ride.model.Ride;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,19 @@ import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.dto.VehicleChangeRequestStatus;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
 import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.service.RideService;
@@ -53,12 +58,13 @@ public class DriverService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final PersonRepository personRepository;
+    private final DriverVehicleChangeRequestRepository changeRequestRepository;
 
     private final RideService rideService;
     private final EmailService emailService;
     private final ActivationTokenService activationTokenService;
 
-    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService) {
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService, DriverVehicleChangeRequestRepository changeRequestRepository) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -69,6 +75,7 @@ public class DriverService {
         this.emailService = emailService;
         this.activationTokenService = activationTokenService;
         this.rideService = rideService;
+        this.changeRequestRepository = changeRequestRepository;
     }
 
     public void simulateMove(DriverLocationDto dto) {
@@ -109,7 +116,6 @@ public class DriverService {
 
     public VehicleSummaryDto updateVehicle(Long userId, VehicleSummaryDto request) {
 
-        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -141,6 +147,70 @@ public class DriverService {
         );
 
         return dto;
+    }
+
+    public void createVehicleChangeRequest(Long userId, VehicleSummaryDto request) {
+
+        Driver driver = driverRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("Driver not found"));
+
+        Optional<DriverVehicleChangeRequest> existing
+                = changeRequestRepository.findByDriverIdAndStatus(
+                        driver.getId(),
+                        VehicleChangeRequestStatus.PENDING
+                );
+
+        if (existing.isPresent()) {
+            throw new IllegalStateException("You already have a pending vehicle update request.");
+        }
+
+        VehicleType vehicleType = vehicleTypeRepository
+                .findByType(request.getVehicleType())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle type"));
+
+        DriverVehicleChangeRequest changeRequest = new DriverVehicleChangeRequest();
+
+        changeRequest.setDriver(driver);
+        changeRequest.setModel(request.getModel());
+        changeRequest.setLicensePlate(request.getLicensePlate());
+        changeRequest.setNumberOfSeats(request.getNumberOfSeats());
+        changeRequest.setBabySeat(request.isBabySeat());
+        changeRequest.setPetFriendly(request.isPetFriendly());
+        changeRequest.setVehicleType(vehicleType.getType());
+
+        changeRequest.setStatus(VehicleChangeRequestStatus.PENDING);
+        changeRequest.setCreatedAt(LocalDateTime.now());
+
+        changeRequestRepository.save(changeRequest);
+
+        String reviewLink = "http://localhost:4200/admin/vehicle-requests/" + changeRequest.getId();
+
+        User user = driver.getUser();
+        String fullName = user.getPerson().getFirstName() + " " + user.getPerson().getLastName();
+        String subject = "Vehicle update request from " + fullName;
+        String body = """
+            Driver %s has requested to update vehicle information.
+
+            New vehicle details:
+            - Model: %s
+            - License plate: %s
+            - Seats: %d
+            - Baby seat: %s
+            - Pet friendly: %s
+
+            Review request here:
+            %s
+            """.formatted(
+                fullName,
+                request.getModel(),
+                request.getLicensePlate(),
+                request.getNumberOfSeats(),
+                request.isBabySeat() ? "Yes" : "No",
+                request.isPetFriendly() ? "Yes" : "No",
+                reviewLink
+        );
+
+        emailService.send("admin1@gmail.com", subject, body);
     }
 
     @Transactional
