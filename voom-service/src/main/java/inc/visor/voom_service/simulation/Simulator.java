@@ -50,6 +50,8 @@ public class Simulator implements ApplicationRunner {
     @Scheduled(fixedRate = 3000)
     public void tick() {
 
+        System.out.println("tick");
+
         state.getAll().forEach(driver -> {
             LatLng pos = driver.nextPosition();
             if (pos != null) {

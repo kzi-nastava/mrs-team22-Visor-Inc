@@ -1,18 +1,26 @@
-import {Component, inject, signal} from '@angular/core';
-import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
-import {MatIcon} from '@angular/material/icon';
-import {MatDivider} from '@angular/material/list';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ValueInputDate} from '../../../../shared/value-input/value-input-date/value-input-date';
-import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
-import {map} from 'rxjs';
+import { Component, inject, signal } from '@angular/core';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/list';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ValueInputDate } from '../../../../shared/value-input/value-input-date/value-input-date';
+import { ValueInputString } from '../../../../shared/value-input/value-input-string/value-input-string';
+import { map } from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {UserProfileDto, UserStatus} from '../../../../shared/rest/user/user.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { UserProfileDto, UserStatus } from '../../../../shared/rest/user/user.model';
+import { Router } from '@angular/router';
+import { ROUTE_ADMIN_REGISTER_DRIVER } from '../../register-driver/register-driver';
 
-export const ROUTE_ADMIN_USERS = "users";
+export const ROUTE_ADMIN_USERS = 'users';
 
 @Component({
   selector: 'app-admin-users',
@@ -28,40 +36,54 @@ export const ROUTE_ADMIN_USERS = "users";
     MatDivider,
     ValueInputDate,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
 })
 export class AdminUsers {
-
   userGeneralForm = new FormGroup({
-    firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+    firstName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    lastName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
     birthDate: new FormControl<Date | null>(null, [Validators.required]),
-    email: new FormControl<string>('', [Validators.required, Validators.email, Validators.maxLength(255)]),
-    address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
+    email: new FormControl<string>('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(255),
+    ]),
+    address: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    phoneNumber: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(55),
+    ]),
   });
 
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
-  users$ = this.apiService.userApi.getUsers().pipe(
-    map(response => response.data),
-  );
+  users$ = this.apiService.userApi.getUsers().pipe(map((response) => response.data));
 
-  userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(
-    map(response => response.data),
-  );
+  userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(map((response) => response.data));
 
   users = toSignal(this.users$);
   userRoles = toSignal(this.userRoles$);
   selectedUser = signal<UserProfileDto | null>(null);
 
-  protected openProfilePictureDialog() {
-
-  }
+  protected openProfilePictureDialog() {}
 
   protected saveGeneralInfo() {
     const user = this.selectedUser();
@@ -81,19 +103,20 @@ export class AdminUsers {
       userStatus: UserStatus.INACTIVE,
       pfpUrl: null,
       userRoleId: user.userRoleId,
-    }
+    };
 
-    this.apiService.userApi.updateUser(user.id!, updatedUserDto).pipe(
-      map(response => response.data),
-    ).subscribe((user) => {
-      if (user) {
-        this.snackBar.open("User updated successfully");
-        this.userGeneralForm.patchValue(user);
-        //TODO on update update users$
-      } else {
-        this.snackBar.open("User update failed");
-      }
-    });
+    this.apiService.userApi
+      .updateUser(user.id!, updatedUserDto)
+      .pipe(map((response) => response.data))
+      .subscribe((user) => {
+        if (user) {
+          this.snackBar.open('User updated successfully');
+          this.userGeneralForm.patchValue(user);
+          //TODO on update update users$
+        } else {
+          this.snackBar.open('User update failed');
+        }
+      });
   }
 
   protected selectUser(user: UserProfileDto) {
@@ -102,10 +125,8 @@ export class AdminUsers {
   }
 
   protected addUser() {
-
+    this.router.navigate(['/admin', ROUTE_ADMIN_REGISTER_DRIVER]);
   }
 
-  protected deleteUser() {
-
-  }
+  protected deleteUser() {}
 }

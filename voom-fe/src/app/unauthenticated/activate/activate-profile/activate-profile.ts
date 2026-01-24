@@ -15,7 +15,7 @@ import { ActivateProfileApi } from './activate-profile.api';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
-export const ROUTE_ACTIVATE_PROFILE = 'activate';
+export const ROUTE_ACTIVATE_PROFILE = 'voom/activate';
 
 function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;

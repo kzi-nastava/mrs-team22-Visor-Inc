@@ -1,5 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+
 import { Injectable } from '@angular/core';
+import { Api } from '../../../shared/rest/api';
+import { ApiClient } from '../../../shared/rest/api-client';
+import { RequestConfig } from '../../../shared/rest/rest.model';
+
 
 export type ActivateProfileRequestDto = {
   token: string;
@@ -7,23 +11,27 @@ export type ActivateProfileRequestDto = {
   confirmPassword: string;
 };
 
-export interface ApiError {
-  timestamp: string;
-  status: number;
-  error: string;
-  message: string;
-  path: string;
-}
-
 @Injectable({
   providedIn: 'root',
 })
-export class ActivateProfileApi {
-  private readonly baseUrl = 'http://localhost:8080/api';
+export class ActivateProfileApi extends Api {
 
-  constructor(private http: HttpClient) {}
+  constructor(apiClient: ApiClient) {
+    super(apiClient);
+  }
 
   activateProfile(body: ActivateProfileRequestDto) {
-    return this.http.post<void>(`${this.baseUrl}/drivers/activation`, body);
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+    };
+
+    return this.apiClient.post<ActivateProfileRequestDto, void>(
+      '/api/drivers/activation',
+      body,
+      config
+    );
   }
 }
