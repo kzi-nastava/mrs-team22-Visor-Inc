@@ -2,13 +2,12 @@ package inc.visor.voom_service.driver.controller;
 
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserRole;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.*;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.enums.DriverStatus;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
