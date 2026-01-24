@@ -18,7 +18,7 @@ const NOVI_SAD_BOUNDS = {
   lonMax: 19.95,
 };
 
-type DriverStatus = 'FREE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE' | null;
+type DriverStatus = 'AVAILABLE' | 'GOING_TO_PICKUP' | 'WAITING_AT_PICKUP' | 'IN_RIDE' | null;
 
 type Driver = {
   id: number;
@@ -205,7 +205,7 @@ panTo(lat: number, lng: number) {
     lng: number;
   }[] {
     return this.drivers
-      .filter((d) => d.status === 'FREE')
+      .filter((d) => d.status === 'AVAILABLE')
       .map((d) => {
         const pos = d.marker.getLatLng();
         return {
@@ -225,7 +225,7 @@ panTo(lat: number, lng: number) {
   }) {
     const icon = L.icon({
       iconUrl:
-        config.status === 'FREE' ? 'assets/icons/free driver.png' : 'assets/icons/busy driver.png',
+        config.status === 'AVAILABLE' ? 'assets/icons/free driver.png' : 'assets/icons/busy driver.png',
       iconSize: [30, 30],
       iconAnchor: [15, 30],
     });

@@ -1,15 +1,13 @@
 package inc.visor.voom_service.driver.service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.model.Ride;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +22,7 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
@@ -147,7 +146,6 @@ public class DriverService {
     @Transactional
     public Driver createDriver(CreateDriverDto request) {
 
-        //FIXME @nikola0234
         UserRole userRole = userRoleRepository
                 .findByRoleName("DRIVER")
                 .orElseThrow(()
@@ -163,6 +161,7 @@ public class DriverService {
         Person person = new Person();
         person.setFirstName(request.getFirstName());
         person.setLastName(request.getLastName());
+        person.setBirthDate(LocalDateTime.parse(request.getBirthDate()));
         person.setPhoneNumber(request.getPhoneNumber());
         person.setAddress(request.getAddress());
 
@@ -181,6 +180,7 @@ public class DriverService {
 
         Driver driver = new Driver();
         driver.setUser(user);
+        driver.setStatus(DriverStatus.AVAILABLE);
 
         driver = driverRepository.save(driver);
 

@@ -1,35 +1,51 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../../../shared/rest/api-client';
+import { ApiResponse, RequestConfig } from '../../../shared/rest/rest.model';
+import { VoomApiService } from '../../../shared/rest/voom-api-service';
 
 export type RegisterDriverRequestDto = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-    address: string;
-    vehicle: {
-        model: string;
-        vehicleType: 'STANDARD' | 'LUXURY' | 'VAN';
-        licensePlate: string;
-        numberOfSeats: number;
-        babySeat: boolean;
-        petFriendly: boolean;
-    };
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  vehicle: {
+    model: string;
+    vehicleType: 'STANDARD' | 'LUXURY' | 'VAN';
+    licensePlate: string;
+    numberOfSeats: number;
+    babySeat: boolean;
+    petFriendly: boolean;
+  };
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class RegisterDriverApi {
-  private readonly baseUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  private readonly baseUrl = '/api/drivers';
 
-  registerDriver(body: RegisterDriverRequestDto): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}/drivers`,
-      body
+  constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
+
+  registerDriver(
+    payload: RegisterDriverRequestDto
+  ): Observable<ApiResponse<void>> {
+
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.post<RegisterDriverRequestDto, void>(
+      `${this.baseUrl}`,
+      payload,
+      config
     );
   }
 }

@@ -1,8 +1,9 @@
 package inc.visor.voom_service.simulation;
 
-import inc.visor.voom_service.osrm.dto.LatLng;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import inc.visor.voom_service.osrm.dto.LatLng;
 
 @Component
 public class SimulationPublisher {
@@ -16,7 +17,7 @@ public class SimulationPublisher {
     }
 
     public void publishPosition(long driverId, LatLng pos, boolean finished) {
-//        System.out.println("sending");
+       System.out.println("sending");
         messaging.convertAndSend(
                 "/topic/drivers-positions",
                 new LocationDto(driverId, pos.lat(), pos.lng(), finished)
