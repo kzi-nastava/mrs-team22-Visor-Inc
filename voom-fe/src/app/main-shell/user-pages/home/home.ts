@@ -338,8 +338,6 @@ export class UserHome implements AfterViewInit {
 
     const freeDriversSnapshot = this.map.getFreeDriversSnapshot();
 
-    console.log('Free drivers snapshot:', freeDriversSnapshot);
-
     const payload: RideRequestDto = {
       route: {
         points: this.routePoints().map((p) => ({
@@ -399,6 +397,8 @@ export class UserHome implements AfterViewInit {
     }
 
     this.loadActiveDrivers();
+    this.restoreActiveRide();
+
   }
 
   private applyFavoriteRoute(route: FavoriteRouteDto) {
@@ -424,6 +424,45 @@ export class UserHome implements AfterViewInit {
       dropoff: dropoff?.address ?? '',
     });
   }
+
+  private restoreActiveRide() {
+  this.rideApi.getOngoingRide().subscribe({
+    next: (res) => {
+      if (!res.data) return;
+
+      const activeRide = res.data;
+
+      const points = activeRide.routePoints
+        .slice()
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map((p) => ({
+          id: crypto.randomUUID(),
+          lat: p.lat,
+          lng: p.lng,
+          address: p.address,
+          type: p.type,
+          order: p.orderIndex,
+        }));
+
+      this.routePoints.set(points);
+
+      const pickup = points.find((p) => p.type === 'PICKUP');
+      const dropoff = points.find((p) => p.type === 'DROPOFF');
+
+      this.rideForm.patchValue({
+        pickup: pickup?.address ?? '',
+        dropoff: dropoff?.address ?? '',
+      });
+
+      this.isRideLocked.set(true);
+      this.rideForm.disable({ emitEvent: false });
+    },
+    error: () => {
+      console.error('Failed to restore active ride');
+    },
+  });
+}
+
 
   addRouteToFavorites() {
     const points = this.routePoints();

@@ -1,19 +1,22 @@
 package inc.visor.voom_service.ride.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class RideService {
@@ -128,6 +131,15 @@ public class RideService {
                 .orElse(null);
     }
 
+    public Ride getOngoingRide(Long userId) {
+        List<Ride> ongoingRides = rideRepository.findByStatus(RideStatus.ONGOING);
+
+        return ongoingRides.stream()
+                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId)
+                .findFirst()
+                .orElse(null);
+    }
+
     public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStartedAt(LocalDateTime.now());
@@ -143,6 +155,21 @@ public class RideService {
 
         Driver driver = ride.getDriver();
         driver.setStatus(DriverStatus.BUSY);
+    }
+
+    public ActiveRideDto getActiveRide(Long userId) {
+        Ride ride = getOngoingRide(userId);
+        if (ride == null) {
+            return null;
+        }
+        ActiveRideDto dto = new ActiveRideDto();
+        dto.setRideId(ride.getId());
+        dto.setStatus(ride.getStatus());
+        dto.setRoutePoints(
+                ride.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
+        );
+
+        return dto;
     }
 
 }

@@ -20,8 +20,7 @@ import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.person.service.UserProfileService;
-import inc.visor.voom_service.rating.dto.RatingRequestDto;
-import inc.visor.voom_service.rating.service.RatingService;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancelDto;
@@ -265,4 +264,18 @@ public class RideController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/ongoing")
+    public ResponseEntity<ActiveRideDto> getMethodName(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ActiveRideDto activeRide = rideService.getActiveRide(user.getId());
+
+        return ResponseEntity.ok(activeRide);
+    }
+    
 }

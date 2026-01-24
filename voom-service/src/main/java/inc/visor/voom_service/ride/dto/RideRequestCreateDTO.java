@@ -3,16 +3,36 @@ package inc.visor.voom_service.ride.dto;
 import java.time.Instant;
 import java.util.List;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class RideRequestCreateDTO {
 
+    @NotNull
+    @Valid
     public RouteDTO route;
+
+    @NotNull
+    @Valid
     public ScheduleDTO schedule;
+
+    @NotNull
     public Long vehicleTypeId;
+
+    @NotNull
+    @Valid
     public PreferencesDTO preferences;
+
     public List<String> linkedPassengers;
+
     public List<DriverLocationDTO> freeDriversSnapshot;
 
     public static class RouteDTO {
+        @NotNull
+        @Size(min = 2, message = "At least two route points are required")
+        @Valid
         public List<RoutePointDTO> points;
     }
 
@@ -25,6 +45,7 @@ public class RideRequestCreateDTO {
     }
 
     public static class ScheduleDTO {
+        @NotBlank
         public String type; 
         public Instant startAt;
     }
