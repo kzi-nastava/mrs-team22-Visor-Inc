@@ -1,0 +1,37 @@
+<h2
+  mat-dialog-title
+  class="text-xl font-medium text-gray-800 text-center mb-6"
+>
+  Finish ride
+</h2>
+
+<mat-dialog-content class="px-6 pt-4">
+  <div class="flex flex-col gap-4 text-gray-700 text-center">
+    <p class="text-base">
+      You have arrived at the destination.
+    </p>
+
+    <p class="text-sm text-gray-500">
+      Please confirm that the ride has ended and all passengers have exited.
+    </p>
+
+    @if (data?.dropoffAddress) {
+      <p class="text-sm text-gray-500 italic">
+        {{ data?.dropoffAddress }}
+      </p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions
+  class="mt-10 pb-6 flex justify-center"
+>
+  <button
+    mat-flat-button
+    color="primary"
+    class="h-[52px] px-16 rounded-full text-base font-medium"
+    (click)="finish()"
+  >
+    Finish ride
+  </button>
+</mat-dialog-actions>

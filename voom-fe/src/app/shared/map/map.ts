@@ -337,7 +337,7 @@ panTo(lat: number, lng: number) {
     });
   }
 
-  private clearUserRoute() {
+  public clearUserRoute() {
     this.markers.forEach((m) => this.map.removeLayer(m));
     this.markers = [];
     this.waypoints = [];

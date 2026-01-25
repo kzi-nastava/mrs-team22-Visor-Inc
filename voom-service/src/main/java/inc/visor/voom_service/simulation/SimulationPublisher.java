@@ -8,7 +8,7 @@ import inc.visor.voom_service.osrm.dto.LatLng;
 @Component
 public class SimulationPublisher {
 
-    private record LocationDto(long driverId, double lat, double lng, boolean finished) {}
+    private record LocationDto(long driverId, double lat, double lng, boolean finished, int eta) {}
 
     private final SimpMessagingTemplate messaging;
 
@@ -16,11 +16,10 @@ public class SimulationPublisher {
         this.messaging = messaging;
     }
 
-    public void publishPosition(long driverId, LatLng pos, boolean finished) {
-    //    System.out.println("sending");
+    public void publishPosition(long driverId, LatLng pos, boolean finished, int eta) {
         messaging.convertAndSend(
                 "/topic/drivers-positions",
-                new LocationDto(driverId, pos.lat(), pos.lng(), finished)
+                new LocationDto(driverId, pos.lat(), pos.lng(), finished, eta)
         );
     }
 }

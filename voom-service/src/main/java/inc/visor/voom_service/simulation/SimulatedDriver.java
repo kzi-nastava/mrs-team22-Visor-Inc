@@ -10,6 +10,7 @@ public class SimulatedDriver {
     private final DriverSummaryDto driver;
     private final List<LatLng> waypoints;
     private int waypointIndex = 0;
+    private boolean finishedRide = false;
 
     public SimulatedDriver(DriverSummaryDto driver, List<LatLng> waypoints) {
         this.driver = driver;
@@ -30,7 +31,23 @@ public class SimulatedDriver {
     }
 
     public LatLng currentPosition() {
-        if (waypointIndex == 0) return waypoints.get(0);
+        if (waypointIndex == 0) return waypoints.getFirst();
         return waypoints.get(Math.min(waypointIndex - 1, waypoints.size() - 1));
+    }
+
+    public boolean isFinishedRide() {
+        return finishedRide;
+    }
+
+    public void setFinishedRide(boolean finishedRide) {
+        this.finishedRide = finishedRide;
+    }
+
+    public int getWaypointIndex() {
+        return waypointIndex;
+    }
+
+    public int getWaypointCount() {
+        return waypoints.size();
     }
 }

@@ -24,6 +24,7 @@ import {DriverState, DriverStateChangeDto} from '../../../shared/rest/driver/dri
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import { FinishRideDialog } from '../finish-ride-dialog/finish-ride-dialog';
 
 export const ROUTE_DRIVER_HOME = 'home';
 
@@ -39,7 +40,7 @@ export type ChartOptions = {
   xaxis?: ApexXAxis;
 };
 
-type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED';
+type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED' | 'AT_DROPOFF';
 
 @Component({
   selector: 'app-driver-home',
@@ -64,6 +65,9 @@ export class DriverHome implements AfterViewInit {
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
   ridePhase = signal<RidePhase>('IDLE');
+
+  dropoffPoint = signal<{ lat: number; lng: number } | null>(null);
+  private finishDialogOpen = false;
 
   private apiService = inject(ApiService);
   private authenticationService = inject(AuthenticationService);
@@ -151,6 +155,9 @@ export class DriverHome implements AfterViewInit {
         this.ridePhase() === 'AT_PICKUP'
       ) {
         this.openArrivalDialog();
+      }
+      else if (this.ridePhase() === 'AT_DROPOFF') {
+        this.openFinishRideDialog();
       }
     });
   }
@@ -256,7 +263,21 @@ export class DriverHome implements AfterViewInit {
 
                   if (dist <= 30) {
                     this.ridePhase.set('AT_PICKUP');
+                    this.finishDialogOpen = false;
                   }
+                }
+
+                else if (this.ridePhase() === 'RIDE_STARTED' && this.dropoffPoint()) {
+                    const dist = this.distanceMeters({ lat: pos.lat, lng: pos.lng }, this.dropoffPoint()!);
+                    
+                    console.log(`[DriverHome] Distance to Dropoff: ${dist.toFixed(2)}m`);
+
+                    if ((dist <= 30 || pos.finished) && !this.finishDialogOpen) {
+                        this.ridePhase.set('AT_DROPOFF');
+                    }
+                }
+                else {
+                  this.ridePhase.set('RIDE_STARTED');
                 }
               }
             },
@@ -296,6 +317,26 @@ export class DriverHome implements AfterViewInit {
     });
   }
 
+  private openFinishRideDialog() {
+  if (this.finishDialogOpen) return;
+  this.finishDialogOpen = true;
+
+  const ref = this.dialog.open(FinishRideDialog, {
+    width: '380px',
+    disableClose: true,
+    data: {
+      dropoffAddress: this.routePoints().find(p => p.type === 'DROPOFF')?.address ?? ''
+    },
+  });
+
+  ref.afterClosed().subscribe((res) => {
+    if (res === 'FINISH') {
+      this.finishRide();
+    }
+
+  });
+}
+
   private startRide() {
     const rideId = this.activeRideId();
     console.log('Active ride id:', rideId);
@@ -321,10 +362,33 @@ export class DriverHome implements AfterViewInit {
         this.snackBar.open('Ride started', 'OK', { duration: 3000 });
         this.hasArrived.set(true);
         this.pickupPoint.set(null);
+
+        this.ridePhase.set('RIDE_STARTED');
       },
       error: (err) => {
         console.error('Failed to start ride', err);
         this.snackBar.open('Failed to start ride', 'OK', { duration: 3000 });
+      },
+    });
+  }
+
+  public finishRide() {
+    const rideId = this.activeRideId();
+    if (!rideId) {
+      console.error('No active ride id');
+      return;
+    }
+    this.rideApi.finishOngoingRide().subscribe({
+      next: () => {
+        this.snackBar.open('Ride finished', 'OK', { duration: 3000 });
+        this.activeRideId.set(null);
+        this.routePoints.set([]);
+        this.ridePhase.set('IDLE');
+      }
+      ,
+      error: (err) => {
+        console.error('Failed to finish ride', err);
+        this.snackBar.open('Failed to finish ride', 'OK', { duration: 3000 });
       },
     });
   }
@@ -342,6 +406,12 @@ export class DriverHome implements AfterViewInit {
     this.hasArrived.set(false);
 
     if (!pickup) return;
+
+    const dropoff = payload.route.find((p: any) => p.type === 'DROPOFF');
+    this.dropoffPoint.set({
+      lat: dropoff?.lat || 0,
+      lng: dropoff?.lng || 0,
+    });
 
     if (payload.driverId !== myDriverId) return;
 
@@ -420,9 +490,23 @@ export class DriverHome implements AfterViewInit {
 
         this.routePoints.set(points);
 
+        console.log(activeRide);
+
+        if (activeRide.status === 'ONGOING') {
+          this.ridePhase.set('RIDE_STARTED');
+          this.hasArrived.set(true);
+        } else {
+          this.ridePhase.set('IDLE');
+        }
+
         const pickup = points.find((p) => p.type === 'PICKUP');
         if (pickup) {
           this.pickupPoint.set({ lat: pickup.lat, lng: pickup.lng });
+        }
+
+        const dropoff = points.find((p) => p.type === 'DROPOFF');
+        if (dropoff) {
+          this.dropoffPoint.set({ lat: dropoff.lat, lng: dropoff.lng });
         }
 
         this.activeRideId.set(activeRide.rideId);

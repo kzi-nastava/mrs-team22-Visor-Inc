@@ -1,8 +1,13 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.shared.PredefinedRoutes;
 import org.springframework.stereotype.Component;
 
 import inc.visor.voom_service.osrm.dto.LatLng;
@@ -21,8 +26,10 @@ public class SimulationState {
         return drivers;
     }
 
-    public void replaceRoute(long driverId, LatLng newEnd, OsrmService osrm) {
+    private final Set<Long> pendingDrivers = ConcurrentHashMap.newKeySet();
 
+
+    public void replaceRoute(long driverId, LatLng newEnd, OsrmService osrm) {
         SimulatedDriver existing = drivers.stream()
                 .filter(d -> d.getDriverId() == driverId)
                 .findFirst()
@@ -30,12 +37,33 @@ public class SimulationState {
 
         if (existing == null) return;
 
+        List<LatLng> newWaypoints = osrm.getRoute(existing.currentPosition(), newEnd);
+
         drivers.remove(existing);
-
-        List<LatLng> newWaypoints =
-                osrm.getRoute(existing.currentPosition(), newEnd);
-
         drivers.add(new SimulatedDriver(existing.getDriver(), newWaypoints));
+    }
+
+
+    public void syncDriversWithDatabase(List<DriverSummaryDto> dbDrivers, OsrmService osrm, List<PredefinedRoutes.Route> predefinedRoutes) {
+        List<Long> dbIds = dbDrivers.stream()
+                .map(DriverSummaryDto::getId)
+                .toList();
+
+
+        drivers.removeIf(d -> !dbIds.contains(d.getDriverId()));
+
+        dbDrivers.forEach(dbDriver -> {
+            long driverId = dbDriver.getId();
+
+            boolean exists = drivers.stream()
+                    .anyMatch(d -> d.getDriverId() == driverId);
+
+            PredefinedRoutes.Route predefinedRoute = predefinedRoutes.get((int) (driverId % predefinedRoutes.size()));
+
+            if (!exists) {
+                drivers.add(new SimulatedDriver(dbDriver, osrm.getRoute(predefinedRoute.start(), predefinedRoute.end())));
+            }
+        });
     }
 
     public void replaceRouteMultiplePoints(long driverId, List<LatLng> newPoints, OsrmService osrm) {
@@ -52,6 +80,16 @@ public class SimulationState {
 
         drivers.add(new SimulatedDriver(existing.getDriver(), newWaypoints));
     }
-    
+
+    public void setFinishedRide(long driverId) {
+        SimulatedDriver existing = drivers.stream()
+                .filter(d -> d.getDriverId() == driverId)
+                .findFirst()
+                .orElse(null);
+
+        if (existing == null) return;
+
+        existing.setFinishedRide(true);
+    }
 }
 

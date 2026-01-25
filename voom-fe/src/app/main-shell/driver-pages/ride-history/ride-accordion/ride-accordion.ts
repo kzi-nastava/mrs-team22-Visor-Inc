@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { RideHistoryDto } from '../../../../shared/rest/home/home.model';
 
 type TimeString = `${number}:${number}` | `${number}:''`;
 
@@ -28,9 +29,9 @@ export interface Ride {
   styleUrl: './ride-accordion.css',
 })
 export class RideAccordion {
-  @Input({ required: true }) ride!: Ride;
+  @Input({ required: true }) ride!: RideHistoryDto;
   get orderedPassengerName() {
-    const ordered = this.ride.passengers.find((p) => p.orderedRide);
-    return `${ordered?.name} ${ordered?.lastname}`;
+    const ordered = this.ride.rideRequest.creator.person;
+    return `${ordered?.firstName} ${ordered?.lastName}`;
   }
 }
