@@ -1,27 +1,20 @@
-import { AfterViewInit, Component, computed, signal, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Map } from '../../../shared/map/map';
-import { Dropdown } from '../../../shared/dropdown/dropdown';
-import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
-import { MatButton } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import {
-  DriverSummaryDto,
-  PREDEFINED_ROUTES,
-  RideApi,
-  RideRequestDto,
-  ScheduledRideDto,
-} from './home.api';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
-import { FavoriteRouteDto } from '../favorite-routes/favorite-routes.api';
-import { map } from 'rxjs';
-import { response } from 'express';
+import {AfterViewInit, Component, computed, signal, ViewChild} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Map} from '../../../shared/map/map';
+import {Dropdown} from '../../../shared/dropdown/dropdown';
+import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {DriverSummaryDto, RideApi, RideRequestDto, ScheduledRideDto,} from './home.api';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {Router} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
+import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
+import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
+import {map} from 'rxjs';
 import ApiService from '../../../shared/rest/api-service';
 
 export const ROUTE_USER_HOME = 'ride';

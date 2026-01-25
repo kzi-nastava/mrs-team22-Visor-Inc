@@ -31,7 +31,7 @@ public class SimulationState {
 
     public void replaceRoute(long driverId, LatLng newEnd, OsrmService osrm) {
         SimulatedDriver existing = drivers.stream()
-                .filter(d -> d.getDriverId() == driverId)
+                .filter(d -> d.getDriver().getId() == driverId)
                 .findFirst()
                 .orElse(null);
 
@@ -50,13 +50,13 @@ public class SimulationState {
                 .toList();
 
 
-        drivers.removeIf(d -> !dbIds.contains(d.getDriverId()));
+        drivers.removeIf(d -> !dbIds.contains(d.getDriver().getId()));
 
         dbDrivers.forEach(dbDriver -> {
             long driverId = dbDriver.getId();
 
             boolean exists = drivers.stream()
-                    .anyMatch(d -> d.getDriverId() == driverId);
+                    .anyMatch(d -> d.getDriver().getId() == driverId);
 
             PredefinedRoutes.Route predefinedRoute = predefinedRoutes.get((int) (driverId % predefinedRoutes.size()));
 
@@ -68,7 +68,7 @@ public class SimulationState {
 
     public void replaceRouteMultiplePoints(long driverId, List<LatLng> newPoints, OsrmService osrm) {
         SimulatedDriver existing = drivers.stream()
-                .filter(d -> d.getDriverId() == driverId)
+                .filter(d -> d.getDriver().getId() == driverId)
                 .findFirst()
                 .orElse(null);
 
@@ -83,7 +83,7 @@ public class SimulationState {
 
     public void setFinishedRide(long driverId) {
         SimulatedDriver existing = drivers.stream()
-                .filter(d -> d.getDriverId() == driverId)
+                .filter(d -> d.getDriver().getId() == driverId)
                 .findFirst()
                 .orElse(null);
 

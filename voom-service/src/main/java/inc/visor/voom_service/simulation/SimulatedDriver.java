@@ -2,9 +2,13 @@ package inc.visor.voom_service.simulation;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.osrm.dto.LatLng;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 public class SimulatedDriver {
 
     private final DriverSummaryDto driver;
@@ -17,14 +21,6 @@ public class SimulatedDriver {
         this.waypoints = waypoints;
     }
 
-    public long getDriverId() {
-        return driver.getId();
-    }
-
-    public DriverSummaryDto getDriver() {
-        return driver;
-    }
-
     public LatLng nextPosition() {
         if (waypointIndex >= waypoints.size()) return null;
         return waypoints.get(waypointIndex++);
@@ -33,21 +29,5 @@ public class SimulatedDriver {
     public LatLng currentPosition() {
         if (waypointIndex == 0) return waypoints.getFirst();
         return waypoints.get(Math.min(waypointIndex - 1, waypoints.size() - 1));
-    }
-
-    public boolean isFinishedRide() {
-        return finishedRide;
-    }
-
-    public void setFinishedRide(boolean finishedRide) {
-        this.finishedRide = finishedRide;
-    }
-
-    public int getWaypointIndex() {
-        return waypointIndex;
-    }
-
-    public int getWaypointCount() {
-        return waypoints.size();
     }
 }
