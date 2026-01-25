@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 public class RideStopDto {
 
-    private Long driverId;
-    private Double lat;
-    private Double lng;
+    private Long userId;
+    private List<RideRequestCreateDto.RoutePointDto> points;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private LocalDateTime timestamp;
 

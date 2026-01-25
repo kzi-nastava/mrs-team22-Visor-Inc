@@ -2,8 +2,27 @@
   <div class="rounded-3xl">
    <app-map [focusedDriverId]="myId()" [points]="routePoints()"></app-map>
   </div>
+  @if (activeRideId(); as ride) {
+    <div class="text-xl text-primary font-medium mb-4">Active ride</div>
+    <div class="flex justify-center w-full">
+      <div class="w-full max-w-2xl">
+        <div class="flex items-center justify-center gap-8 py-4">
+          <!-- STOP -->
+          <div class="flex flex-col items-center gap-2">
+            <p class="text-center text-gray-600">If you want to stop the ride click the button below.</p>
+            <button matButton="filled" (click)="stopRide()">Stop</button>
+          </div>
+          <mat-divider vertical></mat-divider>
+          <div class="flex flex-col items-center gap-2">
+            <p class="text-center text-gray-600">In case of emergency, press the PANIC button to alert authorities.</p>
+            <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full cursor-pointer" (click)="panic()">PANIC
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
   <div>
-
     <h1 class="text-xl text-primary font-medium">Summary</h1>
     <h1 class="text-lg text-primary">{{ getFormattedDate() }}</h1>
   </div>

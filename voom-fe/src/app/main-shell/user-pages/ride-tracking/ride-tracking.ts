@@ -1,14 +1,15 @@
-import { Component, signal, ViewChild, OnInit } from '@angular/core';
-import { Map } from '../../../shared/map/map';
-import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import { ActivatedRoute } from '@angular/router';
-import { OngoingRideDto } from '../../../shared/rest/ride/ride.model';
-import { MatButtonModule } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
-import { sign } from 'crypto';
-import { ActiveRideDto } from '../home/home.api';
-import { RoutePoint } from '../home/home';
+import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Map} from '../../../shared/map/map';
+import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {ActivatedRoute} from '@angular/router';
+import {MatButtonModule} from '@angular/material/button';
+import {FormsModule} from '@angular/forms';
+import {ActiveRideDto} from '../home/home.api';
+import {RoutePoint} from '../home/home';
 import ApiService from '../../../shared/rest/api-service';
+import {AuthenticationService} from '../../../shared/service/authentication-service';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {map} from 'rxjs';
 
 export const ROUTE_RIDE_TRACKING = 'ride/tracking';
 
@@ -21,9 +22,12 @@ export const ROUTE_RIDE_TRACKING = 'ride/tracking';
 export class RideTracking implements OnInit {
   @ViewChild(Map) map!: Map;
 
-  private rideId!: number;
-  private driverId!: number;
-  private rendered = false;
+  authenticationService = inject(AuthenticationService);
+
+  rideId = signal<number | null>(null);
+  driverId = signal<number | null>(null);
+  rendered = signal<boolean>(false);
+  user = toSignal(this.authenticationService.activeUser$)
 
   showReport = signal<boolean>(false);
   reported = signal<boolean>(false);
@@ -47,7 +51,7 @@ export class RideTracking implements OnInit {
   constructor(
     private ws: DriverSimulationWsService,
     private api: ApiService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -59,8 +63,13 @@ export class RideTracking implements OnInit {
   }
 
   report(): void {
+
+    const rideId = this.rideId();
+
+    if (!rideId) return;
+
     this.api.rideApi
-      .reportRide(this.rideId, { message: this.message })
+      .reportRide(rideId, { message: this.message })
       .subscribe(() => {
         this.reported.set(true);
         this.showReport.set(false);
@@ -72,8 +81,8 @@ export class RideTracking implements OnInit {
     const ride: ActiveRideDto | null = res.data;
     if (!ride) return;
 
-    this.rideId = ride.rideId;
-    this.driverId = ride.driverId;
+    this.rideId.set(ride.rideId);
+    this.driverId.set(ride.driverId);
 
     this.startAddress.set(ride.routePoints.find(p => p.type === 'PICKUP')?.address || '');
     this.destinationAddress.set(ride.routePoints.find(p => p.type === 'DROPOFF')?.address || '');
@@ -89,7 +98,7 @@ export class RideTracking implements OnInit {
 
     this.points.set(mappedPoints);
 
-    if (this.driverId) {
+    if (ride.driverId) {
       this.startTrackingDriver(ride);
     }
   });
@@ -101,7 +110,9 @@ export class RideTracking implements OnInit {
       () => {},
       undefined,
       (pos) => {
-        if (pos.driverId !== this.driverId) return;
+        const driverId = this.driverId();
+
+        if (!driverId || pos.driverId !== driverId) return;
 
         if (pos.finished) {
           console.log("WebSocket: Ride Finished!");
@@ -111,17 +122,17 @@ export class RideTracking implements OnInit {
 
         this.eta.set(Math.ceil(pos.eta / 60));
 
-        if (!this.rendered) {
-          this.rendered = true;
+        if (!this.rendered()) {
+          this.rendered.set(true);
           this.map.addSimulatedDriver({
-            id: this.driverId,
+            id: driverId,
             firstName: ride.driverName?.split(' ')[0] ?? '',
             lastName: ride.driverName?.split(' ')[1] ?? '',
             start: { lat: pos.lat, lng: pos.lng },
             status: ride.status as any,
           });
         } else {
-          this.map.updateDriverPosition(this.driverId, pos.lat, pos.lng);
+          this.map.updateDriverPosition(driverId, pos.lat, pos.lng);
         }
       }
     );
@@ -136,12 +147,31 @@ export class RideTracking implements OnInit {
   }
 
   submitReview() {
-    this.api.rideApi.rateRide(this.rideId, {
+    const rideId = this.rideId();
+
+    if (!rideId) return;
+
+    this.api.rideApi.rateRide(rideId, {
       driverRating: this.driverRating(),
       vehicleRating: this.carRating(),
       comment: this.reviewComment(),
     }).subscribe(() => {
       this.reviewed.set(true);
+    });
+  }
+
+  protected panic() {
+    const rideId = this.driverId();
+    const user = this.user();
+
+    if (!rideId || !user) {
+      return;
+    }
+
+    this.api.rideApi.ridePanic(rideId, { userId: user.id }).pipe(
+      map(response => response.data),
+    ).subscribe(rideResponse => {
+
     });
   }
 }
