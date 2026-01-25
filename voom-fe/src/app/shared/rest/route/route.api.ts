@@ -15,7 +15,6 @@ export class RouteApi extends Api {
         accept: 'application/json',
         contentType: 'application/json',
       },
-      authenticated: true,
     };
 
     return this.apiClient.post<RouteEstimateRequestDto, RouteEstimateResponseDto>(`/api/routes`, body, config);

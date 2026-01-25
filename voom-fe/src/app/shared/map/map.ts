@@ -85,8 +85,8 @@ export class Map implements AfterViewInit, OnChanges {
 
   ngAfterViewInit(): void {
     this.startInterpolationLoop();
-    
-    if (this.map) return; 
+
+    if (this.map) return;
     this.map = L.map('map', {
       zoomControl: false,
       attributionControl: false,
@@ -110,15 +110,15 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   focusDriver(driverId: number, zoom = 16) {
-  const d = this.getDriver(driverId);
-  if (!d) return;
-  const ll = d.marker.getLatLng();
-  this.map.setView(ll, zoom, { animate: true });
-}
+    const d = this.getDriver(driverId);
+    if (!d) return;
+    const ll = d.marker.getLatLng();
+    this.map.setView(ll, zoom, { animate: true });
+  }
 
-panTo(lat: number, lng: number) {
-  this.map.panTo({ lat, lng }, { animate: true });
-}
+  panTo(lat: number, lng: number) {
+    this.map.panTo({ lat, lng }, { animate: true });
+  }
 
 
   applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {

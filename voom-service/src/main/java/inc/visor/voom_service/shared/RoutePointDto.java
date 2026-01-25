@@ -29,8 +29,9 @@ public class RoutePointDto {
     public RoutePointDto() {
     }
 
-    public RoutePointDto(LatLng point) {
+    public RoutePointDto(LatLng point, int index) {
         this.lat = point.lat();
         this.lng = point.lng();
+        this.orderIndex = index;
     }
 }
