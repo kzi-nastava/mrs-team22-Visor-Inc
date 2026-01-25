@@ -10,12 +10,12 @@ import { Footer } from '../../shared/footer/footer';
 
 import { DriverSimulationWsService } from '../../shared/websocket/DriverSimulationWsService';
 import ApiService from '../../shared/rest/api-service';
-import { DriverSummaryDto } from '../../shared/rest/home/home.model';
+import { DriverSummaryDto } from '../../shared/rest/ride/ride.model';
 
-export const ROUTE_HOME = 'home';
+export const ROUTE_HOME = 'ride';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-ride',
   standalone: true,
   imports: [
     Map,

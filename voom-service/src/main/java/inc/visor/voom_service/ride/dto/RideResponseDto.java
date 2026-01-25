@@ -3,8 +3,13 @@ package inc.visor.voom_service.ride.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class RideResponseDto {
 
     private Long id;
@@ -66,83 +71,15 @@ public class RideResponseDto {
         this.destinationAddress = destinationAddress;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public RideStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RideStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public LocalDateTime getFinishedAt() {
-        return finishedAt;
-    }
-
-    public void setFinishedAt(LocalDateTime finishedAt) {
-        this.finishedAt = finishedAt;
-    }
-
-    public String getDriverName() {
-        return driverName;
-    }
-
-    public void setDriverName(String driverName) {
-        this.driverName = driverName;
-    }
-
-    public String getPassengerName() {
-        return passengerName;
-    }
-
-    public void setPassengerName(String passengerName) {
-        this.passengerName = passengerName;
-    }
-
-    public List<String> getPassengerNames() {
-        return passengerNames;
-    }
-
-    public void setPassengerNames(List<String> passengerNames) {
-        this.passengerNames = passengerNames;
-    }
-
-    public String getStartAddress() {
-        return startAddress;
-    }
-
-    public void setStartAddress(String startAddress) {
-        this.startAddress = startAddress;
-    }
-
-    public String getDestinationAddress() {
-        return destinationAddress;
-    }
-
-    public void setDestinationAddress(String destinationAddress) {
-        this.destinationAddress = destinationAddress;
-    }
-
-    public Long getDriverId() {
-        return driverId;
-    }
-
-    public void setDriverId(Long driverId) {
-        this.driverId = driverId;
+    public RideResponseDto(Ride ride) {
+        this.id = ride.getId();
+        this.status = ride.getStatus();
+        this.startedAt = ride.getStartedAt();
+        this.finishedAt = ride.getFinishedAt();
+        this.driverName = ride.getDriver().getUser().getPerson().getFirstName();
+        this.passengerName = ride.getRideRequest().getCreator().getPerson().getFirstName();
+        this.passengerNames = ride.getPassengers().stream().map(user -> user.getPerson().getFirstName()).toList();
+        this.startAddress = ride.getRideRequest().getRideRoute().getPickupPoint().getAddress();
+        this.destinationAddress = ride.getRideRequest().getRideRoute().getDropoffPoint().getAddress();
     }
 }

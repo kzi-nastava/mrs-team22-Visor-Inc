@@ -20,18 +20,36 @@
         {{ data?.pickupAddress }}
       </p>
     }
+    <mat-dialog-actions
+      class="mt-10 pb-6"
+    >
+      <button
+        mat-flat-button
+        color="primary"
+        class="h-[52px] px-16 rounded-full text-base font-medium"
+        (click)="start()"
+      >
+        Start ride
+      </button>
+    </mat-dialog-actions>
   </div>
+  <mat-divider class="py-2" />
+  <div class="flex flex-col space-y-4">
+    <p class="text-base">Cancel ride</p>
+    <app-value-input-string label="Reason" [formControl]="cancelFormControl"/>
+  </div>
+  <mat-dialog-actions
+    class="mt-10 pb-6"
+  >
+    <button
+      [disabled]="cancelFormControl.invalid"
+      mat-flat-button
+      color="primary"
+      class="rounded-full text-base font-medium"
+      (click)="cancel()"
+    >
+      Cancel ride
+    </button>
+  </mat-dialog-actions>
 </mat-dialog-content>
 
-<mat-dialog-actions
-  class="mt-10 pb-6"
->
-  <button
-    mat-flat-button
-    color="primary"
-    class="h-[52px] px-16 rounded-full text-base font-medium"
-    (click)="start()"
-  >
-    Start ride
-  </button>
-</mat-dialog-actions>

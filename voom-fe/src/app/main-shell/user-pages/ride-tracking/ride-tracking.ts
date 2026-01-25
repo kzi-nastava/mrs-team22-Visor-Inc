@@ -2,7 +2,7 @@ import { Component, signal, ViewChild, OnInit } from '@angular/core';
 import { Map } from '../../../shared/map/map';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
 import { ActivatedRoute } from '@angular/router';
-import { OngoingRideDto } from '../../../shared/rest/home/home.model';
+import { OngoingRideDto } from '../../../shared/rest/ride/ride.model';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { sign } from 'crypto';
@@ -29,10 +29,10 @@ export class RideTracking implements OnInit {
   reported = signal<boolean>(false);
   rideFinished = signal<boolean>(false);
   reviewed = signal<boolean>(false);
-  
+
   startAddress = signal<string>('');
   destinationAddress = signal<string>('');
-  
+
   driverRating = signal<number>(0);
   carRating = signal<number>(0);
   reviewComment = signal<string>('');
@@ -84,7 +84,7 @@ export class RideTracking implements OnInit {
       lng: p.lng,
       address: p.address,
       type: p.type,
-      order: p.orderIndex ?? index 
+      order: p.orderIndex ?? index
     }));
 
     this.points.set(mappedPoints);
