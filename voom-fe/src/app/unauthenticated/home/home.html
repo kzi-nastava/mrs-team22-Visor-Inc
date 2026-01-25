@@ -1,17 +1,33 @@
 <app-header/>
 <div class="p-8 rounded-3xl">
   <app-map
+    [points]="this.routePoints()"
     (mapClick)="onMapClick($event)"
   ></app-map>
 </div>
 <section class="flex flex-col items-center w-full">
-  <form class="flex max-w-[1200px] w-full ml-auto mr-auto justify-center items-center">
-    <app-value-input-string label="Pickup Location"></app-value-input-string>
-    <app-value-input-string label="Dropoff Location"></app-value-input-string>
+  <form [formGroup]="rideForm" class="flex space-x-4 w-full ml-auto mr-auto justify-center items-center">
+    <app-value-input-string label="Pickup Location" formControlName="pickup"></app-value-input-string>
+    <app-value-input-string label="Dropoff Location" formControlName="dropoff"></app-value-input-string>
   </form>
-  <p class="text-center text-lg py-8">Enter pickup, dropoff and type to see your estimate.</p>
-  <button matButton="filled" [disabled]="this.routePoints().length < 2" (click)="getEstimate()">See estimate</button>
 </section>
+@if (rideEstimation(); as rideEstimation) {
+<div class="flex flex-col items-center w-full space-y-4 py-8">
+  <div class="text-center text-lg">Ride Estimate</div>
+  <div class="flex justify-center items-center space-x-8">
+    <div class="flex flex-col">
+      <div class="text-center text-lg">Distance:</div>
+      <div class="text-center text-lg">{{rideEstimation.distance}} km</div>
+    </div>
+    <div class="flex flex-col">
+      <div class="text-center text-lg">Duration:</div>
+      <div class="text-center text-lg">{{rideEstimation.duration}} min</div>
+    </div>
+  </div>
+</div>
+} @else {
+  <p class="text-center text-lg py-8">Enter pickup, dropoff and type to see your estimate.</p>
+}
 <section
   class="how-it-works grid grid-cols-2 p-20 max-w-[1200px] mr-auto ml-auto content-center place-items-center"
 >

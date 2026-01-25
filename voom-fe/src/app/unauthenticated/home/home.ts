@@ -7,11 +7,11 @@ import {Footer} from '../../shared/footer/footer';
 import {DriverSimulationWsService} from '../../shared/websocket/DriverSimulationWsService';
 import ApiService from '../../shared/rest/api-service';
 import {DriverSummaryDto} from '../../shared/rest/ride/ride.model';
-import {RouteEstimateRequestDto} from '../../shared/rest/route/route.model';
+import {RouteEstimateRequestDto, RouteEstimateResponseDto} from '../../shared/rest/route/route.model';
 import {map} from 'rxjs';
 import {RoutePoint} from '../../main-shell/user-pages/home/home';
 import {RoutePointType} from './home.api';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {LatLng} from 'leaflet';
 
 export const ROUTE_HOME = 'ride';
@@ -25,6 +25,7 @@ export const ROUTE_HOME = 'ride';
     MatButton,
     Header,
     Footer,
+    ReactiveFormsModule,
   ],
   templateUrl: './home.html',
   styleUrl: './home.css',
@@ -36,6 +37,7 @@ export class Home implements OnInit {
   private renderedDrivers: number[] = [];
 
   routePoints = signal<RoutePoint[]>([]);
+  rideEstimation = signal<RouteEstimateResponseDto | null>(null);
 
   rideForm = new FormGroup({
     pickup: new FormControl<string>(''),
@@ -55,8 +57,6 @@ export class Home implements OnInit {
     this.api.rideApi.getActiveDrivers().subscribe(res => {
       const drivers: DriverSummaryDto[] = res.data ?? [];
       if (drivers.length === 0) return;
-
-      console.log('Loaded active drivers:', drivers);
 
       this.ws.connect(
         () => {},
@@ -86,25 +86,6 @@ export class Home implements OnInit {
     });
   }
 
-  protected getEstimate() {
-    const routePoints = this.routePoints();
-
-    if (routePoints.length < 2) {
-      return;
-    }
-
-    const routeRequestEstimate: RouteEstimateRequestDto = {
-      startPoint: new LatLng(routePoints[0].lat, routePoints[0].lng),
-      endPoint: new LatLng(routePoints[0].lat, routePoints[0].lng),
-    };
-
-    this.api.routeApi.getRouteEstimate(routeRequestEstimate).pipe(
-      map(response => response.data),
-    ).subscribe((routeEstimateResponse) => {
-
-    })
-  }
-
   protected onMapClick(event: { lat: number; lng: number; address: string }) {
     const cleanAddress = event.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim();
     const points = this.routePoints();
@@ -124,20 +105,28 @@ export class Home implements OnInit {
       return;
     }
 
-    const updated = points.map((p) =>
-      p.type === 'DROPOFF' ? { ...p, type: 'STOP' as RoutePointType } : p,
-    );
-
-    updated.push({
+    const locationToAdd: RoutePoint = {
       id: crypto.randomUUID(),
       lat: event.lat,
       lng: event.lng,
       address: cleanAddress,
       type: 'DROPOFF',
-      order: updated.length,
-    });
+      order: 1,
+    };
 
+    const updated = [points[0], locationToAdd];
     this.routePoints.set(updated);
     this.rideForm.patchValue({ dropoff: cleanAddress });
+
+    const routeRequestEstimate: RouteEstimateRequestDto = {
+      startPoint: new LatLng(updated[0].lat, updated[0].lng),
+      endPoint: new LatLng(updated[1].lat, updated[1].lng),
+    };
+
+    this.api.routeApi.getRouteEstimate(routeRequestEstimate).pipe(
+      map(response => response.data),
+    ).subscribe((routeEstimateResponse) => {
+      this.rideEstimation.set(routeEstimateResponse);
+    });
   }
 }
