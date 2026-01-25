@@ -12,8 +12,6 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
-import inc.visor.voom_service.price.model.Price;
-import inc.visor.voom_service.price.repository.PriceRepository;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
@@ -39,9 +37,8 @@ public class DataInitializer implements ApplicationRunner {
     private final DriverRepository driverRepository;
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
-    private final PriceRepository priceRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, PriceRepository priceRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -50,7 +47,6 @@ public class DataInitializer implements ApplicationRunner {
         this.driverRepository = driverRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.priceRepository = priceRepository;
     }
 
     @Override
@@ -121,8 +117,8 @@ public class DataInitializer implements ApplicationRunner {
     private void createVehicleType(String name) {
         VehicleType type = new VehicleType();
         type.setType(name);
+        type.setPrice(10.0);
         type = vehicleTypeRepository.save(type);
-        priceRepository.save(new Price(10.0, type));
     }
 
     private void seedDrivers() {

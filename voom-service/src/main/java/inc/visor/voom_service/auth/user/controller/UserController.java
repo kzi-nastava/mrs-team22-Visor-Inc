@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.user.controller;
 
+import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
@@ -41,15 +42,23 @@ public class UserController {
         return ResponseEntity.ok(new UserProfileDto(user));
     }
 
-    //TODO add createUser;
+    @PostMapping
+    public ResponseEntity<UserProfileDto> createUser(@RequestBody CreateUserDto dto) {
+        Person person = new Person(dto);
+        person = this.personService.create(person);
+        UserRole userRole = userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
+        User user = new User(dto, person, userRole);
+        user = this.userService.create(user);
+        return ResponseEntity.ok(new UserProfileDto(user));
+    }
 
     @PutMapping("{userId}")
-    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long personId, @RequestBody UserProfileDto dto) {
-        User user = this.userService.getUser(personId).orElseThrow(NotFoundException::new);
+    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long userId, @RequestBody UserProfileDto dto) {
+        User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         UserRole userRole = this.userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
         Person person = new Person(user.getPerson().getId(), dto);
         person = this.personService.update(person);
-        user = new User(personId, person, UserStatus.valueOf(dto.getUserStatus()), userRole);
+        user = new User(person, dto, userRole);
         user = this.userService.update(user);
         return ResponseEntity.ok(new UserProfileDto(user));
     }

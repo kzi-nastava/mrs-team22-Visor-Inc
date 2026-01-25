@@ -1,5 +1,5 @@
 export interface DriverDto {
-  id?: number;
+  id: number;
   firstName: string;
   lastName: string;
   pfpUrl?: string;
@@ -9,4 +9,8 @@ export interface DriverDto {
   phoneNumber: string;
   birthDate: Date;
   address: string;
+}
+
+export interface AdminCreateDriverDto {
+  userId: number;
 }

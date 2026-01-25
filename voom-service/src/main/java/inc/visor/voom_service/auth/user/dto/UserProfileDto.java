@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserStatus;
 import lombok.Getter;
@@ -18,9 +19,12 @@ public class UserProfileDto {
     private String userStatus;
     private String email;
     private String phoneNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private LocalDateTime birthDate;
     private String address;
     private int userRoleId;
+
+    public UserProfileDto() {}
 
     public UserProfileDto(User user) {
         this.id = user.getId();

@@ -1,1 +1,32 @@
-<p>admin-users-dialog works!</p>
+<form class="flex flex-col flex-auto gap-y-8 p-4 dialog-content" [formGroup]="userForm" (submit)="submitUserForm(); $event.preventDefault()">
+  <div class="text-lg">Add user</div>
+  <div class="grid grid-cols-2 flex-auto gap-y-4 gap-4">
+    <mat-form-field class="w-full">
+      <mat-label>Choose user type</mat-label>
+      <mat-select formControlName="userRole">
+        @for (userRole of this.data; track userRole) {
+          <mat-option [value]="userRole">{{ userRole.roleName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="w-full">
+      <mat-label>Choose user status</mat-label>
+      <mat-select formControlName="userStatus">
+        @for (userStatus of Object.values(UserStatus) ; track userStatus) {
+          <mat-option [value]="userStatus">{{ userStatus.toString() }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <app-value-input-string [label]="'First name'" [hide]="false" formControlName="firstName"/>
+    <app-value-input-string [label]="'Last name'" [hide]="false" formControlName="lastName"/>
+    <app-value-input-date [label]="'Date of birth'" formControlName="birthDate"/>
+    <app-value-input-string [label]="'Phone number'" [hide]="false" formControlName="phoneNumber"/>
+    <app-value-input-string [label]="'Address'" [hide]="false" formControlName="address"/>
+    <app-value-input-string [label]="'Email'" [hide]="false" formControlName="email"/>
+    <app-value-input-string [label]="'Password'" [hide]="true" formControlName="password"/>
+  </div>
+  <div class="flex flex-row flex-auto gap-x-2 justify-end">
+    <button matButton type="button" (click)="cancel()">Cancel</button>
+    <button (click)="submitUserForm(); $event.preventDefault()" matButton="filled" type="submit">Submit</button>
+  </div>
+</form>

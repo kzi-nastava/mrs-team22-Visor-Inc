@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.user.model;
 
+import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.person.model.Person;
@@ -27,7 +28,7 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     @Enumerated(EnumType.ORDINAL)
@@ -62,11 +63,20 @@ public class User {
         this.userStatus = dto.getUserStatus();
     }
 
-    public User(long userId, Person person, UserStatus userStatus, UserRole userRole) {
-        this.userStatus = userStatus;
-        this.id = userId;
-        this.person = person;
+    public User(CreateUserDto dto, Person person, UserRole userRole) {
+        this.email = dto.getEmail();
+        this.password = dto.getPassword();
+        this.userStatus = UserStatus.valueOf(dto.getUserStatus());
         this.userRole = userRole;
+        this.person = person;
+    }
+
+    public User(Person person, UserProfileDto dto, UserRole userRole) {
+        this.person = person;
+        this.id = dto.getId();
+        this.email = dto.getEmail();
+        this.userRole = userRole;
+        this.userStatus = UserStatus.valueOf(dto.getUserStatus());
     }
 
     @Override

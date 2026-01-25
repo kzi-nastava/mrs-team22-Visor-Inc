@@ -33,7 +33,7 @@ public class VehicleTypeController {
 
     @PostMapping
     public ResponseEntity<VehicleTypeDto> createVehicleType(@RequestBody CreateVehicleTypeDto dto) {
-        VehicleType vehicleType = new VehicleType(dto.getType());
+        VehicleType vehicleType = new VehicleType(dto);
         vehicleType = vehicleTypeService.create(vehicleType);
         return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
     }
@@ -41,7 +41,7 @@ public class VehicleTypeController {
     @PutMapping("{id}")
     public ResponseEntity<VehicleTypeDto> updateVehicleType(@PathVariable long id, @RequestBody VehicleTypeDto dto) {
         VehicleType vehicleType = vehicleTypeService.getVehicleType(id).orElseThrow(NotFoundException::new);
-        vehicleType.setType(dto.getType());
+        vehicleType.setPrice(dto.getPrice());
         vehicleType = vehicleTypeService.update(vehicleType);
         return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
     }

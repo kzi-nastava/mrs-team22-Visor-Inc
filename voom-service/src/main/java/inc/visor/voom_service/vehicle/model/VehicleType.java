@@ -2,6 +2,7 @@ package inc.visor.voom_service.vehicle.model;
 
 import java.util.Objects;
 
+import inc.visor.voom_service.vehicle.dto.CreateVehicleTypeDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,27 +26,28 @@ public class VehicleType {
     @Column(name = "vehicle_type_name", nullable = false, unique = true)
     private String type;
 
-    public VehicleType(String type) {
+    @Column(name = "vehicle_type_price", nullable = false, unique = false)
+    private Double price;
+
+    public VehicleType(String type, Double price) {
         this.type = type;
+        this.price = price;
     }
 
     public VehicleType() {
     }
 
-    public double getBasePrice() {
-        return switch (type) {
-            case "CAR" -> 5.0;
-            case "VAN" -> 8.0;
-            case "LUXURY" -> 15.0;
-            default -> 0.0;
-        };
+    public VehicleType(CreateVehicleTypeDto dto) {
+        this.type = dto.getType();
+        this.price = dto.getPrice();
     }
 
     @Override
     public String toString() {
-        return "VehicleTypeController{" +
+        return "VehicleType{" +
                 "id=" + id +
                 ", type='" + type + '\'' +
+                ", price=" + price +
                 '}';
     }
 
@@ -53,11 +55,11 @@ public class VehicleType {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         VehicleType that = (VehicleType) o;
-        return id == that.id && Objects.equals(type, that.type);
+        return id == that.id && Objects.equals(type, that.type) && Objects.equals(price, that.price);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type);
+        return Objects.hash(id, type, price);
     }
 }

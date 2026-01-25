@@ -1,19 +1,18 @@
-import {Component, inject, signal} from '@angular/core';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
-import {MatDivider} from '@angular/material/list';
-import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {MatIcon} from '@angular/material/icon';
-import {ValueInputString} from '../../../../shared/value-input/value-input-string/value-input-string';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
+import { MatDivider } from '@angular/material/list';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { MatIcon } from '@angular/material/icon';
+import { ValueInputString } from '../../../../shared/value-input/value-input-string/value-input-string';
 import ApiService from '../../../../shared/rest/api-service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {map} from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {VehicleDto} from '../../../../shared/rest/vehicle/vehicle.model';
-import {VehicleTypeDto} from '../../../../shared/rest/vehicle/vehicle-type.model';
-import {ValueInputNumeric} from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
-import {DriverDto} from '../../../../shared/rest/driver/driver.model';
-import {MatCheckbox} from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject, catchError, filter, map, merge, of, scan, startWith } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { VehicleDto } from '../../../../shared/rest/vehicle/vehicle.model';
+import { VehicleTypeDto } from '../../../../shared/rest/vehicle/vehicle-type.model';
+import { ValueInputNumeric } from '../../../../shared/value-input/value-input-numeric/value-input-numeric';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 export const ROUTE_ADMIN_VEHICLES = "vehicles";
 
@@ -63,11 +62,37 @@ export class AdminVehicles {
     ])
   });
 
+  searchFormControl = new FormControl<string>('');
+  searchTerm = toSignal(this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())));
+
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
-  vehicles$ = this.apiService.vehicleApi.getVehicles().pipe(
+  initialVehicles$ = this.apiService.vehicleApi.getVehicles().pipe(
     map(response => response.data),
+  );
+
+  vehicleCreate$ = new BehaviorSubject<VehicleDto | null>(null);
+  vehicleUpdate$ = new BehaviorSubject<VehicleDto | null>(null);
+
+  vehicles$= merge(
+    this.initialVehicles$.pipe(filter(vehicle => !!vehicle), map(response => { return {type:'initial', value: response} })),
+    this.vehicleCreate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicle => !!vehicle), map(response => { return {type:'create', value: [response]} })),
+    this.vehicleUpdate$.asObservable().pipe(takeUntilDestroyed(), filter(vehicle => !!vehicle), map(response => { return {type:'update', value: [response]} })),
+  ).pipe(
+    takeUntilDestroyed(),
+    scan((acc, obj) => {
+      switch (obj.type) {
+        case 'initial':
+          return obj.value;
+        case 'create':
+          return [...acc, ...obj.value];
+        case 'update':
+          return [...acc.filter(vehicle => vehicle.id !== obj.value[0].id), obj.value[0]];
+        default:
+          return [];
+      }
+    }, [] as VehicleDto[]),
   );
 
   vehicleTypes$ = this.apiService.vehicleTypeApi.getVehicleTypes().pipe(
@@ -75,6 +100,18 @@ export class AdminVehicles {
   );
 
   vehicles = toSignal(this.vehicles$);
+
+  filteredVehicles = computed(() => {
+    const searchTerm = this.searchTerm();
+    const vehicles = this.vehicles();
+
+    if (!vehicles || !searchTerm || !searchTerm.length) {
+      return vehicles;
+    }
+
+    return vehicles.filter(vehicle => vehicle.model.toLowerCase().includes(searchTerm));
+  });
+
   vehicleTypes = toSignal(this.vehicleTypes$);
 
   selectedVehicle = signal<VehicleDto | null>(null);
@@ -99,7 +136,7 @@ export class AdminVehicles {
     this.selectedVehicleType.set(vehicleType);
     this.selectedVehicle.set(vehicle);
 
-    this.vehicleForm.setValue({
+    this.vehicleForm.patchValue({
       driver: vehicle.driverId.toString(),
       vehicleType: vehicleType.type,
       year: vehicle.year,
@@ -118,18 +155,36 @@ export class AdminVehicles {
     this.vehicleForm.get("babySeat")?.enable();
     this.vehicleForm.get("petFriendly")?.enable();
     this.vehicleForm.get("numberOfSeats")?.enable();
-
-  }
-
-  protected addVehicle() {
-
   }
 
   protected saveVehicle() {
+    const vehicle = this.selectedVehicle();
+    const vehicleType = this.selectedVehicleType();
 
-  }
+    if (!vehicle || !vehicleType) {
+      return;
+    }
 
-  protected deleteVehicle() {
+    vehicle.model = this.vehicleForm.get("model")?.value!;
+    vehicle.year = this.vehicleForm.get("year")?.value!;
+    vehicle.licensePlate = this.vehicleForm.get("licensePlate")?.value!;
+    vehicle.numberOfSeats = this.vehicleForm.get("numberOfSeats")?.value!;
+    vehicle.babySeat = this.vehicleForm.get("babySeat")?.value!;
+    vehicle.petFriendly = this.vehicleForm.get("petFriendly")?.value!;
 
+    this.apiService.vehicleApi.updateVehicle(vehicle.id, vehicle).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.snackBar.open(error, '', {horizontalPosition: "right", duration : 3000});
+        return of(null);
+      }),
+    ).subscribe((vehicleType) => {
+      if (vehicleType) {
+        this.snackBar.open("Vehicle updated successfully", '', {horizontalPosition: "right", duration : 3000});
+        this.vehicleUpdate$.next(vehicleType);
+      } else {
+        this.snackBar.open("Vehicle update failed", '', {horizontalPosition: "right", duration : 3000});
+      }
+    });
   }
 }
