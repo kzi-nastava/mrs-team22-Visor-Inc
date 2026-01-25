@@ -22,6 +22,7 @@ export interface RegistrationDto {
   phoneNumber: string;
   address: string;
   userType: string;
+  birthDate: string;
 }
 
 export interface User {

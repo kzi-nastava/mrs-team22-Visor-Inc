@@ -54,6 +54,7 @@ export class Registration {
   });
 
   register() {
+
     const registrationData = {
       email: this.accountForm.value.email as string,
       password: this.accountForm.value.password1 as string,
@@ -61,6 +62,7 @@ export class Registration {
       lastName: this.personalForm.value.lastName as string,
       phoneNumber: this.contactForm.value.phoneNumber as string,
       address: this.contactForm.value.address as string,
+      birthDate: this.personalForm.value.birthDate?.toISOString() as string,
       userType: 'USER',
     };
 
