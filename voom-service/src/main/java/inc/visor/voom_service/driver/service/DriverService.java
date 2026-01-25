@@ -346,4 +346,8 @@ public class DriverService {
                 }))
                 .orElse(null);
     }
+
+    public void save(Driver driver) {
+        driverRepository.save(driver);
+    }
 }

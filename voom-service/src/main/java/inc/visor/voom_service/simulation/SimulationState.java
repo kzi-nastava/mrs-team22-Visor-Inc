@@ -1,7 +1,9 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
@@ -24,6 +26,9 @@ public class SimulationState {
         return drivers;
     }
 
+    private final Set<Long> pendingDrivers = ConcurrentHashMap.newKeySet();
+
+
     public void replaceRoute(long driverId, LatLng newEnd, OsrmService osrm) {
         SimulatedDriver existing = drivers.stream()
                 .filter(d -> d.getDriverId() == driverId)
@@ -38,25 +43,25 @@ public class SimulationState {
         drivers.add(new SimulatedDriver(existing.getDriver(), newWaypoints));
     }
 
+
     public void syncDriversWithDatabase(List<DriverSummaryDto> dbDrivers, OsrmService osrm, List<PredefinedRoutes.Route> predefinedRoutes) {
-        List<Long> dbIds = dbDrivers.stream().map(DriverSummaryDto::getId).toList();
+        List<Long> dbIds = dbDrivers.stream()
+                .map(DriverSummaryDto::getId)
+                .toList();
+
 
         drivers.removeIf(d -> !dbIds.contains(d.getDriverId()));
 
         dbDrivers.forEach(dbDriver -> {
-            boolean exists = drivers.stream().anyMatch(d -> d.getDriverId() == dbDriver.getId());
+            long driverId = dbDriver.getId();
+
+            boolean exists = drivers.stream()
+                    .anyMatch(d -> d.getDriverId() == driverId);
+
+            PredefinedRoutes.Route predefinedRoute = predefinedRoutes.get((int) (driverId % predefinedRoutes.size()));
 
             if (!exists) {
-                CompletableFuture.supplyAsync(() -> {
-                    PredefinedRoutes.Route route = predefinedRoutes.get((int) (dbDriver.getId() % predefinedRoutes.size()));
-                    return osrm.getRoute(route.start(), route.end());
-                }).thenAccept(waypoints -> {
-                    this.add(new SimulatedDriver(dbDriver, waypoints));
-                    System.out.println("Route ready for driver: " + dbDriver.getId());
-                }).exceptionally(ex -> {
-                    System.err.println("Failed to fetch route: " + ex.getMessage());
-                    return null;
-                });
+                drivers.add(new SimulatedDriver(dbDriver, osrm.getRoute(predefinedRoute.start(), predefinedRoute.end())));
             }
         });
     }

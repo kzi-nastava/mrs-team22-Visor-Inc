@@ -1,6 +1,8 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -23,6 +25,7 @@ public class Simulator implements ApplicationRunner {
     private final OsrmService osrmService;
     private final SimulationState state;
     private final SimulationPublisher publisher;
+
 
     private final List<Route> predefinedRoutes = PredefinedRoutes.PREDEFINED_ROUTES;
 
@@ -69,10 +72,11 @@ public class Simulator implements ApplicationRunner {
 
         state.getAll().forEach(driver -> {
             LatLng pos = driver.nextPosition();
+            int eta = (driver.getWaypointCount() - driver.getWaypointIndex()) * 3;
             if (pos != null) {
-                publisher.publishPosition(driver.getDriverId(), pos, driver.isFinishedRide());
+                publisher.publishPosition(driver.getDriverId(), pos, driver.isFinishedRide(), eta);
             } else {
-                publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), driver.isFinishedRide());
+                publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), driver.isFinishedRide(), eta);
             }
         });
     }

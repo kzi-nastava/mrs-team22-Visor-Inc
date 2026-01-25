@@ -2,7 +2,9 @@ package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import inc.visor.voom_service.ride.model.enums.Sorting;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.driver.model.Driver;
@@ -39,8 +41,28 @@ public class RideService {
         return;
     }
 
-    public List<Ride> getDriverRides(Long driverId) {
-        return null;
+    public List<Ride> getDriverRides(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {
+        List<Ride> unfiltered = rideRepository.findByDriverId(driverId);
+
+        return unfiltered.stream()
+                .filter(r -> {
+                    LocalDateTime started = r.getStartedAt();
+                    if (started == null) return false;
+
+                    boolean matchesStart = (start == null) || !started.isBefore(start);
+
+                    boolean matchesEnd = (end == null) || !started.isAfter(end);
+
+                    return matchesStart && matchesEnd;
+                })
+                .sorted((ride1, ride2) -> {
+                    if (sort == Sorting.DESC) {
+                        return ride2.getStartedAt().compareTo(ride1.getStartedAt());
+                    } else {
+                        return ride1.getStartedAt().compareTo(ride2.getStartedAt());
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public boolean existsOverlappingRide(
@@ -172,6 +194,14 @@ public class RideService {
         dto.setDriverName(ride.getDriver().getUser().getPerson().getFirstName() + " " + ride.getDriver().getUser().getPerson().getLastName());
 
         return dto;
+    }
+
+    public Ride findById(Long rideId) {
+        return rideRepository.findById(rideId).orElseThrow();
+    }
+
+    public void save(Ride ride) {
+        rideRepository.save(ride);
     }
 
 }

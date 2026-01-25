@@ -2,14 +2,17 @@ package inc.visor.voom_service.ride.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.simulation.SimulationState;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -122,19 +125,11 @@ public class RideController {
 
         List<RideHistoryDto> rides = new ArrayList<>();
 
-        List<Ride> ridesList = rideService.getDriverRides(driverId);
+        List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
 
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = new RideHistoryDto();
-            rideHistoryDto.setId(ride.getId());
-            rideHistoryDto.setRideRequest(ride.getRideRequest());
-            rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
-            rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
-            rideHistoryDto.setPassengers(ride.getPassengers());
-            rideHistoryDto.setStatus(ride.getStatus());
-            rideHistoryDto.setFinishedAt(ride.getFinishedAt());
-            rideHistoryDto.setStartedAt(ride.getStartedAt());
+            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
             rides.add(rideHistoryDto);
         }
 
@@ -311,17 +306,80 @@ public class RideController {
         Driver driver = driverService.getDriver(userId).get();
         driver.setStatus(DriverStatus.AVAILABLE);
 
-        driverRepository.save(driver);
+        driverService.save(driver);
 
         ActiveRideDto activeRideDto = driverService.getActiveRide(userId);
-        Ride ride = rideRepository.findById(activeRideDto.getRideId()).get();
+        Ride ride = rideService.findById(activeRideDto.getRideId());
         ride.setFinishedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.FINISHED);
-        rideRepository.save(ride);
+        rideService.save(ride);
 
         simulator.setFinishedRide(userId);
 
         return ResponseEntity.ok(activeRideDto);
     }
-    
+
+    @GetMapping("/driver/history")
+    public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(
+            @AuthenticationPrincipal VoomUserDetails userDetails,
+            @RequestParam(name = "dateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
+            @RequestParam(name="dateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
+            @RequestParam(name="sort", required = true) Sorting sort
+            ) {
+
+        List<RideHistoryDto> rides = new ArrayList<>();
+
+        Driver driver = extractDriver(userDetails);
+
+        System.out.println("AAA Driver: " + driver);
+
+        if (driver == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        System.out.println("date from: " + dateFrom);
+        System.out.println("date to: " + dateTo);
+
+//        if (dateTo != null) {
+//            dateTo.plusHours(23);
+//            dateTo.plusMinutes(59);
+//        }
+
+        List<Ride> ridesList = rideService.getDriverRides(driver.getId(), dateFrom, dateTo, sort);
+
+        for (Ride ride : ridesList) {
+            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
+            rides.add(rideHistoryDto);
+        }
+
+
+        return ResponseEntity.ok(rides);
+    }
+
+    private static RideHistoryDto getRideHistoryDto(Ride ride) {
+        RideHistoryDto rideHistoryDto = new RideHistoryDto();
+        rideHistoryDto.setId(ride.getId());
+        rideHistoryDto.setRideRequest(ride.getRideRequest());
+        rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
+        rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
+        rideHistoryDto.setPassengers(ride.getPassengers());
+        rideHistoryDto.setStatus(ride.getStatus());
+        rideHistoryDto.setFinishedAt(ride.getFinishedAt());
+        rideHistoryDto.setStartedAt(ride.getStartedAt());
+        return rideHistoryDto;
+    }
+
+    private Driver extractDriver(VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+        System.out.println("User: " + user);
+        if (user == null) {
+            return null;
+        }
+
+        Long userId = user.getId();
+
+        return driverService.getDriver(userId).get();
+    }
+
 }

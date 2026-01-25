@@ -31,7 +31,7 @@ public class SimulatedDriver {
     }
 
     public LatLng currentPosition() {
-        if (waypointIndex == 0) return waypoints.get(0);
+        if (waypointIndex == 0) return waypoints.getFirst();
         return waypoints.get(Math.min(waypointIndex - 1, waypoints.size() - 1));
     }
 
@@ -41,5 +41,13 @@ public class SimulatedDriver {
 
     public void setFinishedRide(boolean finishedRide) {
         this.finishedRide = finishedRide;
+    }
+
+    public int getWaypointIndex() {
+        return waypointIndex;
+    }
+
+    public int getWaypointCount() {
+        return waypoints.size();
     }
 }
