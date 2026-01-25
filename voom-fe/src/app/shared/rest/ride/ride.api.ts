@@ -65,8 +65,6 @@ export class RideApi extends Api {
     );
   }
 
-
-
   getRide(id: number) {
     const config: RequestConfig = {
       headers: {
