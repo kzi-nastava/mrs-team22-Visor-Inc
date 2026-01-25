@@ -10,6 +10,7 @@ import VehicleApi from './vehicle/vehicle.api';
 import VehicleTypeApi from './vehicle/vehicle-type.api';
 import PriceApi from './price/price.api';
 import {DriverActivityApi} from './driver/driver-activity.api';
+// import { RidesApi } from './ride/ride.api';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,7 @@ export default class ApiService {
   public readonly vehicleTypeApi;
   public readonly priceApi;
   public readonly driverActivityApi;
+  // public readonly ridesApi: RidesApi;
 
   constructor(private apiClient: ApiClient) {
     this.authenticationApi = new AuthenticationApi(this.apiClient);
@@ -38,5 +40,6 @@ export default class ApiService {
     this.vehicleTypeApi = new VehicleTypeApi(this.apiClient);
     this.priceApi = new PriceApi(this.apiClient);
     this.driverActivityApi = new DriverActivityApi(this.apiClient);
+    // this.ridesApi = new RidesApi(this.apiClient);
   }
 }

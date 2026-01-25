@@ -154,3 +154,76 @@ export interface OngoingRideDto {
   routePoints: RoutePointDto[];
   driverId: number;
 }
+
+
+export type RideRequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+export type ScheduleType = 'NOW' | 'LATER';
+export type UserStatus = 'PENDING' | 'ACTIVE' | 'BLOCKED';
+
+export interface RoutePoint {
+  orderIndex: number;
+  lat: number;
+  lng: number;
+  address: string;
+  pointType: RoutePointType;
+}
+
+export interface RideRoute {
+  id: number;
+  totalDistanceKm: number;
+  routePoints: RoutePoint[];
+}
+
+export interface UserRole {
+  id: number;
+  name: string;
+}
+
+export interface Person {
+  id: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  profilePicture?: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  person: Person;
+  userStatus: UserStatus;
+  userRole: UserRole;
+}
+
+export interface VehicleType {
+  id: number;
+  name: string;
+  pricePerKm: number;
+}
+
+export interface RideRequest {
+  id: number;
+  creator: User;
+  rideRoute: RideRoute;
+  status: RideRequestStatus;
+  scheduleType: ScheduleType;
+  scheduledTime?: string;
+  vehicleType: VehicleType;
+  babyTransport: boolean;
+  petTransport: boolean;
+  calculatedPrice: number;
+  linkedPassengerEmails: string[];
+  cancelledBy?: User;
+}
+
+export interface RideHistoryDto {
+  id: number;
+  status: RideStatus;
+  rideRequest: RideRequest;
+  rideRoute: RideRoute;
+  startedAt: string;
+  finishedAt: string;
+  passengers: User[];
+  cancelledBy?: User;
+}

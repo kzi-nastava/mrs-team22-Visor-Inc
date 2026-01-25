@@ -272,7 +272,6 @@ export class DriverHome implements AfterViewInit {
                     
                     console.log(`[DriverHome] Distance to Dropoff: ${dist.toFixed(2)}m`);
 
-                    // If we are close, or if the simulation says "finished"
                     if ((dist <= 30 || pos.finished) && !this.finishDialogOpen) {
                         this.ridePhase.set('AT_DROPOFF');
                     }

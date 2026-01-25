@@ -252,6 +252,7 @@ export type ActiveRideDto = {
   rideId: number;
   status: string;
   routePoints: RideRoutePointDto[];
+  driverId: number;
 }
 
 export type StartRideDto = {

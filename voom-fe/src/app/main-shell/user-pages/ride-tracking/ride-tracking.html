@@ -1,5 +1,5 @@
 <div class="p-8 rounded-3xl">
-  <app-map />
+  <app-map [points]="points()" />
 </div>
 
 @if(rideFinished()) {
@@ -78,7 +78,7 @@
 } @else {
 <div class="max-w-[1200px] ml-auto mr-auto flex flex-col items-center gap-4 p-4">
   <div>
-    <p class="text-center text-xl">Estimated time of arrival: 15 minutes</p>
+    <p class="text-center text-xl">Estimated time of arrival: {{ eta() }} minutes</p>
   </div>
   <p class="text-center text-gray-600">In case of emergency, press the PANIC button to alert authorities.</p>
 

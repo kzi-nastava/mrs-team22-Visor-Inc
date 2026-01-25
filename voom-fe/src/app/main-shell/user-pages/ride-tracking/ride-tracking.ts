@@ -1,11 +1,14 @@
 import { Component, signal, ViewChild, OnInit } from '@angular/core';
 import { Map } from '../../../shared/map/map';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import ApiService from '../../../shared/rest/api-service';
 import { ActivatedRoute } from '@angular/router';
 import { OngoingRideDto } from '../../../shared/rest/home/home.model';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
+import { sign } from 'crypto';
+import { ActiveRideDto } from '../home/home.api';
+import { RoutePoint } from '../home/home';
+import ApiService from '../../../shared/rest/api-service';
 
 export const ROUTE_RIDE_TRACKING = 'ride/tracking';
 
@@ -34,6 +37,10 @@ export class RideTracking implements OnInit {
   carRating = signal<number>(0);
   reviewComment = signal<string>('');
 
+  points = signal<RoutePoint[]>([]);
+
+  eta = signal<number>(0);
+
   message = "";
   stars = [1, 2, 3, 4, 5];
 
@@ -61,22 +68,32 @@ export class RideTracking implements OnInit {
   }
 
   private initDrive(): void {
-    this.api.rideApi.getRide(this.rideId).subscribe((res) => {
-      const ride: OngoingRideDto | null = res.data;
-      if (!ride) return;
+  this.api.rideApi.getOngoingRide().subscribe((res) => {
+    const ride: ActiveRideDto | null = res.data;
+    if (!ride) return;
 
-      this.rideId = ride.rideId;
-      this.driverId = ride.driverId;
+    this.rideId = ride.rideId;
+    this.driverId = ride.driverId;
 
-      this.startAddress.set(ride.routePoints.find(p => p.type === 'PICKUP')?.address || '');
-      this.destinationAddress.set(ride.routePoints.find(p => p.type === 'DROPOFF')?.address || '');
+    this.startAddress.set(ride.routePoints.find(p => p.type === 'PICKUP')?.address || '');
+    this.destinationAddress.set(ride.routePoints.find(p => p.type === 'DROPOFF')?.address || '');
 
-      if (!this.driverId) return;
+    const mappedPoints: RoutePoint[] = ride.routePoints.map((p, index) => ({
+      id: crypto.randomUUID(),
+      lat: p.lat,
+      lng: p.lng,
+      address: p.address,
+      type: p.type,
+      order: p.orderIndex ?? index 
+    }));
 
-      this.map.drawRouteFromAddresses(this.startAddress(), this.destinationAddress());
+    this.points.set(mappedPoints);
+
+    if (this.driverId) {
       this.startTrackingDriver(ride);
-    });
-  }
+    }
+  });
+}
 
   private startTrackingDriver(ride: any): void {
     this.ws.connect(
@@ -91,6 +108,8 @@ export class RideTracking implements OnInit {
           this.rideFinished.set(true);
           return;
         }
+
+        this.eta.set(Math.ceil(pos.eta / 60));
 
         if (!this.rendered) {
           this.rendered = true;

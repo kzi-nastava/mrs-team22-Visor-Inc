@@ -1,8 +1,10 @@
 import { Api } from '../api';
 import { ApiClient } from '../api-client';
-import { DriverSummaryDto, OngoingRideDto, RatingRequestDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
+import { DriverSummaryDto, OngoingRideDto, RatingRequestDto, RideHistoryDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto } from './home.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
+import { ActiveRideDto } from '../../../main-shell/user-pages/home/home.api';
+import { Observable } from 'rxjs/internal/Observable';
 
 export class RideApi extends Api {
 
@@ -97,5 +99,42 @@ finishOngoingRide() {
   );
 }
 
+getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    };
+    return this.apiClient.get<void, ActiveRideDto>(`/api/rides/ongoing`, config);
+  }
+
+getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
+  const queryParams: any = {
+    sort: sort.toUpperCase()
+  };
+
+  if (dateFrom) {
+    queryParams.dateFrom = dateFrom.toISOString();
+  }
+  if (dateTo) {
+    queryParams.dateTo = dateTo.toISOString();
+  }
+
+  const config: RequestConfig = {
+    headers: { 
+      accept: 'application/json',
+      contentType: 'application/json' 
+    },
+    params: queryParams,
+    authenticated: true,
+  };
+
+  return this.apiClient.get<void, RideHistoryDto[]>(
+    `/api/rides/driver/history`, 
+    config
+  );
+}
 
 }
