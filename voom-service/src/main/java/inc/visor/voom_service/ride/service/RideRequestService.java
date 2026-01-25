@@ -6,9 +6,10 @@ import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.mapper.RideRequestMapper;
 import inc.visor.voom_service.ride.model.Ride;
@@ -17,7 +18,6 @@ import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
-import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
@@ -65,25 +65,12 @@ public class RideRequestService {
         return this.rideRequestRepository.save(rideRequest);
     }
     
-    public RideRequestResponseDto createRideRequest(
-            RideRequestCreateDTO dto,
-            Long userId
-    ) {
+    public RideRequestResponseDto createRideRequest(RideRequestCreateDto dto, Long userId) {
+        User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
+        VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
+        RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
 
-        User user = this.userService.getUser(userId)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
-
-        VehicleType vehicleType
-                = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId)
-                        .orElseThrow(()
-                                -> new IllegalArgumentException("Invalid vehicle type")
-                        );
-
-        RideEstimationResult estimate
-                = rideEstimationService.estimate(dto, vehicleType);
-
-        RideRequest rideRequest
-                = RideRequestMapper.toEntity(
+        RideRequest rideRequest = RideRequestMapper.toEntity(
                         dto,
                         user,
                         vehicleType,

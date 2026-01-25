@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -20,7 +20,7 @@ public class RideRequestMapper {
     private RideRequestMapper() {}
 
     public static RideRequest toEntity(
-        RideRequestCreateDTO dto,
+        RideRequestCreateDto dto,
         User creator,
         VehicleType vehicleType,
         double calculatedPrice,
@@ -50,7 +50,7 @@ public class RideRequestMapper {
     }
 
     private static RideRoute mapRoute(
-        RideRequestCreateDTO.RouteDTO routeDto,
+        RideRequestCreateDto.RouteDto routeDto,
         double totalDistanceKm
     ) {
         RideRoute route = new RideRoute();
@@ -67,7 +67,7 @@ public class RideRequestMapper {
     }
 
     private static RoutePoint mapRoutePoint(
-        RideRequestCreateDTO.RoutePointDTO dto
+        RideRequestCreateDto.RoutePointDto dto
     ) {
         RoutePoint point = new RoutePoint();
         point.setLatitude(dto.lat);

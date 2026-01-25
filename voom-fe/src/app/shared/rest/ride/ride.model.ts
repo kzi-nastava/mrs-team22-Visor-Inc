@@ -234,12 +234,11 @@ export interface RideCancellationDto {
 }
 
 export interface RideStopDto {
-  driverId: number;
-  lat: number;
-  lng: number;
+  userId: number;
+  route: RoutePointDto[];
   timestamp: string;
 }
 
 export interface RidePanicDto {
-
+  userId: number,
 }

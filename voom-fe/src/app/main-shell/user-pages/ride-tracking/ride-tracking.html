@@ -35,9 +35,9 @@
         <p class="text-sm text-gray-700">Driver</p>
         <div class="flex gap-1 text-4xl cursor-pointer">
           @for (star of stars; track $index) {
-          <span (click)="setDriverRating($index + 1)" 
-                class="transition" 
-                [class.text-blue-600]="$index < driverRating()" 
+          <span (click)="setDriverRating($index + 1)"
+                class="transition"
+                [class.text-blue-600]="$index < driverRating()"
                 [class.text-blue-200]="$index >= driverRating()">
             ★
           </span>
@@ -49,9 +49,9 @@
         <p class="text-sm text-gray-700">Car</p>
         <div class="flex gap-1 text-4xl cursor-pointer">
           @for (star of stars; track $index) {
-          <span (click)="setCarRating($index + 1)" 
-                class="transition" 
-                [class.text-blue-600]="$index < carRating()" 
+          <span (click)="setCarRating($index + 1)"
+                class="transition"
+                [class.text-blue-600]="$index < carRating()"
                 [class.text-blue-200]="$index >= carRating()">
             ★
           </span>
@@ -61,14 +61,14 @@
 
       <div class="w-full space-y-1">
         <p class="text-sm text-gray-700 text-left">Comment</p>
-        <textarea rows="4" placeholder="Write your comment..." 
-                  class="w-full resize-none rounded-2xl border-2 border-blue-300 px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500" 
-                  [ngModel]="reviewComment()" 
+        <textarea rows="4" placeholder="Write your comment..."
+                  class="w-full resize-none rounded-2xl border-2 border-blue-300 px-4 py-3 text-sm text-gray-700 outline-none focus:border-blue-500"
+                  [ngModel]="reviewComment()"
                   (ngModelChange)="reviewComment.set($event)">
         </textarea>
       </div>
 
-      <button class="mt-4 rounded-full bg-blue-900 px-6 py-2 text-white text-sm font-medium hover:bg-blue-950 transition cursor-pointer" 
+      <button class="mt-4 rounded-full bg-blue-900 px-6 py-2 text-white text-sm font-medium hover:bg-blue-950 transition cursor-pointer"
               (click)="submitReview()">
         Submit Review
       </button>
@@ -82,7 +82,7 @@
   </div>
   <p class="text-center text-gray-600">In case of emergency, press the PANIC button to alert authorities.</p>
 
-  <button class="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2 inline-flex items-center w-auto cursor-pointer mb-10">
+  <button class="bg-red-600 hover:bg-red-700 text-white rounded-full px-4 py-2 inline-flex items-center w-auto cursor-pointer mb-10" (click)="panic()">
     PANIC
   </button>
 
@@ -91,7 +91,7 @@
       @if(reported()) {
         Thank you for your report. We will look into the matter.
       } @else {
-        If driver is driving unadequately you can report him 
+        If driver is driving unadequately you can report him
         <span class="text-blue-500 cursor-pointer" (click)="toggleReport()">here.</span>
       }
     </div>
@@ -101,8 +101,8 @@
     @if(showReport()) {
     <div class="relative">
       <label class=" px-2 text-sm text-blue-800 mb-4">Message</label>
-      <textarea rows="4" placeholder="Enter your report message..." 
-                class="w-full resize-none rounded-2xl border-2 border-blue-800 px-4 py-2 text-sm text-gray-700 outline-none focus:ring-0 focus:border-blue-900 mt-3" 
+      <textarea rows="4" placeholder="Enter your report message..."
+                class="w-full resize-none rounded-2xl border-2 border-blue-800 px-4 py-2 text-sm text-gray-700 outline-none focus:ring-0 focus:border-blue-900 mt-3"
                 [(ngModel)]="message">
       </textarea>
     </div>
@@ -111,7 +111,7 @@
       <button type="button" class="rounded-full bg-red-700 px-6 py-2 text-white font-medium hover:bg-red-800 transition cursor-pointer">
         Cancel Ride
       </button>
-      <button type="button" class="rounded-full bg-blue-900 px-6 py-2 text-white font-medium hover:bg-blue-950 transition cursor-pointer" 
+      <button type="button" class="rounded-full bg-blue-900 px-6 py-2 text-white font-medium hover:bg-blue-950 transition cursor-pointer"
               (click)="report()">
         Report
       </button>

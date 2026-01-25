@@ -16,7 +16,7 @@ import {DriverAssignedDto, RideApi,} from '../../user-pages/home/home.api';
 import {RoutePoint} from '../../user-pages/home/home';
 import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
 import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {BehaviorSubject, catchError, filter, map, merge, of, switchMap} from 'rxjs';
+import {BehaviorSubject, catchError, filter, map, merge, of, switchMap, take} from 'rxjs';
 import {Map} from '../../../shared/map/map';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ArrivalDialog} from '../arrival-dialog/arrival-dialog';
@@ -24,7 +24,10 @@ import {DriverState, DriverStateChangeDto} from '../../../shared/rest/driver/dri
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
-import { FinishRideDialog } from '../finish-ride-dialog/finish-ride-dialog';
+import {FinishRideDialog} from '../finish-ride-dialog/finish-ride-dialog';
+import {MatDivider} from '@angular/material/list';
+import {MatButton} from '@angular/material/button';
+import {RideStopDto, RoutePointDto} from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_DRIVER_HOME = 'ride';
 
@@ -51,6 +54,8 @@ type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED' | 'AT
     MatSnackBarModule,
     Map,
     MatDialogModule,
+    MatDivider,
+    MatButton,
   ],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
@@ -519,5 +524,36 @@ export class DriverHome implements AfterViewInit {
     });
   }
 
-  protected readonly DriverState = DriverState;
+  protected stopRide() {
+    const user = this.driver();
+
+    if (!user) return;
+
+    const dto: RideStopDto = {
+      userId: user.id,
+      route: [],
+      timestamp: new Date().toISOString(),
+    }
+
+    this.apiService.rideApi.stopRide(user.id, dto).pipe(
+      map(response => response.data),
+    ).subscribe(rideResponse => {
+
+    });
+  }
+
+  protected panic() {
+    const rideId = this.activeRideId();
+    const user = this.driver();
+
+    if (!rideId || !user) {
+      return;
+    }
+
+    this.apiService.rideApi.ridePanic(rideId, { userId: user.id }).pipe(
+      map(response => response.data),
+    ).subscribe(rideResponse => {
+
+    });
+  }
 }

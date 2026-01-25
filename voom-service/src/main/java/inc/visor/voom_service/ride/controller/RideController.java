@@ -1,41 +1,35 @@
 package inc.visor.voom_service.ride.controller;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
+import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.*;
+import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.simulation.Simulator;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.VoomUserDetails;
-import inc.visor.voom_service.osrm.dto.LatLng;
-import inc.visor.voom_service.person.service.UserProfileService;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.simulation.Simulator;
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -52,8 +46,9 @@ public class RideController {
     private final DriverService driverService;
     private final UserService userService;
     private final RideRouteService rideRouteService;
+    private final RideEstimateService rideEstimateService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, RideRepository rideRepository, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, RideRepository rideRepository, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
@@ -65,11 +60,12 @@ public class RideController {
         this.driverService = driverService;
         this.userService = userService;
         this.rideRouteService = rideRouteService;
+        this.rideEstimateService = rideEstimateService;
     }
 
     @PostMapping("/requests")
     public ResponseEntity<RideRequestResponseDto> createRideRequest(
-            @Valid @RequestBody RideRequestCreateDTO request,
+            @Valid @RequestBody RideRequestCreateDto request,
             @AuthenticationPrincipal VoomUserDetails userDetails
     ) {
         String username = userDetails != null ? userDetails.getUsername() : null;
@@ -246,25 +242,33 @@ public class RideController {
 
     @PostMapping("/{id}/stop")
     public ResponseEntity<RideResponseDto> stopRide(@PathVariable Long id, @RequestBody RideStopDto dto) {
-        final Driver driver = this.driverService.getDriver(dto.getDriverId()).orElseThrow(RuntimeException::new);
+        final Driver driver = this.driverService.getDriverFromUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
-        ride.setFinishedAt(dto.getTimestamp());
-        ride.setStatus(RideStatus.STOPPED);
         final RideRequest rideRequest = ride.getRideRequest();
         final RideRoute rideRoute = rideRequest.getRideRoute();
 
-        //TODO implement dropoff and price change
-        this.rideRequestService.update(rideRequest);
+        rideRoute.setTotalDistanceKm(this.rideEstimateService.calculateTotalDistance(dto.getPoints()));
+
+        rideRequest.setRideRoute(this.rideRouteService.update(rideRoute));
+
+        final RideEstimationResult rideEstimationResult = this.rideEstimateService.estimate(dto.getPoints(), ride.getRideRequest().getVehicleType());
+        rideRequest.setCalculatedPrice(rideEstimationResult.price());
+
+        ride.setFinishedAt(dto.getTimestamp());
+        ride.setStatus(RideStatus.STOPPED);
+        ride.setRideRequest(this.rideRequestService.update(rideRequest));
         return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
     }
 
     @PostMapping("/{id}/panic")
     public ResponseEntity<RideResponseDto> panic(@PathVariable Long id, @RequestBody RidePanicDto dto) {
+        User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
-        this.rideRequestService.update(rideRequest);
         //TODO publish change to websockets
         ride.setStatus(RideStatus.PANIC);
+        final RideRequest updatedRideRequest = this.rideRequestService.update(rideRequest);
+        ride.setRideRequest(updatedRideRequest);
         return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
     }
 
@@ -377,5 +381,7 @@ public class RideController {
 
         return driverService.getDriver(userId).get();
     }
+
+
 
 }
