@@ -19,9 +19,11 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "ride")
+@Data
 public class Ride {
 
     @Id
@@ -37,7 +39,7 @@ public class Ride {
     @JoinColumn(name = "driver_id", nullable = true)
     private Driver driver;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private RideStatus status;
 
@@ -56,62 +58,5 @@ public class Ride {
     private List<User> passengers;
 
     public Ride() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public RideRequest getRideRequest() {
-        return rideRequest;
-    }
-
-    public void setRideRequest(RideRequest rideRequest) {
-        this.rideRequest = rideRequest;
-
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
-        this.driver = driver;
-    }
-
-    public RideStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RideStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public LocalDateTime getFinishedAt() {
-        return finishedAt;
-    }
-
-    public void setFinishedAt(LocalDateTime finishedAt) {
-        this.finishedAt = finishedAt;
-    }
-
-    public List<User> getPassengers() {
-        return passengers;
-    }
-
-    public void setPassengers(List<User> passengers) {
-        this.passengers = passengers;
     }
 }

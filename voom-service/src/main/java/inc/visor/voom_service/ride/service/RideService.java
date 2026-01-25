@@ -2,6 +2,7 @@ package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import inc.visor.voom_service.ride.model.enums.Sorting;
@@ -39,6 +40,14 @@ public class RideService {
     public void finishRide(Ride ride) {
         // set status
         return;
+    }
+
+    public Optional<Ride> getRide(long rideId) {
+        return this.rideRepository.getRideById(rideId);
+    }
+
+    public Ride update(Ride ride) {
+        return this.rideRepository.save(ride);
     }
 
     public List<Ride> getDriverRides(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {

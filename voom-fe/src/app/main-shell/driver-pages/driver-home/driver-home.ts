@@ -26,7 +26,7 @@ import {AuthenticationService} from '../../../shared/service/authentication-serv
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import { FinishRideDialog } from '../finish-ride-dialog/finish-ride-dialog';
 
-export const ROUTE_DRIVER_HOME = 'home';
+export const ROUTE_DRIVER_HOME = 'ride';
 
 export type ChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -43,7 +43,7 @@ export type ChartOptions = {
 type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED' | 'AT_DROPOFF';
 
 @Component({
-  selector: 'app-driver-home',
+  selector: 'app-driver-ride',
   imports: [
     MatSlideToggle,
     NgApexchartsModule,
@@ -269,7 +269,7 @@ export class DriverHome implements AfterViewInit {
 
                 else if (this.ridePhase() === 'RIDE_STARTED' && this.dropoffPoint()) {
                     const dist = this.distanceMeters({ lat: pos.lat, lng: pos.lng }, this.dropoffPoint()!);
-                    
+
                     console.log(`[DriverHome] Distance to Dropoff: ${dist.toFixed(2)}m`);
 
                     if ((dist <= 30 || pos.finished) && !this.finishDialogOpen) {

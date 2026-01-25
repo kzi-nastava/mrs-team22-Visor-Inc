@@ -21,9 +21,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "ride_request")
+@Data
 public class RideRequest {
 
     @Id
@@ -75,102 +77,9 @@ public class RideRequest {
     @JoinColumn(name = "cancelled_by_user_id", nullable = true)
     private User cancelledBy;
 
+    @Column(name = "cancellation_reason", nullable = true)
+    private String reason;
+
     public RideRequest() {}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public User getCreator() {
-        return creator;
-    }
-
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
-
-    public RideRoute getRideRoute() {
-        return rideRoute;
-    }
-
-    public void setRideRoute(RideRoute rideRoute) {
-        this.rideRoute = rideRoute;
-    }
-
-    public RideRequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RideRequestStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getScheduledTime() {
-        return scheduledTime;
-    }
-
-    public void setScheduledTime(LocalDateTime scheduledTime) {
-        this.scheduledTime = scheduledTime;
-    }
-
-    public ScheduleType getScheduleType() {
-        return scheduleType;
-    }
-
-    public void setScheduleType(ScheduleType scheduleType) {
-        this.scheduleType = scheduleType;
-    }
-
-    public VehicleType getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(VehicleType vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
-    public boolean isBabyTransport() {
-        return babyTransport;
-    }
-
-    public void setBabyTransport(boolean babyTransport) {
-        this.babyTransport = babyTransport;
-    }
-
-    public boolean isPetTransport() {
-        return petTransport;
-    }
-
-    public void setPetTransport(boolean petTransport) {
-        this.petTransport = petTransport;
-    }
-
-    public User getCancelledBy() {
-        return cancelledBy;
-    }
-
-    public void setCancelledBy(User cancelledBy) {
-        this.cancelledBy = cancelledBy;
-    }
-
-    public double getCalculatedPrice() {
-        return calculatedPrice;
-    }
-
-    public void setCalculatedPrice(double calculatedPrice) {
-        this.calculatedPrice = calculatedPrice;
-    }
-
-    public List<String> getLinkedPassengerEmails() {
-        return linkedPassengerEmails;
-    }
-
-    public void setLinkedPassengerEmails(List<String> linkedPassengerEmails) {
-        this.linkedPassengerEmails = linkedPassengerEmails;
-    }
 
 }

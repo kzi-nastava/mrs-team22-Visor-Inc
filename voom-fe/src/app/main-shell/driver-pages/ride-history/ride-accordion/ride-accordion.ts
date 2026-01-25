@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { RideHistoryDto } from '../../../../shared/rest/home/home.model';
+import { RideHistoryDto } from '../../../../shared/rest/ride/ride.model';
 
 type TimeString = `${number}:${number}` | `${number}:''`;
 

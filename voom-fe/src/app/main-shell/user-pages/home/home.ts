@@ -24,7 +24,7 @@ import { map } from 'rxjs';
 import { response } from 'express';
 import ApiService from '../../../shared/rest/api-service';
 
-export const ROUTE_USER_HOME = 'home';
+export const ROUTE_USER_HOME = 'ride';
 
 type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 
@@ -40,7 +40,7 @@ export interface RoutePoint {
 }
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-ride',
   imports: [
     Map,
     Dropdown,

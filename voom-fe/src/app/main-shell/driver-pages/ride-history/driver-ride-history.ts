@@ -6,7 +6,7 @@ import { RideAccordion } from './ride-accordion/ride-accordion';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import ApiService from '../../../shared/rest/api-service';
-import { RideHistoryDto } from '../../../shared/rest/home/home.model';
+import { RideHistoryDto } from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_DRIVER_RIDE_HISTORY = 'activity';
 
@@ -95,7 +95,7 @@ export class DriverRideHistory implements OnInit {
   sort(changeDirection: boolean = false): void {
     if (changeDirection) {
         this.sortDirection.update((val) => (val === 'asc' ? 'desc' : 'asc'));
-        this.loadHistory(); 
+        this.loadHistory();
     } else {
         this.updateSortedDates();
     }

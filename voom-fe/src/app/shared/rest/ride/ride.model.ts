@@ -144,7 +144,7 @@ export interface RoutePointDto {
   address: string;
   lat: number;
   lng: number;
-  orderIndex: number | null; 
+  orderIndex: number | null;
   type: RoutePointType;
 }
 
@@ -226,4 +226,20 @@ export interface RideHistoryDto {
   finishedAt: string;
   passengers: User[];
   cancelledBy?: User;
+}
+
+export interface RideCancellationDto {
+  userId: number;
+  message: string;
+}
+
+export interface RideStopDto {
+  driverId: number;
+  lat: number;
+  lng: number;
+  timestamp: string;
+}
+
+export interface RidePanicDto {
+
 }

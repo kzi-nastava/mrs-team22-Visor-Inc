@@ -3,7 +3,7 @@ import {Observable} from 'rxjs';
 import {ApiClient} from '../../../shared/rest/api-client';
 import {ApiResponse, RequestConfig} from '../../../shared/rest/rest.model';
 import {VoomApiService} from '../../../shared/rest/voom-api-service';
-import { OngoingRideDto } from '../../../shared/rest/home/home.model';
+import { OngoingRideDto } from '../../../shared/rest/ride/ride.model';
 
 export type UserProfileResponseDto = {
   email: string;
@@ -357,9 +357,9 @@ export class RideApi {
       headers: {
         accept: 'application/json',
       },
-      authenticated: true, 
+      authenticated: true,
     };
-  
+
     return this.apiClient.post<void, OngoingRideDto>(
       '/api/rides/finish-ongoing',
       undefined,
