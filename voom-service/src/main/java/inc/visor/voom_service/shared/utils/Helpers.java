@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto.DriverLocationDto;
 
 public class Helpers {
     private Helpers() {}
 
-    public static Map<Long, DriverLocationDTO> snapshotToMap(
-            List<DriverLocationDTO> snapshot
+    public static Map<Long, DriverLocationDto> snapshotToMap(
+            List<DriverLocationDto> snapshot
     ) {
         return snapshot.stream()
                 .collect(Collectors.toMap(

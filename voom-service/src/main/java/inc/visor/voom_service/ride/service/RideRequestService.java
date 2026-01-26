@@ -1,19 +1,15 @@
 package inc.visor.voom_service.ride.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.repository.UserRepository;
+import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.mapper.RideRequestMapper;
 import inc.visor.voom_service.ride.model.Ride;
@@ -22,63 +18,59 @@ import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
-import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
-import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
+import inc.visor.voom_service.vehicle.service.VehicleTypeService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RideRequestService {
 
-    private final RideRepository rideRepository;
     private final RideRequestRepository rideRequestRepository;
-    private final VehicleTypeRepository vehicleTypeRepository;
     private final RideEstimateService rideEstimationService;
-    private final UserRepository userRepository;
     private final DriverService driverService;
     private final RideWsService rideWsService;
     private final Simulator driverSimulator;
+    private final UserService userService;
+    private final VehicleTypeService vehicleTypeService;
+    private final RideService rideService;
 
     public RideRequestService(
             RideRequestRepository rideRequestRepository,
-            VehicleTypeRepository vehicleTypeRepository,
             RideEstimateService rideEstimationService,
-            UserRepository userRepository,
             DriverService driverService,
-            RideRepository rideRepository,
             RideWsService rideWsService,
-            Simulator driverSimulator
+            Simulator driverSimulator, UserService userService, VehicleTypeService vehicleTypeService, RideService rideService
     ) {
         this.rideRequestRepository = rideRequestRepository;
-        this.vehicleTypeRepository = vehicleTypeRepository;
         this.rideEstimationService = rideEstimationService;
-        this.userRepository = userRepository;
         this.driverService = driverService;
-        this.rideRepository = rideRepository;
+        this.rideService = rideService;
         this.rideWsService = rideWsService;
         this.driverSimulator = driverSimulator;
+        this.userService = userService;
+        this.vehicleTypeService = vehicleTypeService;
     }
 
-    public RideRequestResponseDto createRideRequest(
-            RideRequestCreateDTO dto,
-            Long userId
-    ) {
+    public Optional<RideRequest> getRideRequest(long id) {
+        return this.rideRequestRepository.findById(id);
+    }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+    public RideRequest update(RideRequest rideRequest) {
+        return this.rideRequestRepository.save(rideRequest);
+    }
+    
+    public RideRequestResponseDto createRideRequest(RideRequestCreateDto dto, Long userId) {
+        User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
+        VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
+        RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
 
-        VehicleType vehicleType
-                = vehicleTypeRepository.findById(dto.vehicleTypeId)
-                        .orElseThrow(()
-                                -> new IllegalArgumentException("Invalid vehicle type")
-                        );
-
-        RideEstimationResult estimate
-                = rideEstimationService.estimate(dto, vehicleType);
-
-        RideRequest rideRequest
-                = RideRequestMapper.toEntity(
+        RideRequest rideRequest = RideRequestMapper.toEntity(
                         dto,
                         user,
                         vehicleType,
@@ -92,7 +84,7 @@ public class RideRequestService {
 
         if (driverFound) {
             driver.setStatus(DriverStatus.BUSY);
-            driverService.updateDriver(driver);
+            driver = driverService.updateDriver(driver);
             rideRequest.setStatus(RideRequestStatus.ACCEPTED);
         } else {
             rideRequest.setStatus(RideRequestStatus.REJECTED);
@@ -111,18 +103,18 @@ public class RideRequestService {
 
         List<User> passengers = new ArrayList<>();
         for (String email : rideRequest.getLinkedPassengerEmails()) {
-            userRepository.findByEmail(email).ifPresent(passengers::add);
+            this.userService.getUser(email).ifPresent(passengers::add);
         }
         ride.setPassengers(passengers);
 
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
             DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
-            rideRepository.save(ride);
+            this.rideService.save(ride);
             rideWsService.sendDriverAssigned(driverAssignedDto);
 
             driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());
         } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
-            rideRepository.save(ride);
+            this.rideService.save(ride);
         }
 
         return RideRequestResponseDto.from(

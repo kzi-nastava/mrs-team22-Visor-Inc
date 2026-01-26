@@ -19,7 +19,6 @@ import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
-import inc.visor.voom_service.driver.dto.DriverLocationDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.VehicleChangeRequestStatus;
 import inc.visor.voom_service.driver.model.Driver;
@@ -31,8 +30,7 @@ import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO.DriverLocationDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto.DriverLocationDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -78,7 +76,7 @@ public class DriverService {
         this.changeRequestRepository = changeRequestRepository;
     }
 
-    public void simulateMove(DriverLocationDto dto) {
+    public void simulateMove(inc.visor.voom_service.driver.dto.DriverLocationDto dto) {
         // used for simulating movement
         // one possible way is to 1. select 2 random points in Novi Sad
         // 2. call external api to get route and waypoints between these two
@@ -315,7 +313,7 @@ public class DriverService {
 
     public Driver findDriverForRideRequest(
             RideRequest rideRequest,
-            List<RideRequestCreateDTO.DriverLocationDTO> snapshot
+            List<DriverLocationDto> snapshot
     ) {
 
         if (snapshot == null || snapshot.isEmpty()) {
@@ -323,7 +321,7 @@ public class DriverService {
         }
 
         RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
-        Map<Long, DriverLocationDTO> locMap = Helpers.snapshotToMap(snapshot);
+        Map<Long, DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
 
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
@@ -406,11 +404,11 @@ public class DriverService {
     private Driver nearestDriver(
             List<Driver> drivers,
             RoutePoint pickup,
-            Map<Long, DriverLocationDTO> locMap
+            Map<Long, DriverLocationDto> locMap
     ) {
         return drivers.stream()
                 .min(Comparator.comparingDouble(d -> {
-                    DriverLocationDTO loc = locMap.get(d.getId());
+                    DriverLocationDto loc = locMap.get(d.getId());
                     return GeoUtil.distanceKm(
                             pickup.getLatitude(),
                             pickup.getLongitude(),

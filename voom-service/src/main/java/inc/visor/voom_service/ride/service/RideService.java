@@ -2,6 +2,7 @@ package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -42,8 +43,44 @@ public class RideService {
         return;
     }
 
+    public Optional<Ride> getRide(long rideId) {
+        return this.rideRepository.getRideById(rideId);
+    }
+
+    public List<Ride> getRides() {
+        return this.rideRepository.findAll();
+    }
+
+    public Ride update(Ride ride) {
+        return this.rideRepository.save(ride);
+    }
+
     public List<Ride> getDriverRides(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {
         List<Ride> unfiltered = rideRepository.findByDriverId(driverId);
+
+        return unfiltered.stream()
+                .filter(r -> {
+                    LocalDateTime started = r.getStartedAt();
+                    if (started == null) return false;
+
+                    boolean matchesStart = (start == null) || !started.isBefore(start);
+
+                    boolean matchesEnd = (end == null) || !started.isAfter(end);
+
+                    return matchesStart && matchesEnd;
+                })
+                .sorted((ride1, ride2) -> {
+                    if (sort == Sorting.DESC) {
+                        return ride2.getStartedAt().compareTo(ride1.getStartedAt());
+                    } else {
+                        return ride1.getStartedAt().compareTo(ride2.getStartedAt());
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<Ride> getUserRides(long userId, LocalDateTime start, LocalDateTime end, Sorting sort) {
+        List<Ride> unfiltered = rideRepository.findByRideRequest_Creator_Id(userId);
 
         return unfiltered.stream()
                 .filter(r -> {
@@ -105,7 +142,7 @@ public class RideService {
         List<Ride> rides = rideRepository.findByDriverId(driverId);
 
         return rides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .toList();
     }
 
@@ -149,16 +186,17 @@ public class RideService {
         List<Ride> rides = rideRepository.findByDriverId(userId);
 
         return rides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .findFirst()
                 .orElse(null);
     }
 
     public Ride getOngoingRide(Long userId) {
-        List<Ride> ongoingRides = rideRepository.findByStatus(RideStatus.ONGOING);
+
+        List<Ride> ongoingRides = rideRepository.findByRideRequest_Creator_Id(userId);
 
         return ongoingRides.stream()
-                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .findFirst()
                 .orElse(null);
     }
@@ -166,7 +204,7 @@ public class RideService {
     public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStartedAt(LocalDateTime.now());
-        ride.setStatus(RideStatus.ONGOING);
+        ride.setStatus(RideStatus.STARTED);
         rideRepository.save(ride);
     }
 
@@ -181,27 +219,27 @@ public class RideService {
     }
 
     public ActiveRideDto getActiveRide(User user) {
+        Ride activeRide = new Ride();
 
-        Ride ride = new Ride();
-
-        if (user.getUserRole().getId() == 2L) {
-            ride = this.findActiveRide(user.getId());
-        } else if (user.getUserRole().getId() == 3L) {
-            ride = this.getOngoingRide(user.getId());
+        if (user.getUserRole().getId() == 2) {
+            activeRide = findActiveRide(user.getId());
+        } else {
+            activeRide = getOngoingRide(user.getId());
         }
 
-     
+        if (activeRide == null) {
+            return null;
+        }
         ActiveRideDto dto = new ActiveRideDto();
-        dto.setRideId(ride.getId());
-        dto.setStatus(ride.getStatus());
+        dto.setRideId(activeRide.getId());
+        dto.setStatus(activeRide.getStatus());
         dto.setRoutePoints(
-                ride.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
+                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
         );
-        dto.setDriverId(ride.getDriver().getId());
-        dto.setDriverName(ride.getDriver().getUser().getPerson().getFirstName() + " " + ride.getDriver().getUser().getPerson().getLastName());
 
         return dto;
     }
+
 
     public Ride findById(Long rideId) {
         return rideRepository.findById(rideId).orElseThrow();

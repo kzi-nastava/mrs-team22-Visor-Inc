@@ -31,7 +31,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                 .requestMatchers("/api/rides/driver/**").permitAll()
-                .requestMatchers("/api/auth/**", "/api/drivers/active", "/api/drivers/activation", "/ws/**", "/topic/**", "/app/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/drivers/active", "/api/drivers/activation", "/api/routes", "/ws/**", "/topic/**", "/app/**").permitAll()
                 .anyRequest().authenticated()
             ).sessionManagement(session -> session
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)

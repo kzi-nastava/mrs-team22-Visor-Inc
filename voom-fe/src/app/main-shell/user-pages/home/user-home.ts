@@ -1,30 +1,25 @@
-import { AfterViewInit, Component, computed, signal, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Map } from '../../../shared/map/map';
-import { Dropdown } from '../../../shared/dropdown/dropdown';
-import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
-import { MatButton } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import {
-  DriverSummaryDto,
-  PREDEFINED_ROUTES,
-  RideApi,
-  RideRequestDto,
-  ScheduledRideDto,
-} from './home.api';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
-import { FavoriteRouteDto } from '../favorite-routes/favorite-routes.api';
-import { map } from 'rxjs';
-import { response } from 'express';
+import {AfterViewInit, Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Map} from '../../../shared/map/map';
+import {Dropdown} from '../../../shared/dropdown/dropdown';
+import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
+import {MatButton} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {DriverSummaryDto, RideApi, RideRequestDto, ScheduledRideDto,} from './home.api';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {Router} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
+import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
+import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
+import {map} from 'rxjs';
 import ApiService from '../../../shared/rest/api-service';
+import {AuthenticationService} from '../../../shared/service/authentication-service';
+import {toSignal} from '@angular/core/rxjs-interop';
 
-export const ROUTE_USER_HOME = 'home';
+export const ROUTE_USER_HOME = 'ride';
 
 type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 
@@ -36,11 +31,11 @@ export interface RoutePoint {
   lng: number;
   address: string;
   type: RoutePointType;
-  order: number;
+  orderIndex: number;
 }
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-ride',
   imports: [
     Map,
     Dropdown,
@@ -52,11 +47,10 @@ export interface RoutePoint {
     MatCheckboxModule,
     MatSnackBarModule,
   ],
-  templateUrl: './home.html',
-  styleUrl: './home.css',
+  templateUrl: './user-home.html',
+  styleUrl: './user-home.css',
 })
 export class UserHome implements AfterViewInit {
-
 
   @ViewChild(Map) map!: Map;
 
@@ -69,6 +63,9 @@ export class UserHome implements AfterViewInit {
     private apiService: ApiService,
   ) {}
 
+  private authenticationService = inject(AuthenticationService);
+
+  user = toSignal(this.authenticationService.activeUser$);
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
 
@@ -168,7 +165,7 @@ export class UserHome implements AfterViewInit {
           lng: p.lng,
           address: '',
           type: p.type,
-          order: p.order,
+          orderIndex: p.order,
         })),
     );
 
@@ -235,7 +232,7 @@ export class UserHome implements AfterViewInit {
           lng: event.lng,
           address: cleanAddress,
           type: 'PICKUP',
-          order: 0,
+          orderIndex: 0,
         },
       ]);
       this.rideForm.patchValue({ pickup: cleanAddress });
@@ -252,7 +249,7 @@ export class UserHome implements AfterViewInit {
       lng: event.lng,
       address: cleanAddress,
       type: 'DROPOFF',
-      order: updated.length,
+      orderIndex: updated.length,
     });
 
     this.routePoints.set(updated);
@@ -268,9 +265,9 @@ export class UserHome implements AfterViewInit {
     const stops = points.filter((p) => p.id !== id && p.type !== 'PICKUP');
 
     const updated: RoutePoint[] = [
-      { ...pickup, order: 0 },
-      ...stops.map((p, i) => ({ ...p, type: 'STOP' as RoutePointType, order: i + 1 })),
-      { ...newDropoff, type: 'DROPOFF', order: stops.length + 1 },
+      { ...pickup, orderIndex: 0 },
+      ...stops.map((p, i) => ({ ...p, type: 'STOP' as RoutePointType, orderIndex: i + 1 })),
+      { ...newDropoff, type: 'DROPOFF', orderIndex: stops.length + 1 },
     ];
 
     this.routePoints.set(updated);
@@ -281,7 +278,7 @@ export class UserHome implements AfterViewInit {
     this.routePoints.set(
       this.routePoints()
         .filter((p) => p.id !== id)
-        .map((p, i) => ({ ...p, order: i })),
+        .map((p, i) => ({ ...p, orderIndex: i })),
     );
   }
 
@@ -350,7 +347,7 @@ export class UserHome implements AfterViewInit {
         points: this.routePoints().map((p) => ({
           lat: p.lat,
           lng: p.lng,
-          orderIndex: p.order,
+          orderIndex: p.orderIndex,
           type: p.type,
           address: p.address,
         })),
@@ -418,7 +415,7 @@ export class UserHome implements AfterViewInit {
         lng: p.lng,
         address: p.address,
         type: p.type,
-        order: p.orderIndex,
+        orderIndex: p.orderIndex,
       }));
 
     this.routePoints.set(points);
@@ -448,7 +445,7 @@ export class UserHome implements AfterViewInit {
           lng: p.lng,
           address: p.address,
           type: p.type,
-          order: p.orderIndex,
+          orderIndex: p.orderIndex,
         }));
 
       this.routePoints.set(points);
@@ -466,12 +463,11 @@ export class UserHome implements AfterViewInit {
       this.isRideLocked.set(true);
       this.rideForm.disable({ emitEvent: false });
     },
-    error: () => {
-      console.error('Failed to restore active ride');
-    },
-  });
-}
-
+      error: () => {
+        console.error('Failed to restore active ride');
+      },
+    });
+  }
 
   addRouteToFavorites() {
     const points = this.routePoints();
@@ -493,7 +489,7 @@ export class UserHome implements AfterViewInit {
         points: points.map((p) => ({
           lat: p.lat,
           lng: p.lng,
-          orderIndex: p.order,
+          orderIndex: p.orderIndex,
           type: p.type,
           address: p.address,
         })),
@@ -548,6 +544,21 @@ export class UserHome implements AfterViewInit {
             this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
           }
         },
+        (ride) => {
+          const user = this.user();
+          console.log(ride);
+          if (!user) return;
+          if (ride.passengerName === user.firstName || ride.passengerNames.includes(user.firstName)) {
+            this.onMapCleared();
+            this.rideForm.enable({ emitEvent: false });
+            this.scheduledRide.set(null);
+            this.isRideLocked.set(false);
+            this.snackBar.open("Ride status " + ride.status, '', { duration: 3000, horizontalPosition: "right" } );
+          }
+        },
+        (panic) => {
+
+        }
       );
     });
   }

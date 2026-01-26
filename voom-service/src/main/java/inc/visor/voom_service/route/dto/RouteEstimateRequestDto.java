@@ -1,25 +1,17 @@
 package inc.visor.voom_service.route.dto;
 
 import inc.visor.voom_service.shared.RoutePointDto;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.List;
+
+@Getter
+@Setter
 public class RouteEstimateRequestDto {
 
-  private RoutePointDto startPoint;
-  private RoutePointDto endPoint;
+  private List<RoutePointDto> routePoints;
 
-  public RoutePointDto getStartPoint() {
-    return startPoint;
-  }
-
-  public void setStartPoint(RoutePointDto startPoint) {
-    this.startPoint = startPoint;
-  }
-
-  public RoutePointDto getEndPoint() {
-    return endPoint;
-  }
-
-  public void setEndPoint(RoutePointDto endPoint) {
-    this.endPoint = endPoint;
+  public RouteEstimateRequestDto() {
   }
 }
