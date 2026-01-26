@@ -13,7 +13,7 @@
             <p class="text-center md:text-left">{{`${ride.rideRequest.rideRoute.routePoints[0].address}   →   ${ride.rideRequest.rideRoute.routePoints[1].address}`}}</p>
           </div>
           <div class="justify-self-end ml-auto">
-            <p>{{ `${ride.startedAt.split('T')[1].substring(0, 5)} - ${ride.finishedAt.split('T')[1].substring(0, 5)}` }}</p>
+            <p>{{ getTime() }}</p>
           </div>
         </div>
       </mat-panel-title>

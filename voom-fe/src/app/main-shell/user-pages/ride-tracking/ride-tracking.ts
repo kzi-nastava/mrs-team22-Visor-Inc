@@ -161,7 +161,7 @@ export class RideTracking implements OnInit {
   }
 
   protected panic() {
-    const rideId = this.driverId();
+    const rideId = this.rideId();
     const user = this.user();
 
     if (!rideId || !user) {

@@ -34,4 +34,10 @@ export class RideAccordion {
     const ordered = this.ride.rideRequest.creator.person;
     return `${ordered?.firstName} ${ordered?.lastName}`;
   }
+
+  getTime() {
+    const start = this.ride.startedAt ? this.ride.startedAt.split('T')[1].substring(0, 5) : '';
+    const end = this.ride.finishedAt ? this.ride.finishedAt.split('T')[1].substring(0, 5) : '';
+    return `${start} - ${end}`;
+  }
 }
