@@ -8,20 +8,21 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.RideEstimationResult;
-import inc.visor.voom_service.ride.model.RideRequest;
-import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.*;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
+import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.simulation.Simulator;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/rides")
 public class RideController {
@@ -48,8 +51,9 @@ public class RideController {
     private final RideRouteService rideRouteService;
     private final RideEstimateService rideEstimateService;
     private final RideWsService rideWsService;
+    private final OsrmService osrmService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService, OsrmService osrmService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
@@ -62,6 +66,7 @@ public class RideController {
         this.rideRouteService = rideRouteService;
         this.rideEstimateService = rideEstimateService;
         this.rideWsService = rideWsService;
+        this.osrmService = osrmService;
     }
 
     @PostMapping("/requests")
@@ -221,16 +226,41 @@ public class RideController {
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         final RideRoute rideRoute = rideRequest.getRideRoute();
+        final LatLng point = dto.getPoint();
 
-        rideRoute.setTotalDistanceKm(this.rideEstimateService.calculateTotalDistance(dto.getPoints()));
+        final List<RoutePoint> routePoints = rideRoute.getRoutePoints();
+
+        final RoutePoint matched = routePoints.stream()
+                .filter(rp ->
+                        Double.compare(Math.round(rp.getLatitude()), Math.round(point.lat())) == 0 &&
+                        Double.compare(Math.round(rp.getLongitude()), Math.round(point.lng())) == 0
+                )
+                .findFirst()
+                .orElseThrow(NotFoundException::new);
+
+        int orderIndex = matched.getOrderIndex();
+
+        final List<RoutePoint> filteredRoutePoints = new ArrayList<>(routePoints.stream()
+                .filter(rp -> rp.getOrderIndex() <= orderIndex)
+                .sorted(Comparator.comparingInt(RoutePoint::getOrderIndex))
+                .toList());
+
+        filteredRoutePoints.add(new RoutePoint(dto.getPoint()));
+
+        final List<RideRequestCreateDto.RoutePointDto> dtos = filteredRoutePoints.stream().map(RideRequestCreateDto.RoutePointDto::new).toList();
+
+//        rideRoute.setRoutePoints(filteredRoutePoints);
+        rideRoute.setTotalDistanceKm(this.rideEstimateService.calculateTotalDistance(dtos));
         rideRequest.setRideRoute(this.rideRouteService.update(rideRoute));
 
-        final RideEstimationResult rideEstimationResult = this.rideEstimateService.estimate(dto.getPoints(), ride.getRideRequest().getVehicleType());
+        final RideEstimationResult rideEstimationResult = this.rideEstimateService.estimate(dtos, ride.getRideRequest().getVehicleType());
         rideRequest.setCalculatedPrice(rideEstimationResult.price());
 
         ride.setFinishedAt(dto.getTimestamp());
         ride.setStatus(RideStatus.STOPPED);
         ride.setRideRequest(this.rideRequestService.update(rideRequest));
+
+        simulator.setFinishedRide(ride.getDriver().getId());
 
         RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
         this.rideWsService.sendRideChanges(rideResponse);
@@ -239,7 +269,7 @@ public class RideController {
 
     @PostMapping("/{id}/panic")
     public ResponseEntity<RideResponseDto> panic(@PathVariable Long id, @RequestBody RidePanicDto dto) {
-        User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         ride.setStatus(RideStatus.PANIC);

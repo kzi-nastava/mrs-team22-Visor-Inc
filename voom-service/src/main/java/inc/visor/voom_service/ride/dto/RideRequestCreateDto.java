@@ -3,6 +3,9 @@ package inc.visor.voom_service.ride.dto;
 import java.time.Instant;
 import java.util.List;
 
+import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,6 +49,17 @@ public class RideRequestCreateDto {
         public int order;
         public String type;
         public String address;
+
+        public RoutePointDto(RoutePoint point) {
+            this.lat = point.getLatitude();
+            this.lng = point.getLongitude();
+            this.address = point.getAddress();
+            this.order = point.getOrderIndex();
+            this.type = point.getPointType().toString();
+        }
+
+        public RoutePointDto() {
+        }
     }
 
     public static class ScheduleDto {

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, effect, inject, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, inject, signal, ViewChild} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {
   ApexChart,
@@ -27,7 +27,8 @@ import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FinishRideDialog} from '../finish-ride-dialog/finish-ride-dialog';
 import {MatDivider} from '@angular/material/list';
 import {MatButton} from '@angular/material/button';
-import {RideResponseDto, RideStopDto} from '../../../shared/rest/ride/ride.model';
+import {RideStopDto} from '../../../shared/rest/ride/ride.model';
+import {LatLng} from 'leaflet';
 
 export const ROUTE_DRIVER_HOME = 'ride';
 
@@ -65,15 +66,14 @@ export class DriverHome implements AfterViewInit {
   isPassive = signal<boolean>(false);
   myId = signal<number | null>(null);
   routePoints = signal<RoutePoint[]>([]);
-  toastMessage = signal<string | null>(null);
   hasArrived = signal(false);
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
   ridePhase = signal<RidePhase>('IDLE');
-  panicRide = signal<RideResponseDto | null>(null);
 
   dropoffPoint = signal<{ lat: number; lng: number } | null>(null);
   finishDialogOpen = signal<boolean>(false);
+  currentPoint = signal<{ lat: number; lng: number } | null>(null);
 
   private apiService = inject(ApiService);
   private authenticationService = inject(AuthenticationService);
@@ -256,6 +256,8 @@ export class DriverHome implements AfterViewInit {
             } else {
               this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
 
+              this.currentPoint.set({ lat: pos.lat, lng: pos.lng});
+
               const my = this.myId();
               if (my && pos.driverId === my && this.followEnabled) {
                 this.followMyDriver(pos.driverId, pos.lat, pos.lng);
@@ -290,6 +292,12 @@ export class DriverHome implements AfterViewInit {
           },
           () => {},
           (panic) => {
+            if (panic) {
+              this.activeRideId.set(null);
+              this.routePoints.set([]);
+              this.ridePhase.set('IDLE');
+              this.snackBar.open("Ride status " + panic.status, '', { duration: 3000, horizontalPosition: "right" } );
+            }
           }
         );
       },
@@ -505,11 +513,13 @@ export class DriverHome implements AfterViewInit {
     const rideId = this.activeRideId();
     const user = this.driver();
 
-    if (!user || !rideId) return;
+    const endPoint = this.currentPoint();
+
+    if (!user || !rideId || !endPoint) return;
 
     const dto: RideStopDto = {
       userId: user.id,
-      route: [],
+      point: endPoint as LatLng,
       timestamp: new Date().toISOString(),
     }
 

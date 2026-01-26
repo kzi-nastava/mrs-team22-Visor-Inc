@@ -1,3 +1,5 @@
+import {LatLng} from 'leaflet';
+
 export type RideReportRequestDto = {
   message: string;
 };
@@ -74,7 +76,7 @@ export type ScheduledRideDto = {
 
 export type RideResponseDto = {
   id: number;
-  status: 'CREATED' | 'ONGOING' | 'FINISHED' | 'CANCELLED';
+  status: 'CREATED' | 'ONGOING' | 'FINISHED' | 'CANCELLED' | 'STOPPED' | 'PANIC' | 'STARTED';
   startedAt: string;
   finishedAt: string | null;
   driverName: string;
@@ -236,7 +238,7 @@ export interface RideCancellationDto {
 
 export interface RideStopDto {
   userId: number;
-  route: RoutePointDto[];
+  point: LatLng;
   timestamp: string;
 }
 

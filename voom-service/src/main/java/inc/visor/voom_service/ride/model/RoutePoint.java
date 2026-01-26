@@ -1,5 +1,6 @@
 package inc.visor.voom_service.ride.model;
 
+import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.shared.RoutePointDto;
 import jakarta.persistence.Column;
@@ -20,7 +21,7 @@ public class RoutePoint {
     @Column(name = "route_point_id", nullable = false)
     private long id;
 
-    @Column(name = "order_index", nullable = false)
+    @Column(name = "order_index", nullable = true)
     private int orderIndex;
 
     @Column(name = "latitude", nullable = false)
@@ -29,14 +30,20 @@ public class RoutePoint {
     @Column(name = "longitude", nullable = false)
     private double longitude;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address", nullable = true)
     private String address;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "point_type", nullable = false)
+    @Column(name = "point_type", nullable = true)
     private RoutePointType pointType;
 
     public RoutePoint() {}
+
+    public RoutePoint(LatLng point) {
+        this.latitude = point.lat();
+        this.longitude = point.lng();
+        this.pointType = RoutePointType.STOPPED;
+    }
 
     public long getId() {
         return id;

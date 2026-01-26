@@ -555,10 +555,21 @@ export class UserHome implements AfterViewInit {
             this.scheduledRide.set(null);
             this.isRideLocked.set(false);
             this.snackBar.open("Ride status " + ride.status, '', { duration: 3000, horizontalPosition: "right" } );
+            if (ride.status === "STOPPED") {
+              this.router.navigate(['/user/ride/tracking/']);
+            }
           }
         },
         (panic) => {
-
+          const user = this.user();
+          if (!user) return;
+          if (panic.passengerName === user.firstName || panic.passengerNames.includes(user.firstName)) {
+            this.onMapCleared();
+            this.rideForm.enable({ emitEvent: false });
+            this.scheduledRide.set(null);
+            this.isRideLocked.set(false);
+            this.snackBar.open("Ride status " + panic.status, '', { duration: 3000, horizontalPosition: "right" } );
+          }
         }
       );
     });
