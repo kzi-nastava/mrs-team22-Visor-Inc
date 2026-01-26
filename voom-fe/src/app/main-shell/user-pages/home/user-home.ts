@@ -18,6 +18,7 @@ import {map} from 'rxjs';
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {RideResponseDto} from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_USER_HOME = 'ride';
 
@@ -68,6 +69,7 @@ export class UserHome implements AfterViewInit {
   user = toSignal(this.authenticationService.activeUser$);
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
+  panicRide = signal<RideResponseDto | null>(null);
 
   selectedVehicle: number | null = null;
   selectedTime: ScheduleType = 'NOW';
@@ -546,7 +548,6 @@ export class UserHome implements AfterViewInit {
         },
         (ride) => {
           const user = this.user();
-          console.log(ride);
           if (!user) return;
           if (ride.passengerName === user.firstName || ride.passengerNames.includes(user.firstName)) {
             this.onMapCleared();
