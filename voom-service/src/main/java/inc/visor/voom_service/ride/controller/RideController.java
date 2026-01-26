@@ -17,7 +17,6 @@ import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
-import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.simulation.Simulator;

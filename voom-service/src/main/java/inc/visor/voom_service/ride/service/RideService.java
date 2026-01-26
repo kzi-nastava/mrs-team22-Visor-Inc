@@ -218,28 +218,22 @@ public class RideService {
         driver.setStatus(DriverStatus.BUSY);
     }
 
-    public ActiveRideDto getActiveRide(User user) {
+    public ActiveRideDto getActiveRide(Long userId) {
+        Ride activeRide = this.findActiveRide(userId);
 
-        Ride ride = new Ride();
-
-        if (user.getUserRole().getId() == 2L) {
-            ride = this.findActiveRide(user.getId());
-        } else if (user.getUserRole().getId() == 3L) {
-            ride = this.getOngoingRide(user.getId());
+        if (activeRide == null) {
+            return null;
         }
-
-     
         ActiveRideDto dto = new ActiveRideDto();
-        dto.setRideId(ride.getId());
-        dto.setStatus(ride.getStatus());
+        dto.setRideId(activeRide.getId());
+        dto.setStatus(activeRide.getStatus());
         dto.setRoutePoints(
-                ride.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
+                activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
         );
-        dto.setDriverId(ride.getDriver().getId());
-        dto.setDriverName(ride.getDriver().getUser().getPerson().getFirstName() + " " + ride.getDriver().getUser().getPerson().getLastName());
 
         return dto;
     }
+
 
     public Ride findById(Long rideId) {
         return rideRepository.findById(rideId).orElseThrow();
