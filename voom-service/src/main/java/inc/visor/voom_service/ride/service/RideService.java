@@ -23,6 +23,8 @@ import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
 
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
+
 @Service
 public class RideService {
 
@@ -175,8 +177,8 @@ public class RideService {
 
         rideRepository.save(ride);
 
-        String pickupAddress = ride.getRideRequest().getRideRoute().getPickupPoint().getAddress();
-        String dropoffAddress = ride.getRideRequest().getRideRoute().getDropoffPoint().getAddress();
+        String pickupAddress = formatAddress(ride.getPickupAddress());
+        String dropoffAddress = formatAddress(ride.getDropoffAddress());
         String address = pickupAddress + " - " + dropoffAddress;
 
         String trackingUrl = "http://localhost:4200/user/ride/tracking";
@@ -197,6 +199,31 @@ public class RideService {
         }
 
 
+    }
+
+    public void finishRide(long rideId) {
+        Ride ride = findById(rideId);
+        ride.setFinishedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.FINISHED);
+
+        String pickupAddress = formatAddress(ride.getPickupAddress());
+        String dropoffAddress = formatAddress(ride.getDropoffAddress());
+        String address = pickupAddress + " - " + dropoffAddress;
+
+        rideRepository.save(ride);
+
+        String creatorEmail = ride.getRideRequest().getCreator().getEmail();
+        emailService.sendRideCompletionEmail(
+                creatorEmail,
+                address
+        );
+
+        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+            emailService.sendRideCompletionEmail(
+                    email,
+                    address
+            );
+        }
     }
 
     public void startScheduleRide(long rideId) {

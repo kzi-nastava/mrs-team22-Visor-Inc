@@ -114,4 +114,12 @@ public class Ride {
     public void setPassengers(List<User> passengers) {
         this.passengers = passengers;
     }
+
+    public String getPickupAddress() {
+        return rideRequest.getRideRoute().getPickupPoint().getAddress();
+    }
+
+    public String getDropoffAddress() {
+        return rideRequest.getRideRoute().getDropoffPoint().getAddress();
+    }
 }

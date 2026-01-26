@@ -309,11 +309,7 @@ public class RideController {
         driverService.save(driver);
 
         ActiveRideDto activeRideDto = driverService.getActiveRide(userId);
-        Ride ride = rideService.findById(activeRideDto.getRideId());
-        ride.setFinishedAt(LocalDateTime.now());
-        ride.setStatus(RideStatus.FINISHED);
-        rideService.save(ride);
-
+        rideService.finishRide(activeRideDto.getRideId());
         simulator.setFinishedRide(userId);
 
         return ResponseEntity.ok(activeRideDto);
