@@ -27,7 +27,7 @@ import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FinishRideDialog} from '../finish-ride-dialog/finish-ride-dialog';
 import {MatDivider} from '@angular/material/list';
 import {MatButton} from '@angular/material/button';
-import {RideStopDto} from '../../../shared/rest/ride/ride.model';
+import {RideResponseDto, RideStopDto} from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_DRIVER_HOME = 'ride';
 
@@ -70,6 +70,7 @@ export class DriverHome implements AfterViewInit {
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
   ridePhase = signal<RidePhase>('IDLE');
+  panicRide = signal<RideResponseDto | null>(null);
 
   dropoffPoint = signal<{ lat: number; lng: number } | null>(null);
   finishDialogOpen = signal<boolean>(false);
@@ -289,7 +290,6 @@ export class DriverHome implements AfterViewInit {
           },
           () => {},
           (panic) => {
-
           }
         );
       },
@@ -502,9 +502,10 @@ export class DriverHome implements AfterViewInit {
   }
 
   protected stopRide() {
+    const rideId = this.activeRideId();
     const user = this.driver();
 
-    if (!user) return;
+    if (!user || !rideId) return;
 
     const dto: RideStopDto = {
       userId: user.id,
@@ -512,7 +513,7 @@ export class DriverHome implements AfterViewInit {
       timestamp: new Date().toISOString(),
     }
 
-    this.apiService.rideApi.stopRide(user.id, dto).pipe(
+    this.apiService.rideApi.stopRide(rideId, dto).pipe(
       map(response => response.data),
     ).subscribe(rideResponse => {
       this.activeRideId.set(null);
