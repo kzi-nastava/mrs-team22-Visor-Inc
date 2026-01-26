@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,7 +128,7 @@ public class RideController {
 
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
+            RideHistoryDto rideHistoryDto = RideHistoryFormatter.getRideHistoryDto(ride);
             rides.add(rideHistoryDto);
         }
 
@@ -246,6 +247,7 @@ public class RideController {
 
         rideService.startRide(id, user.getId(), request.getRoutePoints());
 
+
         List<LatLng> latLngPoints = request.getRoutePoints().stream()
                 .map(point -> new LatLng(point.getLat(), point.getLng()))
                 .toList();
@@ -346,7 +348,7 @@ public class RideController {
         List<Ride> ridesList = rideService.getDriverRides(driver.getId(), dateFrom, dateTo, sort);
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
+            RideHistoryDto rideHistoryDto = RideHistoryFormatter.getRideHistoryDto(ride);
             rides.add(rideHistoryDto);
         }
 
@@ -354,19 +356,8 @@ public class RideController {
         return ResponseEntity.ok(rides);
     }
 
-    private static RideHistoryDto getRideHistoryDto(Ride ride) {
-        RideHistoryDto rideHistoryDto = new RideHistoryDto();
-        rideHistoryDto.setId(ride.getId());
-        rideHistoryDto.setRideRequest(ride.getRideRequest());
-        rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
-        rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
-        rideHistoryDto.setPassengers(ride.getPassengers());
-        rideHistoryDto.setStatus(ride.getStatus());
-        rideHistoryDto.setFinishedAt(ride.getFinishedAt());
-        rideHistoryDto.setStartedAt(ride.getStartedAt());
-        return rideHistoryDto;
-    }
 
+    // for some reason doesnt work if isnt in this class, cant find solution rn
     private Driver extractDriver(VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userProfileService.getUserByEmail(username);

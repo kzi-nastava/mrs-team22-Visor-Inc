@@ -1,9 +1,11 @@
 package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import inc.visor.voom_service.mail.EmailService;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
@@ -26,10 +28,12 @@ public class RideService {
 
     private final RideRepository rideRepository;
     private final RideRouteService routeService;
+    private final EmailService emailService;
 
-    public RideService(RideRepository rideRepository, RideRouteService routeService) {
+    public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService) {
         this.rideRepository = rideRepository;
         this.routeService = routeService;
+        this.emailService = emailService;
     }
 
     public void updateRidePosition(RideLocationDto dto) {
@@ -158,16 +162,41 @@ public class RideService {
         List<Ride> ongoingRides = rideRepository.findByStatus(RideStatus.ONGOING);
 
         return ongoingRides.stream()
-                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId)
+                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId || ride.getPassengers().stream().anyMatch(user -> user.getId() == userId))
                 .findFirst()
                 .orElse(null);
     }
 
     public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
+
         ride.setStartedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.ONGOING);
+
         rideRepository.save(ride);
+
+        String pickupAddress = ride.getRideRequest().getRideRoute().getPickupPoint().getAddress();
+        String dropoffAddress = ride.getRideRequest().getRideRoute().getDropoffPoint().getAddress();
+        String address = pickupAddress + " - " + dropoffAddress;
+
+        String trackingUrl = "http://localhost:4200/user/ride/tracking";
+
+        String creatorEmail = ride.getRideRequest().getCreator().getEmail();
+        emailService.sendRideTrackingLink(
+                creatorEmail,
+                address,
+                trackingUrl
+        );
+
+        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+            emailService.sendRideTrackingLink(
+                    email,
+                    address,
+                    trackingUrl
+            );
+        }
+
+
     }
 
     public void startScheduleRide(long rideId) {
