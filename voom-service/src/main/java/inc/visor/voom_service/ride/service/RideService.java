@@ -293,7 +293,7 @@ public class RideService {
                 activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
         );
         dto.setDriverId(activeRide.getDriver().getId());
-        dto.setDriverName(activeRide.getDriver().getUser().getPerson().getFirstName() + " " + ride.getDriver().getUser().getPerson().getLastName());
+        dto.setDriverName(activeRide.getDriver().getUser().getPerson().getFirstName() + " " + activeRide.getDriver().getUser().getPerson().getLastName());
 
         return dto;
     }
