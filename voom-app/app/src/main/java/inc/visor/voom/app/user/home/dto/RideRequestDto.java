@@ -2,6 +2,8 @@ package inc.visor.voom.app.user.home.dto;
 
 import java.util.List;
 
+import inc.visor.voom.app.shared.model.DriverLocationDto;
+
 public class RideRequestDto {
 
     public Route route;
@@ -13,6 +15,8 @@ public class RideRequestDto {
     public static class Route {
         public List<Point> points;
     }
+
+    public List<DriverLocationDto> freeDriversSnapshot;
 
     public static class Point {
         public double lat;
@@ -31,4 +35,5 @@ public class RideRequestDto {
         public boolean pets;
         public boolean baby;
     }
+
 }

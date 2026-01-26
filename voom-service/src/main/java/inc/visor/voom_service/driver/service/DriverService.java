@@ -328,6 +328,7 @@ public class DriverService {
         RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
         Map<Long, DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
 
+
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
