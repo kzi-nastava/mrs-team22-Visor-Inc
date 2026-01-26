@@ -266,7 +266,7 @@ public class RideController {
         driver.setStatus(DriverStatus.AVAILABLE);
         this.driverService.updateDriver(driver);
 
-        simulator.setFinishedRide(dto.getUserId());
+        simulator.setFinishedRide(ride.getDriver().getId());
 
         RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
         this.rideWsService.sendRidePanic(rideResponse);
@@ -311,9 +311,8 @@ public class RideController {
 
         ActiveRideDto activeRideDto = driverService.getActiveRide(userId);
         Ride ride = rideService.findById(activeRideDto.getRideId());
-        ride.setFinishedAt(LocalDateTime.now());
-        ride.setStatus(RideStatus.FINISHED);
-        rideService.save(ride);
+
+        rideService.finishRide(ride.getId());
 
         rideWsService.sendRideChanges(new RideResponseDto(ride));
         simulator.setFinishedRide(userId);

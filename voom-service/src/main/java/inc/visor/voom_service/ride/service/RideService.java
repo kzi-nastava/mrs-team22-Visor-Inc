@@ -199,11 +199,11 @@ public class RideService {
 
     public Ride getOngoingRide(Long userId) {
 
-        List<Ride> ongoingRides = rideRepository.findByRideRequest_Creator_Id(userId);
+        List<Ride> ongoingRides = rideRepository.findByStatusIn(List.of(RideStatus.ONGOING, RideStatus.STARTED));
 
         // this should load from db by status and then filter by user id
         return ongoingRides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
+                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId || ride.getPassengers().stream().anyMatch(user -> user.getId() == userId))
                 .findFirst()
                 .orElse(null);
     }

@@ -6,17 +6,18 @@ import inc.visor.voom_service.ride.model.Ride;
 public class RideHistoryFormatter {
 
     public static RideHistoryDto getRideHistoryDto(Ride ride) {
-        RideHistoryDto rideHistoryDto = new RideHistoryDto();
-        rideHistoryDto.setId(ride.getId());
-        rideHistoryDto.setRideRequest(ride.getRideRequest());
-        rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
-        formatRideHistoryDtoAddresses(rideHistoryDto);
-        rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
-        rideHistoryDto.setPassengers(ride.getPassengers());
-        rideHistoryDto.setStatus(ride.getStatus());
-        rideHistoryDto.setFinishedAt(ride.getFinishedAt());
-        rideHistoryDto.setStartedAt(ride.getStartedAt());
-        return rideHistoryDto;
+        //        rideHistoryDto.setId(ride.getId());
+//        rideHistoryDto.setRideRequest(ride.getRideRequest());
+//        rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
+//        formatRideHistoryDtoAddresses(rideHistoryDto);
+//        rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
+//        rideHistoryDto.setPassengers(ride.getPassengers());
+//        rideHistoryDto.setStatus(ride.getStatus());
+//        rideHistoryDto.setFinishedAt(ride.getFinishedAt());
+//        rideHistoryDto.setStartedAt(ride.getStartedAt());
+        RideHistoryDto dto = new RideHistoryDto(ride);
+        formatRideHistoryDtoAddresses(dto);
+        return dto;
     }
 
     public static String formatAddress(String address) {
