@@ -237,12 +237,16 @@ public class RideController {
         rideRequest.setReason(dto.getMessage());
         this.rideRequestService.update(rideRequest);
         ride.setStatus(RideStatus.CANCELLED);
+        simulator.setFinishedRide(dto.getUserId());
         return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
     }
 
     @PostMapping("/{id}/stop")
     public ResponseEntity<RideResponseDto> stopRide(@PathVariable Long id, @RequestBody RideStopDto dto) {
         final Driver driver = this.driverService.getDriverFromUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        driver.setStatus(DriverStatus.AVAILABLE);
+        driverService.save(driver);
+
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         final RideRoute rideRoute = rideRequest.getRideRoute();
@@ -257,6 +261,9 @@ public class RideController {
         ride.setFinishedAt(dto.getTimestamp());
         ride.setStatus(RideStatus.STOPPED);
         ride.setRideRequest(this.rideRequestService.update(rideRequest));
+
+        simulator.setFinishedRide(dto.getUserId());
+
         return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
     }
 
@@ -269,6 +276,9 @@ public class RideController {
         ride.setStatus(RideStatus.PANIC);
         final RideRequest updatedRideRequest = this.rideRequestService.update(rideRequest);
         ride.setRideRequest(updatedRideRequest);
+
+        simulator.setFinishedRide(dto.getUserId());
+
         return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
     }
 

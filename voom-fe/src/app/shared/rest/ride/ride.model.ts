@@ -52,7 +52,7 @@ export type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 export type RideRoutePointDto = {
   lat: number;
   lng: number;
-  order: number;
+  orderIndex: number;
   type: RoutePointType;
   address: string;
 };
@@ -241,4 +241,8 @@ export interface RideStopDto {
 
 export interface RidePanicDto {
   userId: number,
+}
+
+export interface StartRideDto {
+  routePoints: RideRoutePointDto[];
 }
