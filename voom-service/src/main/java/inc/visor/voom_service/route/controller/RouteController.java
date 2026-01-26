@@ -35,7 +35,7 @@ public class RouteController {
 
   @PostMapping
   public ResponseEntity<RouteEstimateResponseDto> getRouteEstimate(@RequestBody RouteEstimateRequestDto dto) {
-    final List<LatLng> points = this.osrmService.getRoute(dto.getStartPoint(), dto.getEndPoint());
+    final List<LatLng> points = this.osrmService.getRoute(dto.getRoutePoints().stream().map(point -> new LatLng(point.getLat(), point.getLng())).toList());
     logger.info("getRouteEstimate: routePoints = {}", points);
     final List<RoutePointDto> routePoints = points.stream().map(point -> new RoutePointDto(point, points.indexOf(point))).toList();
     double distance = this.rideEstimateService.calculateTotalDistanceEstimate(routePoints);

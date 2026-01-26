@@ -1,9 +1,7 @@
-import {LatLng} from 'leaflet';
-
+import {RoutePoint} from '../../../main-shell/user-pages/home/home';
 
 export interface RouteEstimateRequestDto {
-  startPoint: LatLng,
-  endPoint: LatLng,
+  routePoints: RoutePoint[];
 }
 
 export interface RouteEstimateResponseDto {

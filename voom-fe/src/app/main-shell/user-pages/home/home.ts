@@ -29,7 +29,7 @@ export interface RoutePoint {
   lng: number;
   address: string;
   type: RoutePointType;
-  order: number;
+  orderIndex: number;
 }
 
 @Component({
@@ -161,7 +161,7 @@ export class UserHome implements AfterViewInit {
           lng: p.lng,
           address: '',
           type: p.type,
-          order: p.order,
+          orderIndex: p.order,
         })),
     );
 
@@ -228,7 +228,7 @@ export class UserHome implements AfterViewInit {
           lng: event.lng,
           address: cleanAddress,
           type: 'PICKUP',
-          order: 0,
+          orderIndex: 0,
         },
       ]);
       this.rideForm.patchValue({ pickup: cleanAddress });
@@ -245,7 +245,7 @@ export class UserHome implements AfterViewInit {
       lng: event.lng,
       address: cleanAddress,
       type: 'DROPOFF',
-      order: updated.length,
+      orderIndex: updated.length,
     });
 
     this.routePoints.set(updated);
@@ -261,9 +261,9 @@ export class UserHome implements AfterViewInit {
     const stops = points.filter((p) => p.id !== id && p.type !== 'PICKUP');
 
     const updated: RoutePoint[] = [
-      { ...pickup, order: 0 },
-      ...stops.map((p, i) => ({ ...p, type: 'STOP' as RoutePointType, order: i + 1 })),
-      { ...newDropoff, type: 'DROPOFF', order: stops.length + 1 },
+      { ...pickup, orderIndex: 0 },
+      ...stops.map((p, i) => ({ ...p, type: 'STOP' as RoutePointType, orderIndex: i + 1 })),
+      { ...newDropoff, type: 'DROPOFF', orderIndex: stops.length + 1 },
     ];
 
     this.routePoints.set(updated);
@@ -274,7 +274,7 @@ export class UserHome implements AfterViewInit {
     this.routePoints.set(
       this.routePoints()
         .filter((p) => p.id !== id)
-        .map((p, i) => ({ ...p, order: i })),
+        .map((p, i) => ({ ...p, orderIndex: i })),
     );
   }
 
@@ -343,7 +343,7 @@ export class UserHome implements AfterViewInit {
         points: this.routePoints().map((p) => ({
           lat: p.lat,
           lng: p.lng,
-          orderIndex: p.order,
+          orderIndex: p.orderIndex,
           type: p.type,
           address: p.address,
         })),
@@ -411,7 +411,7 @@ export class UserHome implements AfterViewInit {
         lng: p.lng,
         address: p.address,
         type: p.type,
-        order: p.orderIndex,
+        orderIndex: p.orderIndex,
       }));
 
     this.routePoints.set(points);
@@ -441,7 +441,7 @@ export class UserHome implements AfterViewInit {
           lng: p.lng,
           address: p.address,
           type: p.type,
-          order: p.orderIndex,
+          orderIndex: p.orderIndex,
         }));
 
       this.routePoints.set(points);
@@ -486,7 +486,7 @@ export class UserHome implements AfterViewInit {
         points: points.map((p) => ({
           lat: p.lat,
           lng: p.lng,
-          orderIndex: p.order,
+          orderIndex: p.orderIndex,
           type: p.type,
           address: p.address,
         })),
