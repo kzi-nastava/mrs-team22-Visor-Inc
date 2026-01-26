@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ApiClient} from './api-client';
 import {AuthenticationApi} from './authentication/authentication.api';
-import {RideApi} from './home/home.api';
+import {RideApi} from './ride/ride.api';
 import {DriverApi} from './driver/driver.api';
 import {UserProfileApi} from '../../main-shell/user-pages/user-profile/user-profile.api';
 import {UserApi} from './user/user.api';
@@ -9,7 +9,7 @@ import {UserRoleApi} from './user/user-role.api';
 import VehicleApi from './vehicle/vehicle.api';
 import VehicleTypeApi from './vehicle/vehicle-type.api';
 import {DriverActivityApi} from './driver/driver-activity.api';
-// import { RidesApi } from './ride/ride.api';
+import {RouteApi} from './route/route.api';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +25,7 @@ export default class ApiService {
   public readonly vehicleApi;
   public readonly vehicleTypeApi;
   public readonly driverActivityApi;
-  // public readonly ridesApi: RidesApi;
+  public readonly routeApi;
 
   constructor(private apiClient: ApiClient) {
     this.authenticationApi = new AuthenticationApi(this.apiClient);
@@ -37,6 +37,6 @@ export default class ApiService {
     this.vehicleApi = new VehicleApi(this.apiClient);
     this.vehicleTypeApi = new VehicleTypeApi(this.apiClient);
     this.driverActivityApi = new DriverActivityApi(this.apiClient);
-    // this.ridesApi = new RidesApi(this.apiClient);
+    this.routeApi = new RouteApi(this.apiClient);
   }
 }

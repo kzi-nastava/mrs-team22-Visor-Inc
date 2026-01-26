@@ -11,10 +11,10 @@ import {ROUTE_ADMIN_PRICING} from './admin-pricing/admin-pricing';
 import {ROUTE_ADMIN_PAGES} from '../admin-pages';
 import {ROUTE_ADMIN_VEHICLES} from './admin-vehicles/admin-vehicles';
 
-export const ROUTE_ADMIN_HOME = "home"
+export const ROUTE_ADMIN_HOME = "ride"
 
 @Component({
-  selector: 'app-admin-home',
+  selector: 'app-admin-ride',
   imports: [
     MatDrawerContainer,
     MatDrawer,

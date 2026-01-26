@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, effect, inject, signal, ViewChild } from '@angular/core';
-import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
+import {AfterViewInit, Component, computed, effect, inject, signal, ViewChild} from '@angular/core';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {
   ApexChart,
   ApexDataLabels,
@@ -10,26 +10,26 @@ import {
   ApexXAxis,
   NgApexchartsModule,
 } from 'ng-apexcharts';
-import { MatIcon } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DriverAssignedDto, RideApi } from '../../user-pages/home/home.api';
-import { RoutePoint } from '../../user-pages/home/home';
-import { UserProfileApi } from '../../user-pages/user-profile/user-profile.api';
-import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
-import { BehaviorSubject, catchError, filter, map, merge, of, switchMap } from 'rxjs';
-import { Map } from '../../../shared/map/map';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ArrivalDialog } from '../arrival-dialog/arrival-dialog';
-import {
-  DriverState,
-  DriverStateChangeDto,
-} from '../../../shared/rest/driver/driver-activity.model';
+import {MatIcon} from '@angular/material/icon';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {DriverAssignedDto, RideApi,} from '../../user-pages/home/home.api';
+import {RoutePoint} from '../../user-pages/home/user-home';
+import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
+import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
+import {BehaviorSubject, catchError, filter, map, merge, of, switchMap} from 'rxjs';
+import {Map} from '../../../shared/map/map';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ArrivalDialog} from '../arrival-dialog/arrival-dialog';
+import {DriverStateChangeDto} from '../../../shared/rest/driver/driver-activity.model';
 import ApiService from '../../../shared/rest/api-service';
-import { AuthenticationService } from '../../../shared/service/authentication-service';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { FinishRideDialog } from '../finish-ride-dialog/finish-ride-dialog';
+import {AuthenticationService} from '../../../shared/service/authentication-service';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {FinishRideDialog} from '../finish-ride-dialog/finish-ride-dialog';
+import {MatDivider} from '@angular/material/list';
+import {MatButton} from '@angular/material/button';
+import {RideStopDto} from '../../../shared/rest/ride/ride.model';
 
-export const ROUTE_DRIVER_HOME = 'home';
+export const ROUTE_DRIVER_HOME = 'ride';
 
 export type ChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -46,8 +46,17 @@ export type ChartOptions = {
 type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED' | 'AT_DROPOFF';
 
 @Component({
-  selector: 'app-driver-home',
-  imports: [MatSlideToggle, NgApexchartsModule, MatIcon, MatSnackBarModule, Map, MatDialogModule],
+  selector: 'app-driver-ride',
+  imports: [
+    MatSlideToggle,
+    NgApexchartsModule,
+    MatIcon,
+    MatSnackBarModule,
+    Map,
+    MatDialogModule,
+    MatDivider,
+    MatButton,
+  ],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
@@ -63,7 +72,7 @@ export class DriverHome implements AfterViewInit {
   ridePhase = signal<RidePhase>('IDLE');
 
   dropoffPoint = signal<{ lat: number; lng: number } | null>(null);
-  private finishDialogOpen = false;
+  finishDialogOpen = signal<boolean>(false);
 
   private apiService = inject(ApiService);
   private authenticationService = inject(AuthenticationService);
@@ -71,16 +80,13 @@ export class DriverHome implements AfterViewInit {
   driver = toSignal(this.authenticationService.activeUser$);
 
   initialDriverState$ = this.authenticationService.activeUser$.pipe(
-    filter((user) => !!user),
+    filter(user => !!user),
     takeUntilDestroyed(),
     switchMap((user) => {
       return this.apiService.driverActivityApi.getDriverState(user.id).pipe(
-        map((response) => response.data),
-        catchError((error) => {
-          this.snackBar.open('There was an error', '', {
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom',
-          });
+        map(response => response.data),
+        catchError(error => {
+          this.snackBar.open("There was an error", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
           return of(null);
         }),
       );
@@ -89,7 +95,10 @@ export class DriverHome implements AfterViewInit {
 
   driverStateUpdate = new BehaviorSubject<DriverStateChangeDto | null>(null);
 
-  driverState$ = merge(this.initialDriverState$, this.driverStateUpdate.asObservable()).pipe(
+  driverState$ = merge(
+    this.initialDriverState$,
+    this.driverStateUpdate.asObservable(),
+  ).pipe(
     map((driverState) => driverState?.currentState ?? 'INACTIVE'),
   );
 
@@ -147,13 +156,17 @@ export class DriverHome implements AfterViewInit {
     };
 
     effect(() => {
-      if (this.ridePhase() === 'AT_PICKUP') {
+      const ridePhase = this.ridePhase();
+      console.log(ridePhase)
+      if (ridePhase === 'AT_PICKUP') {
         this.openArrivalDialog();
-      } else if (this.ridePhase() === 'AT_DROPOFF') {
+      }
+      else if (ridePhase === 'AT_DROPOFF') {
         this.openFinishRideDialog();
       }
     });
   }
+
 
   onToggleChange(event: MatSlideToggleChange) {
     const user = this.driver();
@@ -166,31 +179,22 @@ export class DriverHome implements AfterViewInit {
       userId: user.id,
       currentState: event.checked ? 'ACTIVE' : 'INACTIVE',
       performedAt: new Date().toISOString(),
-    };
+    }
 
-    this.apiService.driverActivityApi
-      .changeDriverState(dto)
-      .pipe(
-        map((response) => response.data),
-        catchError((error) => {
-          this.snackBar.open('There was an error, ', error);
-          return of(null);
-        }),
-      )
-      .subscribe((driverActivityState) => {
-        if (driverActivityState) {
-          this.snackBar.open('Driver state updated successfully', '', {
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom',
-          });
-        } else {
-          this.snackBar.open('Driver state update failed', '', {
-            horizontalPosition: 'right',
-            verticalPosition: 'bottom',
-          });
-        }
-        this.driverStateUpdate.next(driverActivityState);
-      });
+    this.apiService.driverActivityApi.changeDriverState(dto).pipe(
+      map(response => response.data),
+      catchError(error => {
+        this.snackBar.open("There was an error, ", error);
+        return of(null);
+      }),
+    ).subscribe((driverActivityState) => {
+      if (driverActivityState) {
+        this.snackBar.open("Driver state updated successfully", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
+      } else {
+        this.snackBar.open("Driver state update failed", '', {horizontalPosition: 'right', verticalPosition: 'bottom'});
+      }
+      this.driverStateUpdate.next(driverActivityState);
+    });
 
     this.isPassive.set(event.checked);
   }
@@ -220,112 +224,124 @@ export class DriverHome implements AfterViewInit {
       },
     });
 
-    this.rideApi
-      .getActiveDrivers()
-      .pipe(map((r) => r.data ?? []))
-      .subscribe({
-        next: (drivers) => {
-          if (!drivers.length) return;
+    this.rideApi.getActiveDrivers().pipe(
+      map((r) => r.data ?? []),
+    ).subscribe({
+      next: (drivers) => {
+        if (!drivers.length) return;
 
-          this.driverSocket.connect(
-            () => {},
-            () => {},
-            (assigned) => this.handleDriverAssigned(assigned),
-            (pos) => {
-              const driver = drivers.find((d) => d.id === pos.driverId);
+        this.driverSocket.connect(
+          () => {},
+          () => {},
+          (assigned) => this.handleDriverAssigned(assigned),
+          (pos) => {
+            const driver = drivers.find((d) => d.id === pos.driverId);
 
-              if (!this.renderedDrivers.includes(pos.driverId)) {
-                this.renderedDrivers.push(pos.driverId);
+            if (!this.renderedDrivers.includes(pos.driverId)) {
+              this.renderedDrivers.push(pos.driverId);
 
-                this.map.addSimulatedDriver({
-                  id: pos.driverId,
-                  firstName: driver?.firstName ?? '',
-                  lastName: driver?.lastName ?? '',
-                  start: { lat: pos.lat, lng: pos.lng },
-                  status: (driver?.status as any) || 'FREE',
-                });
+              this.map.addSimulatedDriver({
+                id: pos.driverId,
+                firstName: driver?.firstName ?? '',
+                lastName: driver?.lastName ?? '',
+                start: { lat: pos.lat, lng: pos.lng },
+                status: (driver?.status as any) || 'FREE',
+              });
 
-                const my = this.myId();
-                if (my && pos.driverId === my && this.followEnabled) {
-                  this.focusMyDriver(my);
+              const my = this.myId();
+              if (my && pos.driverId === my && this.followEnabled) {
+                this.focusMyDriver(my);
+              }
+            } else {
+              this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
+
+              const my = this.myId();
+              if (my && pos.driverId === my && this.followEnabled) {
+                this.followMyDriver(pos.driverId, pos.lat, pos.lng);
+              }
+
+              if (this.pickupPoint() && !this.hasArrived()) {
+                const dist = this.distanceMeters(
+                  { lat: pos.lat, lng: pos.lng },
+                  this.pickupPoint()!,
+                );
+
+                if (dist <= 30) {
+                  this.ridePhase.set('AT_PICKUP');
+                  this.finishDialogOpen.set(false);
+                }
+              } else if (this.ridePhase() === 'RIDE_STARTED' && this.dropoffPoint()) {
+                const dist = this.distanceMeters({ lat: pos.lat, lng: pos.lng }, this.dropoffPoint()!);
+                const finishDialogOpen = this.finishDialogOpen();
+
+                if ((dist <= 30 || pos.finished) && !finishDialogOpen) {
+                  this.ridePhase.set('AT_DROPOFF');
+                  this.finishDialogOpen.set(true);
                 }
               } else {
-                this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
-
-                const my = this.myId();
-
-                if (my && pos.driverId === my && this.followEnabled) {
-                  this.followMyDriver(pos.driverId, pos.lat, pos.lng);
+                const ridePhase = this.ridePhase();
+                if (ridePhase === 'AT_DROPOFF') {
+                  return;
                 }
-                
-                if (this.ridePhase() === 'GOING_TO_PICKUP' && this.pickupPoint()) {
-                  const dist = this.distanceMeters(
-                    { lat: pos.lat, lng: pos.lng },
-                    this.pickupPoint()!,
-                  );
-
-                  if (dist <= 30) {
-                    this.ridePhase.set('AT_PICKUP');
-                  }
-                }
-
-                if (this.ridePhase() === 'RIDE_STARTED' && this.dropoffPoint()) {
-                  const dist = this.distanceMeters(
-                    { lat: pos.lat, lng: pos.lng },
-                    this.dropoffPoint()!,
-                  );
-
-                  if (dist <= 30 && !this.finishDialogOpen) {
-                    this.ridePhase.set('AT_DROPOFF');
-                  }
-                }
+                this.ridePhase.set('RIDE_STARTED');
               }
-            },
-          );
-        },
-        error: (err) => console.error(err),
-      });
+            }
+          },
+          () => {},
+          (panic) => {
+
+          }
+        );
+      },
+      error: (err) => console.error(err),
+    });
   }
 
   private openArrivalDialog() {
-    this.rideApi.getActiveRide().subscribe({
-      next: (res) => {
-        if (!res.data) {
-          console.error('No active ride on arrival');
-          return;
+    this.rideApi.getActiveRide().pipe(
+      map(result => result.data),
+      catchError(error => {
+        this.snackBar.open(error, '', { duration: 3000, horizontalPosition: 'right'});
+        return of(null);
+      }),
+    ).subscribe((activeRide) => {
+      if (!activeRide) {
+        return;
+      }
+
+      this.activeRideId.set(activeRide.rideId);
+
+      this.dialog.open(ArrivalDialog, {
+        width: '380px',
+        disableClose: true,
+        data: {
+          pickupAddress: activeRide.routePoints.find((p) => p.type === 'PICKUP')?.address ?? '',
+          activeRide: activeRide,
+        },
+      }).afterClosed().subscribe((res) => {
+        if (res === 'START') {
+          this.hasArrived.set(true);
+          this.pickupPoint.set(null);
+          this.ridePhase.set('RIDE_STARTED');
+        } else {
+          this.activeRideId.set(null);
+          this.routePoints.set([]);
+          this.ridePhase.set('IDLE');
         }
-
-        this.activeRideId.set(res.data.rideId);
-
-        const ref = this.dialog.open(ArrivalDialog, {
-          width: '380px',
-          disableClose: true,
-          data: {
-            pickupAddress: res.data.routePoints.find((p) => p.type === 'PICKUP')?.address ?? '',
-          },
-        });
-
-        ref.afterClosed().subscribe((res) => {
-          if (res === 'START') {
-            this.startRide();
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Failed to refresh active ride', err);
-      },
+      });
     });
   }
 
   private openFinishRideDialog() {
-    if (this.finishDialogOpen) return;
-    this.finishDialogOpen = true;
+    const finishDialogOpen = this.finishDialogOpen();
+    if (!finishDialogOpen) return;
+    this.finishDialogOpen.set(true);
 
     const ref = this.dialog.open(FinishRideDialog, {
       width: '380px',
       disableClose: true,
       data: {
-        dropoffAddress: this.routePoints().find((p) => p.type === 'DROPOFF')?.address ?? '',
+        dropoffAddress: this.routePoints().find(p => p.type === 'DROPOFF')?.address ?? ''
       },
     });
 
@@ -333,38 +349,7 @@ export class DriverHome implements AfterViewInit {
       if (res === 'FINISH') {
         this.finishRide();
       }
-    });
-  }
 
-  private startRide() {
-    const rideId = this.activeRideId();
-    if (!rideId) {
-      console.error('No active ride id');
-      return;
-    }
-
-    const payload = {
-      routePoints: this.routePoints().map((p) => ({
-        lat: p.lat,
-        lng: p.lng,
-        orderIndex: p.order,
-        type: p.type,
-        address: p.address,
-      })),
-    };
-
-    this.rideApi.startRide(rideId, payload).subscribe({
-      next: () => {
-        this.snackBar.open('Ride started', 'OK', { duration: 3000 });
-        this.hasArrived.set(true);
-        this.pickupPoint.set(null);
-
-        this.ridePhase.set('RIDE_STARTED');
-      },
-      error: (err) => {
-        console.error('Failed to start ride', err);
-        this.snackBar.open('Failed to start ride', 'OK', { duration: 3000 });
-      },
     });
   }
 
@@ -380,7 +365,8 @@ export class DriverHome implements AfterViewInit {
         this.activeRideId.set(null);
         this.routePoints.set([]);
         this.ridePhase.set('IDLE');
-      },
+      }
+      ,
       error: (err) => {
         console.error('Failed to finish ride', err);
         this.snackBar.open('Failed to finish ride', 'OK', { duration: 3000 });
@@ -421,7 +407,7 @@ export class DriverHome implements AfterViewInit {
       {
         duration: 5000,
         verticalPosition: 'bottom',
-        horizontalPosition: 'center',
+        horizontalPosition: 'right',
       },
     );
 
@@ -434,7 +420,7 @@ export class DriverHome implements AfterViewInit {
           lng: p.lng,
           address: '',
           type: p.type,
-          order: p.order,
+          orderIndex: p.order,
         })),
     );
   }
@@ -480,19 +466,10 @@ export class DriverHome implements AfterViewInit {
             lng: p.lng,
             address: p.address,
             type: p.type,
-            order: p.orderIndex,
+            orderIndex: p.orderIndex,
           }));
 
         this.routePoints.set(points);
-
-        console.log(activeRide);
-
-        if (activeRide.status === 'ONGOING') {
-          this.ridePhase.set('GOING_TO_PICKUP');
-          this.hasArrived.set(false);
-        } else {
-          this.ridePhase.set('IDLE');
-        }
 
         const pickup = points.find((p) => p.type === 'PICKUP');
         if (pickup) {
@@ -504,7 +481,17 @@ export class DriverHome implements AfterViewInit {
           this.dropoffPoint.set({ lat: dropoff.lat, lng: dropoff.lng });
         }
 
-        this.activeRideId.set(activeRide.rideId);
+        if (activeRide.status === 'STARTED') {
+          this.ridePhase.set('RIDE_STARTED');
+          this.hasArrived.set(true);
+          this.activeRideId.set(activeRide.rideId);
+          console.log("Ride phase", this.ridePhase());
+        } else if (activeRide.status === 'ONGOING') {
+          this.ridePhase.set('GOING_TO_PICKUP');
+          this.hasArrived.set(false);
+        } else {
+          this.ridePhase.set('IDLE');
+        }
 
         console.log('[DriverHome] Active ride restored from API');
       },
@@ -514,5 +501,40 @@ export class DriverHome implements AfterViewInit {
     });
   }
 
-  protected readonly DriverState = DriverState;
+  protected stopRide() {
+    const user = this.driver();
+
+    if (!user) return;
+
+    const dto: RideStopDto = {
+      userId: user.id,
+      route: [],
+      timestamp: new Date().toISOString(),
+    }
+
+    this.apiService.rideApi.stopRide(user.id, dto).pipe(
+      map(response => response.data),
+    ).subscribe(rideResponse => {
+      this.activeRideId.set(null);
+      this.routePoints.set([]);
+      this.ridePhase.set('IDLE');
+    });
+  }
+
+  protected panic() {
+    const rideId = this.activeRideId();
+    const user = this.driver();
+
+    if (!rideId || !user) {
+      return;
+    }
+
+    this.apiService.rideApi.ridePanic(rideId, { userId: user.id }).pipe(
+      map(response => response.data),
+    ).subscribe(rideResponse => {
+      this.activeRideId.set(null);
+      this.routePoints.set([]);
+      this.ridePhase.set('IDLE');
+    });
+  }
 }

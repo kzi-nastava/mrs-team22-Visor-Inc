@@ -1,6 +1,6 @@
 package inc.visor.voom_service.ride.service;
 
-import inc.visor.voom_service.ride.dto.RideRequestCreateDTO;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.utils.GeoUtil;
@@ -15,38 +15,19 @@ public class RideEstimateService {
 
     private static final double PRICE_PER_KM = 120.0;
 
-    public RideEstimationResult estimate(
-        RideRequestCreateDTO dto,
-        VehicleType vehicleType
-    ) {
-        validateRoute(dto);
-
-        double distanceKm = calculateTotalDistance(dto.route.points);
-        double price = vehicleType.getPrice()+ distanceKm * PRICE_PER_KM;
-
-        return new RideEstimationResult(
-            round2(distanceKm),
-            round2(price)
-        );
-    }
-
-
-    private void validateRoute(RideRequestCreateDTO dto) {
-        if (dto.route == null || dto.route.points == null) {
-            throw new IllegalArgumentException("Route is required");
+    public RideEstimationResult estimate(List<RideRequestCreateDto.RoutePointDto> points, VehicleType vehicleType) {
+        if (points.size() < 2) {
+            throw new IllegalArgumentException("Route must contain at least pickup and drop off");
         }
 
-        if (dto.route.points.size() < 2) {
-            throw new IllegalArgumentException(
-                "Route must contain at least pickup and drop off"
-            );
-        }
+        double distanceKm = calculateTotalDistance(points);
+        double price = vehicleType.getPrice() + distanceKm * PRICE_PER_KM;
+
+        return new RideEstimationResult(round(distanceKm), round(price));
     }
 
-    public double calculateTotalDistance(
-        List<RideRequestCreateDTO.RoutePointDTO> dto
-    ) {
-        List<RideRequestCreateDTO.RoutePointDTO> points =
+    public double calculateTotalDistance(List<RideRequestCreateDto.RoutePointDto> dto) {
+        List<RideRequestCreateDto.RoutePointDto> points =
             dto.stream()
                 .sorted(Comparator.comparingInt(p -> p.order))
                 .toList();
@@ -72,7 +53,7 @@ public class RideEstimateService {
     ) {
         List<RoutePointDto> points =
             dto.stream()
-                .sorted(Comparator.comparingInt(RoutePointDto::getOrderIndex))
+                .sorted(Comparator.comparingInt(inc.visor.voom_service.shared.RoutePointDto::getOrderIndex))
                 .toList();
 
         double total = 0.0;
@@ -87,10 +68,10 @@ public class RideEstimateService {
             );
         }
 
-        return round2(total);
+        return round(total);
     }
 
-    private double round2(double value) {
+    private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
 }

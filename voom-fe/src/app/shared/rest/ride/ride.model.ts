@@ -52,7 +52,7 @@ export type RoutePointType = 'PICKUP' | 'STOP' | 'DROPOFF';
 export type RideRoutePointDto = {
   lat: number;
   lng: number;
-  order: number;
+  orderIndex: number;
   type: RoutePointType;
   address: string;
 };
@@ -79,6 +79,7 @@ export type RideResponseDto = {
   finishedAt: string | null;
   driverName: string;
   passengerName: string;
+  passengerNames: string[];
   driverId: number;
   startAddress: string;
   destinationAddress: string;
@@ -144,7 +145,7 @@ export interface RoutePointDto {
   address: string;
   lat: number;
   lng: number;
-  orderIndex: number | null; 
+  orderIndex: number | null;
   type: RoutePointType;
 }
 
@@ -226,4 +227,23 @@ export interface RideHistoryDto {
   finishedAt: string;
   passengers: User[];
   cancelledBy?: User;
+}
+
+export interface RideCancellationDto {
+  userId: number;
+  message: string;
+}
+
+export interface RideStopDto {
+  userId: number;
+  route: RoutePointDto[];
+  timestamp: string;
+}
+
+export interface RidePanicDto {
+  userId: number,
+}
+
+export interface StartRideDto {
+  routePoints: RideRoutePointDto[];
 }

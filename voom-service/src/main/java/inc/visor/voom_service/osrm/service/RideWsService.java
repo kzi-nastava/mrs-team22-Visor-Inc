@@ -2,6 +2,7 @@ package inc.visor.voom_service.osrm.service;
 
 import java.util.List;
 
+import inc.visor.voom_service.ride.dto.RideResponseDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,4 +31,13 @@ public class RideWsService {
                 dto
         );
     }
+
+    public void sendRideChanges(RideResponseDto dto) {
+        messaging.convertAndSend("/topic/ride-changes", dto);
+    }
+
+    public void sendRidePanic(RideResponseDto dto) {
+        messaging.convertAndSend("/topic/ride-panic", dto);
+    }
+
 }

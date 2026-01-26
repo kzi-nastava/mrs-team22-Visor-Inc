@@ -1,6 +1,6 @@
 import {Route} from '@angular/router';
 import {ROUTE_USER_PROFILE, UserProfile} from './user-profile/user-profile';
-import {ROUTE_USER_HOME, UserHome} from './home/home';
+import {ROUTE_USER_HOME, UserHome} from './home/user-home';
 import {FavoriteRoutes, ROUTE_FAVORITE_ROUTES} from './favorite-routes/favorite-routes';
 import {UserPages} from './user-pages';
 import { ROUTE_RIDE_TRACKING, RideTracking } from './ride-tracking/ride-tracking';

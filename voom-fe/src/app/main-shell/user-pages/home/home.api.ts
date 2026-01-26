@@ -3,7 +3,7 @@ import {Observable} from 'rxjs';
 import {ApiClient} from '../../../shared/rest/api-client';
 import {ApiResponse, RequestConfig} from '../../../shared/rest/rest.model';
 import {VoomApiService} from '../../../shared/rest/voom-api-service';
-import { OngoingRideDto } from '../../../shared/rest/home/home.model';
+import { OngoingRideDto } from '../../../shared/rest/ride/ride.model';
 
 export type UserProfileResponseDto = {
   email: string;
@@ -255,10 +255,6 @@ export type ActiveRideDto = {
   driverId: number;
 }
 
-export type StartRideDto = {
-  routePoints: RideRoutePointDto[];
-}
-
 export type StartScheduledRideDto = {
   driverId: number;
   lat: number;
@@ -294,17 +290,6 @@ export class RideApi {
     };
 
     return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
-  }
-
-  startRide(rideId: number, payload: StartRideDto): Observable<ApiResponse<void>> {
-    const config: RequestConfig = {
-      headers: {
-        accept: 'application/json',
-        contentType: 'application/json'
-      },
-      authenticated: true,
-    }
-    return this.apiClient.post<StartRideDto, void>(`${this.baseUrl}/${rideId}/start`, payload, config);
   }
 
   startScheduleRide(rideId: number, payload: StartScheduledRideDto): Observable<ApiResponse<void>> {
@@ -357,9 +342,9 @@ export class RideApi {
       headers: {
         accept: 'application/json',
       },
-      authenticated: true, 
+      authenticated: true,
     };
-  
+
     return this.apiClient.post<void, OngoingRideDto>(
       '/api/rides/finish-ongoing',
       undefined,

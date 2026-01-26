@@ -1,26 +1,23 @@
 package inc.visor.voom_service.route.dto;
 
 import inc.visor.voom_service.shared.RoutePointDto;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class RouteEstimateResponseDto {
 
   private int duration;
-  private List<RoutePointDto> routePoints;
+  private double distance;
 
-  public int getDuration() {
-    return duration;
-  }
-
-  public void setDuration(int duration) {
+  public RouteEstimateResponseDto(int duration, double distance) {
     this.duration = duration;
+    this.distance = distance;
   }
 
-  public List<RoutePointDto> getRoutePoints() {
-    return routePoints;
-  }
-
-  public void setRoutePoints(List<RoutePointDto> routePoints) {
-    this.routePoints = routePoints;
+  public RouteEstimateResponseDto() {
   }
 }

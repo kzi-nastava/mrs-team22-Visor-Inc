@@ -13,7 +13,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "ride_route")
 public class RideRoute {
@@ -32,30 +36,6 @@ public class RideRoute {
     private List<RoutePoint> routePoints;
 
     public RideRoute() {}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public double getTotalDistanceKm() {
-        return totalDistanceKm;
-    }
-
-    public void setTotalDistanceKm(double totalDistanceKm) {
-        this.totalDistanceKm = totalDistanceKm;
-    }
-
-    public List<RoutePoint> getRoutePoints() {
-        return routePoints;
-    }
-
-    public void setRoutePoints(List<RoutePoint> routePoints) {
-        this.routePoints = routePoints;
-    }
 
     public RoutePoint getPickupPoint() {
         return routePoints.stream()
