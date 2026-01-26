@@ -2,16 +2,8 @@ package inc.visor.voom_service.ride.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverStatus;
-import inc.visor.voom_service.driver.repository.DriverRepository;
-import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.ride.model.enums.Sorting;
-import inc.visor.voom_service.ride.repository.RideRepository;
-import inc.visor.voom_service.simulation.SimulationState;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
@@ -42,6 +38,8 @@ import inc.visor.voom_service.ride.dto.StartRideDto;
 import inc.visor.voom_service.ride.dto.StartScheduleRideDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.Sorting;
+import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideReportService;
 import inc.visor.voom_service.ride.service.RideRequestService;
@@ -287,7 +285,7 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ActiveRideDto activeRide = rideService.getActiveRide(user.getId());
+        ActiveRideDto activeRide = rideService.getActiveRide(user);
 
         return ResponseEntity.ok(activeRide);
     }
