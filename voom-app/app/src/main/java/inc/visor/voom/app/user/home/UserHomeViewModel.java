@@ -7,8 +7,11 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
@@ -42,6 +45,9 @@ public class UserHomeViewModel extends ViewModel {
     public LiveData<String> getScheduledTime() { return scheduledTime; }
     public LiveData<List<String>> getPassengerEmails() { return passengerEmails; }
     public LiveData<Boolean> isScheduledTimeValid() { return scheduledTimeValid; }
+
+    private final MutableLiveData<Map<Integer, DriverSummaryDto>> activeDriversMap =
+            new MutableLiveData<>(new HashMap<>());
 
     public void setVehicle(Integer id) { selectedVehicleId.setValue(id); }
 
@@ -186,7 +192,22 @@ public class UserHomeViewModel extends ViewModel {
                 .toInstant()
                 .toString();
     }
+    public LiveData<Map<Integer, DriverSummaryDto>> getActiveDriversMap() {
+        return activeDriversMap;
+    }
 
+    public void setActiveDrivers(List<DriverSummaryDto> list) {
+        Map<Integer, DriverSummaryDto> map = new HashMap<>();
+        if (list != null) {
+            for (DriverSummaryDto d : list) map.put(d.id, d);
+        }
+        activeDriversMap.setValue(map);
+    }
+
+    public DriverSummaryDto findActiveDriver(int id) {
+        java.util.Map<Integer, DriverSummaryDto> map = activeDriversMap.getValue();
+        return map == null ? null : map.get(id);
+    }
 
 
 

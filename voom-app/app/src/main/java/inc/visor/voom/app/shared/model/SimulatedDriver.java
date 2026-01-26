@@ -8,7 +8,6 @@ public class SimulatedDriver {
     public String firstName;
     public String lastName;
     public String status;
-
     public GeoPoint currentPosition;
     public GeoPoint lastPosition;
     public GeoPoint targetPosition;
