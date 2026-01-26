@@ -507,12 +507,6 @@ export class DriverHome implements AfterViewInit {
 
     if (!user || !rideId) return;
 
-    const rideId = this.activeRideId();
-
-    if (!rideId) {
-      return;
-    }
-
     const dto: RideStopDto = {
       userId: user.id,
       route: [],

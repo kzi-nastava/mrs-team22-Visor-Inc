@@ -1,23 +1,5 @@
 package inc.visor.voom_service.ride.controller;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
@@ -29,13 +11,13 @@ import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
-import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.simulation.Simulator;
@@ -49,8 +31,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.getRideHistoryDto;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -105,28 +85,33 @@ public class RideController {
 
     @GetMapping
     public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing) {
-        List<Ride> rides = this.rideService.getRides();
-        List<RideResponseDto> rideResponseDtos = rides.stream().map(RideResponseDto::new).toList();
-        return ResponseEntity.ok(rideResponseDtos);
+        final List<Ride> rides;
+        if (ongoing) {
+            rides = this.rideService.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.STARTED || ride.getStatus() == RideStatus.ONGOING).toList();
+        } else {
+            rides = this.rideService.getRides();
+        }
+        final List<RideResponseDto> rideResponses = rides.stream().map(RideResponseDto::new).toList();
+        return ResponseEntity.ok(rideResponses);
     }
 
     @GetMapping("/user/{userId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForUser(@PathVariable long userId, @RequestParam(required = false) LocalDateTime date) {
-        List<Ride> ridesList = rideService.getUserRides(userId, null, null, Sorting.ASC);
-        List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
+        final List<Ride> ridesList = rideService.getUserRides(userId, null, null, Sorting.ASC);
+        final List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideHistoryDtoList);
     }
 
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
-        List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
-        List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
+        final List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
+        final List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideHistoryDtoList);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
-        Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
+        final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         return ResponseEntity.ok(new RideResponseDto(ride));
     }
 
@@ -238,7 +223,6 @@ public class RideController {
         final RideRoute rideRoute = rideRequest.getRideRoute();
 
         rideRoute.setTotalDistanceKm(this.rideEstimateService.calculateTotalDistance(dto.getPoints()));
-
         rideRequest.setRideRoute(this.rideRouteService.update(rideRoute));
 
         final RideEstimationResult rideEstimationResult = this.rideEstimateService.estimate(dto.getPoints(), ride.getRideRequest().getVehicleType());
@@ -261,6 +245,7 @@ public class RideController {
         ride.setStatus(RideStatus.PANIC);
         final RideRequest updatedRideRequest = this.rideRequestService.update(rideRequest);
         ride.setRideRequest(updatedRideRequest);
+        ride.setFinishedAt(LocalDateTime.now());
 
         final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
         driver.setStatus(DriverStatus.AVAILABLE);

@@ -1,16 +1,15 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {Component, effect, inject, signal, ViewChild} from '@angular/core';
 import {MatCard} from '@angular/material/card';
 import {AdminSupportChat} from './admin-support-chat/admin-support-chat';
 import {Map} from '../../../../shared/map/map';
 import {RoutePoint} from '../../../user-pages/home/user-home';
-import {DriverSummaryDto, RideResponseDto} from '../../../../shared/rest/ride/ride.model';
-import {catchError, map, of} from 'rxjs';
+import {RideResponseDto} from '../../../../shared/rest/ride/ride.model';
+import {map} from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DriverSimulationWsService} from '../../../../shared/websocket/DriverSimulationWsService';
 import {MatDialog} from '@angular/material/dialog';
-import {AdminPanic} from './admin-panic/admin-panic';
+import {PanicDialog} from '../../../../shared/panic/panic-dialog/panic-dialog';
 
 export const ROUTE_ADMIN_LIVE = "live"
 
@@ -39,15 +38,6 @@ export class AdminLive {
   activeDrivers$ = this.apiService.rideApi.getActiveDrivers().pipe(
     map(result => result.data ?? []),
   );
-
-  track = computed(() => {
-    const panic= this.panic();
-    if (panic) {
-      this.dialog.open(AdminPanic, { data: panic }).afterClosed().subscribe(() => {
-        this.panic.set(null);
-      });
-    }
-  })
 
   constructor() {
     this.activeDrivers$.pipe(
@@ -90,6 +80,17 @@ export class AdminLive {
           }
         }
       );
+    });
+
+    effect(() => {
+      const panic = this.panic();
+      if (!panic) return;
+
+      const ref = this.dialog.open(PanicDialog, { data: panic });
+
+      ref.afterClosed().subscribe(() => {
+        this.panic.set(null);
+      });
     });
   }
 

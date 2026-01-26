@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminPanic } from './admin-panic';
+import { PanicDialog } from './panic-dialog';
 
-describe('AdminPanic', () => {
-  let component: AdminPanic;
-  let fixture: ComponentFixture<AdminPanic>;
+describe('PanicDialog', () => {
+  let component: PanicDialog;
+  let fixture: ComponentFixture<PanicDialog>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminPanic]
+      imports: [PanicDialog]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminPanic);
+    fixture = TestBed.createComponent(PanicDialog);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
