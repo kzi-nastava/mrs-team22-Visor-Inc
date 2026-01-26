@@ -1,5 +1,23 @@
 package inc.visor.voom_service.ride.controller;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
@@ -31,6 +49,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.getRideHistoryDto;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -179,6 +199,7 @@ public class RideController {
 
         rideService.startRide(id, user.getId(), request.getRoutePoints());
 
+
         List<LatLng> latLngPoints = request.getRoutePoints().stream()
                 .map(point -> new LatLng(point.getLat(), point.getLng()))
                 .toList();
@@ -245,7 +266,7 @@ public class RideController {
         driver.setStatus(DriverStatus.AVAILABLE);
         this.driverService.updateDriver(driver);
 
-        simulator.setFinishedRide(dto.getUserId());
+        simulator.setFinishedRide(ride.getDriver().getId());
 
         RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
         this.rideWsService.sendRidePanic(rideResponse);
@@ -290,9 +311,8 @@ public class RideController {
 
         ActiveRideDto activeRideDto = driverService.getActiveRide(userId);
         Ride ride = rideService.findById(activeRideDto.getRideId());
-        ride.setFinishedAt(LocalDateTime.now());
-        ride.setStatus(RideStatus.FINISHED);
-        rideService.save(ride);
+
+        rideService.finishRide(ride.getId());
 
         rideWsService.sendRideChanges(new RideResponseDto(ride));
         simulator.setFinishedRide(userId);
@@ -329,7 +349,7 @@ public class RideController {
         List<Ride> ridesList = rideService.getDriverRides(driver.getId(), dateFrom, dateTo, sort);
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
+            RideHistoryDto rideHistoryDto = RideHistoryFormatter.getRideHistoryDto(ride);
             rides.add(rideHistoryDto);
         }
 
@@ -341,6 +361,7 @@ public class RideController {
         return new RideHistoryDto(ride);
     }
 
+    // for some reason doesnt work if isnt in this class, cant find solution rn
     private Driver extractDriver(VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userProfileService.getUserByEmail(username);

@@ -61,7 +61,7 @@ public class Simulator implements ApplicationRunner {
             return;
         }
 
-        List<DriverSummaryDto> driversFromDb = driverService.getActiveDrivers();
+//        List<DriverSummaryDto> driversFromDb = driverService.getActiveDrivers();
 
         // state.syncDriversWithDatabase(driversFromDb, osrmService, predefinedRoutes);
 

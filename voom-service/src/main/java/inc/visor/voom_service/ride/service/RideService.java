@@ -1,10 +1,12 @@
 package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import inc.visor.voom_service.mail.EmailService;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
@@ -22,15 +24,19 @@ import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
 
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
+
 @Service
 public class RideService {
 
     private final RideRepository rideRepository;
     private final RideRouteService routeService;
+    private final EmailService emailService;
 
-    public RideService(RideRepository rideRepository, RideRouteService routeService) {
+    public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService) {
         this.rideRepository = rideRepository;
         this.routeService = routeService;
+        this.emailService = emailService;
     }
 
     public void updateRidePosition(RideLocationDto dto) {
@@ -44,7 +50,7 @@ public class RideService {
     }
 
     public Optional<Ride> getRide(long rideId) {
-        return this.rideRepository.getRideById(rideId);
+        return this.rideRepository.findById(rideId);
     }
 
     public List<Ride> getRides() {
@@ -193,19 +199,69 @@ public class RideService {
 
     public Ride getOngoingRide(Long userId) {
 
-        List<Ride> ongoingRides = rideRepository.findByRideRequest_Creator_Id(userId);
+        List<Ride> ongoingRides = rideRepository.findByStatusIn(List.of(RideStatus.ONGOING, RideStatus.STARTED));
 
+        // this should load from db by status and then filter by user id
         return ongoingRides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
+                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId || ride.getPassengers().stream().anyMatch(user -> user.getId() == userId))
                 .findFirst()
                 .orElse(null);
     }
 
     public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
+
         ride.setStartedAt(LocalDateTime.now());
         ride.setStatus(RideStatus.STARTED);
         rideRepository.save(ride);
+
+        String pickupAddress = formatAddress(ride.getPickupAddress());
+        String dropoffAddress = formatAddress(ride.getDropoffAddress());
+        String address = pickupAddress + " - " + dropoffAddress;
+
+        String trackingUrl = "http://localhost:4200/user/ride/tracking";
+
+        String creatorEmail = ride.getRideRequest().getCreator().getEmail();
+        emailService.sendRideTrackingLink(
+                creatorEmail,
+                address,
+                trackingUrl
+        );
+
+        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+            emailService.sendRideTrackingLink(
+                    email,
+                    address,
+                    trackingUrl
+            );
+        }
+
+
+    }
+
+    public void finishRide(long rideId) {
+        Ride ride = findById(rideId);
+        ride.setFinishedAt(LocalDateTime.now());
+        ride.setStatus(RideStatus.FINISHED);
+
+        String pickupAddress = formatAddress(ride.getPickupAddress());
+        String dropoffAddress = formatAddress(ride.getDropoffAddress());
+        String address = pickupAddress + " - " + dropoffAddress;
+
+        rideRepository.save(ride);
+
+        String creatorEmail = ride.getRideRequest().getCreator().getEmail();
+        emailService.sendRideCompletionEmail(
+                creatorEmail,
+                address
+        );
+
+        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+            emailService.sendRideCompletionEmail(
+                    email,
+                    address
+            );
+        }
     }
 
     public void startScheduleRide(long rideId) {
@@ -236,6 +292,8 @@ public class RideService {
         dto.setRoutePoints(
                 activeRide.getRideRequest().getRideRoute().getRoutePoints().stream().map(RoutePoint::toDto).toList()
         );
+        dto.setDriverId(activeRide.getDriver().getId());
+        dto.setDriverName(activeRide.getDriver().getUser().getPerson().getFirstName() + " " + activeRide.getDriver().getUser().getPerson().getLastName());
 
         return dto;
     }

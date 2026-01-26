@@ -57,6 +57,14 @@ public class Ride {
     )
     private List<User> passengers;
 
+    public String getPickupAddress() {
+        return rideRequest.getRideRoute().getPickupPoint().getAddress();
+    }
+
+    public String getDropoffAddress() {
+        return rideRequest.getRideRoute().getDropoffPoint().getAddress();
+    }
+
     public Ride() {
     }
 }

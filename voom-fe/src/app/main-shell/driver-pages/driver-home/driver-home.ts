@@ -506,13 +506,19 @@ export class DriverHome implements AfterViewInit {
 
     if (!user) return;
 
+    const rideId = this.activeRideId();
+
+    if (!rideId) {
+      return;
+    }
+
     const dto: RideStopDto = {
       userId: user.id,
       route: [],
       timestamp: new Date().toISOString(),
     }
 
-    this.apiService.rideApi.stopRide(user.id, dto).pipe(
+    this.apiService.rideApi.stopRide(rideId, dto).pipe(
       map(response => response.data),
     ).subscribe(rideResponse => {
       this.activeRideId.set(null);
