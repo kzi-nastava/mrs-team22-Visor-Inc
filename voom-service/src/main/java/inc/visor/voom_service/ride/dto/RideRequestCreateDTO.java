@@ -59,7 +59,6 @@ public class RideRequestCreateDTO {
         public Long driverId;
         public double lat;
         public double lng;
-        
     }
 
     public RouteDTO getRoute() {

@@ -1,18 +1,17 @@
 package inc.visor.voom.app.shared.simulation;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
-import inc.visor.voom.app.shared.dto.DriverState;
-import inc.visor.voom.app.shared.model.FreeDriverSnapshot;
+import inc.visor.voom.app.shared.model.DriverLocationDto;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 
 public class DriverSimulationManager {
@@ -67,19 +66,20 @@ public class DriverSimulationManager {
         return null;
     }
 
-    public List<FreeDriverSnapshot> getFreeDriversSnapshot() {
+    public List<DriverLocationDto> getFreeDriversSnapshot() {
 
-        List<FreeDriverSnapshot> snapshot = new ArrayList<>();
+        List<DriverLocationDto> snapshot = new ArrayList<>();
 
         for (SimulatedDriver d : drivers) {
-            if ("FREE".equals(d.status)) {
 
-                snapshot.add(new FreeDriverSnapshot(
+                DriverLocationDto location = new DriverLocationDto(
                         d.id,
                         d.currentPosition.getLatitude(),
                         d.currentPosition.getLongitude()
-                ));
-            }
+                );
+                Log.d("LOCATION ", location.toString());
+                snapshot.add(location);
+            
         }
 
         return snapshot;

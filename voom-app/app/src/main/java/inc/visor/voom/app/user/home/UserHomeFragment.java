@@ -27,6 +27,7 @@ import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
@@ -34,6 +35,7 @@ import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
+import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -382,13 +384,65 @@ public class UserHomeFragment extends Fragment {
             return;
         }
 
-        String json = new GsonBuilder()
-                .setPrettyPrinting()
-                .create()
-                .toJson(payload);
+        payload.freeDriversSnapshot =
+                simulationManager.getFreeDriversSnapshot();
 
-        Log.d("RIDE_PAYLOAD", json);
+        RideApi rideApi = RetrofitClient
+                .getInstance()
+                .create(RideApi.class);
+
+        rideApi.createRideRequest(payload)
+                .enqueue(new Callback<RideRequestResponseDto>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<RideRequestResponseDto> call,
+                            Response<RideRequestResponseDto> response
+                    ) {
+
+                        if (!response.isSuccessful()
+                                || response.body() == null) {
+
+                            Log.e("RIDE", "Request failed");
+                            return;
+                        }
+
+                        RideRequestResponseDto res = response.body();
+
+                        if ("ACCEPTED".equals(res.status)
+                                && res.driver != null) {
+
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Ride accepted. Driver: "
+                                            + res.driver.firstName
+                                            + " "
+                                            + res.driver.lastName,
+                                    android.widget.Toast.LENGTH_LONG
+                            ).show();
+
+                            viewModel.lockRide();
+
+                        } else {
+
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "No drivers available",
+                                    android.widget.Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<RideRequestResponseDto> call,
+                            Throwable t
+                    ) {
+                        Log.e("RIDE", "Network error", t);
+                    }
+                });
     }
+
 
     @Override
     public void onResume() {
