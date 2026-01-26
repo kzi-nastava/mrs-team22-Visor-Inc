@@ -5,7 +5,7 @@ import {ActivatedRoute} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
 import {FormsModule} from '@angular/forms';
 import {ActiveRideDto} from '../home/home.api';
-import {RoutePoint} from '../home/home';
+import {RoutePoint} from '../home/user-home';
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {toSignal} from '@angular/core/rxjs-interop';

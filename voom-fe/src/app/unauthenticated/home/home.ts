@@ -8,7 +8,7 @@ import ApiService from '../../shared/rest/api-service';
 import {DriverSummaryDto} from '../../shared/rest/ride/ride.model';
 import {RouteEstimateRequestDto, RouteEstimateResponseDto} from '../../shared/rest/route/route.model';
 import {map} from 'rxjs';
-import {RoutePoint} from '../../main-shell/user-pages/home/home';
+import {RoutePoint} from '../../main-shell/user-pages/home/user-home';
 import {RoutePointType} from './home.api';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatButton} from '@angular/material/button';

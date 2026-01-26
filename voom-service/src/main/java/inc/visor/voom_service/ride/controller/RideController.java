@@ -8,6 +8,7 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.model.Ride;
@@ -41,26 +42,26 @@ public class RideController {
     private final Simulator simulatorService;
     private final RideReportService rideReportService;
     private final RideService rideService;
-    private final RideRepository rideRepository;
     private final Simulator simulator;
     private final DriverService driverService;
     private final UserService userService;
     private final RideRouteService rideRouteService;
     private final RideEstimateService rideEstimateService;
+    private final RideWsService rideWsService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, RideRepository rideRepository, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
         this.rideService = rideService;
         this.userProfileService = userProfileService;
         this.simulatorService = simulatorService;
-        this.rideRepository = rideRepository;
         this.simulator = simulator;
         this.driverService = driverService;
         this.userService = userService;
         this.rideRouteService = rideRouteService;
         this.rideEstimateService = rideEstimateService;
+        this.rideWsService = rideWsService;
     }
 
     @PostMapping("/requests")
@@ -75,8 +76,7 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        RideRequestResponseDto response
-                = rideRequestService.createRideRequest(request, user.getId());
+        RideRequestResponseDto response = rideRequestService.createRideRequest(request, user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -85,75 +85,35 @@ public class RideController {
 
     @GetMapping
     public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing) {
-
-        RideResponseDto ride = new RideResponseDto(
-                1L,
-                ongoing ? RideStatus.ONGOING : RideStatus.FINISHED,
-                LocalDateTime.now().minusMinutes(10),
-                ongoing ? null : LocalDateTime.now(),
-                "John Doe",
-                "Mark Smith"
-        );
-
-        return ResponseEntity.ok(List.of(ride));
+        List<Ride> rides = this.rideService.getRides();
+        List<RideResponseDto> rideResponseDtos = rides.stream().map(RideResponseDto::new).toList();
+        return ResponseEntity.ok(rideResponseDtos);
     }
 
     @GetMapping("/user/{userId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForUser(@PathVariable long userId, @RequestParam(required = false) LocalDateTime date) {
-
-        RideHistoryDto ride = new RideHistoryDto();
-
-        return ResponseEntity.ok(List.of(ride));
+        List<Ride> ridesList = rideService.getUserRides(userId, null, null, Sorting.ASC);
+        List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
+        return ResponseEntity.ok(rideHistoryDtoList);
     }
 
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
-
-        List<RideHistoryDto> rides = new ArrayList<>();
-
         List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
-
-
-        for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = getRideHistoryDto(ride);
-            rides.add(rideHistoryDto);
-        }
-
-
-        return ResponseEntity.ok(rides);
+        List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
+        return ResponseEntity.ok(rideHistoryDtoList);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RideResponseDto> getRide(@PathVariable Long id) {
-
-//        RideResponseDto ride = new RideResponseDto(
-//                1L,
-//                RideStatus.ONGOING,
-//                LocalDateTime.of(2026, 1, 15, 14, 30),
-//                null,
-//                "Marko Marković",
-//                "Petar Petrović",
-//                1L,
-//                "Bulevar Oslobođenja 45, Novi Sad",
-//                "Zmaj Jovina 12, Novi Sad"
-//        );
-
-        RideResponseDto rideDto = new RideResponseDto();
-
-        rideRepository.findById(id).ifPresent(ride -> rideDto.setId(ride.getId()));
-
-
-
-        return ResponseEntity.ok(rideDto);
+        Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
+        return ResponseEntity.ok(new RideResponseDto(ride));
     }
 
     @PostMapping("/scheduled/{id}")
     public ResponseEntity<Void> scheduleRide(@PathVariable Long id, @Valid @RequestBody StartScheduleRideDto request) {
-
         rideService.startScheduleRide(id);
-
         simulatorService.changeDriverRoute(request.getDriverId(), request.getLat(), request.getLng());
-
         return ResponseEntity.ok().build();
     }
 
@@ -231,14 +191,19 @@ public class RideController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
         final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
+        driver.setStatus(DriverStatus.AVAILABLE);
+        this.driverService.updateDriver(driver);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         rideRequest.setCancelledBy(user);
         rideRequest.setReason(dto.getMessage());
         this.rideRequestService.update(rideRequest);
         ride.setStatus(RideStatus.CANCELLED);
-        simulator.setFinishedRide(dto.getUserId());
-        return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
+
+        RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
+        this.rideWsService.sendRideChanges(rideResponse);
+        return ResponseEntity.ok(rideResponse);
     }
 
     @PostMapping("/{id}/stop")
@@ -262,9 +227,9 @@ public class RideController {
         ride.setStatus(RideStatus.STOPPED);
         ride.setRideRequest(this.rideRequestService.update(rideRequest));
 
-        simulator.setFinishedRide(dto.getUserId());
-
-        return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
+        RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
+        this.rideWsService.sendRideChanges(rideResponse);
+        return ResponseEntity.ok(rideResponse);
     }
 
     @PostMapping("/{id}/panic")
@@ -272,14 +237,19 @@ public class RideController {
         User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
-        //TODO publish change to websockets
         ride.setStatus(RideStatus.PANIC);
         final RideRequest updatedRideRequest = this.rideRequestService.update(rideRequest);
         ride.setRideRequest(updatedRideRequest);
 
+        final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
+        driver.setStatus(DriverStatus.AVAILABLE);
+        this.driverService.updateDriver(driver);
+
         simulator.setFinishedRide(dto.getUserId());
 
-        return ResponseEntity.ok(new RideResponseDto(this.rideService.update(ride)));
+        RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
+        this.rideWsService.sendRidePanic(rideResponse);
+        return ResponseEntity.ok(rideResponse);
     }
 
     @PostMapping("/{id}/report")
@@ -311,9 +281,9 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Long userId = user.getId();
+        long userId = user.getId();
 
-        Driver driver = driverService.getDriver(userId).get();
+        Driver driver = driverService.getDriver(userId).orElseThrow(NotFoundException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
 
         driverService.save(driver);
@@ -324,6 +294,7 @@ public class RideController {
         ride.setStatus(RideStatus.FINISHED);
         rideService.save(ride);
 
+        rideWsService.sendRideChanges(new RideResponseDto(ride));
         simulator.setFinishedRide(userId);
 
         return ResponseEntity.ok(activeRideDto);
@@ -367,16 +338,7 @@ public class RideController {
     }
 
     private static RideHistoryDto getRideHistoryDto(Ride ride) {
-        RideHistoryDto rideHistoryDto = new RideHistoryDto();
-        rideHistoryDto.setId(ride.getId());
-        rideHistoryDto.setRideRequest(ride.getRideRequest());
-        rideHistoryDto.setRideRoute(ride.getRideRequest().getRideRoute());
-        rideHistoryDto.setCancelledBy(ride.getRideRequest().getCancelledBy());
-        rideHistoryDto.setPassengers(ride.getPassengers());
-        rideHistoryDto.setStatus(ride.getStatus());
-        rideHistoryDto.setFinishedAt(ride.getFinishedAt());
-        rideHistoryDto.setStartedAt(ride.getStartedAt());
-        return rideHistoryDto;
+        return new RideHistoryDto(ride);
     }
 
     private Driver extractDriver(VoomUserDetails userDetails) {
@@ -387,9 +349,9 @@ public class RideController {
             return null;
         }
 
-        Long userId = user.getId();
+        long userId = user.getId();
 
-        return driverService.getDriver(userId).get();
+        return driverService.getDriver(userId).orElseThrow(NotFoundException::new);
     }
 
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client } from '@stomp/stompjs';
+import {RidePanicDto, RideResponseDto} from '../rest/ride/ride.model';
 
 @Injectable({ providedIn: 'root' })
 export class DriverSimulationWsService {
@@ -9,7 +10,9 @@ export class DriverSimulationWsService {
     onRoute: (msg: any) => void,
     onScheduledRide: (msg: any) => void,
     onDriverAssigned?: (msg: any) => void,
-    onDriverPosition?: (msg: any) => void
+    onDriverPosition?: (msg: any) => void,
+    onRideChange?: (msg: RideResponseDto) => void,
+    onRidePanic?: (msg: RideResponseDto) => void,
   ) {
     this.client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
@@ -38,6 +41,17 @@ export class DriverSimulationWsService {
         const payload = JSON.parse(message.body);
         onDriverPosition?.(payload);
       });
+
+      this.client.subscribe("/topic/ride-changes", (message) => {
+        const dto = JSON.parse(message.body);
+        onRideChange?.(dto);
+      });
+
+
+      this.client.subscribe("/topic/ride-panic", (message) => {
+        const dto = JSON.parse(message.body);
+        onRidePanic?.(dto);
+      })
     };
 
     this.client.onWebSocketError = (err) => {

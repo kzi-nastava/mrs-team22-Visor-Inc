@@ -47,12 +47,40 @@ public class RideService {
         return this.rideRepository.getRideById(rideId);
     }
 
+    public List<Ride> getRides() {
+        return this.rideRepository.findAll();
+    }
+
     public Ride update(Ride ride) {
         return this.rideRepository.save(ride);
     }
 
     public List<Ride> getDriverRides(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {
         List<Ride> unfiltered = rideRepository.findByDriverId(driverId);
+
+        return unfiltered.stream()
+                .filter(r -> {
+                    LocalDateTime started = r.getStartedAt();
+                    if (started == null) return false;
+
+                    boolean matchesStart = (start == null) || !started.isBefore(start);
+
+                    boolean matchesEnd = (end == null) || !started.isAfter(end);
+
+                    return matchesStart && matchesEnd;
+                })
+                .sorted((ride1, ride2) -> {
+                    if (sort == Sorting.DESC) {
+                        return ride2.getStartedAt().compareTo(ride1.getStartedAt());
+                    } else {
+                        return ride1.getStartedAt().compareTo(ride2.getStartedAt());
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<Ride> getUserRides(long userId, LocalDateTime start, LocalDateTime end, Sorting sort) {
+        List<Ride> unfiltered = rideRepository.findByRideRequest_Creator_Id(userId);
 
         return unfiltered.stream()
                 .filter(r -> {
@@ -114,7 +142,7 @@ public class RideService {
         List<Ride> rides = rideRepository.findByDriverId(driverId);
 
         return rides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .toList();
     }
 
@@ -158,16 +186,17 @@ public class RideService {
         List<Ride> rides = rideRepository.findByDriverId(userId);
 
         return rides.stream()
-                .filter(ride -> ride.getStatus() == RideStatus.ONGOING)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .findFirst()
                 .orElse(null);
     }
 
     public Ride getOngoingRide(Long userId) {
-        List<Ride> ongoingRides = rideRepository.findByStatus(RideStatus.ONGOING);
+
+        List<Ride> ongoingRides = rideRepository.findByRideRequest_Creator_Id(userId);
 
         return ongoingRides.stream()
-                .filter(ride -> ride.getRideRequest().getCreator().getId() == userId)
+                .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)
                 .findFirst()
                 .orElse(null);
     }
@@ -175,7 +204,7 @@ public class RideService {
     public void startRide(long rideId, long driverId, List<RoutePointDto> routePoints) {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStartedAt(LocalDateTime.now());
-        ride.setStatus(RideStatus.ONGOING);
+        ride.setStatus(RideStatus.STARTED);
         rideRepository.save(ride);
     }
 

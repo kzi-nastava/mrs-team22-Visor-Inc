@@ -79,6 +79,7 @@ export type RideResponseDto = {
   finishedAt: string | null;
   driverName: string;
   passengerName: string;
+  passengerNames: string[];
   driverId: number;
   startAddress: string;
   destinationAddress: string;
