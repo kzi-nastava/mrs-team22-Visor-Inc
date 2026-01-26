@@ -218,8 +218,14 @@ public class RideService {
         driver.setStatus(DriverStatus.BUSY);
     }
 
-    public ActiveRideDto getActiveRide(Long userId) {
-        Ride activeRide = this.findActiveRide(userId);
+    public ActiveRideDto getActiveRide(User user) {
+        Ride activeRide = new Ride();
+
+        if (user.getUserRole().getId() == 2) {
+            activeRide = findActiveRide(user.getId());
+        } else {
+            activeRide = getOngoingRide(user.getId());
+        }
 
         if (activeRide == null) {
             return null;

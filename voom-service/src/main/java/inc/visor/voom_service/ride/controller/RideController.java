@@ -267,7 +267,7 @@ public class RideController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ActiveRideDto activeRide = rideService.getActiveRide(user.getId());
+        ActiveRideDto activeRide = rideService.getActiveRide(user);
 
         return ResponseEntity.ok(activeRide);
     }
