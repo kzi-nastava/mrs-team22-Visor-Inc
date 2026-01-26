@@ -4,11 +4,11 @@ import {
   DriverSummaryDto, OngoingRideDto, RatingRequestDto,
   RideCancellationDto, RideHistoryDto,
   RidePanicDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto,
-  RideStopDto
+  RideStopDto, StartRideDto
 } from './ride.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
-import { ActiveRideDto } from '../../../main-shell/user-pages/home/home.api';
+import {ActiveRideDto, StartScheduledRideDto} from '../../../main-shell/user-pages/home/home.api';
 import { Observable } from 'rxjs/internal/Observable';
 
 export class RideApi extends Api {
@@ -105,6 +105,17 @@ export class RideApi extends Api {
       body,
       config
     );
+  }
+
+  startRide(rideId: number, payload: StartRideDto): Observable<ApiResponse<void>> {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      authenticated: true,
+    }
+    return this.apiClient.post<StartRideDto, void>(`/api/rides/${rideId}/start`, payload, config);
   }
 
   reportRide(rideId: number, body: RideReportRequestDto) {

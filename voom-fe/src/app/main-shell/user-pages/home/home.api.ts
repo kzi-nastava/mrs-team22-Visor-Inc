@@ -255,10 +255,6 @@ export type ActiveRideDto = {
   driverId: number;
 }
 
-export type StartRideDto = {
-  routePoints: RideRoutePointDto[];
-}
-
 export type StartScheduledRideDto = {
   driverId: number;
   lat: number;
@@ -294,17 +290,6 @@ export class RideApi {
     };
 
     return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
-  }
-
-  startRide(rideId: number, payload: StartRideDto): Observable<ApiResponse<void>> {
-    const config: RequestConfig = {
-      headers: {
-        accept: 'application/json',
-        contentType: 'application/json'
-      },
-      authenticated: true,
-    }
-    return this.apiClient.post<StartRideDto, void>(`${this.baseUrl}/${rideId}/start`, payload, config);
   }
 
   startScheduleRide(rideId: number, payload: StartScheduledRideDto): Observable<ApiResponse<void>> {

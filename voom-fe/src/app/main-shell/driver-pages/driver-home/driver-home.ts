@@ -16,18 +16,18 @@ import {DriverAssignedDto, RideApi,} from '../../user-pages/home/home.api';
 import {RoutePoint} from '../../user-pages/home/home';
 import {UserProfileApi} from '../../user-pages/user-profile/user-profile.api';
 import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {BehaviorSubject, catchError, filter, map, merge, of, switchMap, take} from 'rxjs';
+import {BehaviorSubject, catchError, filter, map, merge, of, switchMap} from 'rxjs';
 import {Map} from '../../../shared/map/map';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ArrivalDialog} from '../arrival-dialog/arrival-dialog';
-import {DriverState, DriverStateChangeDto} from '../../../shared/rest/driver/driver-activity.model';
+import {DriverStateChangeDto} from '../../../shared/rest/driver/driver-activity.model';
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FinishRideDialog} from '../finish-ride-dialog/finish-ride-dialog';
 import {MatDivider} from '@angular/material/list';
 import {MatButton} from '@angular/material/button';
-import {RideStopDto, RoutePointDto} from '../../../shared/rest/ride/ride.model';
+import {RideStopDto} from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_DRIVER_HOME = 'ride';
 
@@ -293,87 +293,57 @@ export class DriverHome implements AfterViewInit {
   }
 
   private openArrivalDialog() {
-    this.rideApi.getActiveRide().subscribe({
-      next: (res) => {
-        if (!res.data) {
-          console.error('No active ride on arrival');
-          return;
+    this.rideApi.getActiveRide().pipe(
+      map(result => result.data),
+      catchError(error => {
+        this.snackBar.open(error, '', { duration: 3000, horizontalPosition: 'right'});
+        return of(null);
+      }),
+    ).subscribe((activeRide) => {
+      if (!activeRide) {
+        return;
+      }
+
+      this.activeRideId.set(activeRide.rideId);
+
+      this.dialog.open(ArrivalDialog, {
+        width: '380px',
+        disableClose: true,
+        data: {
+          pickupAddress: activeRide.routePoints.find((p) => p.type === 'PICKUP')?.address ?? '',
+          activeRide: activeRide,
+        },
+      }).afterClosed().subscribe((res) => {
+        if (res === 'START') {
+          this.hasArrived.set(true);
+          this.pickupPoint.set(null);
+          this.ridePhase.set('RIDE_STARTED');
+        } else {
+          this.activeRideId.set(null);
+          this.routePoints.set([]);
+          this.ridePhase.set('IDLE');
         }
-
-        this.activeRideId.set(res.data.rideId);
-
-        const ref = this.dialog.open(ArrivalDialog, {
-          width: '380px',
-          disableClose: true,
-          data: {
-            pickupAddress: res.data.routePoints.find((p) => p.type === 'PICKUP')?.address ?? '',
-          },
-        });
-
-        ref.afterClosed().subscribe((res) => {
-          if (res === 'START') {
-            this.startRide();
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Failed to refresh active ride', err);
-      },
+      });
     });
   }
 
   private openFinishRideDialog() {
-  if (this.finishDialogOpen) return;
-  this.finishDialogOpen = true;
+    if (this.finishDialogOpen) return;
+    this.finishDialogOpen = true;
 
-  const ref = this.dialog.open(FinishRideDialog, {
-    width: '380px',
-    disableClose: true,
-    data: {
-      dropoffAddress: this.routePoints().find(p => p.type === 'DROPOFF')?.address ?? ''
-    },
-  });
-
-  ref.afterClosed().subscribe((res) => {
-    if (res === 'FINISH') {
-      this.finishRide();
-    }
-
-  });
-}
-
-  private startRide() {
-    const rideId = this.activeRideId();
-    console.log('Active ride id:', rideId);
-    if (!rideId) {
-      console.error('No active ride id');
-      return;
-    }
-
-    console.log('Starting ride...');
-
-    const payload = {
-      routePoints: this.routePoints().map((p) => ({
-        lat: p.lat,
-        lng: p.lng,
-        orderIndex: p.orderIndex,
-        type: p.type,
-        address: p.address,
-      })),
-    };
-
-    this.rideApi.startRide(rideId, payload).subscribe({
-      next: () => {
-        this.snackBar.open('Ride started', 'OK', { duration: 3000 });
-        this.hasArrived.set(true);
-        this.pickupPoint.set(null);
-
-        this.ridePhase.set('RIDE_STARTED');
+    const ref = this.dialog.open(FinishRideDialog, {
+      width: '380px',
+      disableClose: true,
+      data: {
+        dropoffAddress: this.routePoints().find(p => p.type === 'DROPOFF')?.address ?? ''
       },
-      error: (err) => {
-        console.error('Failed to start ride', err);
-        this.snackBar.open('Failed to start ride', 'OK', { duration: 3000 });
-      },
+    });
+
+    ref.afterClosed().subscribe((res) => {
+      if (res === 'FINISH') {
+        this.finishRide();
+      }
+
     });
   }
 
@@ -538,7 +508,9 @@ export class DriverHome implements AfterViewInit {
     this.apiService.rideApi.stopRide(user.id, dto).pipe(
       map(response => response.data),
     ).subscribe(rideResponse => {
-
+      this.activeRideId.set(null);
+      this.routePoints.set([]);
+      this.ridePhase.set('IDLE');
     });
   }
 
@@ -553,7 +525,9 @@ export class DriverHome implements AfterViewInit {
     this.apiService.rideApi.ridePanic(rideId, { userId: user.id }).pipe(
       map(response => response.data),
     ).subscribe(rideResponse => {
-
+      this.activeRideId.set(null);
+      this.routePoints.set([]);
+      this.ridePhase.set('IDLE');
     });
   }
 }
