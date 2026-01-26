@@ -19,16 +19,27 @@ public class DriverInfoWindow extends InfoWindow {
     public void onOpen(Object item) {
 
         Marker marker = (Marker) item;
-        SimulatedDriver driver = (SimulatedDriver) marker.getRelatedObject();
+        SimulatedDriver driver =
+                (SimulatedDriver) marker.getRelatedObject();
 
-        TextView name = mView.findViewById(R.id.tv_driver_name);
-        TextView status = mView.findViewById(R.id.tv_driver_status);
+        TextView tvName = mView.findViewById(R.id.tv_driver_name);
+        TextView tvStatus = mView.findViewById(R.id.tv_driver_status);
 
-        name.setText(driver.firstName + " " + driver.lastName);
-        status.setText(driver.status);
+        if (driver != null) {
+
+            String fullName = driver.firstName + " " + driver.lastName;
+            tvName.setText(fullName.trim().isEmpty() ? "Driver #" + driver.id : fullName);
+
+            tvStatus.setText(driver.status != null
+                    ? driver.status
+                    : "UNKNOWN");
+        }
     }
 
     @Override
-    public void onClose() {}
+    public void onClose() {
+        // ništa posebno
+    }
 }
+
 

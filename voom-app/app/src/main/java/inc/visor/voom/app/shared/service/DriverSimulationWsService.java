@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.home.UserHomeViewModel;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
 
@@ -14,15 +16,20 @@ public class DriverSimulationWsService {
     private final DriverSimulationManager simulationManager;
     private StompClient stompClient;
 
-    public DriverSimulationWsService(DriverSimulationManager simulationManager) {
+    private final UserHomeViewModel viewModel;
+
+    public DriverSimulationWsService(DriverSimulationManager simulationManager,
+                                     UserHomeViewModel viewModel) {
         this.simulationManager = simulationManager;
+        this.viewModel = viewModel;
     }
+
 
     public void connect() {
 
         stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
-                "ws://192.168.1.6:8080/ws"
+                "ws://192.168.1.11:8080/ws"
         );
 
         stompClient.lifecycle().subscribe(lifecycleEvent -> {
@@ -62,11 +69,15 @@ public class DriverSimulationWsService {
                                     DriverPositionDto.class
                             );
 
+                    DriverSummaryDto meta = viewModel.findActiveDriver((int) dto.driverId);
+
                     simulationManager.updateDriverPosition(
                             dto.driverId,
                             dto.lat,
-                            dto.lng
+                            dto.lng,
+                            meta
                     );
+
                 });
     }
 

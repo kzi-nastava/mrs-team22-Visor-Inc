@@ -24,6 +24,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.driver.api.DriverApi;
+import inc.visor.voom.app.driver.dto.DriverSummaryDto;
+import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
@@ -71,9 +74,37 @@ public class UserHomeFragment extends Fragment {
 
         simulationManager.startInterpolationLoop();
 
-        wsService = new DriverSimulationWsService(simulationManager);
-        wsService.connect();
+        DriverApi driverApi = RetrofitClient
+                .getInstance()
+                .create(DriverApi.class);
 
+        driverApi.getActiveDrivers().enqueue(new Callback<List<DriverSummaryDto>>() {
+
+            @Override
+            public void onResponse(Call<List<DriverSummaryDto>> call,
+                                   Response<List<DriverSummaryDto>> response) {
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    Log.e("API", "Failed to load drivers");
+                    return;
+                }
+
+                List<DriverSummaryDto> drivers = response.body();
+
+                viewModel.setActiveDrivers(drivers);
+
+                wsService = new DriverSimulationWsService(
+                        simulationManager,
+                        viewModel
+                );
+                wsService.connect();
+            }
+
+            @Override
+            public void onFailure(Call<List<DriverSummaryDto>> call, Throwable t) {
+                Log.e("API", "Error fetching drivers", t);
+            }
+        });
 
         setupMapClickListener();
         setupClearButton();
@@ -81,7 +112,6 @@ public class UserHomeFragment extends Fragment {
 
         requireView().findViewById(R.id.btn_confirm)
                 .setOnClickListener(v -> onConfirmClicked());
-
 
         AutoCompleteTextView ddVehicle = requireView().findViewById(R.id.dd_vehicle);
 

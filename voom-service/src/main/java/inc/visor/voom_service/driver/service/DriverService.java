@@ -254,7 +254,6 @@ public class DriverService {
 
         Driver driver = new Driver();
         driver.setUser(user);
-        driver.setPerson(person);
         driver.setStatus(DriverStatus.AVAILABLE);
 
         driver = driverRepository.save(driver);
