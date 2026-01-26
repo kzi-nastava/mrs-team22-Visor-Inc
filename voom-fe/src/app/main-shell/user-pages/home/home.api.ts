@@ -338,7 +338,7 @@ export class RideApi {
       },
       authenticated: true,
     };
-    return this.apiClient.get<void, ActiveRideDto>(`${this.driversBaseUrl}/active-ride`, config);
+    return this.apiClient.get<void, ActiveRideDto>(`${this.baseUrl}/ongoing`, config);
   }
 
   getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {

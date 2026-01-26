@@ -1,8 +1,6 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -65,7 +63,7 @@ public class Simulator implements ApplicationRunner {
 
         List<DriverSummaryDto> driversFromDb = driverService.getActiveDrivers();
 
-        state.syncDriversWithDatabase(driversFromDb, osrmService, predefinedRoutes);
+        // state.syncDriversWithDatabase(driversFromDb, osrmService, predefinedRoutes);
 
         List<SimulatedDriver> activeDrivers = state.getAll();
         System.out.println("tick - active drivers: " + activeDrivers.size());

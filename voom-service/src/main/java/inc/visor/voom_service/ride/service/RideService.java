@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import inc.visor.voom_service.ride.model.enums.Sorting;
 import org.springframework.stereotype.Service;
 
+import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
@@ -16,6 +16,7 @@ import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
@@ -179,11 +180,17 @@ public class RideService {
         driver.setStatus(DriverStatus.BUSY);
     }
 
-    public ActiveRideDto getActiveRide(Long userId) {
-        Ride ride = getOngoingRide(userId);
-        if (ride == null) {
-            return null;
+    public ActiveRideDto getActiveRide(User user) {
+
+        Ride ride = new Ride();
+
+        if (user.getUserRole().getId() == 2L) {
+            ride = this.findActiveRide(user.getId());
+        } else if (user.getUserRole().getId() == 3L) {
+            ride = this.getOngoingRide(user.getId());
         }
+
+     
         ActiveRideDto dto = new ActiveRideDto();
         dto.setRideId(ride.getId());
         dto.setStatus(ride.getStatus());
