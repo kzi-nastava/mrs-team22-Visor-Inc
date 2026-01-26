@@ -93,7 +93,7 @@ export class RideTracking implements OnInit {
       lng: p.lng,
       address: p.address,
       type: p.type,
-      order: p.orderIndex ?? index
+      orderIndex: p.orderIndex ?? index
     }));
 
     this.points.set(mappedPoints);

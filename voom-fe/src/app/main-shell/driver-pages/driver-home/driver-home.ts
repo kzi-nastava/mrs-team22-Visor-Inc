@@ -356,7 +356,7 @@ export class DriverHome implements AfterViewInit {
       routePoints: this.routePoints().map((p) => ({
         lat: p.lat,
         lng: p.lng,
-        orderIndex: p.order,
+        orderIndex: p.orderIndex,
         type: p.type,
         address: p.address,
       })),
@@ -444,7 +444,7 @@ export class DriverHome implements AfterViewInit {
           lng: p.lng,
           address: '',
           type: p.type,
-          order: p.order,
+          orderIndex: p.order,
         })),
     );
   }
@@ -490,7 +490,7 @@ export class DriverHome implements AfterViewInit {
             lng: p.lng,
             address: p.address,
             type: p.type,
-            order: p.orderIndex,
+            orderIndex: p.orderIndex,
           }));
 
         this.routePoints.set(points);

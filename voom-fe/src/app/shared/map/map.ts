@@ -62,7 +62,7 @@ export class Map implements AfterViewInit, OnChanges {
     lat: number;
     lng: number;
     type: 'PICKUP' | 'STOP' | 'DROPOFF';
-    order: number;
+    orderIndex: number;
   }[] = [];
 
   @Input() locked = false;
@@ -291,7 +291,7 @@ export class Map implements AfterViewInit, OnChanges {
       return;
     }
 
-    const sorted = [...this.points].sort((a, b) => a.order - b.order);
+    const sorted = [...this.points].sort((a, b) => a.orderIndex - b.orderIndex);
 
     this.waypoints = sorted.map((p) => {
       const ll = L.latLng(p.lat, p.lng);
@@ -431,8 +431,8 @@ drawRouteFromAddresses(startAddress: string, endAddress: string) {
     end: this.searchAddress(endAddress),
   }).subscribe(({ start, end }) => {
     this.points = [
-      { lat: start.lat, lng: start.lng, type: 'PICKUP', order: 0 },
-      { lat: end.lat, lng: end.lng, type: 'DROPOFF', order: 1 },
+      { lat: start.lat, lng: start.lng, type: 'PICKUP', orderIndex: 0 },
+      { lat: end.lat, lng: end.lng, type: 'DROPOFF', orderIndex: 1 },
     ];
 
     this.syncFromPoints(); // reuse existing logic
