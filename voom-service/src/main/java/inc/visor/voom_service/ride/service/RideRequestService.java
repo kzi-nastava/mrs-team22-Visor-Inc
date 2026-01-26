@@ -84,7 +84,7 @@ public class RideRequestService {
 
         if (driverFound) {
             driver.setStatus(DriverStatus.BUSY);
-            driverService.updateDriver(driver);
+            driver = driverService.updateDriver(driver);
             rideRequest.setStatus(RideRequestStatus.ACCEPTED);
         } else {
             rideRequest.setStatus(RideRequestStatus.REJECTED);

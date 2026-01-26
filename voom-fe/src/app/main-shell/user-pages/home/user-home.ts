@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, inject, signal, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Map} from '../../../shared/map/map';
 import {Dropdown} from '../../../shared/dropdown/dropdown';
@@ -16,6 +16,8 @@ import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-di
 import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
 import {map} from 'rxjs';
 import ApiService from '../../../shared/rest/api-service';
+import {AuthenticationService} from '../../../shared/service/authentication-service';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 export const ROUTE_USER_HOME = 'ride';
 
@@ -45,11 +47,10 @@ export interface RoutePoint {
     MatCheckboxModule,
     MatSnackBarModule,
   ],
-  templateUrl: './home.html',
-  styleUrl: './home.css',
+  templateUrl: './user-home.html',
+  styleUrl: './user-home.css',
 })
 export class UserHome implements AfterViewInit {
-
 
   @ViewChild(Map) map!: Map;
 
@@ -62,6 +63,9 @@ export class UserHome implements AfterViewInit {
     private apiService: ApiService,
   ) {}
 
+  private authenticationService = inject(AuthenticationService);
+
+  user = toSignal(this.authenticationService.activeUser$);
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
 
@@ -459,12 +463,11 @@ export class UserHome implements AfterViewInit {
       this.isRideLocked.set(true);
       this.rideForm.disable({ emitEvent: false });
     },
-    error: () => {
-      console.error('Failed to restore active ride');
-    },
-  });
-}
-
+      error: () => {
+        console.error('Failed to restore active ride');
+      },
+    });
+  }
 
   addRouteToFavorites() {
     const points = this.routePoints();
@@ -541,6 +544,21 @@ export class UserHome implements AfterViewInit {
             this.map.updateDriverPosition(pos.driverId, pos.lat, pos.lng);
           }
         },
+        (ride) => {
+          const user = this.user();
+          console.log(ride);
+          if (!user) return;
+          if (ride.passengerName === user.firstName || ride.passengerNames.includes(user.firstName)) {
+            this.onMapCleared();
+            this.rideForm.enable({ emitEvent: false });
+            this.scheduledRide.set(null);
+            this.isRideLocked.set(false);
+            this.snackBar.open("Ride status " + ride.status, '', { duration: 3000, horizontalPosition: "right" } );
+          }
+        },
+        (panic) => {
+
+        }
       );
     });
   }
