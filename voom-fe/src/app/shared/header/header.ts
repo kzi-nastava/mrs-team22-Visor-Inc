@@ -13,7 +13,6 @@ import { ROUTE_FAVORITE_ROUTES } from '../../main-shell/user-pages/favorite-rout
 import { ROUTE_UNAUTHENTICATED_MAIN } from '../../unauthenticated/unauthenticated-main';
 import { ROUTE_USER_PAGES } from '../../main-shell/user-pages/user-pages';
 import { ROUTE_DRIVER_PAGES } from '../../main-shell/driver-pages/driver-pages';
-import { RideApi } from '../../main-shell/user-pages/home/home.api';
 import { ROUTE_SCHEDULED_RIDES } from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
 
 @Component({
@@ -24,7 +23,6 @@ import { ROUTE_SCHEDULED_RIDES } from '../../main-shell/user-pages/scheduled-rid
 })
 export class Header {
   private authenticationService = inject(AuthenticationService);
-  private rideApi = inject(RideApi);
 
   isAuthenticated = toSignal(this.authenticationService.isAuthenticated());
   user = toSignal(this.authenticationService.activeUser$);
@@ -40,20 +38,6 @@ export class Header {
   }
 
   protected signOut() {
-    const user = this.authenticationService.activeUser$.value;
-
-    if (user?.role === 'DRIVER') {
-      this.rideApi.removeDriverFromSimulation().subscribe({
-        next: () => console.log('Removed from simulation'),
-        error: (err) => console.error('Remove from simulation failed', err),
-        complete: () => {
-          this.authenticationService.logout();
-          this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
-        },
-      });
-      return; 
-    }
-
     this.authenticationService.logout();
     this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
   }

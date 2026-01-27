@@ -363,18 +363,4 @@ export class RideApi {
       config,
     );
   }
-
-  removeDriverFromSimulation(): Observable<ApiResponse<void>> {
-    const config: RequestConfig = {
-      headers: {
-        accept: 'application/json',
-      },
-      authenticated: true,
-    };
-    return this.apiClient.post<void, void>(
-      `/api/drivers/remove-simulation`,
-      undefined,
-      config,
-    );
-  }
 }

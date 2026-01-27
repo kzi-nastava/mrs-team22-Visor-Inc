@@ -22,13 +22,9 @@ import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
-import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
-import inc.visor.voom_service.simulation.Simulator;
 
 @Service
 public class AuthService {
@@ -41,10 +37,9 @@ public class AuthService {
     private final UserRoleService userRoleService;
     private final JwtService jwtService;
     private final TokenService tokenService;
-    private final Simulator simulatorService;
-    private final DriverService driverService;
 
-    public AuthService(UserService userService, PersonService personService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, UserRoleService userRoleService, JwtService jwtService, TokenService tokenService, Simulator simulatorService, DriverService driverService) {
+
+    public AuthService(UserService userService, PersonService personService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, UserRoleService userRoleService, JwtService jwtService, TokenService tokenService) {
         this.userService = userService;
         this.personService = personService;
         this.passwordEncoder = passwordEncoder;
@@ -53,20 +48,12 @@ public class AuthService {
         this.userRoleService = userRoleService;
         this.jwtService = jwtService;
         this.tokenService = tokenService;
-        this.simulatorService = simulatorService;
-        this.driverService = driverService;
     }
 
     public TokenDto login(LoginDto dto) {
         User user = userService.getUser(dto.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
         if (user.getUserStatus() != UserStatus.ACTIVE) {
             throw new RuntimeException("User is not active.");
-        }
-
-        if (user.getUserRole().getId() == 2) {
-            System.out.println("Adding driver to simulation: " + user.getId());
-            Driver driver = driverService.getDriverFromUser(user.getId()).orElseThrow(NotFoundException::new);
-            simulatorService.addActiveDriver(driver.getId());
         }
 
         authenticationManager.authenticate(
