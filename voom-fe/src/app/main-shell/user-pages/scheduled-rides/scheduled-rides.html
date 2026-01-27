@@ -1,0 +1,34 @@
+<div class="p-4 px-32">
+  <div class="flex justify-between items-center">
+    <div class="font-medium text-2xl">Scheduled Rides</div>
+  </div>
+  <div class="py-8 space-y-4">
+    @if (scheduledRides(); as scheduledRides) {
+      @for (scheduledRide of scheduledRides; track scheduledRide) {
+        <mat-accordion>
+          <mat-expansion-panel hideToggle>
+            <mat-expansion-panel-header>
+              <mat-panel-title class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="text-lg font-normal">scheduledRide.scheduledTime</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="text-lg font-normal">{{ scheduledRide.driver!.firstName }}</div>
+                  <div class="text-lg font-normal">{{ scheduledRide.driver!.lastName }}</div>
+                  <img src="assets/icons/free%20driver.png" alt="" class="w-8 h-8" />
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <div class="text-lg font-normal">Price:</div>
+                  <div class="text-lg font-normal">$ {{scheduledRide.price }}</div>
+                </div>
+                <button matButton="outlined" (click)="rideCancel(scheduledRide)">Cancel Ride</button>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        </mat-accordion>
+      }
+    } @else {
+      <div class="text-center text-xl">No scheduled rides found yet</div>
+    }
+  </div>
+</div>

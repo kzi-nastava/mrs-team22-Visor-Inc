@@ -175,30 +175,66 @@ getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
   }
 
 getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
-  const queryParams: any = {
-    sort: sort.toUpperCase()
-  };
+    const queryParams: any = {
+      sort: sort.toUpperCase()
+    };
 
-  if (dateFrom) {
-    queryParams.dateFrom = dateFrom.toISOString();
+    if (dateFrom) {
+      queryParams.dateFrom = dateFrom.toISOString();
+    }
+    if (dateTo) {
+      queryParams.dateTo = dateTo.toISOString();
+    }
+
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      params: queryParams,
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, RideHistoryDto[]>(
+      `/api/rides/driver/history`,
+      config
+    );
   }
-  if (dateTo) {
-    queryParams.dateTo = dateTo.toISOString();
+
+  getScheduledRides(userId: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, RideRequestResponseDto[]>(
+      `/api/rides/user/${userId}/scheduled`,
+      config
+    );
   }
 
-  const config: RequestConfig = {
-    headers: {
-      accept: 'application/json',
-      contentType: 'application/json'
-    },
-    params: queryParams,
-    authenticated: true,
-  };
+  cancelScheduledRide(
+    rideId: number,
+    dto: RideCancellationDto
+  ) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
 
-  return this.apiClient.get<void, RideHistoryDto[]>(
-    `/api/rides/driver/history`,
-    config
-  );
-}
+    return this.apiClient.post<RideCancellationDto, RideRequestResponseDto>(
+      `/api/rides/scheduled/${rideId}/cancel`,
+      dto,
+      config
+    );
+  }
+
+
 
 }

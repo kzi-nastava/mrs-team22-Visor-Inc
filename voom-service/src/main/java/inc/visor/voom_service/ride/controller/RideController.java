@@ -14,6 +14,12 @@ import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import inc.visor.voom_service.ride.model.*;
+import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideEstimationResult;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.Sorting;
@@ -390,6 +396,19 @@ public class RideController {
         return driverService.getDriver(userId).orElseThrow(NotFoundException::new);
     }
 
+    @GetMapping("/user/{userId}/scheduled")
+    public ResponseEntity<List<RideRequestResponseDto>> getScheduledRides(@PathVariable long userId) {
+        final List<RideRequest> ongoingRideRequests = this.rideRequestService.getOngoingRideRequests();
+        final List<RideRequest> filteredOngoingRideRequests = ongoingRideRequests.stream().filter(rideRequest -> rideRequest.getCreator().getId() == userId).toList();
+        return ResponseEntity.ok(filteredOngoingRideRequests.stream().map(RideRequestResponseDto::new).toList());
+    }
 
-
+    @PostMapping("/scheduled/{id}/cancel")
+    public ResponseEntity<RideRequestResponseDto> cancelScheduledRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
+        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final RideRequest rideRequest = this.rideRequestService.getRideRequest(id).orElseThrow(NotFoundException::new);
+        rideRequest.setCancelledBy(user);
+        rideRequest.setStatus(RideRequestStatus.CANCELLED);
+        return ResponseEntity.ok(new RideRequestResponseDto(this.rideRequestService.update(rideRequest)));
+    }
 }
