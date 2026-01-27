@@ -137,7 +137,7 @@ export class UserHome implements AfterViewInit {
   private handleScheduledRides(rides: ScheduledRideDto[]) {
     if (!rides || rides.length === 0) return;
 
-    const now = Date.now() - 60 * 60 * 1000; // one hour back to account for server-client time diff
+    const now = Date.now(); // one hour back to account for server-client time diff
     const TEN_MIN = 10 * 60 * 1000;
 
     const ride = rides

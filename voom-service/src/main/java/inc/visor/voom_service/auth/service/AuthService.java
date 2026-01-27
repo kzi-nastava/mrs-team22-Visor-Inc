@@ -1,5 +1,12 @@
 package inc.visor.voom_service.auth.service;
 
+import java.time.LocalDateTime;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import inc.visor.voom_service.auth.dto.LoginDto;
 import inc.visor.voom_service.auth.dto.RegistrationDto;
 import inc.visor.voom_service.auth.dto.ResetPasswordDto;
@@ -8,18 +15,16 @@ import inc.visor.voom_service.auth.token.model.Token;
 import inc.visor.voom_service.auth.token.model.TokenType;
 import inc.visor.voom_service.auth.token.service.JwtService;
 import inc.visor.voom_service.auth.token.service.TokenService;
-import inc.visor.voom_service.auth.user.model.*;
+import inc.visor.voom_service.auth.user.model.Permission;
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserRole;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -32,6 +37,7 @@ public class AuthService {
     private final UserRoleService userRoleService;
     private final JwtService jwtService;
     private final TokenService tokenService;
+
 
     public AuthService(UserService userService, PersonService personService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, UserRoleService userRoleService, JwtService jwtService, TokenService tokenService) {
         this.userService = userService;
@@ -49,6 +55,7 @@ public class AuthService {
         if (user.getUserStatus() != UserStatus.ACTIVE) {
             throw new RuntimeException("User is not active.");
         }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.getEmail(),
@@ -57,7 +64,7 @@ public class AuthService {
         );
 
         String refreshTokenText = jwtService.generateRefreshToken(new VoomUserDetails(user));
-        String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user),  user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
+        String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user), user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
 
         Token refreshToken = tokenService.getToken(user, TokenType.REFRESH).orElse(null);
         Token accessToken = tokenService.getToken(user, TokenType.ACCESS).orElse(null);
@@ -155,7 +162,7 @@ public class AuthService {
             throw new RuntimeException("Invalid refresh token.");
         }
 
-        String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user),  user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
+        String accessTokenText = jwtService.generateAccessToken(new VoomUserDetails(user), user.getUserRole().getPermissions().stream().map(Permission::getAuthority).toList());
         Token accessToken = tokenService.getToken(user, TokenType.ACCESS).orElse(null);
 
         getAccessToken(user, accessTokenText, accessToken);

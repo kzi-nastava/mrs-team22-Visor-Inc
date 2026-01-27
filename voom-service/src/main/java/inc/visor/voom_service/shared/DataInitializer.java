@@ -1,5 +1,15 @@
 package inc.visor.voom_service.shared;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import inc.visor.voom_service.auth.user.model.Permission;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
@@ -8,7 +18,10 @@ import inc.visor.voom_service.auth.user.repository.PermissionRepository;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverState;
+import inc.visor.voom_service.driver.model.DriverStateChange;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.repository.DriverActivityRepository;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
@@ -16,15 +29,6 @@ import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.core.annotation.Order;
-
-import java.time.LocalDateTime;
-import java.util.Set;
 
 @Order(1)
 @Component
@@ -39,8 +43,9 @@ public class DataInitializer implements ApplicationRunner {
     private final DriverRepository driverRepository;
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
+    private final DriverActivityRepository driverActivityRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, DriverActivityRepository driverActivityRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -49,6 +54,7 @@ public class DataInitializer implements ApplicationRunner {
         this.driverRepository = driverRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
+        this.driverActivityRepository = driverActivityRepository;
     }
 
     @Override
@@ -69,7 +75,6 @@ public class DataInitializer implements ApplicationRunner {
         if (adminPermission == null) {
             adminPermission = permissionRepository.save(new Permission("ADMIN"));
         }
-
 
         if (userRoleRepository.count() == 0) {
             createUserRole("ADMIN", adminPermission);
@@ -155,6 +160,12 @@ public class DataInitializer implements ApplicationRunner {
             driver.setUser(user);
             driver.setStatus(DriverStatus.AVAILABLE);
             driverRepository.save(driver);
+
+            DriverStateChange initChange = new DriverStateChange();
+            initChange.setDriver(driver);
+            initChange.setCurrentState(DriverState.ACTIVE);
+            initChange.setPerformedAt(LocalDateTime.now().minusSeconds(5)); 
+            driverActivityRepository.save(initChange);
 
             Vehicle vehicle = new Vehicle();
             vehicle.setDriver(driver);

@@ -26,7 +26,6 @@ import inc.visor.voom_service.driver.model.DriverState;
 import inc.visor.voom_service.driver.model.DriverStateChange;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
-import inc.visor.voom_service.driver.repository.DriverActivityRepository;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
 import inc.visor.voom_service.mail.EmailService;
@@ -99,8 +98,6 @@ public class DriverService {
     }
 
     public VehicleSummaryDto getVehicle(Long userId) {
-
-        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 
@@ -334,7 +331,7 @@ public class DriverService {
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
-                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
+                .filter(d -> isDriverCurrentlyActive(d.getId()))
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
 
@@ -465,6 +462,14 @@ public class DriverService {
         }
 
         return activeSeconds / 3600.0;
+    }
+
+    private boolean isDriverCurrentlyActive(Long driverId) {
+        return driverActivityService
+                .getLastStateChange(driverId)
+                .map(DriverStateChange::getCurrentState)
+                .map(state -> state == DriverState.ACTIVE)
+                .orElse(false); 
     }
 
 }

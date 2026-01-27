@@ -1,6 +1,7 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -9,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.OsrmService;
@@ -77,6 +79,35 @@ public class Simulator implements ApplicationRunner {
                 publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), driver.isFinishedRide(), eta);
             }
         });
+    }
+
+    public boolean addActiveDriver(long driverId) {
+        if (!state.existsDriver(driverId)) {
+            System.out.println("Adding active driver to simulation: " + driverId);
+            Optional<Driver> dbDriver = driverService.getDriver(driverId);
+            if (dbDriver.isPresent()) {
+                System.out.println("Driver found in DB, adding to simulation: " + driverId);
+                DriverSummaryDto dto = new DriverSummaryDto(dbDriver.get());
+                Route route = predefinedRoutes.get((int) (dto.getId() % predefinedRoutes.size()));
+                List<LatLng> waypoints = osrmService.getRoute(route.start(), route.end());
+                SimulatedDriver newDriver = new SimulatedDriver(dto, waypoints);
+                state.add(newDriver);
+                return true;
+            }
+            System.out.println("Driver not found in DB, cannot add to simulation: " + driverId);
+            return false;
+        }
+        return false;
+    }
+
+    public boolean removeActiveDriver(long driverId) {
+        if (!state.existsDriver(driverId)) {
+            return false;
+        }
+
+        state.removeDriver(driverId);
+        return true;
+
     }
 
     public void changeDriverRoute(long driverId, double lat, double lng) {

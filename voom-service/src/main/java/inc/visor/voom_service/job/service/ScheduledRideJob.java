@@ -1,7 +1,6 @@
 package inc.visor.voom_service.job.service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class ScheduledRideJob {
 
         System.out.println("Processing scheduled rides...");
 
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
         LocalDateTime threshold = now.plusMinutes(20);
 
         List<RideRequest> upcomingRequests

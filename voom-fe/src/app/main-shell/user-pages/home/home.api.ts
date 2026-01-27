@@ -1,8 +1,8 @@
-import {Inject, Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {ApiClient} from '../../../shared/rest/api-client';
-import {ApiResponse, RequestConfig} from '../../../shared/rest/rest.model';
-import {VoomApiService} from '../../../shared/rest/voom-api-service';
+import { Inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiClient } from '../../../shared/rest/api-client';
+import { ApiResponse, RequestConfig } from '../../../shared/rest/rest.model';
+import { VoomApiService } from '../../../shared/rest/voom-api-service';
 import { OngoingRideDto } from '../../../shared/rest/ride/ride.model';
 
 export type UserProfileResponseDto = {
@@ -253,13 +253,13 @@ export type ActiveRideDto = {
   status: string;
   routePoints: RideRoutePointDto[];
   driverId: number;
-}
+};
 
 export type StartScheduledRideDto = {
   driverId: number;
   lat: number;
   lng: number;
-}
+};
 
 @Injectable({ providedIn: 'root' })
 export class RideApi {
@@ -272,42 +272,54 @@ export class RideApi {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
 
-    return this.apiClient.post<RideRequestDto, RideRequestResponseDto>(`${this.baseUrl}/requests`, payload, config);
+    return this.apiClient.post<RideRequestDto, RideRequestResponseDto>(
+      `${this.baseUrl}/requests`,
+      payload,
+      config,
+    );
   }
 
   createFavoriteRoute(payload: CreateFavoriteRouteDto): Observable<ApiResponse<void>> {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
 
-    return this.apiClient.post<CreateFavoriteRouteDto, void>(`${this.baseUrl}/favorites`, payload, config);
+    return this.apiClient.post<CreateFavoriteRouteDto, void>(
+      `${this.baseUrl}/favorites`,
+      payload,
+      config,
+    );
   }
 
   startScheduleRide(rideId: number, payload: StartScheduledRideDto): Observable<ApiResponse<void>> {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
-    }
-    return this.apiClient.post<StartScheduledRideDto, void>(`${this.baseUrl}/scheduled/${rideId}`, payload, config);
+    };
+    return this.apiClient.post<StartScheduledRideDto, void>(
+      `${this.baseUrl}/scheduled/${rideId}`,
+      payload,
+      config,
+    );
   }
 
   getActiveDrivers(): Observable<ApiResponse<DriverSummaryDto[]>> {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
@@ -319,7 +331,7 @@ export class RideApi {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
@@ -330,7 +342,7 @@ export class RideApi {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
@@ -348,8 +360,7 @@ export class RideApi {
     return this.apiClient.post<void, OngoingRideDto>(
       '/api/rides/finish-ongoing',
       undefined,
-      config
+      config,
     );
   }
-
 }
