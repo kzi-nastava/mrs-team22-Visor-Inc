@@ -5,6 +5,7 @@ import inc.visor.voom_service.vehicle.dto.CreateVehicleTypeDto;
 import inc.visor.voom_service.vehicle.dto.VehicleTypeDto;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,14 +33,14 @@ public class VehicleTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleTypeDto> createVehicleType(@RequestBody CreateVehicleTypeDto dto) {
+    public ResponseEntity<VehicleTypeDto> createVehicleType(@Valid @RequestBody CreateVehicleTypeDto dto) {
         VehicleType vehicleType = new VehicleType(dto);
         vehicleType = vehicleTypeService.create(vehicleType);
         return ResponseEntity.ok(new VehicleTypeDto(vehicleType));
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<VehicleTypeDto> updateVehicleType(@PathVariable long id, @RequestBody VehicleTypeDto dto) {
+    public ResponseEntity<VehicleTypeDto> updateVehicleType(@PathVariable long id, @Valid @RequestBody VehicleTypeDto dto) {
         VehicleType vehicleType = vehicleTypeService.getVehicleType(id).orElseThrow(NotFoundException::new);
         vehicleType.setPrice(dto.getPrice());
         vehicleType = vehicleTypeService.update(vehicleType);

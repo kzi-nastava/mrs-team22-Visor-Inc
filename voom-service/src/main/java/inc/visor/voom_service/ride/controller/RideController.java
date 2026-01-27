@@ -224,7 +224,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
+    public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long id, @Valid @RequestBody RideCancellationDto dto) {
         final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
@@ -242,7 +242,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/stop")
-    public ResponseEntity<RideResponseDto> stopRide(@PathVariable Long id, @RequestBody RideStopDto dto) {
+    public ResponseEntity<RideResponseDto> stopRide(@PathVariable Long id, @Valid @RequestBody RideStopDto dto) {
         final Driver driver = this.driverService.getDriverFromUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
         driverService.save(driver);
@@ -292,7 +292,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/panic")
-    public ResponseEntity<RideResponseDto> panic(@PathVariable Long id, @RequestBody RidePanicDto dto) {
+    public ResponseEntity<RideResponseDto> panic(@PathVariable Long id, @Valid @RequestBody RidePanicDto dto) {
         final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
@@ -415,7 +415,7 @@ public class RideController {
     }
 
     @GetMapping("/user/{userId}/scheduled")
-    public ResponseEntity<List<RideHistoryDto>> getScheduledRides(@PathVariable long userId) {
+    public ResponseEntity<List<RideHistoryDto>> getScheduledRides( @PathVariable long userId) {
         final List<Ride> cancelledScheduledRides = this.rideService.getScheduledRides(RideStatus.USER_CANCELLED);
         final List<Ride> scheduledRides = this.rideService.getScheduledRides(RideStatus.SCHEDULED);
         scheduledRides.addAll(cancelledScheduledRides);

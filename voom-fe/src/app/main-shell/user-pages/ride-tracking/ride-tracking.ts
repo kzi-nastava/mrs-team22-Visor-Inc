@@ -4,8 +4,8 @@ import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulat
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
 import {FormsModule} from '@angular/forms';
-import {ActiveRideDto} from '../home/home.api';
-import {ROUTE_USER_HOME, RoutePoint} from '../home/user-home';
+import {ActiveRideDto} from '../user-home/home.api';
+import {ROUTE_USER_HOME, RoutePoint} from '../user-home/user-home';
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {toSignal} from '@angular/core/rxjs-interop';

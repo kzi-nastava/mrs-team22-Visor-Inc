@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Map} from '../../shared/map/map';
 import {ValueInputString} from '../../shared/value-input/value-input-string/value-input-string';
 import {Header} from '../../shared/header/header';
@@ -7,11 +7,12 @@ import {DriverSimulationWsService} from '../../shared/websocket/DriverSimulation
 import ApiService from '../../shared/rest/api-service';
 import {DriverSummaryDto} from '../../shared/rest/ride/ride.model';
 import {RouteEstimateRequestDto, RouteEstimateResponseDto} from '../../shared/rest/route/route.model';
-import {map} from 'rxjs';
-import {RoutePoint} from '../../main-shell/user-pages/home/user-home';
+import {catchError, map} from 'rxjs';
+import {RoutePoint} from '../../main-shell/user-pages/user-home/user-home';
 import {RoutePointType} from './home.api';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 export const ROUTE_HOME = 'ride';
 
@@ -34,6 +35,8 @@ export class Home implements OnInit {
   @ViewChild(Map) map!: Map;
 
   private renderedDrivers: number[] = [];
+
+  snackBar = inject(MatSnackBar);
 
   routePoints = signal<RoutePoint[]>([]);
   rideEstimation = signal<RouteEstimateResponseDto | null>(null);
@@ -123,6 +126,11 @@ export class Home implements OnInit {
   onMapClick(event: { lat: number; lng: number; address: string }) {
     const cleanAddress = event.address.replace(/\s*,?\s*Novi Sad.*$/i, '').trim();
     const points = this.routePoints();
+
+    if (points.length === 10) {
+      this.snackBar.open("You have reached maximum number of stops", '', { duration : 3000, horizontalPosition:"right" });
+      return;
+    }
 
     if (points.length === 0) {
       this.routePoints.set([

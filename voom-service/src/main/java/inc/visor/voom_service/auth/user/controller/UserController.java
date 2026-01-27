@@ -11,6 +11,7 @@ import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserProfileDto> createUser(@RequestBody CreateUserDto dto) {
+    public ResponseEntity<UserProfileDto> createUser(@Valid @RequestBody CreateUserDto dto) {
         Person person = new Person(dto);
         person = this.personService.create(person);
         UserRole userRole = userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
@@ -53,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping("{userId}")
-    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long userId, @RequestBody UserProfileDto dto) {
+    public ResponseEntity<UserProfileDto> updateUser(@PathVariable("userId") Long userId, @Valid @RequestBody UserProfileDto dto) {
         User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         UserRole userRole = this.userRoleService.getUserRole(dto.getUserRoleId()).orElseThrow(NotFoundException::new);
         Person person = new Person(user.getPerson().getId(), dto);

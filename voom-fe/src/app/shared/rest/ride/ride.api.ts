@@ -8,7 +8,7 @@ import {
 } from './ride.model';
 import { RequestConfig } from '../rest.model';
 import { ApiResponse } from '../rest.model';
-import {ActiveRideDto, StartScheduledRideDto} from '../../../main-shell/user-pages/home/home.api';
+import {ActiveRideDto, StartScheduledRideDto} from '../../../main-shell/user-pages/user-home/home.api';
 import { Observable } from 'rxjs/internal/Observable';
 
 export class RideApi extends Api {
