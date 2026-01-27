@@ -19,6 +19,8 @@ public class ScheduledRideDto {
 
     public String status;
 
+    public long creatorId;
+
     public ScheduledRideDto() {}
 
     public ScheduledRideDto(

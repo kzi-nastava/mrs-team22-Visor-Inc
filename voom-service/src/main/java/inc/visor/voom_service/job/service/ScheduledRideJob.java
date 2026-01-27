@@ -57,7 +57,7 @@ public class ScheduledRideJob {
                 dto.driverId = ride.getDriver() != null ? ride.getDriver().getId() : null;
                 dto.scheduledStartTime = req.getScheduledTime();
                 dto.status = ride.getStatus().name();
-
+                dto.creatorId = ride.getRideRequest().getCreator().getId();
                 dto.route = req.getRideRoute().getRoutePoints().stream()
                         .map(p -> {
                             RoutePointDto rp = new RoutePointDto();

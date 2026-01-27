@@ -424,7 +424,7 @@ public class RideController {
     }
 
     @GetMapping("/driver/scheduled")
-    public ResponseEntity<List<RideHistoryDto>> getScheduledRidesDriver(@PathVariable long userId, @AuthenticationPrincipal VoomUserDetails userDetails) {
+    public ResponseEntity<List<RideHistoryDto>> getScheduledRidesDriver(@AuthenticationPrincipal VoomUserDetails userDetails) {
         final List<Ride> scheduledRides = this.rideService.getScheduledRides(RideStatus.SCHEDULED);
         try {
             final Driver driver = extractDriver(userDetails);
