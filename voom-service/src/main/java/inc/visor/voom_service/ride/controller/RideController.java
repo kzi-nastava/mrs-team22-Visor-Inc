@@ -14,17 +14,10 @@ import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import inc.visor.voom_service.ride.model.*;
-import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.RideEstimationResult;
-import inc.visor.voom_service.ride.model.RideRequest;
-import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
-import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.simulation.Simulator;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -57,9 +50,8 @@ public class RideController {
     private final RideRouteService rideRouteService;
     private final RideEstimateService rideEstimateService;
     private final RideWsService rideWsService;
-    private final OsrmService osrmService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService, OsrmService osrmService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
@@ -72,7 +64,6 @@ public class RideController {
         this.rideRouteService = rideRouteService;
         this.rideEstimateService = rideEstimateService;
         this.rideWsService = rideWsService;
-        this.osrmService = osrmService;
     }
 
     @PostMapping("/requests")
