@@ -199,7 +199,7 @@ export interface User {
 
 export interface VehicleType {
   id: number;
-  name: string;
+  type: string;
   pricePerKm: number;
 }
 

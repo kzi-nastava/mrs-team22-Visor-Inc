@@ -3,6 +3,7 @@ package inc.visor.voom_service.ride.dto;
 import java.time.LocalDateTime;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 
@@ -35,37 +36,6 @@ public class RideRequestResponseDto {
         this.driver = driver;
         this.pickupLat = pickupLat;
         this.pickupLng = pickupLng;
-    }
-
-    public RideRequestResponseDto(RideRequest rideRequest) {
-        this.requestId = rideRequest.getId();
-        this.status = rideRequest.getStatus();
-        this.price = rideRequest.getCalculatedPrice();
-        this.scheduledTime = rideRequest.getScheduledTime();
-        this.pickupLat = rideRequest.getRideRoute().getPickupPoint().getLatitude();
-        this.pickupLng = rideRequest.getRideRoute().getPickupPoint().getLongitude();
-    }
-
-    public static RideRequestResponseDto create(
-            long requestId,
-            RideRequestStatus status,
-            double distanceKm,
-            double price,
-            LocalDateTime scheduledTime,
-            DriverSummaryDto driver,
-            double pickupLat,
-            double pickupLng
-    ) {
-        return new RideRequestResponseDto(
-                requestId,
-                status,
-                distanceKm,
-                price,
-                scheduledTime,
-                driver,
-                pickupLat,
-                pickupLng
-        );
     }
 
     public static RideRequestResponseDto from(
