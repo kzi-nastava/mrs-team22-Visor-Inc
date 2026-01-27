@@ -1,23 +1,5 @@
 package inc.visor.voom_service.ride.controller;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
@@ -29,13 +11,14 @@ import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
+import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
-import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.simulation.Simulator;
@@ -49,8 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.getRideHistoryDto;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -255,7 +236,7 @@ public class RideController {
 
     @PostMapping("/{id}/panic")
     public ResponseEntity<RideResponseDto> panic(@PathVariable Long id, @RequestBody RidePanicDto dto) {
-        User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         ride.setStatus(RideStatus.PANIC);
@@ -375,6 +356,19 @@ public class RideController {
         return driverService.getDriver(userId).orElseThrow(NotFoundException::new);
     }
 
+    @GetMapping("/user/{userId}/scheduled")
+    public ResponseEntity<List<RideRequestResponseDto>> getScheduledRides(@PathVariable long userId) {
+        final List<RideRequest> ongoingRideRequests = this.rideRequestService.getOngoingRideRequests();
+        final List<RideRequest> filteredOngoingRideRequests = ongoingRideRequests.stream().filter(rideRequest -> rideRequest.getCreator().getId() == userId).toList();
+        return ResponseEntity.ok(filteredOngoingRideRequests.stream().map(RideRequestResponseDto::new).toList());
+    }
 
-
+    @PostMapping("/scheduled/{id}/cancel")
+    public ResponseEntity<RideRequestResponseDto> cancelScheduledRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
+        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final RideRequest rideRequest = this.rideRequestService.getRideRequest(id).orElseThrow(NotFoundException::new);
+        rideRequest.setCancelledBy(user);
+        rideRequest.setStatus(RideRequestStatus.CANCELLED);
+        return ResponseEntity.ok(new RideRequestResponseDto(this.rideRequestService.update(rideRequest)));
+    }
 }

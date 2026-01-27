@@ -17,7 +17,7 @@ public class RideRequestResponseDto {
     private double pickupLat;
     private double pickupLng;
 
-    private RideRequestResponseDto(
+    public RideRequestResponseDto(
             long requestId,
             RideRequestStatus status,
             double distanceKm,
@@ -35,6 +35,15 @@ public class RideRequestResponseDto {
         this.driver = driver;
         this.pickupLat = pickupLat;
         this.pickupLng = pickupLng;
+    }
+
+    public RideRequestResponseDto(RideRequest rideRequest) {
+        this.requestId = rideRequest.getId();
+        this.status = rideRequest.getStatus();
+        this.price = rideRequest.getCalculatedPrice();
+        this.scheduledTime = rideRequest.getScheduledTime();
+        this.pickupLat = rideRequest.getRideRoute().getPickupPoint().getLatitude();
+        this.pickupLng = rideRequest.getRideRoute().getPickupPoint().getLongitude();
     }
 
     public static RideRequestResponseDto create(

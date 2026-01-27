@@ -13,6 +13,7 @@ import {ROUTE_FAVORITE_ROUTES} from '../../main-shell/user-pages/favorite-routes
 import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated/unauthenticated-main';
 import {ROUTE_USER_PAGES} from '../../main-shell/user-pages/user-pages';
 import {ROUTE_DRIVER_PAGES} from '../../main-shell/driver-pages/driver-pages';
+import {ROUTE_SCHEDULED_RIDES} from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
 
 @Component({
   selector: 'app-header',
@@ -70,5 +71,9 @@ export class Header {
     const user = this.user();
 
     user ? this.router.navigate([user.role.toLowerCase()]) : this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
+  }
+
+  protected scheduledRides() {
+    this.router.navigate([ROUTE_USER_PAGES, ROUTE_SCHEDULED_RIDES]);
   }
 }
