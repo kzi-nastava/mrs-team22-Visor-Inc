@@ -1,19 +1,19 @@
 package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import inc.visor.voom_service.mail.EmailService;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -24,14 +24,13 @@ import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
 
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
-
 @Service
 public class RideService {
 
     private final RideRepository rideRepository;
     private final RideRouteService routeService;
     private final EmailService emailService;
+
 
     public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService) {
         this.rideRepository = rideRepository;
@@ -189,7 +188,7 @@ public class RideService {
     }
 
     public Ride findActiveRide(Long userId) {
-        List<Ride> rides = rideRepository.findByDriverId(userId);
+        List<Ride> rides = rideRepository.findByDriver_User_Id(userId);
 
         return rides.stream()
                 .filter(ride -> ride.getStatus() == RideStatus.ONGOING || ride.getStatus() == RideStatus.STARTED)

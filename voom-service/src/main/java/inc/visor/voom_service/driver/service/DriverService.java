@@ -99,8 +99,6 @@ public class DriverService {
     }
 
     public VehicleSummaryDto getVehicle(Long userId) {
-
-        //FIXME @nikola0234
         Driver driver = driverRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("Driver not found"));
 

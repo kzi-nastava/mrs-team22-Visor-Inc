@@ -1,41 +1,35 @@
-import {Component, inject} from '@angular/core';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {Router, RouterModule} from '@angular/router';
-import {AuthenticationService} from '../service/authentication-service';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {ROUTE_REGISTRATION} from '../../unauthenticated/registration/registration';
-import {ROUTE_LOGIN} from '../../unauthenticated/login/login';
-import {ROUTE_USER_PROFILE} from '../../main-shell/user-pages/user-profile/user-profile';
-import {ROUTE_DRIVER_RIDE_HISTORY} from '../../main-shell/driver-pages/ride-history/driver-ride-history';
-import {ROUTE_FAVORITE_ROUTES} from '../../main-shell/user-pages/favorite-routes/favorite-routes';
-import {ROUTE_UNAUTHENTICATED_MAIN} from '../../unauthenticated/unauthenticated-main';
-import {ROUTE_USER_PAGES} from '../../main-shell/user-pages/user-pages';
-import {ROUTE_DRIVER_PAGES} from '../../main-shell/driver-pages/driver-pages';
-import {ROUTE_SCHEDULED_RIDES} from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
+import { Component, inject } from '@angular/core';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterModule } from '@angular/router';
+import { AuthenticationService } from '../service/authentication-service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ROUTE_REGISTRATION } from '../../unauthenticated/registration/registration';
+import { ROUTE_LOGIN } from '../../unauthenticated/login/login';
+import { ROUTE_USER_PROFILE } from '../../main-shell/user-pages/user-profile/user-profile';
+import { ROUTE_DRIVER_RIDE_HISTORY } from '../../main-shell/driver-pages/ride-history/driver-ride-history';
+import { ROUTE_FAVORITE_ROUTES } from '../../main-shell/user-pages/favorite-routes/favorite-routes';
+import { ROUTE_UNAUTHENTICATED_MAIN } from '../../unauthenticated/unauthenticated-main';
+import { ROUTE_USER_PAGES } from '../../main-shell/user-pages/user-pages';
+import { ROUTE_DRIVER_PAGES } from '../../main-shell/driver-pages/driver-pages';
+import { RideApi } from '../../main-shell/user-pages/home/home.api';
+import { ROUTE_SCHEDULED_RIDES } from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
 
 @Component({
   selector: 'app-header',
-  imports: [
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    RouterModule,
-
-  ],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, RouterModule],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class Header {
-
   private authenticationService = inject(AuthenticationService);
+  private rideApi = inject(RideApi);
 
   isAuthenticated = toSignal(this.authenticationService.isAuthenticated());
   user = toSignal(this.authenticationService.activeUser$);
 
-  constructor(private router: Router) {
-  }
+  constructor(private router: Router) {}
 
   protected favoriteRoutes() {
     this.router.navigate([ROUTE_USER_PAGES, ROUTE_FAVORITE_ROUTES]);
@@ -46,6 +40,20 @@ export class Header {
   }
 
   protected signOut() {
+    const user = this.authenticationService.activeUser$.value;
+
+    if (user?.role === 'DRIVER') {
+      this.rideApi.removeDriverFromSimulation().subscribe({
+        next: () => console.log('Removed from simulation'),
+        error: (err) => console.error('Remove from simulation failed', err),
+        complete: () => {
+          this.authenticationService.logout();
+          this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
+        },
+      });
+      return; 
+    }
+
     this.authenticationService.logout();
     this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
   }
@@ -70,7 +78,9 @@ export class Header {
   protected goHome() {
     const user = this.user();
 
-    user ? this.router.navigate([user.role.toLowerCase()]) : this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
+    user
+      ? this.router.navigate([user.role.toLowerCase()])
+      : this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN]);
   }
 
   protected scheduledRides() {

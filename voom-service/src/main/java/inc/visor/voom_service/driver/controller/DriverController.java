@@ -35,6 +35,7 @@ import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.dto.VehicleSummaryDto;
 import jakarta.validation.Valid;
 
@@ -47,12 +48,14 @@ public class DriverController {
     private final UserService userService;
     private final PersonService personService;
     private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
+    private final Simulator simulationService;
 
-    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService) {
+    public DriverController(DriverService driverService, ActivationTokenService activationTokenService, UserService userService, PersonService personService, Simulator simulationService) {
         this.driverService = driverService;
         this.activationTokenService = activationTokenService;
         this.userService = userService;
         this.personService = personService;
+        this.simulationService = simulationService;
     }
 
     @PostMapping
@@ -64,7 +67,7 @@ public class DriverController {
     @PostMapping("/admin")
     public ResponseEntity<DriverSummaryDto> adminCreateDriver(@RequestBody AdminCreateDriverDto dto) {
         User user = this.userService.getUser(dto.getUserId()).orElseThrow(NotFoundException::new);
-        Driver driver = new Driver(user, DriverStatus.BUSY);
+        Driver driver = new Driver(user, DriverStatus.AVAILABLE);
         driver = driverService.create(driver);
         return ResponseEntity.ok(new DriverSummaryDto(driver));
     }
@@ -191,6 +194,26 @@ public class DriverController {
         ActiveRideDto response = driverService.getActiveRide(userId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/remove-simulation")
+    public ResponseEntity<Void> removeDriverFromSimulation(
+            @AuthenticationPrincipal VoomUserDetails userDetails
+    ) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = this.userService.getUser(username).orElseThrow(NotFoundException::new);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long userId = user.getId();
+
+        Driver driver = driverService.getDriverFromUser(userId).orElseThrow(NotFoundException::new);
+
+        simulationService.removeActiveDriver(driver.getId());
+
+        return ResponseEntity.noContent().build();
     }
 
 }
