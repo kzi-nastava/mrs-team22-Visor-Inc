@@ -1,7 +1,9 @@
 package inc.visor.voom_service.simulation;
 
 import java.util.List;
+import java.util.Optional;
 
+import inc.visor.voom_service.driver.model.Driver;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -77,6 +79,32 @@ public class Simulator implements ApplicationRunner {
                 publisher.publishPosition(driver.getDriverId(), driver.currentPosition(), driver.isFinishedRide(), eta);
             }
         });
+    }
+
+    public boolean addActiveDriver(long driverId) {
+        if (!state.existsDriver(driverId)) {
+            Optional<Driver> dbDriver = driverService.getDriver(driverId);
+            if (dbDriver.isPresent()) {
+                DriverSummaryDto dto = new DriverSummaryDto(dbDriver.get());
+                Route route = predefinedRoutes.get((int) (dto.getId() % predefinedRoutes.size()));
+                List<LatLng> waypoints = osrmService.getRoute(route.start(), route.end());
+                SimulatedDriver newDriver = new SimulatedDriver(dto, waypoints);
+                state.add(newDriver);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public boolean removeActiveDriver(long driverId) {
+        if (!state.existsDriver(driverId)) {
+            return false;
+        }
+
+        state.removeDriver(driverId);
+        return true;
+
     }
 
     public void changeDriverRoute(long driverId, double lat, double lng) {

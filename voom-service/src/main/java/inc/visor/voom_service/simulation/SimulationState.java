@@ -91,5 +91,13 @@ public class SimulationState {
 
         existing.setFinishedRide(true);
     }
+
+    public boolean existsDriver(long driverId) {
+        return drivers.stream().anyMatch(d -> d.getDriver().getId() == driverId);
+    }
+
+    public void removeDriver(long driverId) {
+        drivers.removeIf(d -> d.getDriver().getId() == driverId);
+    }
 }
 
