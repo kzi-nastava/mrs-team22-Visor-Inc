@@ -70,4 +70,9 @@ export class Header {
   protected scheduledRides() {
     this.router.navigate([ROUTE_USER_PAGES, ROUTE_SCHEDULED_RIDES]);
   }
+
+  protected scheduledRidesDriver() {
+    this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_SCHEDULED_RIDES]);
+  }
+
 }

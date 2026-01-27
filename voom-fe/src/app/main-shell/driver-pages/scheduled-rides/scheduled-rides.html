@@ -1,0 +1,56 @@
+<div class="p-4 px-32">
+  <div class="flex justify-between items-center">
+    <div class="font-medium text-2xl">Scheduled Rides</div>
+  </div>
+  <div class="py-8 space-y-4 flex flex-col">
+    @if (scheduledRides(); as scheduledRides) {
+      @if (scheduledRides.length !== 0) {
+        @for (scheduledRide of scheduledRides; track scheduledRide) {
+          <mat-accordion>
+            <mat-expansion-panel hideToggle>
+              <mat-expansion-panel-header>
+                <mat-panel-title class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4">
+                    <div class="text-lg font-normal">{{ getParsedTime(scheduledRide.rideRequest.scheduledTime) }}</div>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    <div class="text-lg font-normal">{{ scheduledRide.rideRoute.routePoints[0].address }}</div>
+                    <mat-icon>arrow_forward</mat-icon>
+                    <div class="text-lg font-normal">{{ scheduledRide.rideRoute.routePoints[0].address }}</div>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    <div class="text-lg font-normal">{{ scheduledRide.rideRequest.creator.person.firstName + ' ' + scheduledRide.rideRequest.creator.person.lastName }}</div>
+                    <img src="assets/icons/free%20driver.png" alt="" class="w-8 h-8" />
+                  </div>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="flex items-center justify-between pt-8 px-4">
+                <div class="flex items-center justify-center space-x-2">
+                  <div class="text-lg font-normal">Price:</div>
+                  <div class="text-lg font-normal">$ {{ scheduledRide.rideRequest.calculatedPrice }}</div>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <div class="text-lg font-normal">Distance:</div>
+                  <div class="text-lg font-normal">{{ scheduledRide.rideRequest.rideRoute.totalDistanceKm }} km</div>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <div class="text-lg font-normal">Vehicle type:</div>
+                  <div class="text-lg font-normal">{{ scheduledRide.rideRequest.vehicleType.type.toLowerCase() }}</div>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                  <div class="text-lg font-normal">Status:</div>
+                  <div class="text-lg font-normal">{{ scheduledRide.status.toString().toLowerCase() }}</div>
+                </div>
+                <!-- @if (scheduledRide.status === 'SCHEDULED') {
+                  <button matButton="outlined" (click)="rideCancel(scheduledRide)">Cancel Ride</button>
+                } -->
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        }
+      } @else {
+        <div class="text-center text-xl">No scheduled rides found yet</div>
+      }
+    }
+  </div>
+</div>
