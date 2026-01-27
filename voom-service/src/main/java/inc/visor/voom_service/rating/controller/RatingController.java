@@ -20,7 +20,7 @@ public class RatingController {
     }
 
     @PostMapping("{rideId}")
-    public ResponseEntity<Void> rateRide(@PathVariable Long rideId, @RequestBody RatingRequestDto request) {
+    public ResponseEntity<Void> rateRide(@PathVariable Long rideId, @Valid @RequestBody RatingRequestDto request) {
         //FIXME check if ride exists first
         ratingService.rateRide(rideId, request);
         System.out.println(rideId);
