@@ -79,9 +79,11 @@ public class RideRequestService {
 
         boolean driverFound = driver != null;
 
-        if (driverFound) {
+        if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
             driver.setStatus(DriverStatus.BUSY);
             driver = driverService.updateDriver(driver);
+            rideRequest.setStatus(RideRequestStatus.ACCEPTED);
+        } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
             rideRequest.setStatus(RideRequestStatus.ACCEPTED);
         } else {
             rideRequest.setStatus(RideRequestStatus.REJECTED);
