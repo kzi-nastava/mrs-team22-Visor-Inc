@@ -60,6 +60,7 @@ export type ScheduledRideDto = {
   driverId: number | null;
   scheduledStartTime: string;
   status: string;
+  creatorId: number;
   route: {
     lat: number;
     lng: number;

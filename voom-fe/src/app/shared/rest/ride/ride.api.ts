@@ -213,6 +213,18 @@ getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' |
     return this.apiClient.get<void, RideHistoryDto[]>(`/api/rides/user/${userId}/scheduled`, config);
   }
 
+  getScheduledRidesDriver(driverId: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, RideHistoryDto[]>(`/api/rides/driver/scheduled`, config);
+  }
+
   cancelScheduledRide(rideId: number, dto: RideCancellationDto) {
     const config: RequestConfig = {
       headers: {

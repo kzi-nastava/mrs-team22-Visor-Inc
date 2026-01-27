@@ -11,6 +11,7 @@
           <button mat-button (click)="favoriteRoutes()">Favorite Routes</button>
         }
         @if (user.role === 'USER' || user.role === 'DRIVER') {
+          <button mat-button (click)="scheduledRidesDriver()">Scheduled Rides</button>
           <button mat-button (click)="rideHistory()">Ride History</button>
         }
         <button mat-button (click)="signOut()">Sign Out</button>
