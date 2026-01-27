@@ -1,4 +1,4 @@
-import {RoutePoint} from '../../../main-shell/user-pages/home/user-home';
+import {RoutePoint} from '../../../main-shell/user-pages/user-home/user-home';
 
 export interface RouteEstimateRequestDto {
   routePoints: RoutePoint[];

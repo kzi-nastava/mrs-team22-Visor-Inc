@@ -12,8 +12,8 @@ import {
 } from 'ng-apexcharts';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DriverAssignedDto, RideApi } from '../../user-pages/home/home.api';
-import { RoutePoint } from '../../user-pages/home/user-home';
+import { DriverAssignedDto, RideApi } from '../../user-pages/user-home/home.api';
+import { RoutePoint } from '../../user-pages/user-home/user-home';
 import { UserProfileApi } from '../../user-pages/user-profile/user-profile.api';
 import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
 import { BehaviorSubject, catchError, filter, map, merge, of, switchMap } from 'rxjs';

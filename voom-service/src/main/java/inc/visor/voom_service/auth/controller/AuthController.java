@@ -5,6 +5,8 @@ import inc.visor.voom_service.auth.service.AuthService;
 import inc.visor.voom_service.auth.token.service.JwtService;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,37 +31,37 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginDto dto) {
+    public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginDto dto) {
         TokenDto tokenDto = authService.login(dto);
         return ResponseEntity.ok().body(tokenDto);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody RegistrationDto registrationDto) {
+    public ResponseEntity<UserDto> register(@Valid @RequestBody RegistrationDto registrationDto) {
         User user = authService.register(registrationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserDto(user));
     }
 
     @PostMapping("/refreshToken")
-    public ResponseEntity<TokenDto> refreshToken(@RequestBody String refreshToken) {
+    public ResponseEntity<TokenDto> refreshToken(@NotBlank(message = "Token is required") @RequestBody String refreshToken) {
         TokenDto tokenDto = authService.refreshToken(refreshToken);
         return ResponseEntity.ok().body(tokenDto);
     }
 
     @PostMapping("/verifyUser")
-    public ResponseEntity<Void> verifyUser(@RequestBody String token) {
+    public ResponseEntity<Void> verifyUser(@NotBlank(message = "Token is required") @RequestBody String token) {
         authService.verifyUser(token);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordDto dto) {
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordDto dto) {
         authService.forgotPassword(dto.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDto dto) {
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordDto dto) {
         authService.resetPassword(dto);
         return ResponseEntity.noContent().build();
     }

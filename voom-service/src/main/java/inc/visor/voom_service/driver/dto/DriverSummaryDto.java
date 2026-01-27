@@ -1,8 +1,13 @@
 package inc.visor.voom_service.driver.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,16 +17,44 @@ import java.time.LocalDateTime;
 @Setter
 public class DriverSummaryDto {
 
-    private Long id;
+    @NotNull(message = "User id must not be null")
+    private long id;
+
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 255, message = "First name must be between 2 and 255 characters")
     private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 255, message = "Last name must be between 2 and 255 characters")
     private String lastName;
-    private String pfpUrl;
-    private DriverStatus status;
-    private UserStatus userStatus;
-    private String email;
+
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 2, max = 55, message = "Phone number must be between 2 and 55 characters")
     private String phoneNumber;
-    private LocalDateTime birthDate;
+
+    @NotBlank(message = "Address is required")
+    @Size(min = 2, max = 255, message = "Address must be between 2 and 255 characters")
     private String address;
+
+    @NotNull(message = "Birth date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private LocalDateTime birthDate;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Size(max = 255, message = "Email must be at most 255 characters")
+    private String email;
+
+    @NotBlank(message = "User status is required")
+    private UserStatus userStatus;
+
+    @NotNull(message = "User role id is required")
+    private int userRoleId;
+
+    private String pfpUrl;
+
+    @NotNull(message = "Driver status is required")
+    private DriverStatus status;
 
     public DriverSummaryDto() {
     }

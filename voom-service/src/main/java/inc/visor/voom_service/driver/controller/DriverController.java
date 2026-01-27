@@ -65,7 +65,7 @@ public class DriverController {
     }
 
     @PostMapping("/admin")
-    public ResponseEntity<DriverSummaryDto> adminCreateDriver(@RequestBody AdminCreateDriverDto dto) {
+    public ResponseEntity<DriverSummaryDto> adminCreateDriver(@Valid @RequestBody AdminCreateDriverDto dto) {
         User user = this.userService.getUser(dto.getUserId()).orElseThrow(NotFoundException::new);
         Driver driver = new Driver(user, DriverStatus.AVAILABLE);
         driver = driverService.create(driver);
@@ -153,13 +153,6 @@ public class DriverController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/activation")
-    public ResponseEntity<Boolean> checkActivationToken(
-            @RequestParam String token
-    ) {
-        return ResponseEntity.ok(true);
-    }
-
     @PostMapping("/activation")
     public ResponseEntity<String> activateDriver(
             @Valid @RequestBody ActivateDriverRequestDto request
@@ -172,12 +165,6 @@ public class DriverController {
         );
 
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{driverId}/status")
-    public ResponseEntity<DriverSummaryDto> updateDriver(@PathVariable Long driverId, @RequestParam String status) {
-        DriverSummaryDto response = new DriverSummaryDto();
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/active-ride")
@@ -203,11 +190,7 @@ public class DriverController {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = this.userService.getUser(username).orElseThrow(NotFoundException::new);
 
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Long userId = user.getId();
+        long userId = user.getId();
 
         Driver driver = driverService.getDriverFromUser(userId).orElseThrow(NotFoundException::new);
 

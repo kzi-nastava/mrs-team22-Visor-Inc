@@ -10,7 +10,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {catchError, map, of} from 'rxjs';
 import {RideCancellationDto, RideRoutePointDto} from '../../../shared/rest/ride/ride.model';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {ActiveRideDto} from '../../user-pages/home/home.api';
+import {ActiveRideDto} from '../../user-pages/user-home/home.api';
 import {point} from 'leaflet';
 
 export type ArrivalDialogResult = 'START' | 'CANCEL';

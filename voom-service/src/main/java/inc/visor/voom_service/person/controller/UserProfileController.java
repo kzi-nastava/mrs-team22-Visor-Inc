@@ -58,6 +58,7 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.updateProfile(user, request));
     }
 
+    //FIXME what
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(
         @Valid @RequestBody ChangePasswordRequestDto request,

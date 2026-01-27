@@ -17,7 +17,7 @@ import { UserProfileApi } from './user-profile.api';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthenticationService } from '../../../shared/service/authentication-service';
 import { ApiResponse } from '../../../shared/rest/rest.model';
-import { DriverVehicleResponseDto, UserProfileResponseDto } from '../home/home.api';
+import { DriverVehicleResponseDto, UserProfileResponseDto } from '../user-home/home.api';
 import { FavoriteRouteDto, FavoriteRoutesApi } from '../favorite-routes/favorite-routes.api';
 import { FavoriteRoute } from '../favorite-routes/favorite-routes';
 import { RouterModule } from '@angular/router';

@@ -10,6 +10,7 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleService;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,7 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleDto> createVehicle(@RequestBody CreateVehicleDto dto) {
+    public ResponseEntity<VehicleDto> createVehicle(@Valid @RequestBody CreateVehicleDto dto) {
         Driver driver = driverService.getDriver(dto.getDriverId()).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = vehicleTypeService.getVehicleType(dto.getVehicleTypeId()).orElseThrow(NotFoundException::new);
         Vehicle vehicle = new Vehicle(dto, vehicleType, driver);
@@ -55,7 +56,7 @@ public class VehicleController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<VehicleDto> updateVehicle(@PathVariable long id, @RequestBody VehicleDto dto) {
+    public ResponseEntity<VehicleDto> updateVehicle(@PathVariable long id, @Valid @RequestBody VehicleDto dto) {
         Vehicle vehicle = vehicleService.getVehicle(id).orElseThrow(NotFoundException::new);
         Driver driver = driverService.getDriver(dto.getDriverId()).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = vehicleTypeService.getVehicleType(dto.getVehicleTypeId()).orElseThrow(NotFoundException::new);
