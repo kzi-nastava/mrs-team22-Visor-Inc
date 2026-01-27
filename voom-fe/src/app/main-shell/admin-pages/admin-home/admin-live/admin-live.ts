@@ -2,7 +2,7 @@ import {Component, effect, inject, signal, ViewChild} from '@angular/core';
 import {MatCard} from '@angular/material/card';
 import {AdminSupportChat} from './admin-support-chat/admin-support-chat';
 import {Map} from '../../../../shared/map/map';
-import {RoutePoint} from '../../../user-pages/home/user-home';
+import {RoutePoint} from '../../../user-pages/user-home/user-home';
 import {RideResponseDto} from '../../../../shared/rest/ride/ride.model';
 import {map} from 'rxjs';
 import ApiService from '../../../../shared/rest/api-service';
