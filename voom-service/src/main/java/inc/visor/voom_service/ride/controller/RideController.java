@@ -313,7 +313,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/report")
-    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
+    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody @Valid RideReportRequestDto body) {
         rideReportService.reportRide(id, body.getMessage());
         return ResponseEntity.noContent().build();
     }

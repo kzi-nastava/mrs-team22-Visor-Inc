@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,11 +17,13 @@ public class RideReport {
     @GeneratedValue
     private Long id;
 
+    @NotNull
     private Long rideId;
 
     @Column(length = 1000)
     private String message;
 
+    @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 
