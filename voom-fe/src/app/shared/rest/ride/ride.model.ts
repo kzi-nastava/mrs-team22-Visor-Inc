@@ -129,9 +129,9 @@ export type DriverSummaryDto = {
   status?: string;
 };
 
-export type RideRequestResponseDto = {
+export interface RideRequestResponseDto {
   requestId: number;
-  status: 'ACCEPTED' | 'REJECTED' | 'PENDING';
+  status: 'ACCEPTED' | 'REJECTED' | 'PENDING' | 'SCHEDULED' | 'CANCELLED';
   distanceKm: number;
   price: number;
   scheduledTime: string | null;
@@ -201,7 +201,7 @@ export interface User {
 
 export interface VehicleType {
   id: number;
-  name: string;
+  type: string;
   pricePerKm: number;
 }
 

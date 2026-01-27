@@ -319,7 +319,9 @@ export class UserHome implements AfterViewInit {
     const [h, m] = this.rideForm.value.scheduledTime!.split(':').map(Number);
     const date = new Date();
     date.setHours(h, m, 0, 0);
-    return date.toISOString();
+    return new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000
+    ).toISOString();
   }
 
   sendDriverToPickup(driverId: number, lat: number, lng: number) {

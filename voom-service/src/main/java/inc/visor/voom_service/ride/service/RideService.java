@@ -307,4 +307,7 @@ public class RideService {
         rideRepository.save(ride);
     }
 
+    public List<Ride> getScheduledRides(RideStatus rideStatus) {
+        return this.rideRepository.findByStatus(rideStatus);
+    }
 }

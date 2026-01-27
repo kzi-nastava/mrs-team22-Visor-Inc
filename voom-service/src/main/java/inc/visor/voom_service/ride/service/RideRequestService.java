@@ -24,6 +24,7 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -55,10 +56,6 @@ public class RideRequestService {
         this.driverSimulator = driverSimulator;
         this.userService = userService;
         this.vehicleTypeService = vehicleTypeService;
-    }
-
-    public Optional<RideRequest> getRideRequest(long id) {
-        return this.rideRequestRepository.findById(id);
     }
 
     public RideRequest update(RideRequest rideRequest) {

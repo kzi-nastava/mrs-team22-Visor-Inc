@@ -8,18 +8,15 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.LatLng;
-import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.ride.dto.*;
 import inc.visor.voom_service.ride.helpers.RideHistoryFormatter;
 import inc.visor.voom_service.ride.model.*;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
-import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.service.*;
 import inc.visor.voom_service.route.service.RideRouteService;
-import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.simulation.Simulator;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -51,9 +49,8 @@ public class RideController {
     private final RideRouteService rideRouteService;
     private final RideEstimateService rideEstimateService;
     private final RideWsService rideWsService;
-    private final OsrmService osrmService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService, OsrmService osrmService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.rideReportService = rideReportService;
@@ -66,7 +63,6 @@ public class RideController {
         this.rideRouteService = rideRouteService;
         this.rideEstimateService = rideEstimateService;
         this.rideWsService = rideWsService;
-        this.osrmService = osrmService;
     }
 
     @PostMapping("/requests")
@@ -210,7 +206,7 @@ public class RideController {
         rideRequest.setCancelledBy(user);
         rideRequest.setReason(dto.getMessage());
         this.rideRequestService.update(rideRequest);
-        ride.setStatus(RideStatus.CANCELLED);
+        ride.setStatus(RideStatus.DRIVER_CANCELLED);
 
         RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
         this.rideWsService.sendRideChanges(rideResponse);
@@ -390,6 +386,24 @@ public class RideController {
         return driverService.getDriver(userId).orElseThrow(NotFoundException::new);
     }
 
+    @GetMapping("/user/{userId}/scheduled")
+    public ResponseEntity<List<RideHistoryDto>> getScheduledRides(@PathVariable long userId) {
+        final List<Ride> cancelledScheduledRides = this.rideService.getScheduledRides(RideStatus.USER_CANCELLED);
+        final List<Ride> scheduledRides = this.rideService.getScheduledRides(RideStatus.SCHEDULED);
+        scheduledRides.addAll(cancelledScheduledRides);
+        final List<Ride> filteredScheduledRides = scheduledRides.stream().filter(scheduledRide -> scheduledRide.getRideRequest().getCreator().getId() == userId && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isBefore(LocalDateTime.now().atZone(ZoneId.of("Europe/Belgrade"))) && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isAfter(LocalDateTime.now().plusHours(5).atZone(ZoneId.of("Europe/Belgrade")))).toList();
+        return ResponseEntity.ok(filteredScheduledRides.stream().map(RideHistoryDto::new).toList());
+    }
 
-
+    @PostMapping("/scheduled/{id}/cancel")
+    public ResponseEntity<RideHistoryDto> cancelScheduledRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
+        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
+        final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
+        final RideRequest rideRequest = ride.getRideRequest();
+        rideRequest.setCancelledBy(user);
+        rideRequest.setReason(dto.getMessage());
+        ride.setRideRequest(this.rideRequestService.update(rideRequest));
+        ride.setStatus(RideStatus.USER_CANCELLED);
+        return ResponseEntity.ok(new RideHistoryDto(this.rideService.update(ride)));
+    }
 }
