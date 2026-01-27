@@ -1,5 +1,6 @@
 package inc.visor.voom_service.driver.controller;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class DriverActivityController {
     }
 
     @PostMapping
-    public ResponseEntity<DriverStateChangeDto> changeDriverState(@RequestBody DriverStateChangeDto dto) {
+    public ResponseEntity<DriverStateChangeDto> changeDriverState(@Valid @RequestBody DriverStateChangeDto dto) {
         Driver driver = this.driverService.getDriverFromUser(dto.getUserId()).orElseThrow(NotFoundException::new);
         DriverStateChange driverState = new DriverStateChange(driver, dto);
         driverState = this.driverActivityService.create(driverState);
