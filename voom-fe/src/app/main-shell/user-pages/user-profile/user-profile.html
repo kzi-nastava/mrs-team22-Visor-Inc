@@ -112,12 +112,14 @@
           </label>
         </div>
 
-        <div class="text-sm text-gray-700">
+        <div class="text-sm text-gray-700 text-right">
           <div>Active hours (last 24h):</div>
-          <div class="font-semibold mt-1">6.5h</div>
+          <div class="font-semibold mt-1">
+            {{ vehicleForm.controls.activeLast24Hours.value | number:'1.1-2' }}h
+          </div>
         </div>
       </div>
-
+      
       <div class="text-xs text-gray-500 italic text-center">
         Changes made by drivers require administrator approval.
       </div>

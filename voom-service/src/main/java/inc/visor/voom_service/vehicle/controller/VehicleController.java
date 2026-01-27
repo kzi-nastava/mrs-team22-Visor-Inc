@@ -9,10 +9,13 @@ import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleService;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import inc.visor.voom_service.mail.EmailService;
 
 @RestController
 @RequestMapping("api/vehicles")
@@ -21,11 +24,13 @@ public class VehicleController {
     private final VehicleService vehicleService;
     private final VehicleTypeService vehicleTypeService;
     private final DriverService driverService;
+    private final EmailService emailService;
 
-    public VehicleController(VehicleService vehicleService, VehicleTypeService vehicleTypeService, DriverService driverService) {
+    public VehicleController(VehicleService vehicleService, VehicleTypeService vehicleTypeService, DriverService driverService, EmailService emailService) {
         this.vehicleService = vehicleService;
         this.vehicleTypeService = vehicleTypeService;
         this.driverService = driverService;
+        this.emailService = emailService;
     }
 
     @GetMapping
@@ -44,6 +49,7 @@ public class VehicleController {
         Driver driver = driverService.getDriver(dto.getDriverId()).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = vehicleTypeService.getVehicleType(dto.getVehicleTypeId()).orElseThrow(NotFoundException::new);
         Vehicle vehicle = new Vehicle(dto, vehicleType, driver);
+        emailService.sendActivationEmail(driver.getUser());
         vehicle = vehicleService.create(vehicle);
         return ResponseEntity.ok(new VehicleDto(vehicle));
     }

@@ -32,7 +32,7 @@ export type DriverVehicleResponseDto = {
   numberOfSeats: number;
   babySeat: boolean;
   petFriendly: boolean;
-  activeHoursLast24h?: number;
+  activeLast24Hours?: number;
   driverId?: number;
 };
 

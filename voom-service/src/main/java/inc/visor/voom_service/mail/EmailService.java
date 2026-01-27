@@ -3,22 +3,26 @@ package inc.visor.voom_service.mail;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import jakarta.mail.MessagingException;
+import inc.visor.voom_service.activation.model.ActivationToken;
+import inc.visor.voom_service.activation.service.ActivationTokenService;
+import inc.visor.voom_service.auth.user.model.User;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final ActivationTokenService activationTokenService;
 
     @Value("${spring.mail.from:no-reply@voom.local}")
     private String from;
 
-    public EmailService(JavaMailSender mailSender) {
+    public EmailService(JavaMailSender mailSender, ActivationTokenService activationTokenService) {
         this.mailSender = mailSender;
+        this.activationTokenService = activationTokenService;
     }
 
     public void send(String to, String subject, String body) {
@@ -42,6 +46,27 @@ public class EmailService {
     public void sendActivationEmail(String to, String activationLink) {
         send(
                 to,
+                "Activate your Voom account",
+                """
+      Your account has been created.
+
+      Please activate your account by setting your password using the link below.
+      This link is valid for 24 hours.
+
+      %s
+      """.formatted(activationLink)
+        );
+    }
+
+    public void sendActivationEmail(User user) {
+        ActivationToken activationToken
+                = activationTokenService.createForUser(user);
+
+        String activationLink
+                = "http://localhost:4200/voom/activate?token=" + activationToken.getToken();
+
+        send(
+                user.getEmail(),
                 "Activate your Voom account",
                 """
       Your account has been created.

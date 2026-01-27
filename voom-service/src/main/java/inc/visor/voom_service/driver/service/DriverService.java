@@ -22,8 +22,11 @@ import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.VehicleChangeRequestStatus;
 import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverState;
+import inc.visor.voom_service.driver.model.DriverStateChange;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
+import inc.visor.voom_service.driver.repository.DriverActivityRepository;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
 import inc.visor.voom_service.mail.EmailService;
@@ -61,8 +64,9 @@ public class DriverService {
     private final RideService rideService;
     private final EmailService emailService;
     private final ActivationTokenService activationTokenService;
+    private final DriverActivityService driverActivityService;
 
-    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService, DriverVehicleChangeRequestRepository changeRequestRepository) {
+    public DriverService(VehicleRepository vehicleRepository, DriverRepository driverRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, UserRoleRepository userRoleRepository, PersonRepository personRepository, PasswordEncoder passwordEncoder, EmailService emailService, ActivationTokenService activationTokenService, RideRouteService routeService, RideService rideService, DriverVehicleChangeRequestRepository changeRequestRepository, DriverActivityService driverActivityService) {
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
@@ -74,6 +78,7 @@ public class DriverService {
         this.activationTokenService = activationTokenService;
         this.rideService = rideService;
         this.changeRequestRepository = changeRequestRepository;
+        this.driverActivityService = driverActivityService;
     }
 
     public void simulateMove(inc.visor.voom_service.driver.dto.DriverLocationDto dto) {
@@ -102,6 +107,8 @@ public class DriverService {
         Vehicle vehicle = vehicleRepository.findByDriverId(driver.getId())
                 .orElseThrow(() -> new IllegalStateException("Vehicle not found"));
 
+        double activeHours = calculateActiveHoursLast24h(driver.getId());
+
         VehicleSummaryDto dto = new VehicleSummaryDto(
                 vehicle.getVehicleType().getType(),
                 vehicle.getYear(),
@@ -110,7 +117,8 @@ public class DriverService {
                 vehicle.isBabySeat(),
                 vehicle.isPetFriendly(),
                 vehicle.getNumberOfSeats(),
-                driver.getId()
+                driver.getId(),
+                activeHours
         );
 
         return dto;
@@ -422,4 +430,41 @@ public class DriverService {
     public void save(Driver driver) {
         driverRepository.save(driver);
     }
+
+    public double calculateActiveHoursLast24h(Long driverId) {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime since = now.minusHours(24);
+
+        List<DriverStateChange> changes
+                = driverActivityService.findChangesSince(driverId, since);
+
+        if (changes.isEmpty()) {
+            return 0;
+        }
+
+        double activeSeconds = 0;
+
+        for (int i = 0; i < changes.size(); i++) {
+
+            DriverStateChange current = changes.get(i);
+
+            if (current.getCurrentState() == DriverState.ACTIVE) {
+
+                LocalDateTime start = current.getPerformedAt();
+                LocalDateTime end;
+
+                if (i + 1 < changes.size()) {
+                    end = changes.get(i + 1).getPerformedAt();
+                } else {
+                    end = now;
+                }
+
+                activeSeconds += Duration.between(start, end).getSeconds();
+            }
+        }
+
+        return activeSeconds / 3600.0;
+    }
+
 }
