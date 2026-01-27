@@ -423,6 +423,22 @@ public class RideController {
         return ResponseEntity.ok(filteredScheduledRides.stream().map(RideHistoryDto::new).toList());
     }
 
+    @GetMapping("/driver/scheduled")
+    public ResponseEntity<List<RideHistoryDto>> getScheduledRidesDriver(@PathVariable long userId, @AuthenticationPrincipal VoomUserDetails userDetails) {
+        final List<Ride> scheduledRides = this.rideService.getScheduledRides(RideStatus.SCHEDULED);
+        try {
+            final Driver driver = extractDriver(userDetails);
+            if (driver == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            final List<Ride> filteredScheduledRides = scheduledRides.stream().filter(scheduledRide -> scheduledRide.getDriver().getId() == driver.getId() && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isBefore(LocalDateTime.now().atZone(ZoneId.of("Europe/Belgrade"))) && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isAfter(LocalDateTime.now().plusHours(5).atZone(ZoneId.of("Europe/Belgrade")))).toList();
+            return ResponseEntity.ok(filteredScheduledRides.stream().map(RideHistoryDto::new).toList());
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @PostMapping("/scheduled/{id}/cancel")
     public ResponseEntity<RideHistoryDto> cancelScheduledRide(@PathVariable Long id, @RequestBody RideCancellationDto dto) {
         final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
