@@ -4,8 +4,9 @@ public enum RideStatus {
     SCHEDULED,
     ONGOING,
     STARTED,
-    CANCELLED,
+    DRIVER_CANCELLED,
     FINISHED,
     PANIC,
-    STOPPED
+    STOPPED,
+    USER_CANCELLED
 }

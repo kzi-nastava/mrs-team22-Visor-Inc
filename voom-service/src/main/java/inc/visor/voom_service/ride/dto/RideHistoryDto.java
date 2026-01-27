@@ -33,4 +33,7 @@ public class RideHistoryDto {
         this.passengers = ride.getPassengers();
         this.cancelledBy = ride.getRideRequest().getCancelledBy();
     }
+
+    public RideHistoryDto() {
+    }
 }

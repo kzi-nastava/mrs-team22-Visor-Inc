@@ -58,12 +58,6 @@ public class RideRequestService {
         this.vehicleTypeService = vehicleTypeService;
     }
 
-    public List<RideRequest> getOngoingRideRequests() { return this.rideRequestRepository.findUpcomingScheduled(LocalDateTime.now(), LocalDateTime.now().plusHours(5)); }
-
-    public Optional<RideRequest> getRideRequest(long id) {
-        return this.rideRequestRepository.findById(id);
-    }
-
     public RideRequest update(RideRequest rideRequest) {
         return this.rideRequestRepository.save(rideRequest);
     }
