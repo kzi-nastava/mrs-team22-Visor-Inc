@@ -1,6 +1,8 @@
 package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
+import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,9 +31,9 @@ public class RoutePointDto {
     public RoutePointDto() {
     }
 
-    public RoutePointDto(LatLng point, int index) {
+    public RoutePointDto(LatLng point, int i) {
         this.lat = point.lat();
         this.lng = point.lng();
-        this.orderIndex = index;
+        this.orderIndex = i;
     }
 }

@@ -1,15 +1,16 @@
 import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Map} from '../../../shared/map/map';
 import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
 import {FormsModule} from '@angular/forms';
 import {ActiveRideDto} from '../home/home.api';
-import {RoutePoint} from '../home/user-home';
+import {ROUTE_USER_HOME, RoutePoint} from '../home/user-home';
 import ApiService from '../../../shared/rest/api-service';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
+import {ROUTE_HOME} from '../../../unauthenticated/home/home';
 
 export const ROUTE_RIDE_TRACKING = 'ride/tracking';
 
@@ -22,6 +23,7 @@ export const ROUTE_RIDE_TRACKING = 'ride/tracking';
 export class RideTracking implements OnInit {
   @ViewChild(Map) map!: Map;
 
+  router = inject(Router);
   authenticationService = inject(AuthenticationService);
 
   rideId = signal<number | null>(null);
@@ -134,6 +136,18 @@ export class RideTracking implements OnInit {
         } else {
           this.map.updateDriverPosition(driverId, pos.lat, pos.lng);
         }
+      },
+      () => {
+        const user = this.user();
+        if (!user) return;
+        if (ride.passengerName !== user.firstName || !ride.passengerNames.includes(user.firstName)) return;
+        this.router.navigate([ROUTE_USER_HOME]);
+      },
+      (panic) => {
+        const user = this.user();
+        if (!user) return;
+        if (ride.passengerName !== user.firstName || !ride.passengerNames.includes(user.firstName)) return;
+        this.router.navigate([ROUTE_USER_HOME]);
       }
     );
   }
@@ -171,7 +185,7 @@ export class RideTracking implements OnInit {
     this.api.rideApi.ridePanic(rideId, { userId: user.id }).pipe(
       map(response => response.data),
     ).subscribe(rideResponse => {
-
+      this.router.navigate([ROUTE_USER_HOME]);
     });
   }
 }
