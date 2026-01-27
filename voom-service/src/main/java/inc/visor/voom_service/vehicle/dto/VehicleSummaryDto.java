@@ -28,4 +28,15 @@ public class VehicleSummaryDto {
         this.driverId = driverId;
         this.activeLast24Hours = activeLast24Hours;
     }
+
+    public VehicleSummaryDto(String type, int year, String model, String licensePlate, boolean babySeat, boolean petFriendly, int numberOfSeats, long id) {
+        this.vehicleType = vehicleType;
+        this.year = year;
+        this.model = model;
+        this.licensePlate = licensePlate;
+        this.babySeat = babySeat;
+        this.petFriendly = petFriendly;
+        this.numberOfSeats = numberOfSeats;
+        this.driverId = driverId;
+    }
 }
