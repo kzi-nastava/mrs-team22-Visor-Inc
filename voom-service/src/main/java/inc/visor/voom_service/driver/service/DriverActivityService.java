@@ -1,10 +1,12 @@
 package inc.visor.voom_service.driver.service;
 
-import inc.visor.voom_service.driver.model.DriverStateChange;
-import inc.visor.voom_service.driver.repository.DriverActivityRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import inc.visor.voom_service.driver.model.DriverStateChange;
+import inc.visor.voom_service.driver.repository.DriverActivityRepository;
 
 @Service
 public class DriverActivityService {
@@ -21,6 +23,10 @@ public class DriverActivityService {
 
     public Optional<DriverStateChange> getLastStateChange(long driverId) {
         return this.driverActivityRepository.getLastStateChange(driverId);
+    }
+
+    public List<DriverStateChange> findChangesSince(long driverId, java.time.LocalDateTime since) {
+        return this.driverActivityRepository.findChangesSince(driverId, since);
     }
 
 }

@@ -15,8 +15,9 @@ public class VehicleSummaryDto {
     private boolean petFriendly;
     private int numberOfSeats;
     private Long driverId;
+    private double activeLast24Hours;
 
-    public VehicleSummaryDto(String vehicleType, int year, String model, String licensePlate, boolean babySeat, boolean petFriendly, int numberOfSeats, Long driverId) {
+    public VehicleSummaryDto(String vehicleType, int year, String model, String licensePlate, boolean babySeat, boolean petFriendly, int numberOfSeats, Long driverId, double activeLast24Hours) {
         this.vehicleType = vehicleType;
         this.year = year;
         this.model = model;
@@ -25,5 +26,6 @@ public class VehicleSummaryDto {
         this.petFriendly = petFriendly;
         this.numberOfSeats = numberOfSeats;
         this.driverId = driverId;
+        this.activeLast24Hours = activeLast24Hours;
     }
 }

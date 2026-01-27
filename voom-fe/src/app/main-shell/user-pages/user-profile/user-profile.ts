@@ -107,6 +107,7 @@ export class UserProfile {
     seats: new FormControl<number | null>(null, Validators.required),
     babyTransportAllowed: new FormControl<boolean>(false),
     petsAllowed: new FormControl<boolean>(false),
+    activeLast24Hours: new FormControl<number | null>({value: null, disabled: true}),
   });
 
   ngOnInit(): void {
@@ -155,6 +156,7 @@ export class UserProfile {
             seats: vehicle?.numberOfSeats,
             babyTransportAllowed: vehicle?.babySeat,
             petsAllowed: vehicle?.petFriendly,
+            activeLast24Hours: vehicle?.activeHoursLast24h ?? 0,
           });
         },
 
