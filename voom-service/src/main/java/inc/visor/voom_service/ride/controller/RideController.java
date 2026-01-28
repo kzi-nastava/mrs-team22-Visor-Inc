@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -151,8 +152,6 @@ public class RideController {
         return ResponseEntity.ok().build();
     }
 
-    //FIXME @nikola0231 move to FavoriteRouteController
-
     @PostMapping("/favorites")
     public ResponseEntity<Void> createFavoriteRoute(@AuthenticationPrincipal VoomUserDetails userDetails, @Valid @RequestBody CreateFavoriteRouteRequest request) {
 
@@ -168,8 +167,6 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    //FIXME @nikola0231 move to FavoriteRouteController
-
     @GetMapping("/favorites")
     public ResponseEntity<List<FavoriteRouteDto>> getFavoriteRoutes(@AuthenticationPrincipal VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
@@ -182,8 +179,6 @@ public class RideController {
         List<FavoriteRouteDto> favoriteRoutes = favoriteRouteService.getAllByUserId(user.getId());
         return ResponseEntity.ok(favoriteRoutes);
     }
-
-    //FIXME @nikola0231 move to FavoriteRouteController
 
     @DeleteMapping("/favorites/{favoriteRouteId}")
     public ResponseEntity<Void> deleteFavoriteRoute(
@@ -203,7 +198,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails, @RequestBody StartRideDto request) {
+    public ResponseEntity<String> startRide(@PathVariable Long id, @AuthenticationPrincipal VoomUserDetails userDetails, @Validated @RequestBody StartRideDto request) {
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userProfileService.getUserByEmail(username);
 
@@ -212,7 +207,6 @@ public class RideController {
         }
 
         rideService.startRide(id, user.getId(), request.getRoutePoints());
-
 
         List<LatLng> latLngPoints = request.getRoutePoints().stream()
                 .map(point -> new LatLng(point.getLat(), point.getLng()))
