@@ -76,7 +76,7 @@ export class ArrivalDialog {
       routePoints: this.data.activeRide.routePoints.map((p) => ({
         lat: p.lat,
         lng: p.lng,
-        orderIndex: p.orderIndex,
+        orderIndex: p.orderIndex ?? 0,
         type: p.type,
         address: p.address,
       } as RideRoutePointDto)),

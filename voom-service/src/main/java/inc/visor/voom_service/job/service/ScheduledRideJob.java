@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.osrm.dto.ScheduledRideDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.shared.RoutePointDto;
@@ -49,29 +51,37 @@ public class ScheduledRideJob {
         List<ScheduledRideDto> payload = new ArrayList<>();
 
         for (RideRequest req : upcomingRequests) {
-            rideRepository.findByRideRequestId(req.getId()).ifPresent(ride -> {
 
-                ScheduledRideDto dto = new ScheduledRideDto();
-                dto.rideId = ride.getId();
-                dto.rideRequestId = req.getId();
-                dto.driverId = ride.getDriver() != null ? ride.getDriver().getId() : null;
-                dto.scheduledStartTime = req.getScheduledTime();
-                dto.status = ride.getStatus().name();
-                dto.creatorId = ride.getRideRequest().getCreator().getId();
-                dto.route = req.getRideRoute().getRoutePoints().stream()
-                        .map(p -> {
-                            RoutePointDto rp = new RoutePointDto();
-                            rp.setLat(p.getLatitude());
-                            rp.setLng(p.getLongitude());
-                            rp.setOrderIndex(p.getOrderIndex());
-                            rp.setType(p.getPointType());
-                            rp.setAddress(p.getAddress());
-                            return rp;
-                        })
-                        .toList();
+            Ride ride = rideRepository.findByRideRequestId(req.getId()).orElse(null);
 
-                payload.add(dto);
-            });
+            if (ride == null) {
+                continue;
+            }
+
+            if (ride.getStatus() != RideStatus.SCHEDULED) {
+                continue;   // <-- ovde PRESKAČEŠ kompletan ride
+            }
+
+            ScheduledRideDto dto = new ScheduledRideDto();
+            dto.rideId = ride.getId();
+            dto.rideRequestId = req.getId();
+            dto.driverId = ride.getDriver() != null ? ride.getDriver().getId() : null;
+            dto.scheduledStartTime = req.getScheduledTime();
+            dto.status = ride.getStatus().name();
+            dto.creatorId = ride.getRideRequest().getCreator().getId();
+            dto.route = req.getRideRoute().getRoutePoints().stream()
+                    .map(p -> {
+                        RoutePointDto rp = new RoutePointDto();
+                        rp.setLat(p.getLatitude());
+                        rp.setLng(p.getLongitude());
+                        rp.setOrderIndex(p.getOrderIndex());
+                        rp.setType(p.getPointType());
+                        rp.setAddress(p.getAddress());
+                        return rp;
+                    })
+                    .toList();
+
+            payload.add(dto);
         }
 
         rideWsService.sendScheduledRides(payload);

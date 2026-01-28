@@ -1,24 +1,24 @@
-import {AfterViewInit, Component, computed, inject, signal, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Map} from '../../../shared/map/map';
-import {Dropdown} from '../../../shared/dropdown/dropdown';
-import {ValueInputString} from '../../../shared/value-input/value-input-string/value-input-string';
-import {MatButton} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {DriverSummaryDto, RideApi, RideRequestDto, ScheduledRideDto,} from './home.api';
-import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
-import {DriverSimulationWsService} from '../../../shared/websocket/DriverSimulationWsService';
-import {Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
-import {FavoriteRouteNameDialog} from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
-import {FavoriteRouteDto} from '../favorite-routes/favorite-routes.api';
-import {map} from 'rxjs';
+import { AfterViewInit, Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Map } from '../../../shared/map/map';
+import { Dropdown } from '../../../shared/dropdown/dropdown';
+import { ValueInputString } from '../../../shared/value-input/value-input-string/value-input-string';
+import { MatButton } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DriverSummaryDto, RideApi, RideRequestDto, ScheduledRideDto } from './home.api';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { DriverSimulationWsService } from '../../../shared/websocket/DriverSimulationWsService';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { FavoriteRouteNameDialog } from '../favorite-routes/favorite-route-name-dialog/favorite-route-name-dialog';
+import { FavoriteRouteDto } from '../favorite-routes/favorite-routes.api';
+import { map } from 'rxjs';
 import ApiService from '../../../shared/rest/api-service';
-import {AuthenticationService} from '../../../shared/service/authentication-service';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {RideResponseDto} from '../../../shared/rest/ride/ride.model';
+import { AuthenticationService } from '../../../shared/service/authentication-service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RideResponseDto } from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_USER_HOME = 'ride';
 
@@ -52,7 +52,6 @@ export interface RoutePoint {
   styleUrl: './user-home.css',
 })
 export class UserHome implements AfterViewInit {
-
   @ViewChild(Map) map!: Map;
 
   constructor(
@@ -137,7 +136,7 @@ export class UserHome implements AfterViewInit {
   private handleScheduledRides(rides: ScheduledRideDto[]) {
     if (!rides || rides.length === 0) return;
 
-    const now = Date.now(); // one hour back to account for server-client time diff
+    const now = Date.now(); 
     const TEN_MIN = 10 * 60 * 1000;
 
     const ride = rides
@@ -155,8 +154,6 @@ export class UserHome implements AfterViewInit {
     if (!ride) return;
 
     if (this.scheduledRide()?.rideId === ride.rideId) return;
-
-    
 
     this.scheduledRide.set(ride);
     this.isRideLocked.set(true);
@@ -214,14 +211,18 @@ export class UserHome implements AfterViewInit {
     if (!value) return false;
 
     const now = new Date();
+    now.setSeconds(0, 0); 
+
     const selected = new Date();
     const [h, m] = value.split(':').map(Number);
-
     selected.setHours(h, m, 0, 0);
 
-    console.log(selected, now);
+    if (selected < now) {
+      selected.setDate(selected.getDate() + 1);
+    }
 
     const diffMinutes = (selected.getTime() - now.getTime()) / 60000;
+
     return diffMinutes >= 0 && diffMinutes <= 300;
   }
 
@@ -324,9 +325,7 @@ export class UserHome implements AfterViewInit {
     const [h, m] = this.rideForm.value.scheduledTime!.split(':').map(Number);
     const date = new Date();
     date.setHours(h, m, 0, 0);
-    return new Date(
-      date.getTime() - date.getTimezoneOffset() * 60000
-    ).toISOString();
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
   }
 
   sendDriverToPickup(driverId: number, lat: number, lng: number) {
@@ -388,8 +387,10 @@ export class UserHome implements AfterViewInit {
             if (res.pickupLat && res.pickupLng && res.scheduledTime === null) {
               this.sendDriverToPickup(res.driver.id, res.pickupLat, res.pickupLng);
             }
-            this.isRideLocked.set(true);
-            this.rideForm.disable({ emitEvent: false });
+            if (this.selectedTime === 'NOW') {
+              this.isRideLocked.set(true);
+              this.rideForm.disable({ emitEvent: false });
+            }
           } else {
             this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
           }
@@ -411,7 +412,6 @@ export class UserHome implements AfterViewInit {
 
     this.loadActiveDrivers();
     this.restoreActiveRide();
-
   }
 
   private applyFavoriteRoute(route: FavoriteRouteDto) {
@@ -439,39 +439,39 @@ export class UserHome implements AfterViewInit {
   }
 
   private restoreActiveRide() {
-  this.rideApi.getOngoingRide().subscribe({
-    next: (res) => {
-      if (!res.data) return;
+    this.rideApi.getOngoingRide().subscribe({
+      next: (res) => {
+        if (!res.data) return;
 
-      const activeRide = res.data;
+        const activeRide = res.data;
 
-      const points = activeRide.routePoints
-        .slice()
-        .sort((a, b) => a.orderIndex - b.orderIndex)
-        .map((p) => ({
-          id: crypto.randomUUID(),
-          lat: p.lat,
-          lng: p.lng,
-          address: p.address,
-          type: p.type,
-          orderIndex: p.orderIndex,
-        }));
+        const points = activeRide.routePoints
+          .slice()
+          .sort((a, b) => a.orderIndex - b.orderIndex)
+          .map((p) => ({
+            id: crypto.randomUUID(),
+            lat: p.lat,
+            lng: p.lng,
+            address: p.address,
+            type: p.type,
+            orderIndex: p.orderIndex,
+          }));
 
-      this.routePoints.set(points);
+        this.routePoints.set(points);
 
-      const pickup = points.find((p) => p.type === 'PICKUP');
-      const dropoff = points.find((p) => p.type === 'DROPOFF');
+        const pickup = points.find((p) => p.type === 'PICKUP');
+        const dropoff = points.find((p) => p.type === 'DROPOFF');
 
-      this.rideForm.patchValue({
-        pickup: pickup?.address ?? '',
-        dropoff: dropoff?.address ?? '',
-      });
+        this.rideForm.patchValue({
+          pickup: pickup?.address ?? '',
+          dropoff: dropoff?.address ?? '',
+        });
 
-      console.log(activeRide)
+        console.log(activeRide);
 
-      this.isRideLocked.set(true);
-      this.rideForm.disable({ emitEvent: false });
-    },
+        this.isRideLocked.set(true);
+        this.rideForm.disable({ emitEvent: false });
+      },
       error: () => {
         console.error('Failed to restore active ride');
       },
@@ -556,13 +556,19 @@ export class UserHome implements AfterViewInit {
         (ride) => {
           const user = this.user();
           if (!user) return;
-          if (ride.passengerName === user.firstName || ride.passengerNames.includes(user.firstName)) {
+          if (
+            ride.passengerName === user.firstName ||
+            ride.passengerNames.includes(user.firstName)
+          ) {
             this.onMapCleared();
             this.rideForm.enable({ emitEvent: false });
             this.scheduledRide.set(null);
             this.isRideLocked.set(false);
-            this.snackBar.open("Ride status " + ride.status, '', { duration: 3000, horizontalPosition: "right" } );
-            if (ride.status === "STOPPED") {
+            this.snackBar.open('Ride status ' + ride.status, '', {
+              duration: 3000,
+              horizontalPosition: 'right',
+            });
+            if (ride.status === 'STOPPED') {
               this.router.navigate(['/user/ride/tracking/']);
             }
           }
@@ -570,14 +576,20 @@ export class UserHome implements AfterViewInit {
         (panic) => {
           const user = this.user();
           if (!user) return;
-          if (panic.passengerName === user.firstName || panic.passengerNames.includes(user.firstName)) {
+          if (
+            panic.passengerName === user.firstName ||
+            panic.passengerNames.includes(user.firstName)
+          ) {
             this.onMapCleared();
             this.rideForm.enable({ emitEvent: false });
             this.scheduledRide.set(null);
             this.isRideLocked.set(false);
-            this.snackBar.open("Ride status " + panic.status, '', { duration: 3000, horizontalPosition: "right" } );
+            this.snackBar.open('Ride status ' + panic.status, '', {
+              duration: 3000,
+              horizontalPosition: 'right',
+            });
           }
-        }
+        },
       );
     });
   }

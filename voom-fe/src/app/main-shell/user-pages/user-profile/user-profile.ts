@@ -156,7 +156,7 @@ export class UserProfile {
             seats: vehicle?.numberOfSeats,
             babyTransportAllowed: vehicle?.babySeat,
             petsAllowed: vehicle?.petFriendly,
-            activeLast24Hours: vehicle?.activeHoursLast24h ?? 0,
+            activeLast24Hours: vehicle?.activeLast24Hours ?? 0,
           });
         },
 
