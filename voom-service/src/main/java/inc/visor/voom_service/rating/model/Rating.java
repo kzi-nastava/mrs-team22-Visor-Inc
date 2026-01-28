@@ -1,10 +1,9 @@
 package inc.visor.voom_service.rating.model;
 
 import inc.visor.voom_service.ride.model.Ride;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -32,6 +31,7 @@ public class Rating {
     @JoinColumn(name = "ride_id", nullable = false)
     private Ride ride;
 
+    @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 

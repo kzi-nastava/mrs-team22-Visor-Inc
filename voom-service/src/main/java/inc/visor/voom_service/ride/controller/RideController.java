@@ -313,7 +313,7 @@ public class RideController {
     }
 
     @PostMapping("/{id}/report")
-    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody RideReportRequestDto body) {
+    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody @Valid RideReportRequestDto body) {
         rideReportService.reportRide(id, body.getMessage());
         return ResponseEntity.noContent().build();
     }
@@ -421,6 +421,22 @@ public class RideController {
         scheduledRides.addAll(cancelledScheduledRides);
         final List<Ride> filteredScheduledRides = scheduledRides.stream().filter(scheduledRide -> scheduledRide.getRideRequest().getCreator().getId() == userId && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isBefore(LocalDateTime.now().atZone(ZoneId.of("Europe/Belgrade"))) && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isAfter(LocalDateTime.now().plusHours(5).atZone(ZoneId.of("Europe/Belgrade")))).toList();
         return ResponseEntity.ok(filteredScheduledRides.stream().map(RideHistoryDto::new).toList());
+    }
+
+    @GetMapping("/driver/scheduled")
+    public ResponseEntity<List<RideHistoryDto>> getScheduledRidesDriver(@AuthenticationPrincipal VoomUserDetails userDetails) {
+        final List<Ride> scheduledRides = this.rideService.getScheduledRides(RideStatus.SCHEDULED);
+        try {
+            final Driver driver = extractDriver(userDetails);
+            if (driver == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            final List<Ride> filteredScheduledRides = scheduledRides.stream().filter(scheduledRide -> scheduledRide.getDriver().getId() == driver.getId() && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isBefore(LocalDateTime.now().atZone(ZoneId.of("Europe/Belgrade"))) && !scheduledRide.getRideRequest().getScheduledTime().atZone(ZoneId.of("Europe/Belgrade")).isAfter(LocalDateTime.now().plusHours(5).atZone(ZoneId.of("Europe/Belgrade")))).toList();
+            return ResponseEntity.ok(filteredScheduledRides.stream().map(RideHistoryDto::new).toList());
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/scheduled/{id}/cancel")

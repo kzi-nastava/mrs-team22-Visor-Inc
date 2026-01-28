@@ -3,12 +3,17 @@ import {DriverRideHistory, ROUTE_DRIVER_RIDE_HISTORY} from './ride-history/drive
 import {DriverHome, ROUTE_DRIVER_HOME} from './driver-home/driver-home';
 import {DriverPages} from './driver-pages';
 import { ROUTE_USER_PROFILE, UserProfile } from "../user-pages/user-profile/user-profile";
+import { ROUTE_SCHEDULED_RIDES, ScheduledRides } from "./scheduled-rides/scheduled-rides";
 
 export default [
   {
     path: '',
     component: DriverPages,
     children: [
+      {
+        path: ROUTE_SCHEDULED_RIDES,
+        component: ScheduledRides,
+      },
       {
         path: ROUTE_DRIVER_HOME,
         component: DriverHome,

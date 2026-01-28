@@ -149,11 +149,14 @@ export class UserHome implements AfterViewInit {
         const diff = r.startMs - now;
         return diff >= 0 && diff <= TEN_MIN;
       })
+      .filter((r) => r.creatorId === this.user()?.id)
       .sort((a, b) => a.startMs - b.startMs)[0];
 
     if (!ride) return;
 
     if (this.scheduledRide()?.rideId === ride.rideId) return;
+
+    
 
     this.scheduledRide.set(ride);
     this.isRideLocked.set(true);
@@ -215,6 +218,8 @@ export class UserHome implements AfterViewInit {
     const [h, m] = value.split(':').map(Number);
 
     selected.setHours(h, m, 0, 0);
+
+    console.log(selected, now);
 
     const diffMinutes = (selected.getTime() - now.getTime()) / 60000;
     return diffMinutes >= 0 && diffMinutes <= 300;
