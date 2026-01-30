@@ -4,26 +4,31 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
-import inc.visor.voom.app.user.home.UserHomeViewModel;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
+
 
 public class DriverSimulationWsService {
 
     private final DriverSimulationManager simulationManager;
+    private final DriverMetaProvider metaProvider;
     private StompClient stompClient;
 
-    private final UserHomeViewModel viewModel;
-
-    public DriverSimulationWsService(DriverSimulationManager simulationManager,
-                                     UserHomeViewModel viewModel) {
+    public DriverSimulationWsService(
+            DriverSimulationManager simulationManager,
+            DriverMetaProvider metaProvider
+    ) {
         this.simulationManager = simulationManager;
-        this.viewModel = viewModel;
+        this.metaProvider = metaProvider;
     }
 
+    public DriverSimulationWsService(DriverSimulationManager simulationManager) {
+        this(simulationManager, null);
+    }
 
     public void connect() {
 
@@ -38,14 +43,6 @@ public class DriverSimulationWsService {
 
                 case OPENED:
                     Log.d("WS", "Connected");
-
-                    stompClient.topic("/topic/drivers-positions")
-                            .subscribe(topicMessage -> {
-                                // handle message
-                            }, throwable -> {
-                                Log.e("WS", "Topic error", throwable);
-                            });
-
                     break;
 
                 case ERROR:
@@ -69,7 +66,11 @@ public class DriverSimulationWsService {
                                     DriverPositionDto.class
                             );
 
-                    DriverSummaryDto meta = viewModel.findActiveDriver((int) dto.driverId);
+                    DriverSummaryDto meta = null;
+
+                    if (metaProvider != null) {
+                        meta = metaProvider.findActiveDriver((int) dto.driverId);
+                    }
 
                     simulationManager.updateDriverPosition(
                             dto.driverId,
@@ -77,7 +78,6 @@ public class DriverSimulationWsService {
                             dto.lng,
                             meta
                     );
-
                 });
     }
 
@@ -87,5 +87,3 @@ public class DriverSimulationWsService {
         }
     }
 }
-
-

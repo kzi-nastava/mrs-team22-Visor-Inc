@@ -11,12 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
-public class UserHomeViewModel extends ViewModel {
+public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
 
     private final MutableLiveData<List<RoutePoint>> routePoints =
             new MutableLiveData<>(new ArrayList<>());

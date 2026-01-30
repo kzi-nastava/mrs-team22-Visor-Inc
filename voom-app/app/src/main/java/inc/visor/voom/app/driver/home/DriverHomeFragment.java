@@ -1,13 +1,12 @@
 package inc.visor.voom.app.driver.home;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -17,7 +16,6 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.osmdroid.api.IMapController;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
@@ -25,18 +23,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.driver.api.DriverApi;
+import inc.visor.voom.app.driver.dto.DriverSummaryDto;
+import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.service.MapRendererService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DriverHomeFragment extends Fragment {
 
-    private MapView map = null;
+    private MapView map;
+    private MapRendererService mapRenderer;
+    private DriverHomeViewModel viewModel;
 
     public DriverHomeFragment() {
-        // Required empty public constructor
+        super(R.layout.fragment_driver_home);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
+
+        setupChart(view);
+        setupMap(view);
+        loadDriversAndStartSimulation();
+        observeDrivers();
+    }
+
+    private void setupChart(View view) {
         PieChart pieChart = view.findViewById(R.id.pie_chart);
 
         List<PieEntry> entries = new ArrayList<>();
@@ -58,21 +75,57 @@ public class DriverHomeFragment extends Fragment {
         pieChart.invalidate();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.fragment_driver_home, container, false);
-
-        MapView map = view.findViewById(R.id.map);
+    private void setupMap(View view) {
+        map = view.findViewById(R.id.map);
         map.setMultiTouchControls(true);
 
         IMapController controller = map.getController();
         controller.setZoom(15.0);
+        controller.setCenter(new GeoPoint(45.2671, 19.8335));
 
-        GeoPoint startPoint = new GeoPoint(45.2671, 19.8335); // Novi Sad 🙂
-        controller.setCenter(startPoint);
+        mapRenderer = new MapRendererService(map);
 
-        return view;
+        // 🔥 Sprečava NestedScrollView da krade touch
+        map.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
+    }
+
+    private void loadDriversAndStartSimulation() {
+
+        DriverApi driverApi = RetrofitClient
+                .getInstance()
+                .create(DriverApi.class);
+
+        driverApi.getActiveDrivers().enqueue(new Callback<List<DriverSummaryDto>>() {
+
+            @Override
+            public void onResponse(Call<List<DriverSummaryDto>> call,
+                                   Response<List<DriverSummaryDto>> response) {
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    return;
+                }
+
+                viewModel.setActiveDrivers(response.body());
+
+                viewModel.startSimulation();
+            }
+
+            @Override
+            public void onFailure(Call<List<DriverSummaryDto>> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void observeDrivers() {
+        viewModel.getSimulationManager()
+                .getDrivers()
+                .observe(getViewLifecycleOwner(), drivers -> {
+                    mapRenderer.renderDrivers(drivers);
+                });
     }
 
     @Override
