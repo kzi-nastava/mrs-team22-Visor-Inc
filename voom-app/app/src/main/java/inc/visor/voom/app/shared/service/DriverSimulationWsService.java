@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import inc.visor.voom.app.driver.api.DriverMetaProvider;
+import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
@@ -17,17 +18,23 @@ public class DriverSimulationWsService {
     private final DriverSimulationManager simulationManager;
     private final DriverMetaProvider metaProvider;
     private StompClient stompClient;
+    private final DriverAssignmentListener assignmentListener;
 
     public DriverSimulationWsService(
             DriverSimulationManager simulationManager,
             DriverMetaProvider metaProvider
     ) {
-        this.simulationManager = simulationManager;
-        this.metaProvider = metaProvider;
+        this(simulationManager, metaProvider, null);
     }
 
-    public DriverSimulationWsService(DriverSimulationManager simulationManager) {
-        this(simulationManager, null);
+    public DriverSimulationWsService(
+            DriverSimulationManager simulationManager,
+            DriverMetaProvider metaProvider,
+            DriverAssignmentListener assignmentListener
+    ) {
+        this.simulationManager = simulationManager;
+        this.metaProvider = metaProvider;
+        this.assignmentListener = assignmentListener;
     }
 
     public void connect() {
@@ -79,6 +86,32 @@ public class DriverSimulationWsService {
                             meta
                     );
                 });
+
+        stompClient.topic("/topic/driver-assigned")
+                .subscribe(topicMessage -> {
+
+                    Log.d("WS_ASSIGN", "RAW MESSAGE: " + topicMessage.getPayload());
+
+                    DriverAssignedDto dto =
+                            new Gson().fromJson(
+                                    topicMessage.getPayload(),
+                                    DriverAssignedDto.class
+                            );
+
+                    Log.d("WS_ASSIGN", "Parsed driverId: " + dto.driverId);
+
+                    if (assignmentListener != null) {
+                        Log.d("WS_ASSIGN", "Calling assignmentListener...");
+                        assignmentListener.onDriverAssigned(dto);
+                    } else {
+                        Log.d("WS_ASSIGN", "assignmentListener is NULL!");
+                    }
+
+                }, throwable -> {
+                    Log.e("WS_ASSIGN", "Assigned topic error", throwable);
+                });
+
+
     }
 
     public void disconnect() {

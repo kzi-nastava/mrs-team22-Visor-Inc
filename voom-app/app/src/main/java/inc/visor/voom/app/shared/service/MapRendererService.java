@@ -15,6 +15,7 @@ import java.util.Map;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.shared.component.DriverInfoWindow;
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
@@ -113,7 +114,50 @@ public class MapRendererService {
 
         mapView.invalidate();
     }
+    public void renderRouteMarkers(List<RoutePointDto> points) {
 
+        for (Marker m : routeMarkers) {
+            mapView.getOverlays().remove(m);
+        }
+        routeMarkers.clear();
+
+        for (RoutePointDto point : points) {
+
+            GeoPoint geoPoint = new GeoPoint(
+                    point.lat,
+                    point.lng
+            );
+
+            Marker marker = new Marker(mapView);
+            marker.setPosition(geoPoint);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+            mapView.getOverlays().add(marker);
+            routeMarkers.add(marker);
+        }
+
+        mapView.invalidate();
+    }
+
+
+    public void renderSimpleRoute(List<RoutePoint> points) {
+
+        clearRoute();
+
+        List<GeoPoint> geoPoints = new ArrayList<>();
+
+        for (RoutePoint p : points) {
+            geoPoints.add(new GeoPoint(p.lat, p.lng));
+        }
+
+        routeLine = new Polyline();
+        routeLine.setPoints(geoPoints);
+        routeLine.setColor(Color.parseColor("#2563eb"));
+        routeLine.setWidth(6f);
+
+        mapView.getOverlays().add(routeLine);
+        mapView.invalidate();
+    }
 
 }
 
