@@ -1,5 +1,7 @@
 package inc.visor.voom.app.user.main;
 
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -39,6 +41,20 @@ public class MainUserFragment extends Fragment {
         NavController navController = NavHostFragment.findNavController(getChildFragmentManager().findFragmentById(R.id.user_nav_host));
 
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation_view);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (requireContext().checkSelfPermission(
+                    android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                requestPermissions(
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        100
+                );
+            }
+        }
+
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();

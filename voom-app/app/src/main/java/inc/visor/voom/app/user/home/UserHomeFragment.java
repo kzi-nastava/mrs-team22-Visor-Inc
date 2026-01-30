@@ -30,10 +30,13 @@ import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
+import inc.visor.voom.app.shared.helper.DistanceHelper;
+import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
+import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
@@ -51,6 +54,8 @@ public class UserHomeFragment extends Fragment {
     private LocationRepository locationRepository;
     private DriverSimulationManager simulationManager;
     private DriverSimulationWsService wsService;
+
+    private Boolean arrivalNotified = false;
 
 
     public UserHomeFragment() {
@@ -205,7 +210,37 @@ public class UserHomeFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), drivers -> {
 
                     mapRenderer.renderDrivers(drivers);
+
+                    if (Boolean.TRUE.equals(viewModel.isRideLocked().getValue())
+                            && !arrivalNotified) {
+
+                        List<RoutePoint> points =
+                                viewModel.getRoutePoints().getValue();
+
+                        if (points == null || points.isEmpty()) return;
+
+                        RoutePoint pickup = points.get(0);
+
+                        for (SimulatedDriver driver : drivers) {
+
+                            float distance = DistanceHelper.distanceInMeters(
+                                    driver.currentPosition.getLatitude(),
+                                    driver.currentPosition.getLongitude(),
+                                    pickup.lat,
+                                    pickup.lng
+                            );
+
+                            if (distance < 15) {
+
+                                NotificationService.showArrivalNotification(requireContext());
+                                arrivalNotified = true;
+                                break;
+                            }
+
+                        }
+                    }
                 });
+
 
     }
 
@@ -261,6 +296,7 @@ public class UserHomeFragment extends Fragment {
             if (locked) {
                 mapView.setClickable(false);
                 mapView.setFocusable(false);
+                arrivalNotified = false;
             } else {
                 mapView.setClickable(true);
                 mapView.setFocusable(true);
@@ -268,7 +304,6 @@ public class UserHomeFragment extends Fragment {
         });
 
     }
-
     private void setEnabledRecursive(View view, boolean enabled) {
 
         view.setEnabled(enabled);
@@ -280,7 +315,6 @@ public class UserHomeFragment extends Fragment {
             }
         }
     }
-
 
     private void renderUI(List<RoutePoint> points) {
         renderForm(points);
