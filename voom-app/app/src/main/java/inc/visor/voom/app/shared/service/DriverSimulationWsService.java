@@ -29,7 +29,7 @@ public class DriverSimulationWsService {
 
         stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
-                "ws://192.168.1.11:8080/ws"
+                "ws://192.168.100.59:8080/ws"
         );
 
         stompClient.lifecycle().subscribe(lifecycleEvent -> {

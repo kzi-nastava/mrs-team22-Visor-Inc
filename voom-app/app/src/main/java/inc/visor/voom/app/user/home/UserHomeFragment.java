@@ -3,6 +3,7 @@ package inc.visor.voom.app.user.home;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 
@@ -254,11 +255,32 @@ public class UserHomeFragment extends Fragment {
 
         viewModel.isRideLocked().observe(getViewLifecycleOwner(), locked -> {
 
-            requireView().findViewById(R.id.btn_confirm).setEnabled(!locked);
-            requireView().findViewById(R.id.dd_vehicle).setEnabled(!locked);
-            requireView().findViewById(R.id.dd_time).setEnabled(!locked);
+            View root = requireView().findViewById(R.id.root_container);
+            setEnabledRecursive(root, !locked);
+
+            if (locked) {
+                mapView.setClickable(false);
+                mapView.setFocusable(false);
+            } else {
+                mapView.setClickable(true);
+                mapView.setFocusable(true);
+            }
         });
+
     }
+
+    private void setEnabledRecursive(View view, boolean enabled) {
+
+        view.setEnabled(enabled);
+
+        if (view instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                setEnabledRecursive(vg.getChildAt(i), enabled);
+            }
+        }
+    }
+
 
     private void renderUI(List<RoutePoint> points) {
         renderForm(points);
