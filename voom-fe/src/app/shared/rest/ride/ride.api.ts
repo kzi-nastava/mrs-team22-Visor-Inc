@@ -119,51 +119,51 @@ export class RideApi extends Api {
   }
 
   reportRide(rideId: number, body: RideReportRequestDto) {
-  const config: RequestConfig = {
-    headers: {
-      contentType: 'application/json',
-    },
-    authenticated: true,
-  };
+    const config: RequestConfig = {
+      headers: {
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
 
-  return this.apiClient.post<RideReportRequestDto, void>(
-    `/api/rides/${rideId}/report`,
-    body,
-    config
-  );
-}
+    return this.apiClient.post<RideReportRequestDto, void>(
+      `/api/rides/${rideId}/report`,
+      body,
+      config
+    );
+  }
 
-rateRide(rideId: number, body: RatingRequestDto) {
-  const config: RequestConfig = {
-    headers: {
-      contentType: 'application/json',
-    },
-    authenticated: true,
-  };
+  rateRide(rideId: number, body: RatingRequestDto) {
+    const config: RequestConfig = {
+      headers: {
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
 
-  return this.apiClient.post<RatingRequestDto, void>(
-    `/api/rating/${rideId}`,
-    body,
-    config
-  );
-}
+    return this.apiClient.post<RatingRequestDto, void>(
+      `/api/rating/${rideId}`,
+      body,
+      config
+    );
+  }
 
-finishOngoingRide() {
-  const config: RequestConfig = {
-    headers: {
-      accept: 'application/json',
-    },
-    authenticated: true,
-  };
+  finishOngoingRide() {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      authenticated: true,
+    };
 
-  return this.apiClient.post<void, OngoingRideDto>(
-    '/api/rides/finish-ongoing',
-    undefined,
-    config
-  );
-}
+    return this.apiClient.post<void, OngoingRideDto>(
+      '/api/rides/finish-ongoing',
+      undefined,
+      config
+    );
+  }
 
-getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
+  getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
@@ -174,7 +174,7 @@ getOngoingRide(): Observable<ApiResponse<ActiveRideDto>> {
     return this.apiClient.get<void, ActiveRideDto>(`/api/rides/ongoing`, config);
   }
 
-getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
+  getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
     const queryParams: any = {
       sort: sort.toUpperCase()
     };
@@ -197,6 +197,33 @@ getDriverRideHistory(dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' |
 
     return this.apiClient.get<void, RideHistoryDto[]>(
       `/api/rides/driver/history`,
+      config
+    );
+  }
+
+  getUserRideHistory(userId: number, dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
+    const queryParams: any = {
+      sort: sort.toUpperCase()
+    };
+
+    if (dateFrom) {
+      queryParams.dateFrom = dateFrom.toISOString();
+    }
+    if (dateTo) {
+      queryParams.dateTo = dateTo.toISOString();
+    }
+
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json'
+      },
+      params: queryParams,
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, RideHistoryDto[]>(
+      `/api/rides/user/${userId}/history`,
       config
     );
   }
