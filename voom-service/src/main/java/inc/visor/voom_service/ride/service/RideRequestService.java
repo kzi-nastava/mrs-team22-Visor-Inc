@@ -1,5 +1,10 @@
 package inc.visor.voom_service.ride.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
@@ -18,16 +23,11 @@ import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RideRequestService {
@@ -40,13 +40,14 @@ public class RideRequestService {
     private final UserService userService;
     private final VehicleTypeService vehicleTypeService;
     private final RideService rideService;
+    private final RideRepository rideRepository; 
 
     public RideRequestService(
             RideRequestRepository rideRequestRepository,
             RideEstimateService rideEstimationService,
             DriverService driverService,
             RideWsService rideWsService,
-            Simulator driverSimulator, UserService userService, VehicleTypeService vehicleTypeService, RideService rideService
+            Simulator driverSimulator, UserService userService, VehicleTypeService vehicleTypeService, RideService rideService, RideRepository rideRepository
     ) {
         this.rideRequestRepository = rideRequestRepository;
         this.rideEstimationService = rideEstimationService;
@@ -56,6 +57,7 @@ public class RideRequestService {
         this.driverSimulator = driverSimulator;
         this.userService = userService;
         this.vehicleTypeService = vehicleTypeService;
+        this.rideRepository = rideRepository;
     }
 
     public RideRequest update(RideRequest rideRequest) {
@@ -107,9 +109,8 @@ public class RideRequestService {
         ride.setPassengers(passengers);
 
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
-            DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             this.rideService.save(ride);
-            rideRepository.save(ride);
+            DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             System.out.println("Sending driver assigned via WS: " + driverAssignedDto);
             rideWsService.sendDriverAssigned(driverAssignedDto);
 

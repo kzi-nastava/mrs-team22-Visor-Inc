@@ -55,6 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/**", "/ws/**",
                         "/topic/**",
                         "/app/**").permitAll()
+                .requestMatchers("/error").permitAll()
+
         ).sessionManagement(session -> session
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
         ).authenticationProvider(authenticationProvider)

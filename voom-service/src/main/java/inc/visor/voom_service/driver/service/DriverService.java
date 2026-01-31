@@ -32,7 +32,7 @@ import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDto.DriverLocationDto;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -318,7 +318,7 @@ public class DriverService {
 
     public Driver findDriverForRideRequest(
             RideRequest rideRequest,
-            List<DriverLocationDto> snapshot
+            List<RideRequestCreateDto.DriverLocationDto> snapshot
     ) {
 
         if (snapshot == null || snapshot.isEmpty()) {
@@ -326,7 +326,7 @@ public class DriverService {
         }
 
         RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
-        Map<Long, DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
+        Map<Long, RideRequestCreateDto.DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
 
 
         List<Driver> candidates = snapshot.stream()
@@ -410,11 +410,11 @@ public class DriverService {
     private Driver nearestDriver(
             List<Driver> drivers,
             RoutePoint pickup,
-            Map<Long, DriverLocationDto> locMap
+            Map<Long, RideRequestCreateDto.DriverLocationDto> locMap
     ) {
         return drivers.stream()
                 .min(Comparator.comparingDouble(d -> {
-                    DriverLocationDto loc = locMap.get(d.getId());
+                    RideRequestCreateDto.DriverLocationDto loc = locMap.get(d.getId());
                     return GeoUtil.distanceKm(
                             pickup.getLatitude(),
                             pickup.getLongitude(),
