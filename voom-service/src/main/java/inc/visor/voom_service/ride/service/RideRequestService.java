@@ -109,6 +109,8 @@ public class RideRequestService {
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
             DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             this.rideService.save(ride);
+            rideRepository.save(ride);
+            System.out.println("Sending driver assigned via WS: " + driverAssignedDto);
             rideWsService.sendDriverAssigned(driverAssignedDto);
 
             driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());

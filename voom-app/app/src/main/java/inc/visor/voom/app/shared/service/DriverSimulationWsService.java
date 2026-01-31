@@ -89,22 +89,14 @@ public class DriverSimulationWsService {
 
         stompClient.topic("/topic/driver-assigned")
                 .subscribe(topicMessage -> {
-
-                    Log.d("WS_ASSIGN", "RAW MESSAGE: " + topicMessage.getPayload());
-
                     DriverAssignedDto dto =
                             new Gson().fromJson(
                                     topicMessage.getPayload(),
                                     DriverAssignedDto.class
                             );
-
-                    Log.d("WS_ASSIGN", "Parsed driverId: " + dto.driverId);
-
                     if (assignmentListener != null) {
-                        Log.d("WS_ASSIGN", "Calling assignmentListener...");
                         assignmentListener.onDriverAssigned(dto);
                     } else {
-                        Log.d("WS_ASSIGN", "assignmentListener is NULL!");
                     }
 
                 }, throwable -> {

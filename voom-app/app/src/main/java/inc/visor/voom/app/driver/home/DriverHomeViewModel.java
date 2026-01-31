@@ -1,5 +1,7 @@
 package inc.visor.voom.app.driver.home;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -51,6 +53,7 @@ public class DriverHomeViewModel extends ViewModel implements DriverMetaProvider
         if (myId == null) return;
 
         if (dto.driverId == myId) {
+            Log.d("RIDE_ID_DEBUG","THIS: " + dto.rideId);
             assignedRide.postValue(dto);
         }
     }

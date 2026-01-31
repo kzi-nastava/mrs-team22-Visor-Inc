@@ -1,7 +1,9 @@
 package inc.visor.voom.app.driver.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,17 +26,22 @@ import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
+import inc.visor.voom.app.driver.api.RideApi;
+import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
+import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
+import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
+import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,6 +53,11 @@ public class DriverHomeFragment extends Fragment {
     private DriverHomeViewModel viewModel;
     private RouteRepository routeRepository;
     private boolean hasFocused = false;
+
+    private GeoPoint pickupPoint = null;
+    private boolean arrivalDialogShown = false;
+    private DriverAssignedDto currentAssignment = null;
+
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -120,8 +132,21 @@ public class DriverHomeFragment extends Fragment {
                     if (dto == null) return;
 
                     showAssignedNotification(dto);
-
                     drawRideMarkers(dto);
+                    currentAssignment = dto;
+                    arrivalDialogShown = false;
+
+
+                    RoutePointDto pickup = dto.route.stream()
+                            .findFirst()
+                            .orElse(null);
+
+
+                    Log.d("ARRIVAL_DEBUG", "Route: " + pickup);
+                    if (pickup != null) {
+                        pickupPoint = new GeoPoint(pickup.lat, pickup.lng);
+                    }
+
                 });
     }
 
@@ -136,6 +161,58 @@ public class DriverHomeFragment extends Fragment {
                         .orElse("Unknown location")
         );
     }
+
+    private void openArrivalDialog(DriverAssignedDto dto) {
+
+        String pickupAddress = dto.route.stream()
+                .filter(p -> "PICKUP".equals(p.type))
+                .findFirst()
+                .map(p -> p.address)
+                .orElse("Unknown location");
+
+        ArrivalDialogFragment dialog =
+                ArrivalDialogFragment.newInstance(pickupAddress);
+
+        dialog.setListener(() -> {
+            startRide(dto.rideId, dto);
+        });
+
+        dialog.show(getParentFragmentManager(), "arrival_dialog");
+    }
+
+    private void startRide(Long rideId, DriverAssignedDto assignedDto) {
+
+        RideApi rideApi = RetrofitClient
+                .getInstance()
+                .create(RideApi.class);
+
+        StartRideDto payload = new StartRideDto();
+        payload.routePoints = assignedDto.route;
+
+        rideApi.startRide(rideId, payload)
+                .enqueue(new Callback<Void>() {
+
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        if (response.isSuccessful()) {
+                            Toast.makeText(requireContext(),
+                                    "Ride started",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "Failed to start ride",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                });
+    }
+
     private void drawRideMarkers(DriverAssignedDto dto) {
 
         List<RoutePointDto> sorted =
@@ -179,9 +256,6 @@ public class DriverHomeFragment extends Fragment {
                 }
         );
     }
-
-
-
 
     private void setupMap(View view) {
         map = view.findViewById(R.id.map);
@@ -237,8 +311,21 @@ public class DriverHomeFragment extends Fragment {
                     if (myId == null) return;
 
                     for (SimulatedDriver d : drivers) {
-
                         if (d.id == myId) {
+                            if (pickupPoint != null && !arrivalDialogShown) {
+
+                                double distance = DistanceHelper.distanceInMeters(
+                                        d.currentPosition.getLatitude(),
+                                        d.currentPosition.getLongitude(),
+                                        pickupPoint.getLatitude(),
+                                        pickupPoint.getLongitude()
+                                );
+
+                                if (distance <= 30) {
+                                    arrivalDialogShown = true;
+                                    openArrivalDialog(currentAssignment);
+                                }
+                            }
 
                             GeoPoint point = d.currentPosition;
 
