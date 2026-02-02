@@ -24,10 +24,4 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     List<Ride> findByRideRequest_Creator_Id(long rideRequestCreatorId);
     List<Ride> findByDriver_User_Id(Long userId);
 
-    @Query("SELECT DISTINCT r FROM Ride r " +
-            "LEFT JOIN FETCH r.complaints " +
-            "LEFT JOIN FETCH r.ratings " +
-            "WHERE r.driver.id = :driverId")
-    List<Ride> findByDriverIdWithFeedback(@Param("driverId") long driverId);
-
 }

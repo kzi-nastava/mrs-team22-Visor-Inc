@@ -67,12 +67,6 @@ public class RideService {
         return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
     }
 
-    public List<Ride> getDriverRidesWithFeedback(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {
-        List<Ride> unfiltered = rideRepository.findByDriverIdWithFeedback(driverId);
-
-        return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
-    }
-
     private List<Ride> getRidesFilteredSortedByDate(LocalDateTime start, LocalDateTime end, Sorting sort, List<Ride> unfiltered) {
         return unfiltered.stream()
                 .filter(r -> {

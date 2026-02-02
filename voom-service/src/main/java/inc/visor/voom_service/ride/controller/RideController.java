@@ -133,7 +133,7 @@ public class RideController {
 
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
-        final List<Ride> ridesList = rideService.getDriverRidesWithFeedback(driverId, null, null, Sorting.ASC);
+        final List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
         final List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideHistoryDtoList);
     }
