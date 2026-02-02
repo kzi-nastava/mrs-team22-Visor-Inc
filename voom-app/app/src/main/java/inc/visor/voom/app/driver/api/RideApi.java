@@ -2,6 +2,7 @@ package inc.visor.voom.app.driver.api;
 
 import java.util.List;
 
+import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.dto.StartRideDto;
@@ -17,5 +18,9 @@ public interface RideApi {
             @Path("rideId") long rideId,
             @Body StartRideDto dto
     );
+
+    @GET("/api/rides/ongoing")
+    Call<ActiveRideDto> getOngoingRide();
+
 }
 

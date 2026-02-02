@@ -8,12 +8,15 @@ import inc.visor.voom.app.user.home.model.RoutePoint;
 
 public class ConvertHelper {
 
-    public static List<RoutePoint>
-    convertToRoutePoints(List<RoutePointDto> list) {
+    public static List<RoutePoint> convertToRoutePoints(List<RoutePointDto> list) {
 
-        List<inc.visor.voom.app.user.home.model.RoutePoint> result = new ArrayList<>();
+        List<RoutePoint> result = new ArrayList<>();
+
+        if (list == null) return result;
 
         for (RoutePointDto p : list) {
+
+            if (p == null) continue;
 
             RoutePoint.PointType type;
 
@@ -30,19 +33,22 @@ public class ConvertHelper {
                     type = RoutePoint.PointType.STOP;
             }
 
+            int safeOrderIndex = p.orderIndex != null ? p.orderIndex : 0;
+
+            String safeAddress = p.address != null ? p.address : "";
 
             result.add(
                     new RoutePoint(
                             p.lat,
                             p.lng,
-                            p.address,
-                            p.orderIndex,
+                            safeAddress,
+                            safeOrderIndex,
                             type
                     )
             );
         }
-
         return result;
     }
+
 
 }

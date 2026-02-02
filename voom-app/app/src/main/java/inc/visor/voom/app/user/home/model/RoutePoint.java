@@ -1,5 +1,7 @@
 package inc.visor.voom.app.user.home.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RoutePoint {
 
     public enum PointType {

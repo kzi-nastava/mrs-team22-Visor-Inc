@@ -22,12 +22,14 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.api.RideApi;
 import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
+import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
@@ -57,7 +59,8 @@ public class DriverHomeFragment extends Fragment {
     private GeoPoint pickupPoint = null;
     private boolean arrivalDialogShown = false;
     private DriverAssignedDto currentAssignment = null;
-
+    private Long currentRideId = null;
+    private List<RoutePointDto> currentRoute = null;
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -75,6 +78,7 @@ public class DriverHomeFragment extends Fragment {
 
         setupChart(view);
         setupMap(view);
+        loadOngoingRide();
         loadDriversAndStartSimulation();
         observeDrivers();
     }
@@ -136,6 +140,8 @@ public class DriverHomeFragment extends Fragment {
                     currentAssignment = dto;
                     arrivalDialogShown = false;
 
+                    currentRideId = dto.rideId;
+                    currentRoute = dto.route;
 
                     RoutePointDto pickup = dto.route.stream()
                             .findFirst()
@@ -162,9 +168,11 @@ public class DriverHomeFragment extends Fragment {
         );
     }
 
-    private void openArrivalDialog(DriverAssignedDto dto) {
+    private void openArrivalDialog() {
 
-        String pickupAddress = dto.route.stream()
+        if (currentRoute == null || currentRideId == null) return;
+
+        String pickupAddress = currentRoute.stream()
                 .filter(p -> "PICKUP".equals(p.type))
                 .findFirst()
                 .map(p -> p.address)
@@ -174,20 +182,22 @@ public class DriverHomeFragment extends Fragment {
                 ArrivalDialogFragment.newInstance(pickupAddress);
 
         dialog.setListener(() -> {
-            startRide(dto.rideId, dto);
+            startRide(currentRideId, currentRoute);
         });
 
         dialog.show(getParentFragmentManager(), "arrival_dialog");
     }
 
-    private void startRide(Long rideId, DriverAssignedDto assignedDto) {
+
+
+    private void startRide(Long rideId, List<RoutePointDto> routePoints) {
 
         RideApi rideApi = RetrofitClient
                 .getInstance()
                 .create(RideApi.class);
 
         StartRideDto payload = new StartRideDto();
-        payload.routePoints = assignedDto.route;
+        payload.routePoints = routePoints;
 
         rideApi.startRide(rideId, payload)
                 .enqueue(new Callback<Void>() {
@@ -196,9 +206,13 @@ public class DriverHomeFragment extends Fragment {
                     public void onResponse(Call<Void> call, Response<Void> response) {
 
                         if (response.isSuccessful()) {
+
                             Toast.makeText(requireContext(),
                                     "Ride started",
                                     Toast.LENGTH_LONG).show();
+
+                            arrivalDialogShown = true;
+
                         } else {
                             Toast.makeText(requireContext(),
                                     "Failed to start ride",
@@ -213,13 +227,15 @@ public class DriverHomeFragment extends Fragment {
                 });
     }
 
+
     private void drawRideMarkers(DriverAssignedDto dto) {
 
         List<RoutePointDto> sorted =
                 new ArrayList<>(dto.route);
 
-        sorted.sort((a,b) ->
-                Integer.compare(a.orderIndex, b.orderIndex));
+        sorted.sort(
+                Comparator.comparingInt(p -> p.orderIndex != null ? p.orderIndex : 0)
+        );
 
         mapRenderer.renderMarkers(
                 ConvertHelper.convertToRoutePoints(sorted),
@@ -323,7 +339,7 @@ public class DriverHomeFragment extends Fragment {
 
                                 if (distance <= 30) {
                                     arrivalDialogShown = true;
-                                    openArrivalDialog(currentAssignment);
+                                    openArrivalDialog();
                                 }
                             }
 
@@ -356,6 +372,95 @@ public class DriverHomeFragment extends Fragment {
             map.onPause();
         }
     }
+
+    private void loadOngoingRide() {
+
+        RideApi rideApi = RetrofitClient
+                .getInstance()
+                .create(RideApi.class);
+
+        rideApi.getOngoingRide().enqueue(new Callback<ActiveRideDto>() {
+
+            @Override
+            public void onResponse(Call<ActiveRideDto> call,
+                                   Response<ActiveRideDto> response) {
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    Log.d("ONGOING_RIDE", "No active ride");
+                    return;
+                }
+
+                ActiveRideDto activeRide = response.body();
+
+
+
+                if (activeRide.routePoints == null || activeRide.routePoints.isEmpty()) {
+                    return;
+                }
+
+                Log.d("ONGOING_RIDE", "Restoring ride id: " + activeRide.toString());
+
+                restoreRideOnMap(activeRide);
+            }
+
+            @Override
+            public void onFailure(Call<ActiveRideDto> call, Throwable t) {
+                Log.e("ONGOING_RIDE", "Failed to load ongoing ride", t);
+            }
+        });
+    }
+
+    private void restoreRideOnMap(ActiveRideDto activeRide) {
+        currentRideId = activeRide.rideId;
+        currentRoute = activeRide.routePoints;
+        arrivalDialogShown = false;
+
+        List<RoutePointDto> sorted = new ArrayList<>(activeRide.routePoints);
+
+        mapRenderer.renderMarkers(
+                ConvertHelper.convertToRoutePoints(sorted),
+                requireContext().getDrawable(R.drawable.ic_location_24)
+        );
+
+        routeRepository.fetchRouteFromPoints(
+                ConvertHelper.convertToRoutePoints(sorted),
+                new Callback<OsrmResponse>() {
+
+                    @Override
+                    public void onResponse(Call<OsrmResponse> call,
+                                           Response<OsrmResponse> response) {
+
+                        if (!response.isSuccessful()
+                                || response.body() == null) return;
+
+                        List<List<Double>> coords =
+                                response.body().routes.get(0).geometry.coordinates;
+
+                        List<GeoPoint> geoPoints = new ArrayList<>();
+
+                        for (List<Double> c : coords) {
+                            geoPoints.add(new GeoPoint(c.get(1), c.get(0)));
+                        }
+
+                        mapRenderer.renderRoute(geoPoints);
+                    }
+
+                    @Override
+                    public void onFailure(Call<OsrmResponse> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+        );
+
+        for (RoutePointDto p : sorted) {
+            if ("PICKUP".equals(p.type)) {
+                pickupPoint = new GeoPoint(p.lat, p.lng);
+            }
+        }
+
+        Log.d("ONGOING_RIDE", "Ride restored successfully");
+    }
+
 
     @Override
     public void onDestroyView() {
