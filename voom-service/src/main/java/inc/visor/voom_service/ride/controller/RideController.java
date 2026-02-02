@@ -113,7 +113,7 @@ public class RideController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing) {
+    public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing, @RequestParam(required = false) LocalDateTime date) {
         final List<Ride> rides;
         if (ongoing) {
             rides = this.rideService.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.STARTED || ride.getStatus() == RideStatus.ONGOING).toList();
