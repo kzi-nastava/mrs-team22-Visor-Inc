@@ -6,11 +6,13 @@ import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.shared.RoutePointDto;
 
 public class DriverAssignedDto {
+
     public Long rideId;
     public Long driverId;
     public List<RoutePointDto> route;
 
-    public DriverAssignedDto() {}
+    public DriverAssignedDto() {
+    }
 
     public DriverAssignedDto(Long rideId, Long driverId, List<RoutePoint> routePoints) {
         this.rideId = rideId;
@@ -25,5 +27,13 @@ public class DriverAssignedDto {
             return rp;
         }).toList();
     }
-    
+
+    @Override
+    public String toString() {
+        return "DriverAssignedDto{"
+                + "rideId=" + rideId
+                + ", driverId=" + driverId
+                + '}';
+    }
+
 }

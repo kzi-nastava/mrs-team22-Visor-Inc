@@ -32,7 +32,7 @@ import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDto.DriverLocationDto;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -190,31 +190,46 @@ public class DriverService {
 
         changeRequestRepository.save(changeRequest);
 
-        String reviewLink = "http://localhost:4200/admin/vehicle-requests/" + changeRequest.getId();
-
         User user = driver.getUser();
         String fullName = user.getPerson().getFirstName() + " " + user.getPerson().getLastName();
         String subject = "Vehicle update request from " + fullName;
+        String reviewLink = "http://localhost:4200/admin/vehicle-requests/" + changeRequest.getId();
+        String androidLink = "voom://vehicle-requests/" + changeRequest.getId();
+
         String body = """
-            Driver %s has requested to update vehicle information.
+        <div style="font-family: Arial, sans-serif;">
+            <h2>Vehicle Change Request</h2>
 
-            New vehicle details:
-            - Model: %s
-            - License plate: %s
-            - Seats: %d
-            - Baby seat: %s
-            - Pet friendly: %s
+            <p><strong>Driver:</strong> %s</p>
+            <p><strong>Model:</strong> %s</p>
+            <p><strong>License Plate:</strong> %s</p>
+            <p><strong>Seats:</strong> %d</p>
+            <p><strong>Baby Seat:</strong> %s</p>
+            <p><strong>Pet Friendly:</strong> %s</p>
 
-            Review request here:
-            %s
-            """.formatted(
+            <br>
+
+            <p>
+                🌐 Open in Web:
+                <a href="%s">%s</a>
+            </p>
+
+            <p>
+                📱 Open in Android App:
+                <a href="%s">%s</a>
+            </p>
+        </div>
+        """.formatted(
                 fullName,
                 request.getModel(),
                 request.getLicensePlate(),
                 request.getNumberOfSeats(),
                 request.isBabySeat() ? "Yes" : "No",
                 request.isPetFriendly() ? "Yes" : "No",
-                reviewLink
+                reviewLink,
+                reviewLink,
+                androidLink,
+                androidLink
         );
 
         emailService.send("admin1@gmail.com", subject, body);
@@ -318,7 +333,7 @@ public class DriverService {
 
     public Driver findDriverForRideRequest(
             RideRequest rideRequest,
-            List<DriverLocationDto> snapshot
+            List<RideRequestCreateDto.DriverLocationDto> snapshot
     ) {
 
         if (snapshot == null || snapshot.isEmpty()) {
@@ -326,7 +341,7 @@ public class DriverService {
         }
 
         RoutePoint pickup = rideRequest.getRideRoute().getPickupPoint();
-        Map<Long, DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
+        Map<Long, RideRequestCreateDto.DriverLocationDto> locMap = Helpers.snapshotToMap(snapshot);
 
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
@@ -409,11 +424,11 @@ public class DriverService {
     private Driver nearestDriver(
             List<Driver> drivers,
             RoutePoint pickup,
-            Map<Long, DriverLocationDto> locMap
+            Map<Long, RideRequestCreateDto.DriverLocationDto> locMap
     ) {
         return drivers.stream()
                 .min(Comparator.comparingDouble(d -> {
-                    DriverLocationDto loc = locMap.get(d.getId());
+                    RideRequestCreateDto.DriverLocationDto loc = locMap.get(d.getId());
                     return GeoUtil.distanceKm(
                             pickup.getLatitude(),
                             pickup.getLongitude(),
@@ -469,7 +484,7 @@ public class DriverService {
                 .getLastStateChange(driverId)
                 .map(DriverStateChange::getCurrentState)
                 .map(state -> state == DriverState.ACTIVE)
-                .orElse(false); 
+                .orElse(false);
     }
 
 }

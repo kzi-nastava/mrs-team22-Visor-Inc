@@ -39,4 +39,7 @@ public class VehicleSummaryDto {
         this.numberOfSeats = numberOfSeats;
         this.driverId = driverId;
     }
+
+    public VehicleSummaryDto() {}
+
 }

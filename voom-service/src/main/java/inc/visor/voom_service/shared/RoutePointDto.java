@@ -1,8 +1,6 @@
 package inc.visor.voom_service.shared;
 
 import inc.visor.voom_service.osrm.dto.LatLng;
-import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
-import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +11,6 @@ import lombok.Setter;
 @Getter
 public class RoutePointDto {
 
-    @NotNull(message="Order index is required")
     private Integer orderIndex;
 
     @NotNull(message="Latitude is required")

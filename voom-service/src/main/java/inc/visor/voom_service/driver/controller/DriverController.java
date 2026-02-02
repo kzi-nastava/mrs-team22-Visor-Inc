@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import inc.visor.voom_service.activation.service.ActivationTokenService;
@@ -130,9 +129,12 @@ public class DriverController {
             @AuthenticationPrincipal VoomUserDetails userDetails,
             @RequestBody VehicleSummaryDto request
     ) {
+        System.out.println("USER DETAILS: " + userDetails);
+
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userService.getUser(username).orElseThrow(NotFoundException::new);
 
+        System.out.println("Received vehicle update request: " + request);
         driverService.createVehicleChangeRequest(user.getId(), request);
 
         return ResponseEntity.ok().build();

@@ -17,6 +17,20 @@
     </fragment>
 
     <fragment
+        android:id="@+id/vehicleApproveFragment"
+        android:name="inc.visor.voom.app.admin.driver_approve.VehicleApproveFragment"
+        android:label="Vehicle Approve">
+
+        <argument
+            android:name="requestId"
+            app:argType="string" />
+
+        <deepLink
+            app:uri="voom://vehicle-requests/{requestId}" />
+    </fragment>
+
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
         android:label="fragment_login"

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@ConditionalOnProperty(
+        name = "security.disable-auth",
+        havingValue = "false",
+        matchIfMissing = true
+)
 public class JwtFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver exceptionResolver;
@@ -35,15 +41,11 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        logger.info("=== JWT FILTER ===");
-        logger.info("Request URI: {}", request.getRequestURI());
-        logger.info("Method: {}", request.getMethod());
-        logger.info("Authorization header: {}", request.getHeader("Authorization"));
         final String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
-            logger.info("Response status after filter: {}", response.getStatus());
             return;
         }
 
@@ -66,11 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
         } catch (Exception e) {
-            logger.error("Exception in JwtFilter: ", e);
-            SecurityContextHolder.clearContext();
-            chain.doFilter(request, response);
+            exceptionResolver.resolveException(request, response, null, e);
         }
-
     }
 
 }
