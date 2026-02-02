@@ -26,10 +26,12 @@ import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
+import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.LocationRepository;
@@ -85,6 +87,8 @@ public class UserHomeFragment extends Fragment {
         DriverApi driverApi = RetrofitClient
                 .getInstance()
                 .create(DriverApi.class);
+
+        restoreActiveRide();
 
         driverApi.getActiveDrivers().enqueue(new Callback<List<DriverSummaryDto>>() {
 
@@ -498,6 +502,58 @@ public class UserHomeFragment extends Fragment {
                     }
                 });
     }
+
+    private void restoreActiveRide() {
+
+        RideApi rideApi = RetrofitClient
+                .getInstance()
+                .create(RideApi.class);
+
+        rideApi.getOngoingRide().enqueue(new Callback<ActiveRideDto>() {
+
+            @Override
+            public void onResponse(Call<ActiveRideDto> call,
+                                   Response<ActiveRideDto> response) {
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    Log.d("RESTORE", "No ongoing ride");
+                    return;
+                }
+
+                ActiveRideDto ride = response.body();
+
+                if (ride.routePoints == null || ride.routePoints.isEmpty()) return;
+
+                Log.d("RESTORE", "Restoring ride id: " + ride.rideId);
+
+                List<RoutePoint> points = new ArrayList<>();
+
+                for (RoutePointDto p : ride.routePoints) {
+
+                    RoutePoint rp = new RoutePoint(
+                            p.lat,
+                            p.lng,
+                            p.address,
+                            p.orderIndex,
+                            RoutePointDto.toPointType(p.type)
+                    );
+
+                    points.add(rp);
+                }
+
+                viewModel.restoreRide(points);
+
+                arrivalNotified = false;
+
+            }
+
+            @Override
+            public void onFailure(Call<ActiveRideDto> call, Throwable t) {
+                Log.e("RESTORE", "Failed to restore ride", t);
+            }
+        });
+    }
+
 
 
     @Override

@@ -89,6 +89,11 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
         passengerEmails.setValue(cur);
     }
 
+    public void restoreRide(List<RoutePoint> points) {
+        routePoints.setValue(points);
+        rideLocked.setValue(true);
+    }
+
     private boolean isWithinNext5Hours(String hhmm) {
         if (hhmm == null) return false;
         String[] parts = hhmm.split(":");

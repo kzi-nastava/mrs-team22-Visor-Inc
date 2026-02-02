@@ -2,6 +2,8 @@ package inc.visor.voom.app.shared.dto;
 
 import com.google.gson.annotations.SerializedName;
 
+import inc.visor.voom.app.user.home.model.RoutePoint;
+
 public class RoutePointDto {
     @SerializedName("order")
     public Integer orderIndex;
@@ -21,4 +23,13 @@ public class RoutePointDto {
 
     }
 
+    public static RoutePoint.PointType toPointType(RoutePointType type) {
+        if (type == RoutePointType.STOP) {
+            return RoutePoint.PointType.STOP;
+        } else if (type == RoutePointType.PICKUP) {
+            return RoutePoint.PointType.PICKUP;
+        } else {
+            return RoutePoint.PointType.DROPOFF;
+        }
+    }
 }
