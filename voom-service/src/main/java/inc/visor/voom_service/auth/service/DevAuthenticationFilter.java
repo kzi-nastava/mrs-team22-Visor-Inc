@@ -2,7 +2,7 @@ package inc.visor.voom_service.auth.service;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +22,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 @Order(1)
+@ConditionalOnProperty(
+        name = "security.disable-auth",
+        havingValue = "true"
+)
 public class DevAuthenticationFilter extends OncePerRequestFilter {
-
-    @Value("${security.disable-auth:false}")
-    private boolean disableAuth;
 
     @Override
     protected void doFilterInternal(
@@ -34,7 +35,7 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         try {
-            if (disableAuth && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 User fakeUser = createFakeUser();
 

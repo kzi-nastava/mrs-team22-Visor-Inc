@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import inc.visor.voom.app.config.AppConfig;
 import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
@@ -39,9 +40,11 @@ public class DriverSimulationWsService {
 
     public void connect() {
 
+        String wsUrl = AppConfig.getWsUrl();
+
         stompClient = Stomp.over(
                 Stomp.ConnectionProvider.OKHTTP,
-                "ws://192.168.1.12:8080/ws"
+                wsUrl
         );
 
         stompClient.lifecycle().subscribe(lifecycleEvent -> {

@@ -1,5 +1,6 @@
 package inc.visor.voom.app.network;
 
+import inc.visor.voom.app.config.AppConfig;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -7,15 +8,18 @@ public class RetrofitClient {
 
     private static Retrofit retrofit;
 
-    private static final String BASE_URL = "http://192.168.1.12:8080/";
-
     public static Retrofit getInstance() {
-        if (retrofit == null) {
+
+        String baseUrl = AppConfig.getBaseUrl();
+
+        if (retrofit == null || !retrofit.baseUrl().toString().equals(baseUrl)) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
+
         return retrofit;
     }
 }
+
