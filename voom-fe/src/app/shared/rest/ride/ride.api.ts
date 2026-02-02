@@ -127,7 +127,7 @@ export class RideApi extends Api {
   };
 
   return this.apiClient.post<RideReportRequestDto, void>(
-    `/api/rides/${rideId}/report`,
+    `/api/complaints/ride/${rideId}`,
     body,
     config
   );

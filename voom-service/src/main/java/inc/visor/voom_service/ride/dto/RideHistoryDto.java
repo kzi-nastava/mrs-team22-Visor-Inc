@@ -2,8 +2,12 @@ package inc.visor.voom_service.ride.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.complaints.dto.ComplaintSummaryDto;
+import inc.visor.voom_service.rating.dto.RatingSummaryDto;
+import inc.visor.voom_service.rating.model.Rating;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
@@ -22,6 +26,8 @@ public class RideHistoryDto {
     private LocalDateTime finishedAt;
     private List<User> passengers;
     private User cancelledBy;
+    private List<ComplaintSummaryDto> complaints;
+    private List<RatingSummaryDto> ratings;
 
     public RideHistoryDto(Ride ride) {
         this.id = ride.getId();
@@ -32,6 +38,8 @@ public class RideHistoryDto {
         this.finishedAt = ride.getFinishedAt();
         this.passengers = ride.getPassengers();
         this.cancelledBy = ride.getRideRequest().getCancelledBy();
+        this.complaints = ride.getComplaints().stream().map(ComplaintSummaryDto::new).collect(Collectors.toList());
+        this.ratings = ride.getRatings().stream().map(RatingSummaryDto::new).collect(Collectors.toList());
     }
 
     public RideHistoryDto() {

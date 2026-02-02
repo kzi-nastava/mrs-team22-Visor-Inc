@@ -1,6 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +64,10 @@ public class RideService {
     public List<Ride> getDriverRides(Long driverId, LocalDateTime start, LocalDateTime end, Sorting sort) {
         List<Ride> unfiltered = rideRepository.findByDriverId(driverId);
 
+        return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
+    }
+
+    private List<Ride> getRidesFilteredSortedByDate(LocalDateTime start, LocalDateTime end, Sorting sort, List<Ride> unfiltered) {
         return unfiltered.stream()
                 .filter(r -> {
                     LocalDateTime started = r.getStartedAt();
@@ -73,39 +78,14 @@ public class RideService {
                     boolean matchesEnd = (end == null) || !started.isAfter(end);
 
                     return matchesStart && matchesEnd;
-                })
-                .sorted((ride1, ride2) -> {
-                    if (sort == Sorting.DESC) {
-                        return ride2.getStartedAt().compareTo(ride1.getStartedAt());
-                    } else {
-                        return ride1.getStartedAt().compareTo(ride2.getStartedAt());
-                    }
-                })
+                }).sorted(Comparator.comparing(Ride::getStartedAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                 .collect(Collectors.toList());
     }
 
     public List<Ride> getUserRides(long userId, LocalDateTime start, LocalDateTime end, Sorting sort) {
         List<Ride> unfiltered = rideRepository.findByRideRequest_Creator_Id(userId);
 
-        return unfiltered.stream()
-                .filter(r -> {
-                    LocalDateTime started = r.getStartedAt();
-                    if (started == null) return false;
-
-                    boolean matchesStart = (start == null) || !started.isBefore(start);
-
-                    boolean matchesEnd = (end == null) || !started.isAfter(end);
-
-                    return matchesStart && matchesEnd;
-                })
-                .sorted((ride1, ride2) -> {
-                    if (sort == Sorting.DESC) {
-                        return ride2.getStartedAt().compareTo(ride1.getStartedAt());
-                    } else {
-                        return ride1.getStartedAt().compareTo(ride2.getStartedAt());
-                    }
-                })
-                .collect(Collectors.toList());
+        return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
     }
 
     public boolean existsOverlappingRide(
