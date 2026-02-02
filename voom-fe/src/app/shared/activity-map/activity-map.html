@@ -1,3 +1,9 @@
-<div>
-  <app-map/>
+<div class="flex flex-col flex-auto gap-y-8 p-4 dialog-content">
+  <div class="text-lg">Ride map</div>
+  <div class="flex items-center justify-center space-x-4">
+    @for (routePoint of data.rideRoute.routePoints; track $index) {
+      <div class="text-sm font-normal">{{ routePoint.address }}</div>
+    }
+  </div>
+  <app-map [points]="transformRoutePoints()"/>
 </div>

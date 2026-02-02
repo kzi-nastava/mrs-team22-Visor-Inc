@@ -225,6 +225,7 @@ export interface RideHistoryDto {
   status: RideStatus;
   rideRequest: RideRequest;
   rideRoute: RideRoute;
+  driver: DriverSummaryDto;
   startedAt: string;
   finishedAt: string;
   passengers: User[];

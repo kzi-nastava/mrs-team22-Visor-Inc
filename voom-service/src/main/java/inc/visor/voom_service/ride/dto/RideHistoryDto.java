@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
@@ -18,6 +19,7 @@ public class RideHistoryDto {
     private RideStatus status;
     private RideRequest rideRequest;
     private RideRoute rideRoute;
+    private DriverSummaryDto driver;
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
     private List<User> passengers;
@@ -28,6 +30,7 @@ public class RideHistoryDto {
         this.status = ride.getStatus();
         this.rideRequest = ride.getRideRequest();
         this.rideRoute = ride.getRideRequest().getRideRoute();
+        this.driver = new DriverSummaryDto(ride.getDriver());
         this.startedAt = ride.getStartedAt();
         this.finishedAt = ride.getFinishedAt();
         this.passengers = ride.getPassengers();

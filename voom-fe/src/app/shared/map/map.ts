@@ -120,7 +120,6 @@ export class Map implements AfterViewInit, OnChanges {
     this.map.panTo({ lat, lng }, { animate: true });
   }
 
-
   applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
     const driver = this.drivers.find((d) => d.id === driverId);
     if (!driver) return;
