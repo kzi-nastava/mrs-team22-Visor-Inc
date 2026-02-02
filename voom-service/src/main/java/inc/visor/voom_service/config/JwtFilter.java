@@ -36,11 +36,11 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
 
-    // @Override
-    // protected boolean shouldNotFilter(HttpServletRequest request) {
-    //     String uri = request.getRequestURI();
-    //     return uri.contains("/api");
-    // }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.contains("/api");
+    }
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         final String authorizationHeader = request.getHeader("Authorization");

@@ -43,14 +43,9 @@ public class ProfileFragment extends Fragment {
         observeViewModel();
         setupListeners();
 
-        binding.btnChangeDriverProfile.setOnClickListener(v ->
-                Navigation.findNavController(v)
-                        .navigate(R.id.action_global_to_mainDriverFragment)
-        );
         viewModel.loadProfile();
 
     }
-
     private void observeViewModel() {
         viewModel.getFirstName().observe(getViewLifecycleOwner(),
                 binding.etFirstName::setText);
