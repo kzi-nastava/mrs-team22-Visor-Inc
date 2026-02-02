@@ -36,7 +36,6 @@ import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.dto.RideCancellationDto;
 import inc.visor.voom_service.ride.dto.RideHistoryDto;
 import inc.visor.voom_service.ride.dto.RidePanicDto;
-import inc.visor.voom_service.ride.dto.RideReportRequestDto;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
@@ -53,7 +52,7 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
 import inc.visor.voom_service.ride.service.RideEstimateService;
-import inc.visor.voom_service.ride.service.RideReportService;
+import inc.visor.voom_service.complaints.service.ComplaintService;
 import inc.visor.voom_service.ride.service.RideRequestService;
 import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.route.service.RideRouteService;
@@ -70,7 +69,7 @@ public class RideController {
     private final FavoriteRouteService favoriteRouteService;
     private final UserProfileService userProfileService;
     private final Simulator simulatorService;
-    private final RideReportService rideReportService;
+    private final ComplaintService complaintService;
     private final RideService rideService;
     private final Simulator simulator;
     private final DriverService driverService;
@@ -79,10 +78,10 @@ public class RideController {
     private final RideEstimateService rideEstimateService;
     private final RideWsService rideWsService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, RideReportService rideReportService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, ComplaintService complaintService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
-        this.rideReportService = rideReportService;
+        this.complaintService = complaintService;
         this.rideService = rideService;
         this.userProfileService = userProfileService;
         this.simulatorService = simulatorService;
@@ -134,7 +133,7 @@ public class RideController {
 
     @GetMapping("/driver/{driverId}/history")
     public ResponseEntity<List<RideHistoryDto>> getRidesForDriver(@PathVariable long driverId, @RequestParam(required = false) LocalDateTime date) {
-        final List<Ride> ridesList = rideService.getDriverRides(driverId, null, null, Sorting.ASC);
+        final List<Ride> ridesList = rideService.getDriverRidesWithFeedback(driverId, null, null, Sorting.ASC);
         final List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideHistoryDtoList);
     }
@@ -306,11 +305,16 @@ public class RideController {
         return ResponseEntity.ok(rideResponse);
     }
 
-    @PostMapping("/{id}/report")
-    public ResponseEntity<RideResponseDto> reportRide(@PathVariable Long id, @RequestBody @Valid RideReportRequestDto body) {
-        rideReportService.reportRide(id, body.getMessage());
-        return ResponseEntity.noContent().build();
-    }
+//    @PostMapping("/{id}/report")
+//    public ResponseEntity<RideResponseDto> reportRide(@AuthenticationPrincipal VoomUserDetails userDetails, @PathVariable Long id, @RequestBody @Valid ComplaintRequestDto body) {
+//        String username = userDetails != null ? userDetails.getUsername() : null;
+//        User user = userProfileService.getUserByEmail(username);
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//        complaintService.reportRide(id, user, body.getMessage());
+//        return ResponseEntity.noContent().build();
+//    }
 
     @GetMapping("/ongoing")
     public ResponseEntity<ActiveRideDto> getMethodName(@AuthenticationPrincipal VoomUserDetails userDetails) {

@@ -1,8 +1,8 @@
-package inc.visor.voom_service.ride.dto;
+package inc.visor.voom_service.complaints.dto;
 
 import jakarta.validation.constraints.Size;
 
-public class RideReportRequestDto {
+public class ComplaintRequestDto {
 
     @Size(min = 5, max = 500)
     String message;

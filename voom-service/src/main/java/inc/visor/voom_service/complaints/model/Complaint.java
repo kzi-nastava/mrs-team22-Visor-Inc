@@ -1,47 +1,38 @@
-package inc.visor.voom_service.rating.model;
+package inc.visor.voom_service.complaints.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.model.Ride;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"ride_id", "rater_id"}),
         }
 )
-@Data
-public class Rating {
+public class Complaint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Min(1)
-    @Max(5)
-    private Integer driverRating;
-
-    @Min(1)
-    @Max(5)
-    private Integer vehicleRating;
-
-    @Size(max = 500)
-    private String comment;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ride_id", nullable = false)
     @JsonBackReference
     private Ride ride;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "rater_id", nullable = false)
-    private User rater;
+    @ManyToOne()
+    @JoinColumn(name = "reporter_id", nullable = false)
+    private User reporter;
+
+    @Column(length = 1000)
+    private String message;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
