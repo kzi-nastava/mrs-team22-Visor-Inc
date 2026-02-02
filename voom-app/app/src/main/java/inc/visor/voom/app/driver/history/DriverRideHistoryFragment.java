@@ -69,6 +69,7 @@ public class DriverRideHistoryFragment extends Fragment {
 
         mViewModel = new ViewModelProvider(this).get(DriverRideHistoryViewModel.class);
 
+        mViewModel.fetchHistory(null, null, asc);
         mViewModel.getRides().observe(getViewLifecycleOwner(), adapter::submitList);
 
         bookingDateEditText = view.findViewById(R.id.booking_date_edit_text);
@@ -100,16 +101,14 @@ public class DriverRideHistoryFragment extends Fragment {
 
         Button applyBtn = view.findViewById(R.id.apply_btn);
         applyBtn.setOnClickListener(v -> {
-            if (startDate != null && endDate != null)  {
-                mViewModel.filter(startDate, endDate, asc);
-            }
+            mViewModel.fetchHistory(startDate, endDate, asc);
         });
 
         ImageButton sortButton = view.findViewById(R.id.sortButton);
         sortButton.setOnClickListener(v -> {
             asc = !asc;
-            mViewModel.activateSort(asc);
             sortButton.setRotationX(sortButton.getRotationX() + 180f);
+            mViewModel.fetchHistory(startDate, endDate, asc);
         });
 
         TextView clearFilters = view.findViewById(R.id.clearFiltersText);
