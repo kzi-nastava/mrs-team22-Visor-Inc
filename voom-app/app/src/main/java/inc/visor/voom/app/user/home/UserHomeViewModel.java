@@ -193,20 +193,25 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
         int h = Integer.parseInt(parts[0]);
         int m = Integer.parseInt(parts[1]);
 
-        java.time.LocalDateTime dateTime =
-                java.time.LocalDateTime.now()
-                        .withHour(h)
-                        .withMinute(m)
-                        .withSecond(0);
+        java.time.LocalDate today = java.time.LocalDate.now();
 
-        return dateTime
-                .atZone(java.time.ZoneId.systemDefault())
-                .toInstant()
-                .toString();
+        java.time.LocalDateTime dateTime =
+                java.time.LocalDateTime.of(
+                                today.getYear(),
+                                today.getMonth(),
+                                today.getDayOfMonth(),
+                                h,
+                                m,
+                                0
+                        )
+                        .plusHours(1); 
+
+        java.time.ZonedDateTime zoned =
+                dateTime.atZone(java.time.ZoneId.systemDefault());
+
+        return zoned.toInstant().toString();
     }
-    public LiveData<Map<Integer, DriverSummaryDto>> getActiveDriversMap() {
-        return activeDriversMap;
-    }
+
 
     public void setActiveDrivers(List<DriverSummaryDto> list) {
         Map<Integer, DriverSummaryDto> map = new HashMap<>();

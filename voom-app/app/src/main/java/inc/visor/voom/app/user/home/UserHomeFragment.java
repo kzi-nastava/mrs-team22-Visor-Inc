@@ -510,10 +510,13 @@ public class UserHomeFragment extends Fragment {
                                     android.widget.Toast.LENGTH_LONG
                             ).show();
 
-                            viewModel.lockRide();
+                            if (viewModel.getSelectedScheduleType().getValue()
+                                    == UserHomeViewModel.ScheduleType.NOW) {
+
+                                viewModel.lockRide();
+                            }
 
                         } else {
-
                             android.widget.Toast.makeText(
                                     requireContext(),
                                     "No drivers available",
