@@ -13,7 +13,9 @@ import java.util.Map;
 
 import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
@@ -89,9 +91,13 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
         passengerEmails.setValue(cur);
     }
 
-    public void restoreRide(List<RoutePoint> points) {
+    public void restoreRide(List<RoutePoint> points, boolean lockForm) {
         routePoints.setValue(points);
-        rideLocked.setValue(true);
+        if (lockForm) {
+            rideLocked.setValue(true);
+        } else {
+            rideLocked.setValue(false);
+        }
     }
 
     private boolean isWithinNext5Hours(String hhmm) {
@@ -187,20 +193,25 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
         int h = Integer.parseInt(parts[0]);
         int m = Integer.parseInt(parts[1]);
 
-        java.time.LocalDateTime dateTime =
-                java.time.LocalDateTime.now()
-                        .withHour(h)
-                        .withMinute(m)
-                        .withSecond(0);
+        java.time.LocalDate today = java.time.LocalDate.now();
 
-        return dateTime
-                .atZone(java.time.ZoneId.systemDefault())
-                .toInstant()
-                .toString();
+        java.time.LocalDateTime dateTime =
+                java.time.LocalDateTime.of(
+                                today.getYear(),
+                                today.getMonth(),
+                                today.getDayOfMonth(),
+                                h,
+                                m,
+                                0
+                        )
+                        .plusHours(1);
+
+        java.time.ZonedDateTime zoned =
+                dateTime.atZone(java.time.ZoneId.systemDefault());
+
+        return zoned.toInstant().toString();
     }
-    public LiveData<Map<Integer, DriverSummaryDto>> getActiveDriversMap() {
-        return activeDriversMap;
-    }
+
 
     public void setActiveDrivers(List<DriverSummaryDto> list) {
         Map<Integer, DriverSummaryDto> map = new HashMap<>();
@@ -301,5 +312,28 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
 
         routePoints.setValue(current);
     }
+
+    public CreateFavoriteRouteDto buildFavoriteRoute(String name) {
+
+        List<RoutePoint> points = routePoints.getValue();
+        if (points == null || points.size() < 2) return null;
+
+        CreateFavoriteRouteDto dto = new CreateFavoriteRouteDto();
+        dto.name = name;
+        dto.points = new ArrayList<>();
+
+        for (RoutePoint p : points) {
+            RoutePointDto point = new RoutePointDto();
+            point.lat = p.lat;
+            point.lng = p.lng;
+            point.orderIndex = p.orderIndex;
+            point.type = RoutePoint.toPointType(p.type);
+            point.address = p.address;
+            dto.points.add(point);
+        }
+
+        return dto;
+    }
+
 
 }

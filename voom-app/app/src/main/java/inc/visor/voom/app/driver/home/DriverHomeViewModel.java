@@ -70,12 +70,12 @@ public class DriverHomeViewModel extends ViewModel implements DriverMetaProvider
         wsService = new DriverSimulationWsService(
                 simulationManager,
                 this,
-                this
+                this,
+                null
         );
 
         wsService.connect();
     }
-
 
     public void setActiveDrivers(List<DriverSummaryDto> list) {
         Map<Integer, DriverSummaryDto> map = new HashMap<>();

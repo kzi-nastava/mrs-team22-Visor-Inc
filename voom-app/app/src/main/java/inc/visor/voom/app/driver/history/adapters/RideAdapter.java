@@ -11,30 +11,26 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.history.models.Passenger;
-import inc.visor.voom.app.driver.history.models.Ride;
-
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import inc.visor.voom.app.shared.dto.RideHistoryDto;
+import inc.visor.voom.app.shared.model.User;
+import inc.visor.voom.app.shared.model.enums.RideStatus;
 
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
-    private final List<Ride> rides = new ArrayList<Ride>();
+    private final List<RideHistoryDto> rides = new ArrayList<>();
+
+    private int expandedPosition = -1;
 
 
-    SimpleDateFormat formatter =
-            new SimpleDateFormat("EEEE, MMM d, yyyy", Locale.ENGLISH);
-
-    public void submitList(List<Ride> list) {
+    public void submitList(List<RideHistoryDto> list) {
         rides.clear();
         rides.addAll(list);
-        notifyDataSetChanged(); // OK for now
+        notifyDataSetChanged();
     }
+
 
     @NonNull
     @Override
@@ -89,38 +85,69 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
         }
 
-        void bind(Ride ride) {
+        void bind(RideHistoryDto ride) {
 
-            Passenger mainPassenger = ride.getPassengers()
-                    .stream()
-                    .filter(Passenger::isOrderedRide)
-                    .findFirst()
-                    .orElse(ride.getPassengers().get(0));
+            int currentPos = getAbsoluteAdapterPosition();
+            boolean isExpanded = (currentPos == expandedPosition);
 
-            tvPassenger.setText(mainPassenger.getFullName());
-            tvRoute.setText(ride.getSource() + " → " + ride.getDestination());
-            tvTime.setText(
-                    ride.getEndTime().isEmpty()
-                            ? ride.getStartTime()
-                            : ride.getStartTime() + "–" + ride.getEndTime()
-            );
 
-            tvDate.setText(formatter.format(ride.getDate()));
+            User creator = ride.getRideRequest().getCreator();
+            String creatorFullName = String.format("%s %s", creator.getPerson().getFirstName(), creator.getPerson().getFirstName());
+            tvPassenger.setText(creatorFullName);
+
+            String pickup = ride.getRideRoute().getPickup().getAddress();
+            String dropoff;
+            if (ride.getRideRoute().getDropOff() == null) {
+                dropoff = "";
+            } else {
+                dropoff = ride.getRideRoute().getDropOff().getAddress();
+            }
+            String route = String.format("%s -> %s", pickup, dropoff);
+
+            tvRoute.setText(route);
+
+            String startTimeText;
+            String endTimeText;
+            String dateText;
+
+            if (ride.getStartedAt().isBlank()) {
+                startTimeText = "";
+                dateText = "";
+            } else {
+                startTimeText = ride.getStartedAt().split("T")[1].substring(0, 5);
+                dateText = ride.getStartedAt().split("T")[0].substring(0, 10);
+            }
+
+            if (ride.getFinishedAt().isBlank()) {
+                endTimeText = "";
+            } else {
+                endTimeText = ride.getFinishedAt().split("T")[1].substring(0, 5);
+            }
+
+            String timeText = String.format("%s - %s", startTimeText, endTimeText);
+
+            tvTime.setText(timeText);
+
+            tvDate.setText(dateText);
             boolean showDateHeader;
 
             if (getAbsoluteAdapterPosition() == 0) {
                 showDateHeader = true;
             } else {
-                Date current = normalizeDate(ride.getDate());
-                Date previous = normalizeDate(rides.get(getAbsoluteAdapterPosition() - 1).getDate());
+                String current = dateText;
+                String previous = rides.get(getAbsoluteAdapterPosition() - 1).getStartedAt().split("T")[0].substring(0, 10);
                 showDateHeader = !current.equals(previous);
             }
             tvDate.setVisibility(showDateHeader ? View.VISIBLE : View.GONE);
 
-            tvDistance.setText("Distance: 2km");
-            tvPrice.setText(String.format("Price: %d", ride.getPrice()));
-            tvStatus.setText("Status: " + ride.getStatus());
-            tvPanic.setText("Panic: " + (ride.isPanic() ? "✔️" : "✖️"));
+            String distance = String.format("Distance: %.2f", ride.getRideRoute().getTotalDistanceKm());
+            tvDistance.setText(distance);
+            String price = String.format("Price: %.2f", ride.getRideRequest().getCalculatedPrice());
+            tvPrice.setText(price);
+            String status = String.format("Status: %s", ride.getStatus());
+            tvStatus.setText(status);
+            String panic = String.format("Panic: %s", ride.getStatus() == RideStatus.PANIC ? "✔️" : "✖️");
+            tvPanic.setText(panic);
 
 
             tvPassengers.setText("Passengers: ");
@@ -128,26 +155,17 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
             passengerAdapter.submitList(ride.getPassengers());
 
-            expandedLayout.setVisibility(
-                    ride.isExpanded() ? View.VISIBLE : View.GONE
-            );
+            expandedLayout.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
 
             itemView.setOnClickListener(v -> {
-                ride.setExpanded(!ride.isExpanded());
-                notifyItemChanged(getAdapterPosition());
+                int previousExpanded = expandedPosition;
+                expandedPosition = isExpanded ? -1 : currentPos;
+
+                notifyItemChanged(previousExpanded);
+                notifyItemChanged(currentPos);
             });
         }
 
-    }
-
-    private Date normalizeDate(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
     }
 }
 

@@ -1,9 +1,11 @@
 package inc.visor.voom_service.ride.service;
 
-import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import java.util.Comparator;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.utils.GeoUtil;
@@ -38,22 +40,24 @@ public class RideEstimateService {
             var b = points.get(i + 1);
 
             total += GeoUtil.distanceKm(
-                a.lat, a.lng,
-                b.lat, b.lng
+                    a.lat, a.lng,
+                    b.lat, b.lng
             );
         }
 
         return total;
     }
 
-    
     public double calculateTotalDistanceEstimate(
-        List<RoutePointDto> dto
+            List<RoutePointDto> dto
     ) {
-        List<RoutePointDto> points =
-            dto.stream()
-                .sorted(Comparator.comparingInt(inc.visor.voom_service.shared.RoutePointDto::getOrderIndex))
-                .toList();
+        List<RoutePointDto> points
+                = dto.stream()
+                        .sorted(Comparator.comparing(
+                                RoutePointDto::getOrderIndex,
+                                Comparator.nullsLast(Integer::compareTo)
+                        ))
+                        .toList();
 
         double total = 0.0;
 
@@ -62,8 +66,8 @@ public class RideEstimateService {
             var b = points.get(i + 1);
 
             total += GeoUtil.distanceKm(
-                a.getLat(), a.getLng(),
-                b.getLat(), b.getLng()
+                    a.getLat(), a.getLng(),
+                    b.getLat(), b.getLng()
             );
         }
 

@@ -9,6 +9,7 @@ import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
+import inc.visor.voom.app.shared.dto.ScheduledRideDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
@@ -20,22 +21,26 @@ public class DriverSimulationWsService {
     private final DriverMetaProvider metaProvider;
     private StompClient stompClient;
     private final DriverAssignmentListener assignmentListener;
+    private final ScheduledRideListener scheduledRideListener;
+
 
     public DriverSimulationWsService(
             DriverSimulationManager simulationManager,
             DriverMetaProvider metaProvider
     ) {
-        this(simulationManager, metaProvider, null);
+        this(simulationManager, metaProvider, null, null);
     }
 
     public DriverSimulationWsService(
             DriverSimulationManager simulationManager,
             DriverMetaProvider metaProvider,
-            DriverAssignmentListener assignmentListener
+            DriverAssignmentListener assignmentListener,
+            ScheduledRideListener scheduleListener
     ) {
         this.simulationManager = simulationManager;
         this.metaProvider = metaProvider;
         this.assignmentListener = assignmentListener;
+        this.scheduledRideListener = scheduleListener;
     }
 
     public void connect() {
@@ -105,6 +110,24 @@ public class DriverSimulationWsService {
                 }, throwable -> {
                     Log.e("WS_ASSIGN", "Assigned topic error", throwable);
                 });
+
+        stompClient.topic("/topic/scheduled-rides")
+                .subscribe(topicMessage -> {
+
+                    ScheduledRideDto[] rides =
+                            new Gson().fromJson(
+                                    topicMessage.getPayload(),
+                                    ScheduledRideDto[].class
+                            );
+
+                    if (scheduledRideListener != null) {
+                        scheduledRideListener.onScheduledRides(rides);
+                    }
+
+                }, throwable -> {
+                    Log.e("WS_SCHEDULE", "Scheduled rides topic error", throwable);
+                });
+
 
 
     }

@@ -19,6 +19,9 @@ import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,14 +35,21 @@ import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
+import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ScheduledRideDto;
+import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
+import inc.visor.voom.app.shared.repository.FavoriteRouteRepository;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
+import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
+import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
@@ -57,7 +67,12 @@ public class UserHomeFragment extends Fragment {
     private DriverSimulationManager simulationManager;
     private DriverSimulationWsService wsService;
 
+    private FavoriteRouteRepository favoriteRouteRepository;
+
     private Boolean arrivalNotified = false;
+
+    private boolean scheduledDriverSent = false;
+
 
 
     public UserHomeFragment() {
@@ -84,9 +99,29 @@ public class UserHomeFragment extends Fragment {
 
         simulationManager.startInterpolationLoop();
 
+        favoriteRouteRepository = new FavoriteRouteRepository();
+
+        requireView().findViewById(R.id.btn_add_favorite)
+                .setOnClickListener(v -> openFavoriteDialog());
+
+        requireView().findViewById(R.id.btn_choose_favorite)
+                .setOnClickListener(v -> openFavoriteRoutes());
+
         DriverApi driverApi = RetrofitClient
                 .getInstance()
                 .create(DriverApi.class);
+
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey("picked_route")) {
+
+            List<RoutePointDto> dtos =
+                    (List<RoutePointDto>) args.getSerializable("picked_route");
+
+            if (dtos != null && !dtos.isEmpty()) {
+                applyPickedRoute(dtos);
+            }
+        }
 
         restoreActiveRide();
 
@@ -107,7 +142,9 @@ public class UserHomeFragment extends Fragment {
 
                 wsService = new DriverSimulationWsService(
                         simulationManager,
-                        viewModel
+                        viewModel,
+                        null,
+                        rides -> handleScheduledRides(rides)
                 );
                 wsService.connect();
             }
@@ -278,12 +315,15 @@ public class UserHomeFragment extends Fragment {
                 }
         ));
     }
-
+    private void openFavoriteRoutes() {
+        androidx.navigation.Navigation
+                .findNavController(requireView())
+                .navigate(R.id.favoriteRoutesFragment);
+    }
     private void setupClearButton() {
         requireView().findViewById(R.id.btn_clear_route)
                 .setOnClickListener(v -> viewModel.clearRoute());
     }
-
     private void observeViewModel() {
 
         viewModel.getRoutePoints().observe(getViewLifecycleOwner(), points -> {
@@ -481,10 +521,13 @@ public class UserHomeFragment extends Fragment {
                                     android.widget.Toast.LENGTH_LONG
                             ).show();
 
-                            viewModel.lockRide();
+                            if (viewModel.getSelectedScheduleType().getValue()
+                                    == UserHomeViewModel.ScheduleType.NOW) {
+
+                                viewModel.lockRide();
+                            }
 
                         } else {
-
                             android.widget.Toast.makeText(
                                     requireContext(),
                                     "No drivers available",
@@ -515,8 +558,13 @@ public class UserHomeFragment extends Fragment {
             public void onResponse(Call<ActiveRideDto> call,
                                    Response<ActiveRideDto> response) {
 
-                if (!response.isSuccessful() || response.body() == null) {
+                if (!response.isSuccessful()) {
                     Log.d("RESTORE", "No ongoing ride");
+                    return;
+                }
+
+                if (response.body() == null) {
+                    Log.d("RESTORE", "Empty body");
                     return;
                 }
 
@@ -541,7 +589,7 @@ public class UserHomeFragment extends Fragment {
                     points.add(rp);
                 }
 
-                viewModel.restoreRide(points);
+                viewModel.restoreRide(points, true);
 
                 arrivalNotified = false;
 
@@ -554,7 +602,187 @@ public class UserHomeFragment extends Fragment {
         });
     }
 
+    private void openFavoriteDialog() {
 
+        List<RoutePoint> points = viewModel.getRoutePoints().getValue();
+        if (points == null || points.size() < 2) {
+            android.widget.Toast.makeText(
+                    requireContext(),
+                    "Pickup and dropoff required",
+                    android.widget.Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        FavoriteRouteNameDialog dialog = new FavoriteRouteNameDialog();
+
+        dialog.setListener(name -> {
+
+            CreateFavoriteRouteDto dto =
+                    viewModel.buildFavoriteRoute(name);
+
+            if (dto == null) return;
+
+            favoriteRouteRepository.createFavoriteRoute(
+                    dto,
+                    new Callback<Void>() {
+
+                        @Override
+                        public void onResponse(
+                                Call<Void> call,
+                                Response<Void> response
+                        ) {
+
+                            if (response.isSuccessful()) {
+                                android.widget.Toast.makeText(
+                                        requireContext(),
+                                        "Route saved",
+                                        android.widget.Toast.LENGTH_SHORT
+                                ).show();
+                            } else if (response.code() == 409) {
+                                android.widget.Toast.makeText(
+                                        requireContext(),
+                                        "Route already exists",
+                                        android.widget.Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(
+                                Call<Void> call,
+                                Throwable t
+                        ) {
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Failed to save route",
+                                    android.widget.Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
+        });
+
+        dialog.show(getParentFragmentManager(), "FavoriteDialog");
+    }
+
+    private void applyPickedRoute(List<RoutePointDto> dtos) {
+
+        List<RoutePoint> points = new ArrayList<>();
+
+        for (RoutePointDto p : dtos) {
+
+            RoutePoint rp = new RoutePoint(
+                    p.lat,
+                    p.lng,
+                    p.address,
+                    p.orderIndex,
+                    RoutePointDto.toPointType(p.type)
+            );
+
+            points.add(rp);
+        }
+
+        viewModel.clearRoute();
+        viewModel.restoreRide(points, false);
+    }
+
+    private void handleScheduledRides(ScheduledRideDto[] rides) {
+        if (rides == null || rides.length == 0) return;
+
+        long now = System.currentTimeMillis();
+        long TEN_MIN = 10 * 60 * 1000;
+
+        ScheduledRideDto selected = null;
+
+        for (ScheduledRideDto r : rides) {
+
+
+            LocalDateTime ldt = LocalDateTime.parse(r.scheduledStartTime);
+
+            long startMs = ldt
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+
+            long diff = startMs - now;
+
+            if (diff >= 0 && diff <= TEN_MIN) {
+                selected = r;
+                break;
+            }
+        }
+
+        if (selected == null) return;
+
+        ScheduledRideDto finalSelected = selected;
+
+        requireActivity().runOnUiThread(() -> {
+
+            List<RoutePoint> points = new ArrayList<>();
+
+            for (RoutePointDto p : finalSelected.route) {
+
+                RoutePoint rp = new RoutePoint(
+                        p.lat,
+                        p.lng,
+                        p.address,
+                        p.orderIndex,
+                        RoutePointDto.toPointType(p.type)
+                );
+
+                points.add(rp);
+            }
+
+            viewModel.restoreRide(points, true);
+            arrivalNotified = false;
+
+            if (!scheduledDriverSent && finalSelected.driverId != null) {
+
+                RoutePointDto pickup = null;
+
+                for (RoutePointDto p : finalSelected.route) {
+                    if (p.type == RoutePointType.PICKUP) {
+                        pickup = p;
+                        break;
+                    }
+                }
+
+                if (pickup != null) {
+
+                    RideApi rideApi = RetrofitClient
+                            .getInstance()
+                            .create(RideApi.class);
+
+                    StartScheduledRideDto payload = new StartScheduledRideDto();
+                    payload.setDriverId(finalSelected.driverId);
+                    payload.setLat(pickup.lat);
+                    payload.setLng(pickup.lng);
+
+                    rideApi.startScheduleRide(finalSelected.rideId, payload)
+                            .enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    Log.d("SCHEDULE", "Ride started on backend");
+                                    scheduledDriverSent = true; 
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Log.e("SCHEDULE", "Failed to start ride", t);
+                                }
+                            });
+                }
+            }
+
+            android.widget.Toast.makeText(
+                    requireContext(),
+                    "Scheduled ride starting soon",
+                    android.widget.Toast.LENGTH_LONG
+            ).show();
+        });
+
+    }
 
     @Override
     public void onResume() {
