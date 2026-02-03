@@ -1,5 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,16 +29,18 @@ public class FavoriteRouteService {
     public void create(long userId, CreateFavoriteRouteRequest request) {
 
         List<RoutePointDto> incomingPoints = request.getPoints().stream()
-                .sorted((a, b) -> Integer.compare(a.getOrderIndex(), b.getOrderIndex()))
+                .sorted(Comparator.comparingInt(
+                        p -> p.getOrderIndex() == null ? Integer.MAX_VALUE : p.getOrderIndex()
+                ))
                 .toList();
 
-        List<FavoriteRoute> existingRoutes
-                = repository.findAllByUserId(userId);
+        List<FavoriteRoute> existingRoutes = repository.findAllByUserId(userId);
 
         for (FavoriteRoute existing : existingRoutes) {
+
             List<RoutePoint> existingPoints = existing.getRoutePoints()
                     .stream()
-                    .sorted((a, b) -> Integer.compare(a.getOrderIndex(), b.getOrderIndex()))
+                    .sorted(Comparator.comparingInt(RoutePoint::getOrderIndex))
                     .toList();
 
             if (sameRoute(existingPoints, incomingPoints)) {
@@ -44,23 +48,33 @@ public class FavoriteRouteService {
             }
         }
 
-        
         FavoriteRoute route = new FavoriteRoute();
         route.setUserId(userId);
         route.setName(request.getName());
-        
-        List<RoutePoint> points = incomingPoints.stream().map(dto -> {
+
+        List<RoutePoint> points = new ArrayList<>();
+
+        for (int i = 0; i < incomingPoints.size(); i++) {
+
+            RoutePointDto dto = incomingPoints.get(i);
+
             RoutePoint rp = new RoutePoint();
-            rp.setOrderIndex(dto.getOrderIndex());
+
+            rp.setOrderIndex(
+                    dto.getOrderIndex() == null ? i : dto.getOrderIndex()
+            );
+
             rp.setLatitude(dto.getLat());
             rp.setLongitude(dto.getLng());
             rp.setAddress(dto.getAddress());
             rp.setPointType(dto.getType());
-            return rp;
-        }).toList();
-       
-        double estimateDistance = rideEstimateService.calculateTotalDistanceEstimate(incomingPoints);
-        
+
+            points.add(rp);
+        }
+
+        double estimateDistance
+                = rideEstimateService.calculateTotalDistanceEstimate(incomingPoints);
+
         route.setRoutePoints(points);
         route.setTotalDistanceKm(estimateDistance);
 

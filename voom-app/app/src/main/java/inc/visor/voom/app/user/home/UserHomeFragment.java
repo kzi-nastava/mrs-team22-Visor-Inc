@@ -34,12 +34,15 @@ import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
+import inc.visor.voom.app.shared.repository.FavoriteRouteRepository;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
+import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
@@ -56,6 +59,8 @@ public class UserHomeFragment extends Fragment {
     private LocationRepository locationRepository;
     private DriverSimulationManager simulationManager;
     private DriverSimulationWsService wsService;
+
+    private FavoriteRouteRepository favoriteRouteRepository;
 
     private Boolean arrivalNotified = false;
 
@@ -83,6 +88,12 @@ public class UserHomeFragment extends Fragment {
         simulationManager = viewModel.getSimulationManager();
 
         simulationManager.startInterpolationLoop();
+
+        favoriteRouteRepository = new FavoriteRouteRepository();
+
+        requireView().findViewById(R.id.btn_add_favorite)
+                .setOnClickListener(v -> openFavoriteDialog());
+
 
         DriverApi driverApi = RetrofitClient
                 .getInstance()
@@ -553,6 +564,71 @@ public class UserHomeFragment extends Fragment {
             }
         });
     }
+
+    private void openFavoriteDialog() {
+
+        List<RoutePoint> points = viewModel.getRoutePoints().getValue();
+        if (points == null || points.size() < 2) {
+            android.widget.Toast.makeText(
+                    requireContext(),
+                    "Pickup and dropoff required",
+                    android.widget.Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        FavoriteRouteNameDialog dialog = new FavoriteRouteNameDialog();
+
+        dialog.setListener(name -> {
+
+            CreateFavoriteRouteDto dto =
+                    viewModel.buildFavoriteRoute(name);
+
+            if (dto == null) return;
+
+            favoriteRouteRepository.createFavoriteRoute(
+                    dto,
+                    new Callback<Void>() {
+
+                        @Override
+                        public void onResponse(
+                                Call<Void> call,
+                                Response<Void> response
+                        ) {
+
+                            if (response.isSuccessful()) {
+                                android.widget.Toast.makeText(
+                                        requireContext(),
+                                        "Route saved",
+                                        android.widget.Toast.LENGTH_SHORT
+                                ).show();
+                            } else if (response.code() == 409) {
+                                android.widget.Toast.makeText(
+                                        requireContext(),
+                                        "Route already exists",
+                                        android.widget.Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(
+                                Call<Void> call,
+                                Throwable t
+                        ) {
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Failed to save route",
+                                    android.widget.Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
+        });
+
+        dialog.show(getParentFragmentManager(), "FavoriteDialog");
+    }
+
 
 
 

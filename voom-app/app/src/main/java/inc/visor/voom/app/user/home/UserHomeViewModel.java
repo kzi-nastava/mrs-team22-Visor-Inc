@@ -13,7 +13,9 @@ import java.util.Map;
 
 import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 
@@ -301,5 +303,28 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
 
         routePoints.setValue(current);
     }
+
+    public CreateFavoriteRouteDto buildFavoriteRoute(String name) {
+
+        List<RoutePoint> points = routePoints.getValue();
+        if (points == null || points.size() < 2) return null;
+
+        CreateFavoriteRouteDto dto = new CreateFavoriteRouteDto();
+        dto.name = name;
+        dto.points = new ArrayList<>();
+
+        for (RoutePoint p : points) {
+            RoutePointDto point = new RoutePointDto();
+            point.lat = p.lat;
+            point.lng = p.lng;
+            point.orderIndex = p.orderIndex;
+            point.type = RoutePoint.toPointType(p.type);
+            point.address = p.address;
+            dto.points.add(point);
+        }
+
+        return dto;
+    }
+
 
 }
