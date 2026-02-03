@@ -204,7 +204,7 @@ public class UserHomeViewModel extends ViewModel implements DriverMetaProvider {
                                 m,
                                 0
                         )
-                        .plusHours(1); 
+                        .plusHours(1);
 
         java.time.ZonedDateTime zoned =
                 dateTime.atZone(java.time.ZoneId.systemDefault());

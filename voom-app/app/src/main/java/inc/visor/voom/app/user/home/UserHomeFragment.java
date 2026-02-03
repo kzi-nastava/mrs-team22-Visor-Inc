@@ -19,6 +19,9 @@ import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +35,9 @@ import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
+import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ScheduledRideDto;
+import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.FavoriteRouteRepository;
@@ -64,6 +70,9 @@ public class UserHomeFragment extends Fragment {
     private FavoriteRouteRepository favoriteRouteRepository;
 
     private Boolean arrivalNotified = false;
+
+    private boolean scheduledDriverSent = false;
+
 
 
     public UserHomeFragment() {
@@ -133,7 +142,9 @@ public class UserHomeFragment extends Fragment {
 
                 wsService = new DriverSimulationWsService(
                         simulationManager,
-                        viewModel
+                        viewModel,
+                        null,
+                        rides -> handleScheduledRides(rides)
                 );
                 wsService.connect();
             }
@@ -676,8 +687,102 @@ public class UserHomeFragment extends Fragment {
         viewModel.restoreRide(points, false);
     }
 
+    private void handleScheduledRides(ScheduledRideDto[] rides) {
+        if (rides == null || rides.length == 0) return;
+
+        long now = System.currentTimeMillis();
+        long TEN_MIN = 10 * 60 * 1000;
+
+        ScheduledRideDto selected = null;
+
+        for (ScheduledRideDto r : rides) {
 
 
+            LocalDateTime ldt = LocalDateTime.parse(r.scheduledStartTime);
+
+            long startMs = ldt
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+
+            long diff = startMs - now;
+
+            if (diff >= 0 && diff <= TEN_MIN) {
+                selected = r;
+                break;
+            }
+        }
+
+        if (selected == null) return;
+
+        ScheduledRideDto finalSelected = selected;
+
+        requireActivity().runOnUiThread(() -> {
+
+            List<RoutePoint> points = new ArrayList<>();
+
+            for (RoutePointDto p : finalSelected.route) {
+
+                RoutePoint rp = new RoutePoint(
+                        p.lat,
+                        p.lng,
+                        p.address,
+                        p.orderIndex,
+                        RoutePointDto.toPointType(p.type)
+                );
+
+                points.add(rp);
+            }
+
+            viewModel.restoreRide(points, true);
+            arrivalNotified = false;
+
+            if (!scheduledDriverSent && finalSelected.driverId != null) {
+
+                RoutePointDto pickup = null;
+
+                for (RoutePointDto p : finalSelected.route) {
+                    if (p.type == RoutePointType.PICKUP) {
+                        pickup = p;
+                        break;
+                    }
+                }
+
+                if (pickup != null) {
+
+                    RideApi rideApi = RetrofitClient
+                            .getInstance()
+                            .create(RideApi.class);
+
+                    StartScheduledRideDto payload = new StartScheduledRideDto();
+                    payload.setDriverId(finalSelected.driverId);
+                    payload.setLat(pickup.lat);
+                    payload.setLng(pickup.lng);
+
+                    rideApi.startScheduleRide(finalSelected.rideId, payload)
+                            .enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    Log.d("SCHEDULE", "Ride started on backend");
+                                    scheduledDriverSent = true; 
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Log.e("SCHEDULE", "Failed to start ride", t);
+                                }
+                            });
+                }
+            }
+
+            android.widget.Toast.makeText(
+                    requireContext(),
+                    "Scheduled ride starting soon",
+                    android.widget.Toast.LENGTH_LONG
+            ).show();
+        });
+
+    }
 
     @Override
     public void onResume() {

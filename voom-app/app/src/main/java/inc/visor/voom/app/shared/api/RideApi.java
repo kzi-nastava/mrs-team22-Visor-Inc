@@ -3,6 +3,7 @@ package inc.visor.voom.app.shared.api;
 import java.util.List;
 
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
+import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
@@ -32,6 +33,13 @@ public interface RideApi {
 
     @DELETE("/api/rides/favorites/{id}")
     Call<Void> deleteFavoriteRoute(@Path("id") long routeId);
+
+    @POST("/api/rides/scheduled/{rideId}")
+    Call<Void> startScheduleRide(
+            @Path("rideId") long rideId,
+            @Body StartScheduledRideDto payload
+    );
+
 
 }
 
