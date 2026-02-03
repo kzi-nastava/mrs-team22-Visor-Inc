@@ -18,13 +18,21 @@ import android.widget.Button;
 import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.api.AuthenticationApi;
+import inc.visor.voom.app.shared.dto.authentication.ForgotPasswordDto;
+import inc.visor.voom.app.shared.dto.authentication.TokenDto;
 import inc.visor.voom.app.unauthenticated.registration.RegistrationViewModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ForgotPasswordFragment extends Fragment {
 
     ForgotPasswordViewModel viewModel;
     TextInputEditText emailInput;
     Button buttonSubmit;
+    AuthenticationApi authenticationApi;
 
     public ForgotPasswordFragment() {
         // Required empty public constructor
@@ -34,13 +42,29 @@ public class ForgotPasswordFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        authenticationApi = RetrofitClient.getInstance().create(AuthenticationApi.class);
         viewModel = new ViewModelProvider(this).get(ForgotPasswordViewModel.class);
         emailInput = view.findViewById(R.id.email_input);
 
         setupEmailInput();
 
         buttonSubmit = view.findViewById(R.id.forgot_password_button);
-        buttonSubmit.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_resetPasswordFragment));
+        buttonSubmit.setOnClickListener(v -> {
+            final ForgotPasswordDto dto = new ForgotPasswordDto();
+            final String email = viewModel.getEmail().getValue();
+            dto.setEmail(email);
+            authenticationApi.forgotPassword(dto).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_resetPasswordFragment);
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+
+                }
+            });
+        });
     }
 
     private void setupEmailInput() {

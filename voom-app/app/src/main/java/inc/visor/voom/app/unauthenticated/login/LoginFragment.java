@@ -1,13 +1,6 @@
 package inc.visor.voom.app.unauthenticated.login;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,10 +9,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+
 import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.unauthenticated.registration.RegistrationViewModel;
+import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.api.AuthenticationApi;
+import inc.visor.voom.app.shared.dto.authentication.LoginDto;
+import inc.visor.voom.app.shared.dto.authentication.TokenDto;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment {
 
@@ -29,6 +34,7 @@ public class LoginFragment extends Fragment {
     TextView buttonForgotPassword;
     TextView buttonRegister;
     LoginViewModel viewModel;
+    AuthenticationApi authenticationApi;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -38,6 +44,7 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        authenticationApi = RetrofitClient.getInstance().create(AuthenticationApi.class);
         viewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
         emailInput = view.findViewById(R.id.email_input);
@@ -48,7 +55,28 @@ public class LoginFragment extends Fragment {
 
         buttonLogin = view.findViewById(R.id.login);
 
-        buttonLogin.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment));
+        buttonLogin.setOnClickListener(v -> {
+            final LoginDto dto = new LoginDto();
+            final String email = viewModel.getEmail().getValue();
+            final String password = viewModel.getPassword().getValue();
+
+            dto.setEmail(email);
+            dto.setPassword(password);
+
+            authenticationApi.login(dto).enqueue(new Callback<TokenDto>() {
+                @Override
+                public void onResponse(Call<TokenDto> call, Response<TokenDto> response) {
+                    if (!response.isSuccessful() || response.body() == null) {
+                        return;
+                    }
+                    Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment);
+                }
+
+                @Override
+                public void onFailure(Call<TokenDto> call, Throwable t) {
+                }
+            });
+        });
 
         buttonForgotPassword = view.findViewById(R.id.forgot_password);
 
