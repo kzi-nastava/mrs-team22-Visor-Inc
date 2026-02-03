@@ -41,6 +41,7 @@ import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
 import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
@@ -93,6 +94,10 @@ public class UserHomeFragment extends Fragment {
 
         requireView().findViewById(R.id.btn_add_favorite)
                 .setOnClickListener(v -> openFavoriteDialog());
+
+        requireView().findViewById(R.id.btn_choose_favorite)
+                .setOnClickListener(v -> openFavoriteRoutes());
+
 
 
         DriverApi driverApi = RetrofitClient
@@ -289,12 +294,15 @@ public class UserHomeFragment extends Fragment {
                 }
         ));
     }
-
+    private void openFavoriteRoutes() {
+        androidx.navigation.Navigation
+                .findNavController(requireView())
+                .navigate(R.id.favoriteRoutesFragment);
+    }
     private void setupClearButton() {
         requireView().findViewById(R.id.btn_clear_route)
                 .setOnClickListener(v -> viewModel.clearRoute());
     }
-
     private void observeViewModel() {
 
         viewModel.getRoutePoints().observe(getViewLifecycleOwner(), points -> {
@@ -526,8 +534,13 @@ public class UserHomeFragment extends Fragment {
             public void onResponse(Call<ActiveRideDto> call,
                                    Response<ActiveRideDto> response) {
 
-                if (!response.isSuccessful() || response.body() == null) {
+                if (!response.isSuccessful()) {
                     Log.d("RESTORE", "No ongoing ride");
+                    return;
+                }
+
+                if (response.body() == null) {
+                    Log.d("RESTORE", "Empty body");
                     return;
                 }
 

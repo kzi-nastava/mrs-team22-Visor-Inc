@@ -11,6 +11,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/favoriteRoutesFragment"
+        android:name="inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment"
+        android:label="Favorite Routes" />
+
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
         android:label="fragment_login"
