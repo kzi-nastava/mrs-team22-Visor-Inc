@@ -19,6 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
 import inc.visor.voom.app.shared.dto.authentication.LoginDto;
 import inc.visor.voom.app.shared.dto.authentication.TokenDto;
@@ -35,6 +36,7 @@ public class LoginFragment extends Fragment {
     TextView buttonRegister;
     LoginViewModel viewModel;
     AuthenticationApi authenticationApi;
+    DataStoreManager dataStoreManager;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -63,12 +65,16 @@ public class LoginFragment extends Fragment {
             dto.setEmail(email);
             dto.setPassword(password);
 
+            dataStoreManager = DataStoreManager.getInstance(this.getContext());
+
             authenticationApi.login(dto).enqueue(new Callback<TokenDto>() {
                 @Override
                 public void onResponse(Call<TokenDto> call, Response<TokenDto> response) {
                     if (!response.isSuccessful() || response.body() == null) {
                         return;
                     }
+                    final TokenDto dto = response.body();
+                    dataStoreManager.saveUserData(dto);
                     Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment);
                 }
 
