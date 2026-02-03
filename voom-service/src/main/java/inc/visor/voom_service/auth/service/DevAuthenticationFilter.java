@@ -60,8 +60,8 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
     private User createFakeUser() {
         User user = new User();
 
-        user.setId(2L);
-        user.setEmail("driver2@gmail.com");
+        user.setId(6L);
+        user.setEmail("user1@gmail.com");
         user.setPassword("N/A");
         user.setUserStatus(UserStatus.ACTIVE);
 
