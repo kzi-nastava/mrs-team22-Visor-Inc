@@ -39,6 +39,12 @@ public class FavoriteRoutesViewModel extends ViewModel {
         return loading;
     }
 
+    private final MutableLiveData<String> message = new MutableLiveData<>();
+
+    public LiveData<String> getMessage() {
+        return message;
+    }
+
     public void fetch() {
 
         loading.setValue(true);
@@ -135,4 +141,41 @@ public class FavoriteRoutesViewModel extends ViewModel {
 
         return address;
     }
+
+    public void deleteRoute(long id) {
+
+        api.deleteFavoriteRoute(id)
+                .enqueue(new retrofit2.Callback<Void>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<Void> call,
+                            retrofit2.Response<Void> response
+                    ) {
+
+                        if (!response.isSuccessful()) {
+                            message.setValue("Failed to delete route");
+                            return;
+                        }
+
+                        List<FavoriteRouteUI> current = routes.getValue();
+                        if (current == null) return;
+
+                        List<FavoriteRouteUI> updated =
+                                new ArrayList<>(current);
+
+                        updated.removeIf(r -> r.id == id);
+
+                        routes.setValue(updated);
+                        message.setValue("Route successfully deleted");
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        message.setValue("Network error while deleting");
+                    }
+                });
+    }
+
+
 }

@@ -46,6 +46,20 @@ public class FavoriteRoutesFragment extends Fragment
         );
 
         viewModel.fetch();
+
+        viewModel.getMessage().observe(
+                getViewLifecycleOwner(),
+                msg -> {
+                    if (msg != null) {
+                        android.widget.Toast.makeText(
+                                requireContext(),
+                                msg,
+                                android.widget.Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
+
     }
 
     @Override
@@ -59,10 +73,8 @@ public class FavoriteRoutesFragment extends Fragment
                 .navigate(R.id.action_favoriteRoutesFragment_to_profileFragment, bundle);
     }
 
-
-
     @Override
     public void onDelete(FavoriteRouteUI route) {
-
+        viewModel.deleteRoute(route.id);
     }
 }
