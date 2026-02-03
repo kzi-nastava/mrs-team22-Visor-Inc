@@ -141,7 +141,7 @@ export interface RideRequestResponseDto {
   pickupLng: number | null;
 };
 
-export type RideStatus = 'SCHEDULED' | 'ONGOING' | 'CANCELLED' | 'FINISHED' | 'PANIC';
+export type RideStatus = 'SCHEDULED' | 'ONGOING' | 'CANCELLED' | 'FINISHED' | 'PANIC' | 'USER_CANCELLED' | "DRIVER_CANCELLED";
 
 
 export interface RoutePointDto {
@@ -219,6 +219,7 @@ export interface RideRequest {
   calculatedPrice: number;
   linkedPassengerEmails: string[];
   cancelledBy?: User;
+  reason: string;
 }
 
 export interface ComplaintSummaryDto {

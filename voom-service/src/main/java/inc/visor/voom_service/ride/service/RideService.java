@@ -67,7 +67,7 @@ public class RideService {
         return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
     }
 
-    private List<Ride> getRidesFilteredSortedByDate(LocalDateTime start, LocalDateTime end, Sorting sort, List<Ride> unfiltered) {
+    public List<Ride> getRidesFilteredSortedByDate(LocalDateTime start, LocalDateTime end, Sorting sort, List<Ride> unfiltered) {
         return unfiltered.stream()
                 .filter(r -> {
                     LocalDateTime started = r.getStartedAt();
@@ -78,7 +78,18 @@ public class RideService {
                     boolean matchesEnd = (end == null) || !started.isAfter(end);
 
                     return matchesStart && matchesEnd;
-                }).sorted(Comparator.comparing(Ride::getStartedAt, Comparator.nullsFirst(Comparator.naturalOrder())))
+                })
+                .sorted((r1, r2) -> {
+                    Comparator<Ride> dateComparator = Comparator.comparing(
+                            Ride::getStartedAt,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                    );
+
+                    if (sort == Sorting.DESC) {
+                        return dateComparator.reversed().compare(r1, r2);
+                    }
+                    return dateComparator.compare(r1, r2);
+                })
                 .collect(Collectors.toList());
     }
 

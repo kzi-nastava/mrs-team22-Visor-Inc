@@ -1,15 +1,22 @@
-import { Api } from '../api';
-import { ApiClient } from '../api-client';
+import {Api} from '../api';
+import {ApiClient} from '../api-client';
 import {
-  DriverSummaryDto, OngoingRideDto, RatingRequestDto,
-  RideCancellationDto, RideHistoryDto,
-  RidePanicDto, RideReportRequestDto, RideRequestDto, RideRequestResponseDto, RideResponseDto,
-  RideStopDto, StartRideDto
+  DriverSummaryDto,
+  OngoingRideDto,
+  RatingRequestDto,
+  RideCancellationDto,
+  RideHistoryDto,
+  RidePanicDto,
+  RideReportRequestDto,
+  RideRequestDto,
+  RideRequestResponseDto,
+  RideResponseDto,
+  RideStopDto,
+  StartRideDto
 } from './ride.model';
-import { RequestConfig } from '../rest.model';
-import { ApiResponse } from '../rest.model';
-import {ActiveRideDto, StartScheduledRideDto} from '../../../main-shell/user-pages/user-home/home.api';
-import { Observable } from 'rxjs/internal/Observable';
+import {ApiResponse, RequestConfig} from '../rest.model';
+import {ActiveRideDto} from '../../../main-shell/user-pages/user-home/home.api';
+import {Observable} from 'rxjs/internal/Observable';
 
 export class RideApi extends Api {
 
@@ -33,15 +40,25 @@ export class RideApi extends Api {
     );
   }
 
-  getRides(ongoing: boolean = false, date?: string) {
+  getRides(dateFrom: string | null, dateTo: string | null, sort: 'ASC' | 'DESC' = 'DESC') {
+    const queryParams: any = {
+      sort: sort.toUpperCase()
+    };
+
+    if (dateFrom) {
+      queryParams.start = dateFrom;
+    }
+    if (dateTo) {
+      queryParams.end = dateTo;
+    }
+    queryParams.sort = sort.toUpperCase();
+
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
+        contentType: 'application/json'
       },
-      params: {
-        ongoing: ongoing.toString(),
-        ...(date && { date })
-      },
+      params: queryParams,
       authenticated: true,
     };
 
@@ -199,10 +216,10 @@ export class RideApi extends Api {
     };
 
     if (dateFrom) {
-      queryParams.dateFrom = dateFrom.toISOString();
+      queryParams.start = dateFrom.toISOString();
     }
     if (dateTo) {
-      queryParams.dateTo = dateTo.toISOString();
+      queryParams.end = dateTo.toISOString();
     }
 
     const config: RequestConfig = {
@@ -220,17 +237,18 @@ export class RideApi extends Api {
     );
   }
 
-  getUserRideHistory(userId: number, dateFrom?: Date | null, dateTo?: Date | null, sort: 'asc' | 'desc' = 'asc') {
+  getUserRideHistory(userId: number, dateFrom: string | null, dateTo: string | null, sort: 'ASC' | 'DESC' = 'DESC') {
     const queryParams: any = {
       sort: sort.toUpperCase()
     };
 
     if (dateFrom) {
-      queryParams.dateFrom = dateFrom.toISOString();
+      queryParams.start = dateFrom;
     }
     if (dateTo) {
-      queryParams.dateTo = dateTo.toISOString();
+      queryParams.end = dateTo;
     }
+    queryParams.sort = sort;
 
     const config: RequestConfig = {
       headers: {

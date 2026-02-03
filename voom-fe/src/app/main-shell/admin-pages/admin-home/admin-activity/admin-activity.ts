@@ -8,8 +8,8 @@ import {ValueInputDate} from '../../../../shared/value-input/value-input-date/va
 import {RideHistoryDto} from '../../../../shared/rest/ride/ride.model';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivityMap} from '../../../../shared/activity-map/activity-map';
-import {map} from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {combineLatest, map, startWith, switchMap} from 'rxjs';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 
 export const ROUTE_ADMIN_ACTIVITY = "activity";
 
@@ -31,16 +31,27 @@ export class AdminActivity {
 
   private apiService = inject(ApiService);
 
-  sortDirection = signal<'asc' | 'desc'>('desc');
+  sortDirection = signal<'ASC' | 'DESC'>('DESC');
 
   fromDate = new FormControl<Date | null>(null);
   toDate = new FormControl<Date | null>(null);
 
-  rideHistory$ = this.apiService.rideApi.getRides(false).pipe(
-    map(response => response.data ?? []),
+  private userRideHistory$ = combineLatest([
+    this.fromDate.valueChanges.pipe(startWith(null)),
+    this.toDate.valueChanges.pipe(startWith(null)),
+    toObservable(this.sortDirection),
+  ]).pipe(
+    switchMap(([start, end, sort]) => {
+      const startDateStr = start?.toISOString();
+      const endDateStr = end?.toISOString();
+
+      return this.apiService.rideApi.getRides(startDateStr ?? null, endDateStr ?? null, sort).pipe(
+        map(response => response.data ?? []),
+      );
+    })
   );
 
-  rideHistory = toSignal(this.rideHistory$);
+  rideHistory = toSignal(this.userRideHistory$);
 
   constructor(private dialog: MatDialog) {
   }

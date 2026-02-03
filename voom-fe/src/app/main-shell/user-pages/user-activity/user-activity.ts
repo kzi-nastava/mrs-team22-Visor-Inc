@@ -4,8 +4,8 @@ import ApiService from '../../../shared/rest/api-service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {ValueInputDate} from '../../../shared/value-input/value-input-date/value-input-date';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
-import {filter, map, switchMap} from 'rxjs';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {combineLatest, map, of, startWith, switchMap} from 'rxjs';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatButton} from '@angular/material/button';
 import {RideHistoryDto} from '../../../shared/rest/ride/ride.model';
@@ -33,23 +33,27 @@ export class UserActivity {
   private apiService = inject(ApiService);
   private authenticationService = inject(AuthenticationService);
 
-  sortDirection = signal<'asc' | 'desc'>('desc');
+  sortDirection = signal<'ASC' | 'DESC'>('DESC');
 
   fromDate = new FormControl<Date | null>(null);
   toDate = new FormControl<Date | null>(null);
 
-  userRideHistory$ = this.authenticationService.activeUser$.pipe(
-    filter(user => !!user),
-    switchMap(user => {
+  userRideHistory$ = combineLatest([
+    this.authenticationService.activeUser$,
+    this.fromDate.valueChanges.pipe(startWith(this.fromDate.value)),
+    this.toDate.valueChanges.pipe(startWith(this.toDate.value)),
+    toObservable(this.sortDirection)
+  ]).pipe(
+    switchMap(([user, from, to, sort]) => {
+      if (!user) return of([]);
 
-      const from = this.fromDate.value;
-      const to = this.toDate.value;
-      const sortDirection = this.sortDirection();
+      const startStr = from instanceof Date ? from.toISOString() : from;
+      const endStr = to instanceof Date ? to.toISOString() : to;
 
-      return this.apiService.rideApi.getUserRideHistory(user.id, from, to, sortDirection).pipe(
-        map((response) => response.data),
+      return this.apiService.rideApi.getUserRideHistory(user.id, startStr ?? null, endStr ?? null, sort).pipe(
+        map(response => response.data ?? [])
       );
-    }),
+    })
   );
 
   userRideHistory = toSignal(this.userRideHistory$);
