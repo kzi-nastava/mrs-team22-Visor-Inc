@@ -14,9 +14,9 @@ import java.util.Locale;
 
 import inc.visor.voom.app.driver.history.models.Passenger;
 import inc.visor.voom.app.driver.history.models.Ride;
-import inc.visor.voom.app.driver.history.models.RideHistoryModels.*;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
+import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

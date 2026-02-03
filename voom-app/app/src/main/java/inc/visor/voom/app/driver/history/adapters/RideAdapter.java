@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-
-import inc.visor.voom.app.driver.history.models.RideHistoryModels.*;
+import inc.visor.voom.app.shared.dto.RideHistoryDto;
+import inc.visor.voom.app.shared.model.User;
+import inc.visor.voom.app.shared.model.enums.RideStatus;
 
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
@@ -27,7 +28,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public void submitList(List<RideHistoryDto> list) {
         rides.clear();
         rides.addAll(list);
-        notifyDataSetChanged(); // OK for now
+        notifyDataSetChanged();
     }
 
 

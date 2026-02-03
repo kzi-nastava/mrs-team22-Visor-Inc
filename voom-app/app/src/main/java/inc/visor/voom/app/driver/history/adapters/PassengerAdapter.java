@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.history.models.RideHistoryModels.User;
+import inc.visor.voom.app.shared.model.User;
 
 public class PassengerAdapter
         extends RecyclerView.Adapter<PassengerAdapter.PassengerViewHolder> {
