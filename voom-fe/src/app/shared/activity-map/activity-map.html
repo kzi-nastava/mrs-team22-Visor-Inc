@@ -1,9 +1,90 @@
-<div class="flex flex-col flex-auto gap-y-8 p-4 dialog-content">
+<div class="flex flex-col flex-auto gap-y-8 p-4 dialog-content overflow-y-auto overflow-x-hidden">
   <div class="text-lg">Ride map</div>
   <div class="flex items-center justify-center space-x-4">
     @for (routePoint of data.rideRoute.routePoints; track $index) {
       <div class="text-sm font-normal">{{ routePoint.address }}</div>
     }
+  </div>
+  <div class="flex justify-between items-center">
+    <div class="">
+      <h3 class="text-lg font-medium">Driver</h3>
+      <div class="flex items-center gap-4">
+        <div>
+          <div class="font-medium">{{ data.driver.firstName }} {{ data.driver.lastName }}</div>
+          <div class="text-sm text-gray-500">{{ data.driver.status }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="">
+      <h3 class="text-lg font-medium mb-2">Complaints</h3>
+      @if (data.complaints.length) {
+        <div class="space-y-3">
+          @for (complaint of data.complaints; track $index) {
+            <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div class="text-sm font-medium ">{{ complaint.message }}</div>
+              <div class="text-sm text-gray-700">{{ getParsedTime(complaint.time) }}</div>
+              <div>
+                <div class="font-medium">{{ complaint.reporter.firstName }} {{ complaint.reporter.lastName }}</div>
+              </div>
+            </div>
+          }
+        </div>
+        } @else {
+        <div class="text-sm text-gray-500">No complaints reported.</div>
+      }
+    </div>
+    <div class="">
+      <h3 class="text-lg font-medium mb-2">Ratings</h3>
+      @if (data.ratings.length ) {
+        <div class="space-y-3">
+          @for (rating of data.ratings; track $index) {
+            <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div class="text-sm font-medium ">{{ rating.message }}</div>
+              <div class="text-sm text-gray-700">Vehicle rating: {{ rating.driverRating }}</div>
+              <div class="text-sm text-gray-700">Vehicle rating: {{ rating.driverRating }}</div>
+              <div>
+                <div class="font-medium">
+                  {{ rating.rater.firstName }} {{ rating.rater.lastName }}
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-sm text-gray-500">No ratings.</div>
+      }
+    </div>
+    <div class="flex flex-col space-y-4">
+      <app-dropdown
+        class="mx-auto md:justify-self-center lg:justify-self-stretch max-w-[260px] lg:max-w-none"
+        label="Time"
+        [options]="timeOptions"
+        [(selected)]="selectedTime"
+      ></app-dropdown>
+      @if (isLaterSelected) {
+        <div class="w-full mt-4 flex justify-center">
+          <div class="w-full max-w-[280px]">
+            <label class="block text-sm mb-1">Pick time</label>
+
+            <input
+              type="time"
+              class="w-full border rounded-lg px-3 py-2"
+              [formControl]="scheduledTime"
+              [min]="minTime"
+              [max]="maxTime"
+              [class.border-red-500]="
+                scheduledTime.touched && !isScheduledTimeValid()
+              "
+            />
+
+            @if (!isScheduledTimeValid()) {
+              <p class="text-xs text-red-600 mt-1">Time must be within the next 5 hours</p>
+            }
+          </div>
+        </div>
+      }
+      <button matButton="outlined" (click)="confirmRide()">Schedule ride</button>
+    </div>
   </div>
   <app-map [points]="transformRoutePoints()"/>
 </div>

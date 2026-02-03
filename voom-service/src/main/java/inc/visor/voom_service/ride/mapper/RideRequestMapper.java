@@ -58,7 +58,7 @@ public class RideRequestMapper {
 
         List<RoutePoint> points =
             routeDto.points.stream()
-                .sorted(Comparator.comparingInt(p -> p.order))
+                .sorted(Comparator.comparingInt(p -> p.orderIndex))
                 .map(RideRequestMapper::mapRoutePoint)
                 .toList();
 
@@ -72,7 +72,7 @@ public class RideRequestMapper {
         RoutePoint point = new RoutePoint();
         point.setLatitude(dto.lat);
         point.setLongitude(dto.lng);
-        point.setOrderIndex(dto.order);
+        point.setOrderIndex(dto.orderIndex);
         point.setAddress(dto.address);
         point.setPointType(RoutePointType.valueOf(dto.type));
         return point;

@@ -8,6 +8,8 @@ import {ValueInputDate} from '../../../../shared/value-input/value-input-date/va
 import {RideHistoryDto} from '../../../../shared/rest/ride/ride.model';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivityMap} from '../../../../shared/activity-map/activity-map';
+import {map} from 'rxjs';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 export const ROUTE_ADMIN_ACTIVITY = "activity";
 
@@ -34,9 +36,11 @@ export class AdminActivity {
   fromDate = new FormControl<Date | null>(null);
   toDate = new FormControl<Date | null>(null);
 
-  // rideHistory$ = this.apiService.rideApi.getHistory();
+  rideHistory$ = this.apiService.rideApi.getRides(false).pipe(
+    map(response => response.data ?? []),
+  );
 
-  rideHistory = signal<RideHistoryDto[]>([]);
+  rideHistory = toSignal(this.rideHistory$);
 
   constructor(private dialog: MatDialog) {
   }

@@ -113,14 +113,14 @@ public class RideController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing, @RequestParam(required = false) LocalDateTime date) {
+    public ResponseEntity<List<RideHistoryDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing, @RequestParam(required = false) LocalDateTime date) {
         final List<Ride> rides;
         if (ongoing) {
             rides = this.rideService.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.STARTED || ride.getStatus() == RideStatus.ONGOING).toList();
         } else {
             rides = this.rideService.getRides();
         }
-        final List<RideResponseDto> rideResponses = rides.stream().map(RideResponseDto::new).toList();
+        final List<RideHistoryDto> rideResponses = rides.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideResponses);
     }
 

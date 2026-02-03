@@ -33,6 +33,24 @@ export class RideApi extends Api {
     );
   }
 
+  getRides(ongoing: boolean = false, date?: string) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      params: {
+        ongoing: ongoing.toString(),
+        ...(date && { date })
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, RideHistoryDto[]>(
+      `/api/rides`,
+      config
+    );
+  }
+
   stopRide(rideId: number, body: RideStopDto) {
     const config: RequestConfig = {
       headers: {
@@ -98,6 +116,7 @@ export class RideApi extends Api {
         accept: 'application/json',
         contentType: 'application/json',
       },
+      authenticated: true,
     };
 
     return this.apiClient.post<RideRequestDto, RideRequestResponseDto>(
@@ -127,7 +146,7 @@ export class RideApi extends Api {
     };
 
     return this.apiClient.post<RideReportRequestDto, void>(
-      `/api/rides/${rideId}/report`,
+      `/api/complaints/ride/${rideId}`,
       body,
       config
     );
