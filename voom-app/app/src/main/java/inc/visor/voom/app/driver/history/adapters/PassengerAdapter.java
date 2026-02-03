@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.history.models.Passenger;
+import inc.visor.voom.app.shared.model.User;
 
 public class PassengerAdapter
         extends RecyclerView.Adapter<PassengerAdapter.PassengerViewHolder> {
 
-    private final List<Passenger> passengers = new ArrayList<>();
+    private final List<User> passengers = new ArrayList<>();
 
-    public void submitList(List<Passenger> list) {
+    public void submitList(List<User> list) {
         passengers.clear();
         passengers.addAll(list);
         notifyDataSetChanged();
@@ -54,8 +54,9 @@ public class PassengerAdapter
             tvName = itemView.findViewById(R.id.tvPassengerName);
         }
 
-        void bind(Passenger passenger) {
-            tvName.setText(passenger.getFullName());
+        void bind(User passenger) {
+            String fullName = String.format("%s %s", passenger.getPerson().getFirstName(), passenger.getPerson().getLastName());
+            tvName.setText(fullName);
         }
     }
 }
