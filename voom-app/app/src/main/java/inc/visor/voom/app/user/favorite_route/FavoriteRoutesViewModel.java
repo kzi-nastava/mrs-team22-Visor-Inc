@@ -1,5 +1,7 @@
 package inc.visor.voom.app.user.favorite_route;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -11,6 +13,7 @@ import java.util.List;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
+import inc.visor.voom.app.shared.dto.RoutePointType;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteUI;
 import retrofit2.Call;
@@ -70,6 +73,12 @@ public class FavoriteRoutesViewModel extends ViewModel {
 
     private FavoriteRouteUI mapDto(FavoriteRouteDto dto) {
 
+        Log.d("FAV", "Points size: " + dto.points.size());
+
+        for (RoutePointDto p : dto.points) {
+            Log.d("FAV", "Type: " + p.type + " address: " + p.address);
+        }
+
         if (dto.points == null) {
             return new FavoriteRouteUI(
                     dto,
@@ -91,14 +100,14 @@ public class FavoriteRoutesViewModel extends ViewModel {
         RoutePointDto dropoff = null;
 
         for (RoutePointDto p : dto.points) {
-            if ("PICKUP".equals(p.type)) pickup = p;
-            if ("DROPOFF".equals(p.type)) dropoff = p;
+            if (RoutePointType.PICKUP.equals(p.type)) pickup = p;
+            if (RoutePointType.DROPOFF.equals(p.type)) dropoff = p;
         }
 
         List<String> stops = new ArrayList<>();
 
         for (RoutePointDto p : dto.points) {
-            if ("STOP".equals(p.type)) {
+            if (RoutePointType.STOP.equals(p.type)) {
                 stops.add(shortAddress(p.address));
             }
         }
