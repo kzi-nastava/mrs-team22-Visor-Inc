@@ -13,7 +13,15 @@
     <fragment
         android:id="@+id/favoriteRoutesFragment"
         android:name="inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment"
-        android:label="Favorite Routes" />
+        android:label="Favorite Routes">
+
+        <action
+            android:id="@+id/action_favoriteRoutesFragment_to_profileFragment"
+            app:destination="@id/profileFragment"
+            app:popUpTo="@id/profileFragment"
+            app:popUpToInclusive="false" />
+
+    </fragment>
 
 
     <fragment

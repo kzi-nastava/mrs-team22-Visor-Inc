@@ -98,11 +98,21 @@ public class UserHomeFragment extends Fragment {
         requireView().findViewById(R.id.btn_choose_favorite)
                 .setOnClickListener(v -> openFavoriteRoutes());
 
-
-
         DriverApi driverApi = RetrofitClient
                 .getInstance()
                 .create(DriverApi.class);
+
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey("picked_route")) {
+
+            List<RoutePointDto> dtos =
+                    (List<RoutePointDto>) args.getSerializable("picked_route");
+
+            if (dtos != null && !dtos.isEmpty()) {
+                applyPickedRoute(dtos);
+            }
+        }
 
         restoreActiveRide();
 
@@ -565,7 +575,7 @@ public class UserHomeFragment extends Fragment {
                     points.add(rp);
                 }
 
-                viewModel.restoreRide(points);
+                viewModel.restoreRide(points, true);
 
                 arrivalNotified = false;
 
@@ -640,6 +650,27 @@ public class UserHomeFragment extends Fragment {
         });
 
         dialog.show(getParentFragmentManager(), "FavoriteDialog");
+    }
+
+    private void applyPickedRoute(List<RoutePointDto> dtos) {
+
+        List<RoutePoint> points = new ArrayList<>();
+
+        for (RoutePointDto p : dtos) {
+
+            RoutePoint rp = new RoutePoint(
+                    p.lat,
+                    p.lng,
+                    p.address,
+                    p.orderIndex,
+                    RoutePointDto.toPointType(p.type)
+            );
+
+            points.add(rp);
+        }
+
+        viewModel.clearRoute();
+        viewModel.restoreRide(points, false);
     }
 
 

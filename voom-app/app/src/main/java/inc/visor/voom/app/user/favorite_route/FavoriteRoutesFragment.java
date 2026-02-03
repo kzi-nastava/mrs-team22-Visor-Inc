@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.user.favorite_route.adapters.FavoriteRoutesAdapter;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteUI;
@@ -48,7 +50,16 @@ public class FavoriteRoutesFragment extends Fragment
 
     @Override
     public void onPick(FavoriteRouteUI route) {
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("picked_route", new ArrayList<>(route.dto.points));
+
+        androidx.navigation.Navigation
+                .findNavController(requireView())
+                .navigate(R.id.action_favoriteRoutesFragment_to_profileFragment, bundle);
     }
+
+
 
     @Override
     public void onDelete(FavoriteRouteUI route) {
