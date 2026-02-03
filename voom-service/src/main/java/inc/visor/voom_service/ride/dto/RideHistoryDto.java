@@ -9,6 +9,7 @@ import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.complaints.dto.ComplaintSummaryDto;
 import inc.visor.voom_service.rating.dto.RatingSummaryDto;
 import inc.visor.voom_service.rating.model.Rating;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
