@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_splashFragment_to_mainUserFragment"
             app:destination="@id/mainUserFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_mainAdminFragment"
+            app:destination="@id/mainAdminFragment" />
     </fragment>
 
     <fragment
@@ -98,4 +101,9 @@
         android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
         android:label="fragment_driver_ride_history"
         tools:layout="@layout/fragment_driver_ride_history" />
+    <fragment
+        android:id="@+id/mainAdminFragment"
+        android:name="inc.visor.voom.app.admin.main.MainAdminFragment"
+        android:label="fragment_main_admin"
+        tools:layout="@layout/fragment_main_admin" />
 </navigation>

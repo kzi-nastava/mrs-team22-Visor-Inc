@@ -3,6 +3,7 @@ package inc.visor.voom.app.unauthenticated.login;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.Objects;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
@@ -57,25 +60,43 @@ public class LoginFragment extends Fragment {
 
         buttonLogin = view.findViewById(R.id.login);
 
+        dataStoreManager = DataStoreManager.getInstance(this.getContext());
+
         buttonLogin.setOnClickListener(v -> {
             final LoginDto dto = new LoginDto();
             final String email = viewModel.getEmail().getValue();
             final String password = viewModel.getPassword().getValue();
 
+            Log.d("TEST", "Input values: " + email + " " + password);
+
             dto.setEmail(email);
             dto.setPassword(password);
 
-            dataStoreManager = DataStoreManager.getInstance(this.getContext());
+            Log.d("TEST", "DTO: " + dto);
 
             authenticationApi.login(dto).enqueue(new Callback<TokenDto>() {
                 @Override
                 public void onResponse(Call<TokenDto> call, Response<TokenDto> response) {
+                    Log.d("TEST", "Request: " + call + " " + response);
                     if (!response.isSuccessful() || response.body() == null) {
                         return;
                     }
                     final TokenDto dto = response.body();
                     dataStoreManager.saveUserData(dto);
-                    Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment);
+                    if (Objects.equals(dto.getUser().getRole(), "USER")) {
+                        if (isAdded() && !isDetached()) {
+                            Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment);
+                        }
+                    } else if (Objects.equals(dto.getUser().getRole(), "DRIVER")) {
+                        if (isAdded() && !isDetached()) {
+                            Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainDriverFragment);
+                        }
+                    } else if (Objects.equals(dto.getUser().getRole(), "ADMIN")) {
+                        if (isAdded() && !isDetached()) {
+                        }
+                    } else {
+                        dataStoreManager.clearUserData();
+                    }
                 }
 
                 @Override
