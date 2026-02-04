@@ -11,16 +11,24 @@
         android:label="Splash">
         <action
             android:id="@+id/action_splashFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_splashFragment_to_mainDriverFragment"
-            app:destination="@id/mainDriverFragment" />
+            app:destination="@id/mainDriverFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_splashFragment_to_mainUserFragment"
-            app:destination="@id/mainUserFragment" />
+            app:destination="@id/mainUserFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_splashFragment_to_mainAdminFragment"
-            app:destination="@id/mainAdminFragment" />
+            app:destination="@id/mainAdminFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment

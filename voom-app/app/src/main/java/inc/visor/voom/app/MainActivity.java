@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
             navController = navHostFragment.getNavController();
         }
 
-//        checkLoginStatusAndNavigate();
-
         Uri data = getIntent().getData();
         if (data != null) {
             Log.d("DEEPLINK", "URI: " + data);
@@ -55,34 +53,35 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        checkLoginStatusAndNavigate();
     }
 
     private void checkLoginStatusAndNavigate() {
         final Disposable disposable = this.dataStoreManager
-                .isLoggedIn()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isLoggedIn -> {
+            .isLoggedIn()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(isLoggedIn -> {
                 if (isLoggedIn) {
-                    // User is logged in, check user type
                     getUserTypeAndNavigate();
                 } else {
-                    // User is not logged in, navigate to login/welcome screen
                     navigateToLogin();
                 }
             },
             throwable -> {
-                // Handle error - navigate to login by default
                 Log.e("MainActivity", "Error checking login status", throwable);
                 navigateToLogin();
             }
         );
-        compositeDisposable.delete(disposable);
+        compositeDisposable.add(disposable);
     }
 
     private void getUserTypeAndNavigate() {
-        final Disposable disposable = dataStoreManager.getUserRole().subscribe(userType -> {
-                // Navigate based on user type
+        final Disposable disposable = dataStoreManager
+            .getUserRole()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(userType -> {
                 switch (userType) {
                     case "DRIVER":
                         navigateToDriverHome();
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToAdminHome() {
         if (navController != null) {
-            navController.navigate(R.id.action_splashFragment_to_mainDriverFragment);
+            navController.navigate(R.id.mainAdminFragment);
         }
     }
 
