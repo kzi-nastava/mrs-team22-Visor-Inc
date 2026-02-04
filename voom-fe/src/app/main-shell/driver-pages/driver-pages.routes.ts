@@ -4,6 +4,7 @@ import {DriverHome, ROUTE_DRIVER_HOME} from './driver-home/driver-home';
 import {DriverPages} from './driver-pages';
 import { ROUTE_USER_PROFILE, UserProfile } from "../user-pages/user-profile/user-profile";
 import { ROUTE_SCHEDULED_RIDES, ScheduledRides } from "./scheduled-rides/scheduled-rides";
+import { ROUTE_STATISTICS, Report } from "../../shared/report/report";
 
 export default [
   {
@@ -13,6 +14,10 @@ export default [
       {
         path: ROUTE_SCHEDULED_RIDES,
         component: ScheduledRides,
+      },
+      {
+        path: ROUTE_STATISTICS,
+        component: Report,
       },
       {
         path: ROUTE_DRIVER_HOME,

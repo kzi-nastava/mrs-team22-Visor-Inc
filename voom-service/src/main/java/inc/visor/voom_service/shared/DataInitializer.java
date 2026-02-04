@@ -284,7 +284,7 @@ public class DataInitializer implements ApplicationRunner {
             request.setVehicleType(vehicleType);
             request.setBabyTransport(false);
             request.setPetTransport(false);
-            request.setCalculatedPrice(5 + i * 10);
+            request.setCalculatedPrice(5 + i * 1);
             rideRequestRepository.save(request);
 
             Ride ride = new Ride();

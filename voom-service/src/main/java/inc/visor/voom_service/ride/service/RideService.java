@@ -298,4 +298,13 @@ public class RideService {
                 to
         );
     }
+
+    public List<Ride> getFinishedRidesByDriverIdAndTimeRange(Long driverId, LocalDateTime from, LocalDateTime to) {
+        return this.rideRepository.findByDriver_IdAndStatusAndFinishedAtBetween(
+                driverId,
+                RideStatus.FINISHED,
+                from,
+                to
+        );
+    }
 }

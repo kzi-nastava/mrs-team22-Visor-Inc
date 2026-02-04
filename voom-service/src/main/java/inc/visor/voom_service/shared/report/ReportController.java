@@ -65,8 +65,8 @@ public class ReportController {
             Driver driver = driverService.getDriver(user.getId())
                     .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-            // response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
-            return null;
+            response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
+            return ResponseEntity.ok(response);
         }
         else {
             response = reportService.getUserReport(user.getId(), fromDateTime, toDateTime);

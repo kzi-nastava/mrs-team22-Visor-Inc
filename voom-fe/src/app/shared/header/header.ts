@@ -80,4 +80,8 @@ export class Header {
     this.router.navigate([ROUTE_USER_PAGES, ROUTE_STATISTICS]);
   }
 
+  protected driverStatistics() {
+    this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_STATISTICS]);
+  }
+
 }

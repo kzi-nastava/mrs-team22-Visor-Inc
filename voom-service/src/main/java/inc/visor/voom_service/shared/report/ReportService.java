@@ -50,11 +50,11 @@ public class ReportService {
                     long rideCount = dailyRides.size();
 
                     double totalKm = dailyRides.stream()
-                            .mapToDouble(ride -> ride.getRideRequest().getRideRoute().getTotalDistanceKm()) 
+                            .mapToDouble(ride -> ride.getRideRequest().getRideRoute().getTotalDistanceKm())
                             .sum();
 
                     double totalMoney = dailyRides.stream()
-                            .mapToDouble(ride -> ride.getRideRequest().getCalculatedPrice()) 
+                            .mapToDouble(ride -> ride.getRideRequest().getCalculatedPrice())
                             .sum();
 
                     return new ReportDailyStatsDto(
@@ -70,22 +70,58 @@ public class ReportService {
         return buildResponse(dailyStats);
     }
 
-//     public ReportResponseDto getDriverReport(Long driverId, LocalDateTime from, LocalDateTime to) {
+    public ReportResponseDto getDriverReport(Long driverId, LocalDateTime from, LocalDateTime to) {
 
-//         List<ReportDailyStatsDto> dailyStats
-//                 = reportRepository.getDriverDailyStats(driverId, from, to);
+        List<Ride> rides
+                = rideService.getFinishedRidesByDriverIdAndTimeRange(driverId, from, to);
 
-//         return buildResponse(dailyStats);
-//     }
+        Map<LocalDate, List<Ride>> ridesByDate = rides.stream()
+                .collect(Collectors.groupingBy(
+                        ride -> ride.getFinishedAt().toLocalDate()
+                ));
+
+        List<ReportDailyStatsDto> dailyStats = ridesByDate.entrySet()
+                .stream()
+                .map(entry -> {
+
+                    LocalDate date = entry.getKey();
+                    List<Ride> dailyRides = entry.getValue();
+
+                    long rideCount = dailyRides.size();
+
+                    double totalKm = dailyRides.stream()
+                            .mapToDouble(ride
+                                    -> ride.getRideRequest()
+                                    .getRideRoute()
+                                    .getTotalDistanceKm()
+                            )
+                            .sum();
+
+                    double totalMoney = dailyRides.stream()
+                            .mapToDouble(ride
+                                    -> ride.getRideRequest()
+                                    .getCalculatedPrice()
+                            )
+                            .sum();
+
+                    return new ReportDailyStatsDto(
+                            date,
+                            rideCount,
+                            totalKm,
+                            totalMoney
+                    );
+                })
+                .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
+                .toList();
+
+        return buildResponse(dailyStats);
+    }
 
 //     public ReportResponseDto getAdminReport(LocalDateTime from, LocalDateTime to) {
-
 //         List<ReportDailyStatsDto> dailyStats
 //                 = reportRepository.getAdminDailyStats(from, to);
-
 //         return buildResponse(dailyStats);
 //     }
-
     private ReportResponseDto buildResponse(List<ReportDailyStatsDto> dailyStats) {
 
         long totalRides = dailyStats.stream()
