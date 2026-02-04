@@ -18,6 +18,12 @@ import android.widget.Button;
 import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.shared.api.AuthenticationApi;
+import inc.visor.voom.app.shared.dto.authentication.ResetPasswordDto;
+import inc.visor.voom.app.shared.dto.authentication.TokenDto;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ResetPasswordFragment extends Fragment {
 
@@ -25,6 +31,7 @@ public class ResetPasswordFragment extends Fragment {
     TextInputEditText passwordInput;
     TextInputEditText repeatPasswordInput;
     Button buttonSubmit;
+    AuthenticationApi authenticationApi;
 
     public ResetPasswordFragment() {
         // Required empty public constructor
@@ -42,7 +49,23 @@ public class ResetPasswordFragment extends Fragment {
         setupRepeatPasswordInput();
 
         buttonSubmit = view.findViewById(R.id.reset_password_button);
-        buttonSubmit.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_resetPasswordFragment_to_mainUserFragment));
+        buttonSubmit.setOnClickListener(v -> {
+            final ResetPasswordDto dto = new ResetPasswordDto();
+            dto.setPassword(viewModel.getPassword().getValue());
+            dto.setConfirmPassword(viewModel.getRepeatPassword().getValue());
+
+            authenticationApi.resetPassword(dto).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Navigation.findNavController(view).navigate(R.id.action_resetPasswordFragment_to_mainUserFragment);
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+
+                }
+            });
+        });
     }
 
     private void setupPasswordInput() {

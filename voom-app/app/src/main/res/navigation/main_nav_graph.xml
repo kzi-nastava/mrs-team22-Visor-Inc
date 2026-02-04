@@ -3,8 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/splashFragment">
 
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="inc.visor.voom.app.shared.SplashFragment"
+        android:label="Splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_splashFragment_to_mainDriverFragment"
+            app:destination="@id/mainDriverFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_splashFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_splashFragment_to_mainAdminFragment"
+            app:destination="@id/mainAdminFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
 
     <fragment
         android:id="@+id/registrationFragment"
@@ -44,6 +69,9 @@
         <action
             android:id="@+id/action_loginFragment_to_mainUserFragment"
             app:destination="@id/mainUserFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainDriverFragment"
+            app:destination="@id/mainDriverFragment" />
     </fragment>
     <action
         android:id="@+id/action_global_to_mainDriverFragment"
@@ -70,11 +98,7 @@
         android:id="@+id/mainUserFragment"
         android:name="inc.visor.voom.app.user.main.MainUserFragment"
         android:label="fragment_main_user"
-        tools:layout="@layout/fragment_main_user">
-        <action
-            android:id="@+id/action_mainUserFragment_to_mainDriverFragment"
-            app:destination="@id/mainDriverFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_main_user"/>
     <fragment
         android:id="@+id/mainDriverFragment"
         android:name="inc.visor.voom.app.driver.main.MainDriverFragment"
@@ -85,4 +109,9 @@
         android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
         android:label="fragment_driver_ride_history"
         tools:layout="@layout/fragment_driver_ride_history" />
+    <fragment
+        android:id="@+id/mainAdminFragment"
+        android:name="inc.visor.voom.app.admin.main.MainAdminFragment"
+        android:label="fragment_main_admin"
+        tools:layout="@layout/fragment_main_admin" />
 </navigation>

@@ -1,20 +1,11 @@
 package inc.visor.voom_service.ride.service;
 
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -24,6 +15,15 @@ import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 
 @Service
 public class RideService {

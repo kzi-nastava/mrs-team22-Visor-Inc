@@ -1,6 +1,14 @@
 package inc.visor.voom.app.unauthenticated.login;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,18 +16,19 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
-
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Objects;
+
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.unauthenticated.registration.RegistrationViewModel;
+import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.AuthenticationApi;
+import inc.visor.voom.app.shared.dto.authentication.LoginDto;
+import inc.visor.voom.app.shared.dto.authentication.TokenDto;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment {
 
@@ -29,6 +38,8 @@ public class LoginFragment extends Fragment {
     TextView buttonForgotPassword;
     TextView buttonRegister;
     LoginViewModel viewModel;
+    AuthenticationApi authenticationApi;
+    DataStoreManager dataStoreManager;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -38,6 +49,7 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        authenticationApi = RetrofitClient.getInstance().create(AuthenticationApi.class);
         viewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
         emailInput = view.findViewById(R.id.email_input);
@@ -48,7 +60,50 @@ public class LoginFragment extends Fragment {
 
         buttonLogin = view.findViewById(R.id.login);
 
-        buttonLogin.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment));
+        dataStoreManager = DataStoreManager.getInstance(this.getContext());
+
+        buttonLogin.setOnClickListener(v -> {
+            final LoginDto dto = new LoginDto();
+            final String email = viewModel.getEmail().getValue();
+            final String password = viewModel.getPassword().getValue();
+
+            Log.d("TEST", "Input values: " + email + " " + password);
+
+            dto.setEmail(email);
+            dto.setPassword(password);
+
+            Log.d("TEST", "DTO: " + dto);
+
+            authenticationApi.login(dto).enqueue(new Callback<TokenDto>() {
+                @Override
+                public void onResponse(Call<TokenDto> call, Response<TokenDto> response) {
+                    Log.d("TEST", "Request: " + call + " " + response);
+                    if (!response.isSuccessful() || response.body() == null) {
+                        return;
+                    }
+                    final TokenDto dto = response.body();
+                    dataStoreManager.saveUserData(dto);
+                    if (Objects.equals(dto.getUser().getRole(), "USER")) {
+                        if (isAdded() && !isDetached()) {
+                            Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainUserFragment);
+                        }
+                    } else if (Objects.equals(dto.getUser().getRole(), "DRIVER")) {
+                        if (isAdded() && !isDetached()) {
+                            Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainDriverFragment);
+                        }
+                    } else if (Objects.equals(dto.getUser().getRole(), "ADMIN")) {
+                        if (isAdded() && !isDetached()) {
+                        }
+                    } else {
+                        dataStoreManager.clearUserData();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<TokenDto> call, Throwable t) {
+                }
+            });
+        });
 
         buttonForgotPassword = view.findViewById(R.id.forgot_password);
 
