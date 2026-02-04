@@ -28,10 +28,10 @@ public class RideEstimateService {
     }
 
     public double calculateTotalDistance(List<RideRequestCreateDto.RoutePointDto> dto) {
-        List<RideRequestCreateDto.RoutePointDto> points
-                = dto.stream()
-                        .sorted(Comparator.comparingInt(p -> p.order))
-                        .toList();
+        List<RideRequestCreateDto.RoutePointDto> points =
+            dto.stream()
+                .sorted(Comparator.comparingInt(p -> p.orderIndex))
+                .toList();
 
         double total = 0.0;
 

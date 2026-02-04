@@ -107,6 +107,10 @@ export class Map implements AfterViewInit, OnChanges {
         });
       });
     });
+
+    if (this.points && this.points.length > 0) {
+      this.syncFromPoints();
+    }
   }
 
   focusDriver(driverId: number, zoom = 16) {
@@ -119,7 +123,6 @@ export class Map implements AfterViewInit, OnChanges {
   panTo(lat: number, lng: number) {
     this.map.panTo({ lat, lng }, { animate: true });
   }
-
 
   applyDriverRoute(driverId: number, coords: { lat: number; lng: number }[]) {
     const driver = this.drivers.find((d) => d.id === driverId);
@@ -276,6 +279,9 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   private syncFromPoints() {
+
+    console.log(this.points);
+
     this.drawVersion++;
 
     this.markers.forEach((m) => this.map.removeLayer(m));

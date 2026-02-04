@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -113,20 +114,20 @@ public class RideController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RideResponseDto>> getRides(@RequestParam(required = false, defaultValue = "false") boolean ongoing) {
+    public ResponseEntity<List<RideHistoryDto>> getRides(@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'") @RequestParam(required = false) LocalDateTime start, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'") @RequestParam(required = false) LocalDateTime end, @RequestParam(defaultValue = "DESC") Sorting sort) {
         final List<Ride> rides;
-        if (ongoing) {
-            rides = this.rideService.getRides().stream().filter(ride -> ride.getStatus() == RideStatus.STARTED || ride.getStatus() == RideStatus.ONGOING).toList();
-        } else {
-            rides = this.rideService.getRides();
-        }
-        final List<RideResponseDto> rideResponses = rides.stream().map(RideResponseDto::new).toList();
+        log.info("Start " + start + " " + "End " + end);
+        List<Ride> allRides = this.rideService.getRides();
+        rides = this.rideService.getRidesFilteredSortedByDate(start, end, sort, allRides);
+
+        final List<RideHistoryDto> rideResponses = rides.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideResponses);
     }
 
     @GetMapping("/user/{userId}/history")
-    public ResponseEntity<List<RideHistoryDto>> getRidesForUser(@PathVariable long userId, @RequestParam(required = false) LocalDateTime date) {
-        final List<Ride> ridesList = rideService.getUserRides(userId, null, null, Sorting.ASC);
+    public ResponseEntity<List<RideHistoryDto>> getRidesForUser(@PathVariable long userId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'") @RequestParam(required = false) LocalDateTime start, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'") @RequestParam(required = false) LocalDateTime end,  @RequestParam(defaultValue = "DESC") Sorting sort) {
+        final List<Ride> ridesList = rideService.getUserRides(userId, start, end, sort);
+        log.info("Start " + start + " " + "End " + end);
         final List<RideHistoryDto> rideHistoryDtoList = ridesList.stream().map(RideHistoryDto::new).toList();
         return ResponseEntity.ok(rideHistoryDtoList);
     }

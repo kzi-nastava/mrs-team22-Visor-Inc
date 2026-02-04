@@ -7,7 +7,7 @@ import {DriverSimulationWsService} from '../../shared/websocket/DriverSimulation
 import ApiService from '../../shared/rest/api-service';
 import {DriverSummaryDto} from '../../shared/rest/ride/ride.model';
 import {RouteEstimateRequestDto, RouteEstimateResponseDto} from '../../shared/rest/route/route.model';
-import {catchError, map} from 'rxjs';
+import {map} from 'rxjs';
 import {RoutePoint} from '../../main-shell/user-pages/user-home/user-home';
 import {RoutePointType} from './home.api';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
