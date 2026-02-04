@@ -1,31 +1,54 @@
 <div class="reports-container">
-
-  <!-- FILTER BAR -->
   <mat-card class="filter-card">
     <div class="filter-content">
-
-      <mat-form-field appearance="outline" class="date-field">
+      <mat-form-field
+        appearance="outline"
+        class="date-field"
+        [color]="isInvalidRange() ? 'warn' : 'primary'"
+      >
         <mat-label>From</mat-label>
-        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate">
+        <input
+          matInput
+          [matDatepicker]="fromPicker"
+          [(ngModel)]="fromDate"
+          [ngClass]="{ 'invalid-date': isInvalidRange() }"
+        />
         <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
         <mat-datepicker #fromPicker></mat-datepicker>
+
+        <mat-error *ngIf="isInvalidRange()"> Invalid date range </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="date-field">
+      <mat-form-field
+        appearance="outline"
+        class="date-field"
+        [color]="isInvalidRange() ? 'warn' : 'primary'"
+      >
         <mat-label>To</mat-label>
-        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate">
+        <input
+          matInput
+          [matDatepicker]="toPicker"
+          [(ngModel)]="toDate"
+          [ngClass]="{ 'invalid-date': isInvalidRange() }"
+        />
         <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
         <mat-datepicker #toPicker></mat-datepicker>
+
+        <mat-error *ngIf="isInvalidRange()"> Invalid date range </mat-error>
       </mat-form-field>
 
-      <button mat-raised-button color="primary" class="generate-btn" (click)="loadReports()">
+      <button
+        mat-raised-button
+        color="primary"
+        class="generate-btn"
+        (click)="loadReports()"
+        [disabled]="!fromDate || !toDate || isInvalidRange()"
+      >
         Generate Report
       </button>
-
     </div>
   </mat-card>
 
-  <!-- SUMMARY -->
   <div class="summary-grid">
     <mat-card class="summary-card">
       <h3>Total rides</h3>
@@ -34,11 +57,14 @@
 
     <mat-card class="summary-card">
       <h3>Total km</h3>
-      <p>{{ summary.totalKm }}</p>
+      <p>{{ summary.totalKm | number: '1.2-2' }} km</p>
     </mat-card>
 
     <mat-card class="summary-card">
-      <h3>Total earnings</h3>
+      <h3>
+        {{ isDriver ? 'Total earnings' : 'Total expenses' }}
+      </h3>
+
       <p>{{ summary.totalMoney | currency }}</p>
     </mat-card>
 
@@ -48,16 +74,17 @@
     </mat-card>
   </div>
 
-  <!-- CHARTS -->
   <div class="charts-grid">
-
-    <mat-card class="chart-card">
+    <mat-card class="chart-card full-width">
       <h3>Rides per day</h3>
       <div class="chart-wrapper">
-        <canvas baseChart
+        <canvas
+          baseChart
           [data]="ridesChartData"
           [options]="chartOptions"
-          chartType="line">
+          [legend]="true"
+          chartType="line"
+        >
         </canvas>
       </div>
     </mat-card>
@@ -65,23 +92,17 @@
     <mat-card class="chart-card">
       <h3>Kilometers per day</h3>
       <div class="chart-wrapper">
-        <canvas baseChart
-          [data]="kmChartData"
-          chartType="bar">
-        </canvas>
+        <canvas baseChart [data]="kmChartData" [legend]="true" chartType="bar"> </canvas>
       </div>
     </mat-card>
 
     <mat-card class="chart-card">
-      <h3>Earnings per day</h3>
+      <h3>
+        {{ isDriver ? 'Earnings per day' : 'Expenses per day' }}
+      </h3>
       <div class="chart-wrapper">
-        <canvas baseChart
-          [data]="moneyChartData"
-          chartType="line">
-        </canvas>
+        <canvas baseChart [data]="moneyChartData" [legend]="true" chartType="line"> </canvas>
       </div>
     </mat-card>
-
   </div>
-
 </div>

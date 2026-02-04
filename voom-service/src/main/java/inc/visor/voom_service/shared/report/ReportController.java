@@ -57,17 +57,20 @@ public class ReportController {
         ReportResponseDto response;
 
         if (user.getUserRole().getId() == 1) {
-            response = reportService.getAdminReport(fromDateTime, toDateTime);
+            // response = reportService.getAdminReport(fromDateTime, toDateTime);
+            return null;
         }
         else if (user.getUserRole().getId() == 2) {
 
             Driver driver = driverService.getDriver(user.getId())
                     .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-            response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
+            // response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
+            return null;
         }
         else {
             response = reportService.getUserReport(user.getId(), fromDateTime, toDateTime);
+            System.out.println("USER REPORT" + response);
         }
 
         return ResponseEntity.ok(response);

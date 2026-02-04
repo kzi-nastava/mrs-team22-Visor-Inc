@@ -256,10 +256,25 @@ public class DataInitializer implements ApplicationRunner {
 
             RideRoute route = new RideRoute();
 
-            RoutePoint pickup = createPoint("Pickup Street " + i);
-            RoutePoint dropoff = createPoint("Dropoff Street " + i);
+            double[] coords = ROUTES[i % ROUTES.length];
+
+            RoutePoint pickup = createPoint(
+                    "Pickup Street " + i,
+                    coords[0],
+                    coords[1]
+            );
+
+            RoutePoint dropoff = createPoint(
+                    "Dropoff Street " + i,
+                    coords[2],
+                    coords[3]
+            );
 
             route.setRoutePoints(Arrays.asList(pickup, dropoff));
+            route.setTotalDistanceKm(calculateDistanceKm(
+                    coords[0], coords[1],
+                    coords[2], coords[3]
+            ));
 
             RideRequest request = new RideRequest();
             request.setCreator(user);
@@ -269,7 +284,7 @@ public class DataInitializer implements ApplicationRunner {
             request.setVehicleType(vehicleType);
             request.setBabyTransport(false);
             request.setPetTransport(false);
-            request.setCalculatedPrice(500 + i * 100);
+            request.setCalculatedPrice(5 + i * 10);
             rideRequestRepository.save(request);
 
             Ride ride = new Ride();
@@ -284,12 +299,40 @@ public class DataInitializer implements ApplicationRunner {
         System.out.println("Seeded test rides for reports.");
     }
 
-    private RoutePoint createPoint(String address) {
+    private RoutePoint createPoint(String address, double lat, double lng) {
         RoutePoint point = new RoutePoint();
         point.setAddress(address);
-        point.setLatitude(45.2671);
-        point.setLongitude(19.8335);
+        point.setLatitude(lat);
+        point.setLongitude(lng);
         return point;
+    }
+
+    private static final double[][] ROUTES = {
+        {45.2458, 19.8529, 45.2556, 19.8449}, // Liman → Centar
+        {45.2429, 19.8434, 45.2472, 19.8372}, // Liman → Spens
+        {45.2384, 19.8049, 45.2441, 19.8586}, // Telep → Liman
+        {45.2701, 19.8617, 45.2549, 19.8463}, // Podbara → Centar
+        {45.2813, 19.8418, 45.2471, 19.8733}, // Klisa → Petrovaradin
+    };
+
+    private double calculateDistanceKm(
+            double lat1, double lon1,
+            double lat2, double lon2
+    ) {
+        final int R = 6371; // Earth radius km
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2)
+                * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
     }
 
 }

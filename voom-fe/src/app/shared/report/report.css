@@ -13,17 +13,18 @@
 .filter-content {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.date-field {
-  width: 220px;
+  gap: 16px;
+  width: 100%;
 }
 
 .generate-btn {
-  height: 56px;
+  margin-left: auto;
 }
+
+.date-field {
+  min-width: 220px;
+}
+
 
 /* SUMMARY */
 .summary-grid {
@@ -53,8 +54,10 @@
 /* CHARTS */
 .charts-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 24px;
 }
+
 
 .chart-card {
   padding: 20px;
@@ -69,3 +72,8 @@
   position: relative;
   height: 350px;
 }
+
+::ng-deep .date-field .mat-mdc-form-field-icon-suffix {
+  margin-right: 8px;
+}
+
