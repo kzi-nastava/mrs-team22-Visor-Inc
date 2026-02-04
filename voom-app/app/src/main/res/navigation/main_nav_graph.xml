@@ -62,16 +62,27 @@
         tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
-            app:destination="@id/forgotPasswordFragment" />
+            app:destination="@id/forgotPasswordFragment"/>
         <action
             android:id="@+id/action_loginFragment_to_mainUserFragment"
-            app:destination="@id/mainUserFragment" />
+            app:destination="@id/mainUserFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_loginFragment_to_mainDriverFragment"
-            app:destination="@id/mainDriverFragment" />
+            app:destination="@id/mainDriverFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_loginFragment_to_mainAdminFragment"
+            app:destination="@id/mainAdminFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <action
         android:id="@+id/action_global_to_mainDriverFragment"
@@ -82,8 +93,8 @@
         android:label="fragment_forgot_password"
         tools:layout="@layout/fragment_forgot_password">
         <action
-            android:id="@+id/action_forgotPasswordFragment_to_resetPasswordFragment"
-            app:destination="@id/resetPasswordFragment" />
+            android:id="@+id/action_forgotPasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/resetPasswordFragment"
@@ -91,8 +102,8 @@
         android:label="fragment_reset_password"
         tools:layout="@layout/fragment_reset_password">
         <action
-            android:id="@+id/action_resetPasswordFragment_to_mainUserFragment"
-            app:destination="@id/mainUserFragment" />
+            android:id="@+id/action_resetPasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/mainUserFragment"

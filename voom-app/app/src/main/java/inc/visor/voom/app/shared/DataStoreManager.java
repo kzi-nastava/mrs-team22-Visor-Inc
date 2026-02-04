@@ -46,26 +46,26 @@ public class DataStoreManager {
 
     public Single<Long> getUserId() {
         return dataStore.data().map(prefs -> prefs.get(USER_ID_KEY))
-                .firstOrError()
-                .onErrorReturnItem(0L);
+            .firstOrError()
+            .onErrorReturnItem(0L);
     }
 
     public Single<String> getUserEmail() {
         return dataStore.data().map(prefs -> prefs.get(USER_EMAIL_KEY))
-                .firstOrError()
-                .onErrorReturnItem("");
+            .firstOrError()
+            .onErrorReturnItem("");
     }
 
     public Single<String> getUserRole() {
         return dataStore.data().map(prefs -> prefs.get(USER_ROLE_KEY))
-                .firstOrError()
-                .onErrorReturnItem("");
+            .firstOrError()
+            .onErrorReturnItem("");
     }
 
     public Single<String> getAuthToken() {
         return dataStore.data().map(prefs -> prefs.get(AUTH_TOKEN_KEY))
-                .firstOrError()
-                .onErrorReturnItem("");
+            .firstOrError()
+            .onErrorReturnItem("");
     }
 
     public Single<Boolean> isLoggedIn() {

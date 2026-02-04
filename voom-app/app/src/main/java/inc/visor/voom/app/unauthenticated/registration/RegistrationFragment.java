@@ -11,6 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
 import inc.visor.voom.app.shared.dto.authentication.RegistrationDto;
@@ -33,11 +36,26 @@ public class RegistrationFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
+        final String firstName = viewModel.getFirstName().getValue();
+        final String lastName = viewModel.getLastName().getValue();
+        final LocalDateTime birthDate = viewModel.getBirthDate().getValue();
+        final String email = viewModel.getEmail().getValue();
+        final String password = viewModel.getPassword().getValue();
+        final String address = viewModel.getAddress().getValue();
+        final String phoneNumber = viewModel.getPhoneNumber().getValue();
+
+        RegistrationDto dto = new RegistrationDto();
+
+        dto.setFirstName(firstName);
+        dto.setLastName(lastName);
+        dto.setBirthDate(birthDate);
+        dto.setEmail(email);
+        dto.setPassword(password);
+        dto.setAddress(address);
+        dto.setPhoneNumber(phoneNumber);
 
         viewModel.getRegistrationComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
-                RegistrationDto dto = new RegistrationDto();
-
                 authenticationApi.register(dto).enqueue(new Callback<UserDto>() {
                     @Override
                     public void onResponse(Call<UserDto> call, Response<UserDto> response) {

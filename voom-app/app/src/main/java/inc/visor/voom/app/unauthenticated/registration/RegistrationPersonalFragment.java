@@ -21,6 +21,8 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -132,7 +134,7 @@ public class RegistrationPersonalFragment extends Fragment {
             final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
             birthDateInput.setText(sdf.format(birthDate));
-            viewModel.setBirthDate(birthDate);
+            viewModel.setBirthDate(LocalDateTime.from(birthDate.toInstant()));
         });
     }
 

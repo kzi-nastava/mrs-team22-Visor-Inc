@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(isLoggedIn -> {
-                if (isLoggedIn) {
-                    getUserTypeAndNavigate();
-                } else {
+//                if (isLoggedIn) {
+//                    getUserTypeAndNavigate();
+//                } else {
                     navigateToLogin();
-                }
+//                }
             },
             throwable -> {
                 Log.e("MainActivity", "Error checking login status", throwable);
