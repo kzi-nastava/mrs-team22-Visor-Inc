@@ -1,6 +1,7 @@
 package inc.visor.voom.app.unauthenticated.registration;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
 import inc.visor.voom.app.shared.dto.authentication.RegistrationDto;
 import inc.visor.voom.app.shared.dto.authentication.UserDto;
@@ -35,27 +38,36 @@ public class RegistrationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        authenticationApi = RetrofitClient.getInstance().create(AuthenticationApi.class);
+
         viewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
-        final String firstName = viewModel.getFirstName().getValue();
-        final String lastName = viewModel.getLastName().getValue();
-        final LocalDateTime birthDate = viewModel.getBirthDate().getValue();
-        final String email = viewModel.getEmail().getValue();
-        final String password = viewModel.getPassword().getValue();
-        final String address = viewModel.getAddress().getValue();
-        final String phoneNumber = viewModel.getPhoneNumber().getValue();
-
-        RegistrationDto dto = new RegistrationDto();
-
-        dto.setFirstName(firstName);
-        dto.setLastName(lastName);
-        dto.setBirthDate(birthDate);
-        dto.setEmail(email);
-        dto.setPassword(password);
-        dto.setAddress(address);
-        dto.setPhoneNumber(phoneNumber);
 
         viewModel.getRegistrationComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
+
+                final String firstName = viewModel.getFirstName().getValue();
+                final String lastName = viewModel.getLastName().getValue();
+                final LocalDateTime birthDate = viewModel.getBirthDate().getValue();
+                final String email = viewModel.getEmail().getValue();
+                final String password = viewModel.getPassword().getValue();
+                final String address = viewModel.getAddress().getValue();
+                final String phoneNumber = viewModel.getPhoneNumber().getValue();
+
+                final RegistrationDto dto = new RegistrationDto();
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+                dto.setFirstName(firstName);
+                dto.setLastName(lastName);
+                dto.setBirthDate(birthDate.format(formatter));
+                dto.setEmail(email);
+                dto.setPassword(password);
+                dto.setAddress(address);
+                dto.setPhoneNumber(phoneNumber);
+                dto.setUserType("USER");
+
+                Log.d("TEST", "DTO: " + dto);
+
                 authenticationApi.register(dto).enqueue(new Callback<UserDto>() {
                     @Override
                     public void onResponse(Call<UserDto> call, Response<UserDto> response) {
