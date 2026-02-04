@@ -1,10 +1,6 @@
 package inc.visor.voom.app.driver.api;
 
-import java.util.List;
-
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
-import inc.visor.voom.app.driver.dto.DriverSummaryDto;
-import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.dto.StartRideDto;
 import retrofit2.Call;
 import retrofit2.http.Body;
