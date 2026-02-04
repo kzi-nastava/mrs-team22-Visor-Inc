@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
@@ -17,6 +18,8 @@ import org.osmdroid.config.Configuration;
 import inc.visor.voom.app.shared.DataStoreManager;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+
         super.onCreate(savedInstanceState);
 
         Configuration.getInstance().setUserAgentValue(getPackageName());
@@ -44,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         Uri data = getIntent().getData();
         if (data != null) {
-            Log.d("DEEPLINK", "URI: " + data.toString());
+            Log.d("DEEPLINK", "URI: " + data);
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -52,11 +57,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        splashScreen.setKeepOnScreenCondition(() -> false);
+
     }
 
     private void checkLoginStatusAndNavigate() {
-        final Disposable disposable = this.dataStoreManager.isLoggedIn().subscribe(
-            isLoggedIn -> {
+        final Disposable disposable = this.dataStoreManager
+                .isLoggedIn()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(isLoggedIn -> {
                 if (isLoggedIn) {
                     // User is logged in, check user type
                     getUserTypeAndNavigate();
@@ -83,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                         navigateToDriverHome();
                         break;
                     case "passenger":
-                        navigateToPassengerHome();
+                        navigateToUserHome();
                         break;
                     case "admin":
                         navigateToAdminHome();
@@ -103,19 +114,19 @@ public class MainActivity extends AppCompatActivity {
     }
     private void navigateToLogin() {
         if (navController != null) {
-            navController.navigate(R.id.loginFragment);
+            navController.navigate(R.id.action_splashFragment_to_loginFragment);
         }
     }
 
     private void navigateToDriverHome() {
         if (navController != null) {
-            navController.navigate(R.id.driverHomeFragment);
+            navController.navigate(R.id.action_splashFragment_to_mainDriverFragment);
         }
     }
 
-    private void navigateToPassengerHome() {
+    private void navigateToUserHome() {
         if (navController != null) {
-//            navController.navigate(R.id.);
+            navController.navigate(R.id.action_loginFragment_to_mainUserFragment);
         }
     }
 

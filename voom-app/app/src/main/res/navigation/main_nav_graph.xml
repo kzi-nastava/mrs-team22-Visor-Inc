@@ -2,8 +2,23 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_nav_graph">
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/splashFragment">
 
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="inc.visor.voom.app.shared.SplashFragment"
+        android:label="Splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_mainDriverFragment"
+            app:destination="@id/mainDriverFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/registrationFragment"
@@ -43,6 +58,9 @@
         <action
             android:id="@+id/action_loginFragment_to_mainUserFragment"
             app:destination="@id/mainUserFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainDriverFragment"
+            app:destination="@id/mainDriverFragment" />
     </fragment>
     <action
         android:id="@+id/action_global_to_mainDriverFragment"
@@ -69,11 +87,7 @@
         android:id="@+id/mainUserFragment"
         android:name="inc.visor.voom.app.user.main.MainUserFragment"
         android:label="fragment_main_user"
-        tools:layout="@layout/fragment_main_user">
-        <action
-            android:id="@+id/action_mainUserFragment_to_mainDriverFragment"
-            app:destination="@id/mainDriverFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_main_user"/>
     <fragment
         android:id="@+id/mainDriverFragment"
         android:name="inc.visor.voom.app.driver.main.MainDriverFragment"
