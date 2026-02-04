@@ -1,13 +1,13 @@
-<div class="p-4">
+<div class="px-16 py-4">
   <div class="flex justify-between items-center">
-    <div class="font-medium text-3xl">Activity</div>
+    <div class="font-medium text-2xl">Activity</div>
     <div class="flex items-center space-x-8">
       <mat-icon class="scale-150 cursor-pointer">filter_list</mat-icon>
       <app-value-input-date label="From" [formControl]="fromDate"></app-value-input-date>
       <app-value-input-date label="To" [formControl]="toDate"></app-value-input-date>
     </div>
   </div>
-  @if (rideHistory(); as history) {
+  @if (userRideHistory(); as history) {
     @if (history.length !== 0) {
       <div class="py-8 space-y-4">
         @for (ride of history; track ride.id) {
@@ -15,11 +15,7 @@
             <mat-expansion-panel-header>
               <mat-panel-title class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                  @if (ride.status === 'SCHEDULED' || ride.status === 'USER_CANCELLED' || ride.status === 'DRIVER_CANCELLED') {
-                    <div class="text-lg font-normal">{{ getParsedTime(ride.rideRequest.scheduledTime)}}</div>
-                  } @else {
-                    <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt)}} - {{ getParsedTime(ride.finishedAt) }}</div>
-                  }
+                  <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt)}} - {{ getParsedTime(ride.finishedAt) }}</div>
                 </div>
                 <div class="flex items-center space-x-4">
                   @for (routePoint of ride.rideRoute.routePoints; track $index) {
@@ -45,13 +41,9 @@
                 <div class="text-lg font-normal">Vehicle type:</div>
                 <div class="text-lg font-normal">{{ ride.rideRequest.vehicleType.type.toLowerCase() }}</div>
               </div>
-              <div class="flex flex-col items-center justify-center space-x-2">
+              <div class="flex items-center justify-center space-x-2">
                 <div class="text-lg font-normal">Status:</div>
                 <div class="text-lg font-normal">{{ ride.status.toLowerCase() }}</div>
-                @if (ride.status.toLowerCase() === 'user_cancelled') {
-                  <div class="text-lg font-normal">User: {{ ride.cancelledBy!.email }}</div>
-                  <div class="text-lg font-normal">Reason: {{ ride.rideRequest.reason }}</div>
-                }
               </div>
               <div class="flex items-center justify-center space-x-2">
                 <div class="text-lg font-normal">Pet transport:</div>
