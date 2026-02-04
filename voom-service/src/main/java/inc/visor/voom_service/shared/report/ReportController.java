@@ -1,0 +1,75 @@
+package inc.visor.voom_service.shared.report;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/reports")
+@RequiredArgsConstructor
+public class ReportController {
+
+    private final ReportService reportService;
+    private final UserProfileService userProfileService;
+    private final DriverService driverService;
+    
+    @GetMapping
+    public ResponseEntity<ReportResponseDto> getReport(
+            @AuthenticationPrincipal VoomUserDetails userDetails,
+            @RequestParam("from")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate from,
+
+            @RequestParam("to")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate to
+    ) {
+
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User user = userProfileService.getUserByEmail(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
+
+        ReportResponseDto response;
+
+        if (user.getUserRole().getId() == 1) {
+            response = reportService.getAdminReport(fromDateTime, toDateTime);
+        }
+        else if (user.getUserRole().getId() == 2) {
+
+            Driver driver = driverService.getDriver(user.getId())
+                    .orElseThrow(() -> new RuntimeException("Driver not found"));
+
+            response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
+        }
+        else {
+            response = reportService.getUserReport(user.getId(), fromDateTime, toDateTime);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+}
