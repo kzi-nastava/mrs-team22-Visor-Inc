@@ -1,0 +1,52 @@
+<div class="reports-container">
+
+  <mat-card class="filter-card">
+    <mat-form-field>
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate">
+      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fromPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate">
+      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+      <mat-datepicker #toPicker></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="loadReports()">
+      Generate
+    </button>
+  </mat-card>
+
+  <div class="summary-cards">
+    <mat-card>Total rides: {{ summary.totalRides }}</mat-card>
+    <mat-card>Total km: {{ summary.totalKm }}</mat-card>
+    <mat-card>Total earnings: {{ summary.totalMoney | currency }}</mat-card>
+    <mat-card>Average per day: {{ summary.averageMoney | currency }}</mat-card>
+  </div>
+
+  <mat-card>
+    <canvas baseChart
+      [data]="ridesChartData"
+      [options]="chartOptions"
+      chartType="line">
+    </canvas>
+  </mat-card>
+
+  <mat-card>
+    <canvas baseChart
+      [data]="kmChartData"
+      chartType="bar">
+    </canvas>
+  </mat-card>
+
+  <mat-card>
+    <canvas baseChart
+      [data]="moneyChartData"
+      chartType="line">
+    </canvas>
+  </mat-card>
+
+</div>
