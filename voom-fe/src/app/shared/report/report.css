@@ -1,0 +1,71 @@
+.reports-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* FILTER */
+.filter-card {
+  padding: 16px 24px;
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.date-field {
+  width: 220px;
+}
+
+.generate-btn {
+  height: 56px;
+}
+
+/* SUMMARY */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-card h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.summary-card p {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* CHARTS */
+.charts-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.chart-card {
+  padding: 20px;
+}
+
+.chart-card h3 {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 350px;
+}

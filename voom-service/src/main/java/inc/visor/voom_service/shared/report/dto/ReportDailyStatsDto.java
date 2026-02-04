@@ -4,51 +4,36 @@ import java.time.LocalDate;
 
 public class ReportDailyStatsDto {
 
-    private LocalDate date;
-    private double totalMoney;
-    private double totalKm;
-    private long rideCount;
-    
+    private final LocalDate date;
+    private final Long rideCount;
+    private final Double totalKm;
+    private final Double totalMoney;
 
-    public ReportDailyStatsDto() {
-    }
-
-    public ReportDailyStatsDto(LocalDate date, double totalMoney, double totalKm, long rideCount) {
+    public ReportDailyStatsDto(
+            LocalDate date,
+            Long rideCount,
+            Double totalKm,
+            Double totalMoney
+    ) {
         this.date = date;
-        this.totalMoney = totalMoney;
-        this.totalKm = totalKm;
         this.rideCount = rideCount;
+        this.totalKm = totalKm;
+        this.totalMoney = totalMoney;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public double getTotalMoney() {
-        return totalMoney;
-    }
-
-    public void setTotalMoney(double totalMoney) {
-        this.totalMoney = totalMoney;
-    }
-
-    public double getTotalKm() {
-        return totalKm;
-    }
-
-    public void setTotalKm(double totalKm) {
-        this.totalKm = totalKm;
-    }
-
-    public long getRideCount() {
+    public Long getRideCount() {
         return rideCount;
     }
 
-    public void setRideCount(long rideCount) {
-        this.rideCount = rideCount;
+    public Double getTotalKm() {
+        return totalKm;
+    }
+
+    public Double getTotalMoney() {
+        return totalMoney;
     }
 }

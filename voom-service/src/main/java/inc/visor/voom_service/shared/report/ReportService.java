@@ -1,45 +1,91 @@
 package inc.visor.voom_service.shared.report;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.service.RideRequestService;
+import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.shared.report.dto.ReportDailyStatsDto;
 import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class ReportService {
 
-    private final ReportRepository reportRepository;
+    private final RideService rideService;
+
+    private final RideRequestService rideRequestService;
+
+    public ReportService(
+            RideService rideService,
+            RideRequestService rideRequestService
+    ) {
+        this.rideService = rideService;
+        this.rideRequestService = rideRequestService;
+    }
 
     public ReportResponseDto getUserReport(Long userId, LocalDateTime from, LocalDateTime to) {
 
-        List<ReportDailyStatsDto> dailyStats =
-                reportRepository.getUserDailyStats(userId, from, to);
+        List<Ride> rides
+                = rideService.getFinishedRidesByUserIdAndTimeRange(userId, from, to);
+
+        Map<LocalDate, List<Ride>> ridesByDate = rides.stream()
+                .collect(Collectors.groupingBy(
+                        ride -> ride.getFinishedAt().toLocalDate()
+                ));
+
+        List<ReportDailyStatsDto> dailyStats = ridesByDate.entrySet()
+                .stream()
+                .map(entry -> {
+
+                    LocalDate date = entry.getKey();
+                    List<Ride> dailyRides = entry.getValue();
+
+                    long rideCount = dailyRides.size();
+
+                    double totalKm = dailyRides.stream()
+                            .mapToDouble(ride -> ride.getRideRequest().getRideRoute().getTotalDistanceKm()) 
+                            .sum();
+
+                    double totalMoney = dailyRides.stream()
+                            .mapToDouble(ride -> ride.getRideRequest().getCalculatedPrice()) 
+                            .sum();
+
+                    return new ReportDailyStatsDto(
+                            date,
+                            rideCount,
+                            totalKm,
+                            totalMoney
+                    );
+                })
+                .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
+                .toList();
 
         return buildResponse(dailyStats);
     }
 
-    public ReportResponseDto getDriverReport(Long driverId, LocalDateTime from, LocalDateTime to) {
+//     public ReportResponseDto getDriverReport(Long driverId, LocalDateTime from, LocalDateTime to) {
 
-        List<ReportDailyStatsDto> dailyStats =
-                reportRepository.getDriverDailyStats(driverId, from, to);
+//         List<ReportDailyStatsDto> dailyStats
+//                 = reportRepository.getDriverDailyStats(driverId, from, to);
 
-        return buildResponse(dailyStats);
-    }
+//         return buildResponse(dailyStats);
+//     }
 
-    public ReportResponseDto getAdminReport(LocalDateTime from, LocalDateTime to) {
+//     public ReportResponseDto getAdminReport(LocalDateTime from, LocalDateTime to) {
 
-        List<ReportDailyStatsDto> dailyStats =
-                reportRepository.getAdminDailyStats(from, to);
+//         List<ReportDailyStatsDto> dailyStats
+//                 = reportRepository.getAdminDailyStats(from, to);
 
-        return buildResponse(dailyStats);
-    }
+//         return buildResponse(dailyStats);
+//     }
 
-    
     private ReportResponseDto buildResponse(List<ReportDailyStatsDto> dailyStats) {
 
         long totalRides = dailyStats.stream()
@@ -54,10 +100,10 @@ public class ReportService {
                 .mapToDouble(ReportDailyStatsDto::getTotalKm)
                 .sum();
 
-        double avgMoneyPerDay =
-                dailyStats.isEmpty()
-                        ? 0
-                        : totalMoney / dailyStats.size();
+        double avgMoneyPerDay
+                = dailyStats.isEmpty()
+                ? 0
+                : totalMoney / dailyStats.size();
 
         return new ReportResponseDto(
                 dailyStats,

@@ -1,52 +1,87 @@
 <div class="reports-container">
 
+  <!-- FILTER BAR -->
   <mat-card class="filter-card">
-    <mat-form-field>
-      <mat-label>From</mat-label>
-      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate">
-      <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-      <mat-datepicker #fromPicker></mat-datepicker>
-    </mat-form-field>
+    <div class="filter-content">
 
-    <mat-form-field>
-      <mat-label>To</mat-label>
-      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate">
-      <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-      <mat-datepicker #toPicker></mat-datepicker>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate">
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="loadReports()">
-      Generate
-    </button>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate">
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="generate-btn" (click)="loadReports()">
+        Generate Report
+      </button>
+
+    </div>
   </mat-card>
 
-  <div class="summary-cards">
-    <mat-card>Total rides: {{ summary.totalRides }}</mat-card>
-    <mat-card>Total km: {{ summary.totalKm }}</mat-card>
-    <mat-card>Total earnings: {{ summary.totalMoney | currency }}</mat-card>
-    <mat-card>Average per day: {{ summary.averageMoney | currency }}</mat-card>
+  <!-- SUMMARY -->
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <h3>Total rides</h3>
+      <p>{{ summary.totalRides }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total km</h3>
+      <p>{{ summary.totalKm }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total earnings</h3>
+      <p>{{ summary.totalMoney | currency }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Average per day</h3>
+      <p>{{ summary.averageMoney | currency }}</p>
+    </mat-card>
   </div>
 
-  <mat-card>
-    <canvas baseChart
-      [data]="ridesChartData"
-      [options]="chartOptions"
-      chartType="line">
-    </canvas>
-  </mat-card>
+  <!-- CHARTS -->
+  <div class="charts-grid">
 
-  <mat-card>
-    <canvas baseChart
-      [data]="kmChartData"
-      chartType="bar">
-    </canvas>
-  </mat-card>
+    <mat-card class="chart-card">
+      <h3>Rides per day</h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="ridesChartData"
+          [options]="chartOptions"
+          chartType="line">
+        </canvas>
+      </div>
+    </mat-card>
 
-  <mat-card>
-    <canvas baseChart
-      [data]="moneyChartData"
-      chartType="line">
-    </canvas>
-  </mat-card>
+    <mat-card class="chart-card">
+      <h3>Kilometers per day</h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="kmChartData"
+          chartType="bar">
+        </canvas>
+      </div>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <h3>Earnings per day</h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="moneyChartData"
+          chartType="line">
+        </canvas>
+      </div>
+    </mat-card>
+
+  </div>
 
 </div>

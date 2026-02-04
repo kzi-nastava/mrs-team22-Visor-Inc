@@ -1,6 +1,7 @@
 package inc.visor.voom_service.shared;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.springframework.boot.ApplicationArguments;
@@ -25,6 +26,16 @@ import inc.visor.voom_service.driver.repository.DriverActivityRepository;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.repository.RideRequestRepository;
+import inc.visor.voom_service.route.repository.RideRouteRepository;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
@@ -44,8 +55,11 @@ public class DataInitializer implements ApplicationRunner {
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
     private final DriverActivityRepository driverActivityRepository;
+    private final RideRepository rideRepository;
+    private final RideRequestRepository rideRequestRepository;
+    private final RideRouteRepository rideRouteRepository;
 
-    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, DriverActivityRepository driverActivityRepository) {
+    public DataInitializer(UserRoleRepository userRoleRepository, VehicleTypeRepository vehicleTypeRepository, UserRepository userRepository, PersonRepository personRepository, VehicleRepository vehicleRepository, DriverRepository driverRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, DriverActivityRepository driverActivityRepository, RideRepository rideRepository, RideRequestRepository rideRequestRepository, RideRouteRepository rideRouteRepository) {
         this.userRoleRepository = userRoleRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.userRepository = userRepository;
@@ -55,6 +69,9 @@ public class DataInitializer implements ApplicationRunner {
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.driverActivityRepository = driverActivityRepository;
+        this.rideRepository = rideRepository;
+        this.rideRequestRepository = rideRequestRepository;
+        this.rideRouteRepository = rideRouteRepository;
     }
 
     @Override
@@ -112,6 +129,7 @@ public class DataInitializer implements ApplicationRunner {
         user.setPerson(person);
         userRepository.save(user);
 
+        seedTestRides();
     }
 
     private void createUserRole(String name, Permission permission) {
@@ -164,7 +182,7 @@ public class DataInitializer implements ApplicationRunner {
             DriverStateChange initChange = new DriverStateChange();
             initChange.setDriver(driver);
             initChange.setCurrentState(DriverState.ACTIVE);
-            initChange.setPerformedAt(LocalDateTime.now().minusSeconds(5)); 
+            initChange.setPerformedAt(LocalDateTime.now().minusSeconds(5));
             driverActivityRepository.save(initChange);
 
             Vehicle vehicle = new Vehicle();
@@ -219,6 +237,59 @@ public class DataInitializer implements ApplicationRunner {
             default ->
                 "Mercedes C200";
         };
+    }
+
+    private void seedTestRides() {
+
+        if (rideRepository.count() > 0) {
+            return;
+        }
+
+        User user = userRepository.findByEmail("user1@gmail.com").orElseThrow();
+        Driver driver = driverRepository.findAll().get(0);
+        VehicleType vehicleType = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
+
+        for (int i = 1; i <= 4; i++) {
+
+            LocalDateTime start = LocalDateTime.now().minusDays(i).withHour(10);
+            LocalDateTime finish = start.plusMinutes(20);
+
+            RideRoute route = new RideRoute();
+
+            RoutePoint pickup = createPoint("Pickup Street " + i);
+            RoutePoint dropoff = createPoint("Dropoff Street " + i);
+
+            route.setRoutePoints(Arrays.asList(pickup, dropoff));
+
+            RideRequest request = new RideRequest();
+            request.setCreator(user);
+            request.setRideRoute(route);
+            request.setStatus(RideRequestStatus.ACCEPTED);
+            request.setScheduleType(ScheduleType.NOW);
+            request.setVehicleType(vehicleType);
+            request.setBabyTransport(false);
+            request.setPetTransport(false);
+            request.setCalculatedPrice(500 + i * 100);
+            rideRequestRepository.save(request);
+
+            Ride ride = new Ride();
+            ride.setRideRequest(request);
+            ride.setDriver(driver);
+            ride.setStatus(RideStatus.FINISHED);
+            ride.setStartedAt(start);
+            ride.setFinishedAt(finish);
+            rideRepository.save(ride);
+        }
+
+        System.out.println("Seeded test rides for reports.");
+    }
+
+    private RoutePoint createPoint(String address) {
+        RoutePoint point = new RoutePoint();
+        point.setAddress(address);
+        point.setLatitude(45.2671);
+        point.setLongitude(19.8335);
+        return point;
     }
 
 }

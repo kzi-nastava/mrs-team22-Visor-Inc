@@ -14,6 +14,7 @@ import { ROUTE_UNAUTHENTICATED_MAIN } from '../../unauthenticated/unauthenticate
 import { ROUTE_USER_PAGES } from '../../main-shell/user-pages/user-pages';
 import { ROUTE_DRIVER_PAGES } from '../../main-shell/driver-pages/driver-pages';
 import { ROUTE_SCHEDULED_RIDES } from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
+import { ROUTE_STATISTICS } from '../report/report';
 
 @Component({
   selector: 'app-header',
@@ -73,6 +74,10 @@ export class Header {
 
   protected scheduledRidesDriver() {
     this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_SCHEDULED_RIDES]);
+  }
+
+  protected userStatistics() {
+    this.router.navigate([ROUTE_USER_PAGES, ROUTE_STATISTICS]);
   }
 
 }

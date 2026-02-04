@@ -5,12 +5,17 @@ import {FavoriteRoutes, ROUTE_FAVORITE_ROUTES} from './favorite-routes/favorite-
 import {UserPages} from './user-pages';
 import { ROUTE_RIDE_TRACKING, RideTracking } from './ride-tracking/ride-tracking';
 import {ROUTE_SCHEDULED_RIDES, ScheduledRides} from './scheduled-rides/scheduled-rides';
+import { ROUTE_STATISTICS, Report } from '../../shared/report/report';
 
 export default [
   {
     path: '',
     component: UserPages,
     children: [
+      {
+        path: ROUTE_STATISTICS,
+        component: Report,
+      },
       {
         path: ROUTE_RIDE_TRACKING,
         component: RideTracking,
