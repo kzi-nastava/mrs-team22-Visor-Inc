@@ -7,12 +7,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.material.button.MaterialButton;
 
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
@@ -57,6 +61,8 @@ public class UnauthenticatedHomeFragment extends Fragment {
     private TextView tvDuration;
     private TextView tvDistance;
 
+    private MaterialButton signInBtn;
+
     public static UnauthenticatedHomeFragment newInstance() {
         return new UnauthenticatedHomeFragment();
     }
@@ -78,6 +84,13 @@ public class UnauthenticatedHomeFragment extends Fragment {
 
         tvDuration = view.findViewById(R.id.estimationDurationTv);
         tvDistance = view.findViewById(R.id.estimationDistanceTv);
+
+        signInBtn = view.findViewById(R.id.btnSignIn);
+
+        signInBtn.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_unauthenticatedHomeFragment_to_loginFragment);
+        });
 
         mapView.getController().setZoom(14.0);
         mapView.getController().setCenter(new GeoPoint(45.2396, 19.8227));

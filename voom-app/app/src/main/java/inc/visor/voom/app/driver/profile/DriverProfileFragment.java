@@ -1,6 +1,7 @@
 package inc.visor.voom.app.driver.profile;
 
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,19 +9,25 @@ import android.widget.ArrayAdapter;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentDriverProfileBinding;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.user.profile.ChangePasswordDialogFragment;
 
 public class DriverProfileFragment extends Fragment {
 
     private FragmentDriverProfileBinding binding;
     private DriverProfileViewModel viewModel;
+    private DataStoreManager storeManager;
 
     @Nullable
     @Override
@@ -46,6 +53,8 @@ public class DriverProfileFragment extends Fragment {
                 new ChangePasswordDialogFragment()
                         .show(getParentFragmentManager(), "ChangePasswordDialog")
         );
+
+        storeManager = DataStoreManager.getInstance(this.getContext());
 
         observeViewModel();
         setupListeners();
@@ -133,6 +142,18 @@ public class DriverProfileFragment extends Fragment {
     }
 
     private void setupListeners() {
+
+        binding.btnLogout.setOnClickListener(v -> {
+            storeManager.clearUserData();
+            requireActivity().runOnUiThread(() -> {
+                Navigation.findNavController(requireActivity(), R.id.main_nav_host)
+                        .navigate(R.id.unauthenticatedHomeFragment, null,
+                                new NavOptions.Builder()
+                                        .setPopUpTo(R.id.main_nav_graph, true)
+                                        .build()
+                        );
+            });
+        });
 
         binding.btnSavePersonalInfo.setOnClickListener(v ->
                 viewModel.onSaveClicked(
