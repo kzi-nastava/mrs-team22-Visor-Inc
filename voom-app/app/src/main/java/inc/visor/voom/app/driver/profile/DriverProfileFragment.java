@@ -130,15 +130,14 @@ public class DriverProfileFragment extends Fragment {
         );
 
         viewModel.getVehicleUpdated().observe(getViewLifecycleOwner(), updated -> {
-            if (Boolean.TRUE.equals(updated)) {
-                Snackbar.make(
-                        requireView(),
-                        "Vehicle information updated",
-                        Snackbar.LENGTH_LONG
-                ).show();
-            }
-        });
+            if (updated == null) return;
 
+            String message = "Profile change request sent";
+
+            Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show();
+
+            viewModel.getVehicleUpdated().removeObservers(getViewLifecycleOwner());
+        });
     }
 
     private void setupListeners() {

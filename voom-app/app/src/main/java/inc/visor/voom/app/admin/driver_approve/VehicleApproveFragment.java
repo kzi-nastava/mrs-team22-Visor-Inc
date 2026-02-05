@@ -62,8 +62,11 @@ public class VehicleApproveFragment extends Fragment {
                 Snackbar.make(view, msg, Snackbar.LENGTH_LONG).show();
 
                 view.postDelayed(() -> {
-                    NavHostFragment.findNavController(this).popBackStack();
+                    NavHostFragment
+                            .findNavController(this)
+                            .navigate(R.id.unauthenticatedHomeFragment);
                 }, 1500);
+
             }
         });
 
