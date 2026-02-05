@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
@@ -73,6 +74,8 @@ public class DriverHomeFragment extends Fragment {
     Button buttonPanic;
     RideApi rideApi;
     DataStoreManager dataStoreManager;
+    private SwitchMaterial toggleStatus;
+
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -89,6 +92,16 @@ public class DriverHomeFragment extends Fragment {
         routeRepository = new RouteRepository();
 
         dataStoreManager = DataStoreManager.getInstance(this.getContext());
+
+        toggleStatus = view.findViewById(R.id.toggle_status);
+
+        toggleStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                handleStatusActive();
+            } else {
+                handleStatusInactive();
+            }
+        });
 
         observeAssignedRide();
 
@@ -161,6 +174,12 @@ public class DriverHomeFragment extends Fragment {
                 Log.e("PANIC_DEBUG", "Could not get User ID", throwable);
             }).dispose();
         });
+    }
+
+    private void handleStatusInactive() {
+    }
+
+    private void handleStatusActive() {
     }
 
     private void setupChart(View view) {
@@ -285,9 +304,7 @@ public class DriverHomeFragment extends Fragment {
 
                 if (response.isSuccessful()) {
 
-                    Toast.makeText(requireContext(),
-                            "Ride started",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Ride started", Toast.LENGTH_LONG).show();
 
                     arrivalDialogShown = true;
 
