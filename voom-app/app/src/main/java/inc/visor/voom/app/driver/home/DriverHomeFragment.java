@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
@@ -56,12 +57,13 @@ public class DriverHomeFragment extends Fragment {
     private DriverHomeViewModel viewModel;
     private RouteRepository routeRepository;
     private boolean hasFocused = false;
-
     private GeoPoint pickupPoint = null;
     private boolean arrivalDialogShown = false;
     private DriverAssignedDto currentAssignment = null;
     private Long currentRideId = null;
     private List<RoutePointDto> currentRoute = null;
+    private SwitchMaterial toggleStatus;
+
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -75,6 +77,16 @@ public class DriverHomeFragment extends Fragment {
 
         routeRepository = new RouteRepository();
 
+        toggleStatus = view.findViewById(R.id.toggle_status);
+
+        toggleStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                handleStatusActive();
+            } else {
+                handleStatusInactive();
+            }
+        });
+
         observeAssignedRide();
 
         setupChart(view);
@@ -82,6 +94,12 @@ public class DriverHomeFragment extends Fragment {
         loadOngoingRide();
         loadDriversAndStartSimulation();
         observeDrivers();
+    }
+
+    private void handleStatusInactive() {
+    }
+
+    private void handleStatusActive() {
     }
 
     private void setupChart(View view) {
@@ -201,32 +219,28 @@ public class DriverHomeFragment extends Fragment {
         StartRideDto payload = new StartRideDto();
         payload.routePoints = routePoints;
 
-        rideApi.startRide(rideId, payload)
-                .enqueue(new Callback<Void>() {
+        rideApi.startRide(rideId, payload).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
 
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
 
-                        if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(), "Ride started", Toast.LENGTH_LONG).show();
 
-                            Toast.makeText(requireContext(),
-                                    "Ride started",
-                                    Toast.LENGTH_LONG).show();
+                    arrivalDialogShown = true;
 
-                            arrivalDialogShown = true;
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to start ride",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
 
-                        } else {
-                            Toast.makeText(requireContext(),
-                                    "Failed to start ride",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
 
