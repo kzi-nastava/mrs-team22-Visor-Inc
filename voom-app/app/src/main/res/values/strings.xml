@@ -65,4 +65,7 @@
     <string name="activate_account">Activate account</string>
     <string name="stop">stop</string>
     <string name="panic">panic</string>
+    <string name="ride_cancel">cancel\n</string>
+    <string name="ride_Start">start</string>
+    <string name="ride_start">start</string>
 </resources>

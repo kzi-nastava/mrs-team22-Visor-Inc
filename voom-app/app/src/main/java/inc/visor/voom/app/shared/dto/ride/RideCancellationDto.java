@@ -4,7 +4,7 @@ public class RideCancellationDto {
     private long userId;
     private String message;
 
-    RideCancellationDto() {}
+    public RideCancellationDto() {}
 
     public String getMessage() {
         return message;

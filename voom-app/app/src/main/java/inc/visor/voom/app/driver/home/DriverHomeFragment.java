@@ -34,6 +34,7 @@ import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
+import inc.visor.voom.app.driver.history.models.Ride;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.RideApi;
@@ -42,6 +43,7 @@ import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
 import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
 import inc.visor.voom.app.shared.dto.ride.LatLng;
+import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
 import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.dto.ride.StartRideDto;
@@ -115,6 +117,7 @@ public class DriverHomeFragment extends Fragment {
 
         buttonStop.setOnClickListener(v -> {
             this.dataStoreManager.getUserId().subscribe((userId) -> {
+                assert currentRideId != null;
                 final long currentRide = currentRideId;
                 final GeoPoint point = currentPosition.getValue();
                 final LatLng currentPosition = new LatLng();
@@ -147,6 +150,7 @@ public class DriverHomeFragment extends Fragment {
 
         buttonPanic.setOnClickListener(v -> {
             DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                assert currentRideId != null;
                 final long currentRide = currentRideId;
                 final RidePanicDto body = new RidePanicDto();
                 body.setUserId(userId);
@@ -279,15 +283,46 @@ public class DriverHomeFragment extends Fragment {
 
         ArrivalDialogFragment dialog =
                 ArrivalDialogFragment.newInstance(pickupAddress);
+        
+        dialog.setListener(new ArrivalDialogFragment.Listener() {
+            @Override
+            public void onAcceptRide() {
+                startRide(currentRideId, currentRoute);
+            }
 
-        dialog.setListener(() -> {
-            startRide(currentRideId, currentRoute);
+            @Override
+            public void onCancelRide(String cancellationReason) {
+                cancelRide(currentRideId, cancellationReason);
+            }
         });
 
         dialog.show(getParentFragmentManager(), "arrival_dialog");
     }
 
+    private void cancelRide(Long currentRideId, String cancellationReason) {
+        this.dataStoreManager.getUserId().subscribe((userId) -> {
+            assert currentRideId != null;
+            final long currentRide = currentRideId;
 
+            RideCancellationDto dto = new RideCancellationDto();
+            dto.setUserId(userId);
+            dto.setMessage(cancellationReason);
+
+            rideApi.cancelRide(currentRide, dto).enqueue(new Callback<RideResponseDto>() {
+                @Override
+                public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
+
+                }
+
+                @Override
+                public void onFailure(Call<RideResponseDto> call, Throwable t) {
+
+                }
+            });
+        }).dispose();
+
+
+    }
 
     private void startRide(Long rideId, List<RoutePointDto> routePoints) {
 
