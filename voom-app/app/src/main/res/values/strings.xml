@@ -63,4 +63,6 @@
     <string name="profile_image_preview">Profile image preview</string>
     <string name="change_vehicle_information">Change vehicle information\n</string>
     <string name="activate_account">Activate account</string>
+    <string name="stop">stop</string>
+    <string name="panic">panic</string>
 </resources>

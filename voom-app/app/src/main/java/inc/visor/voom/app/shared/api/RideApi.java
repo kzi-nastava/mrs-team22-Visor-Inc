@@ -2,9 +2,13 @@ package inc.visor.voom.app.shared.api;
 
 import java.util.List;
 
-import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
+import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
+import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.dto.ride.RideStopDto;
+import inc.visor.voom.app.shared.dto.ride.StartRideDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateRequestDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateResponseDto;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
@@ -36,6 +40,7 @@ public interface RideApi {
     Call<List<RideHistoryDto>> getDriverRideHistory(@Query("dateFrom") String dateFrom,
                                                     @Query("dateTo") String dateTo,
                                                     @Query("sort") String sort);
+
     @POST("/api/rides/favorites")
     Call<Void> createFavoriteRoute(@Body CreateFavoriteRouteDto dto);
 
@@ -61,7 +66,39 @@ public interface RideApi {
     @POST("/api/complaints/ride/{rideId}")
     Call<Void> reportRide(@Path("rideId") Long rideId, @Body ComplaintRequestDto body);
 
-    @POST("/api/rides/{rideId}/panic")
-    Call<Void> panic(@Path("rideId") Long rideId, @Body RidePanicDto body);
+    @POST("api/rides/{id}/cancel")
+    Call<RideResponseDto> cancelRide(@Path("id") Long id, @Body RideCancellationDto dto);
+
+    @POST("api/rides/{id}/stop")
+    Call<RideResponseDto> stopRide(@Path("id") Long id, @Body RideStopDto dto);
+
+    @POST("api/rides/{id}/panic")
+    Call<RideResponseDto> panic(@Path("id") Long id, @Body RidePanicDto dto);
+
+    @GET("api/rides/user/{userId}/history")
+    Call<List<RideHistoryDto>> getRidesForUser(
+            @Path("userId") long userId,
+            @Query("start") String start,
+            @Query("end") String end,
+            @Query("sort") String sort
+    );
+
+    @GET("api/rides/user/{userId}/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRides(@Path("userId") long userId);
+
+    @GET("api/rides/driver/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRidesDriver();
+
+    @POST("api/rides/scheduled/{id}/cancel")
+    Call<RideHistoryDto> cancelScheduledRide(@Path("id") Long id, @Body RideCancellationDto dto);
+
+    @POST("api/rides/finish-ongoing")
+    Call<ActiveRideDto> finishOngoingRide();
+
+    @POST("/api/rides/{rideId}/start")
+    Call<Void> startRide(
+            @Path("rideId") long rideId,
+            @Body StartRideDto dto
+    );
 }
 

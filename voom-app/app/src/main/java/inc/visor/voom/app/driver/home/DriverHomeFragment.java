@@ -3,6 +3,7 @@ package inc.visor.voom.app.driver.home;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,30 +22,36 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
-import inc.visor.voom.app.driver.api.RideApi;
 import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
-import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
-import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
+import inc.visor.voom.app.shared.dto.ride.LatLng;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.dto.ride.RideStopDto;
+import inc.visor.voom.app.shared.dto.ride.StartRideDto;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
-import inc.visor.voom.app.user.home.model.RoutePoint;
+import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
+import io.reactivex.subjects.BehaviorSubject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,12 +63,16 @@ public class DriverHomeFragment extends Fragment {
     private DriverHomeViewModel viewModel;
     private RouteRepository routeRepository;
     private boolean hasFocused = false;
-
     private GeoPoint pickupPoint = null;
     private boolean arrivalDialogShown = false;
     private DriverAssignedDto currentAssignment = null;
     private Long currentRideId = null;
     private List<RoutePointDto> currentRoute = null;
+    BehaviorSubject<GeoPoint> currentPosition;
+    Button buttonStop;
+    Button buttonPanic;
+    RideApi rideApi;
+    DataStoreManager dataStoreManager;
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -73,7 +84,11 @@ public class DriverHomeFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
 
+        rideApi = RetrofitClient.getInstance().create(RideApi.class);
+
         routeRepository = new RouteRepository();
+
+        dataStoreManager = DataStoreManager.getInstance(this.getContext());
 
         observeAssignedRide();
 
@@ -82,6 +97,70 @@ public class DriverHomeFragment extends Fragment {
         loadOngoingRide();
         loadDriversAndStartSimulation();
         observeDrivers();
+
+        buttonStop = view.findViewById(R.id.stop_button);
+
+        buttonStop.setOnClickListener(v -> {
+            this.dataStoreManager.getUserId().subscribe((userId) -> {
+                final long currentRide = currentRideId;
+                final GeoPoint point = currentPosition.getValue();
+                final LatLng currentPosition = new LatLng();
+                currentPosition.setLat(point.getLatitude());
+                currentPosition.setLng(point.getLongitude());
+                RideStopDto dto = new RideStopDto();
+                dto.setUserId(userId);
+                dto.setTimestamp(LocalDateTime.now());
+                dto.setPoint(currentPosition);
+
+                rideApi.stopRide(currentRide, dto).enqueue(new Callback<RideResponseDto>() {
+                    @Override
+                    public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
+                        if (response.isSuccessful()) {
+
+                        } else {
+                            Log.e("RIDE_API", "Error: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<RideResponseDto> call, Throwable t) {
+                        Log.e("RIDE_API", "Network Failure", t);
+                    }
+                });
+            }).dispose();
+        });
+
+        buttonPanic = view.findViewById(R.id.panic_button);
+
+        buttonPanic.setOnClickListener(v -> {
+            DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                final long currentRide = currentRideId;
+                final RidePanicDto body = new RidePanicDto();
+                body.setUserId(userId);
+
+                Log.d("USER_ID", "With user id: " + userId);
+
+                Log.d("PANIC_DEBUG", "Sending panic request for ride: " + currentRide);
+
+                rideApi.panic(currentRide, body).enqueue(new Callback<RideResponseDto>() {
+                    @Override
+                    public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
+                        if (response.isSuccessful()) {
+
+                        } else {
+                            Log.e("PANIC_API", "Error: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<RideResponseDto> call, Throwable t) {
+                        Log.e("PANIC_API", "Network Failure", t);
+                    }
+                });
+            }, throwable -> {
+                Log.e("PANIC_DEBUG", "Could not get User ID", throwable);
+            }).dispose();
+        });
     }
 
     private void setupChart(View view) {
@@ -104,7 +183,6 @@ public class DriverHomeFragment extends Fragment {
         pieChart.setCenterText("Total Rides");
         pieChart.animateY(1000);
         pieChart.invalidate();
-
 
         DriverApi driverApi = RetrofitClient
                 .getInstance()
@@ -201,32 +279,30 @@ public class DriverHomeFragment extends Fragment {
         StartRideDto payload = new StartRideDto();
         payload.routePoints = routePoints;
 
-        rideApi.startRide(rideId, payload)
-                .enqueue(new Callback<Void>() {
+        rideApi.startRide(rideId, payload).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
 
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
 
-                        if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(),
+                            "Ride started",
+                            Toast.LENGTH_LONG).show();
 
-                            Toast.makeText(requireContext(),
-                                    "Ride started",
-                                    Toast.LENGTH_LONG).show();
+                    arrivalDialogShown = true;
 
-                            arrivalDialogShown = true;
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to start ride",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
 
-                        } else {
-                            Toast.makeText(requireContext(),
-                                    "Failed to start ride",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
 
@@ -319,45 +395,43 @@ public class DriverHomeFragment extends Fragment {
     }
 
     private void observeDrivers() {
-        viewModel.getSimulationManager()
-                .getDrivers()
-                .observe(getViewLifecycleOwner(), drivers -> {
+        viewModel.getSimulationManager().getDrivers().observe(getViewLifecycleOwner(), drivers -> {
+            mapRenderer.renderDrivers(drivers);
 
-                    mapRenderer.renderDrivers(drivers);
+            Long myId = viewModel.getMyDriverId().getValue();
+            if (myId == null) return;
 
-                    Long myId = viewModel.getMyDriverId().getValue();
-                    if (myId == null) return;
+            for (SimulatedDriver d : drivers) {
+                if (d.id == myId) {
+                    if (pickupPoint != null && !arrivalDialogShown) {
 
-                    for (SimulatedDriver d : drivers) {
-                        if (d.id == myId) {
-                            if (pickupPoint != null && !arrivalDialogShown) {
+                        double distance = DistanceHelper.distanceInMeters(
+                                d.currentPosition.getLatitude(),
+                                d.currentPosition.getLongitude(),
+                                pickupPoint.getLatitude(),
+                                pickupPoint.getLongitude()
+                        );
 
-                                double distance = DistanceHelper.distanceInMeters(
-                                        d.currentPosition.getLatitude(),
-                                        d.currentPosition.getLongitude(),
-                                        pickupPoint.getLatitude(),
-                                        pickupPoint.getLongitude()
-                                );
-
-                                if (distance <= 30) {
-                                    arrivalDialogShown = true;
-                                    openArrivalDialog();
-                                }
-                            }
-
-                            GeoPoint point = d.currentPosition;
-
-                            if (!hasFocused) {
-                                map.getController().setZoom(18.0);
-                                hasFocused = true;
-                            }
-
-                            map.getController().animateTo(point);
+                        if (distance <= 30) {
+                            arrivalDialogShown = true;
+                            openArrivalDialog();
                         }
-                        tryOpenArrivalDialog();
                     }
-                });
 
+                    GeoPoint point = d.currentPosition;
+
+                    if (!hasFocused) {
+                        map.getController().setZoom(18.0);
+                        hasFocused = true;
+                    }
+
+                    currentPosition.onNext(point);
+
+                    map.getController().animateTo(point);
+                }
+                tryOpenArrivalDialog();
+            }
+        });
     }
 
     @Override
@@ -377,7 +451,6 @@ public class DriverHomeFragment extends Fragment {
     }
 
     private void loadOngoingRide() {
-
         RideApi rideApi = RetrofitClient
                 .getInstance()
                 .create(RideApi.class);
@@ -425,35 +498,29 @@ public class DriverHomeFragment extends Fragment {
                 requireContext().getDrawable(R.drawable.ic_location_24)
         );
 
-        routeRepository.fetchRouteFromPoints(
-                ConvertHelper.convertToRoutePoints(sorted),
-                new Callback<OsrmResponse>() {
+        routeRepository.fetchRouteFromPoints(ConvertHelper.convertToRoutePoints(sorted), new Callback<OsrmResponse>() {
+            @Override
+            public void onResponse(Call<OsrmResponse> call, Response<OsrmResponse> response) {
+                if (!response.isSuccessful()
+                        || response.body() == null) return;
 
-                    @Override
-                    public void onResponse(Call<OsrmResponse> call,
-                                           Response<OsrmResponse> response) {
+                List<List<Double>> coords =
+                        response.body().routes.get(0).geometry.coordinates;
 
-                        if (!response.isSuccessful()
-                                || response.body() == null) return;
+                List<GeoPoint> geoPoints = new ArrayList<>();
 
-                        List<List<Double>> coords =
-                                response.body().routes.get(0).geometry.coordinates;
-
-                        List<GeoPoint> geoPoints = new ArrayList<>();
-
-                        for (List<Double> c : coords) {
-                            geoPoints.add(new GeoPoint(c.get(1), c.get(0)));
-                        }
-
-                        mapRenderer.renderRoute(geoPoints);
-                    }
-
-                    @Override
-                    public void onFailure(Call<OsrmResponse> call, Throwable t) {
-                        t.printStackTrace();
-                    }
+                for (List<Double> c : coords) {
+                    geoPoints.add(new GeoPoint(c.get(1), c.get(0)));
                 }
-        );
+
+                mapRenderer.renderRoute(geoPoints);
+            }
+
+            @Override
+            public void onFailure(Call<OsrmResponse> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
 
         for (RoutePointDto p : sorted) {
             if (RoutePointType.PICKUP.equals(p.type)) {

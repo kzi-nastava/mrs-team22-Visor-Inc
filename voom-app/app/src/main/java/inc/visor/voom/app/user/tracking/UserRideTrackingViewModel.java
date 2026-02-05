@@ -5,23 +5,19 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.navigation.NavController;
-
-import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.driver.api.DriverMetaProvider;
-import inc.visor.voom.app.driver.dto.ActiveRideDto;
+import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
-import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
-import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.model.RoutePoint;
@@ -192,9 +188,9 @@ public class UserRideTrackingViewModel extends ViewModel implements DriverMetaPr
 
             Log.d("PANIC_DEBUG", "Sending panic request for ride: " + rideId);
 
-            rideApi.panic(rideId, body).enqueue(new Callback<Void>() {
+            rideApi.panic(rideId, body).enqueue(new Callback<RideResponseDto>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
                     if (response.isSuccessful()) {
                         panicked.postValue(true);
                     } else {
@@ -203,13 +199,13 @@ public class UserRideTrackingViewModel extends ViewModel implements DriverMetaPr
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(Call<RideResponseDto> call, Throwable t) {
                     Log.e("PANIC_API", "Network Failure", t);
                 }
             });
         }, throwable -> {
             Log.e("PANIC_DEBUG", "Could not get User ID", throwable);
-        });
+        }).dispose();
     }
 
     public void reportRide(String message) {

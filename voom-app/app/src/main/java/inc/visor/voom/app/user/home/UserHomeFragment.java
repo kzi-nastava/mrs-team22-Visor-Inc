@@ -12,24 +12,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.gson.GsonBuilder;
-
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
-import inc.visor.voom.app.driver.dto.ActiveRideDto;
+import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
@@ -47,7 +42,6 @@ import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
-import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
 import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;

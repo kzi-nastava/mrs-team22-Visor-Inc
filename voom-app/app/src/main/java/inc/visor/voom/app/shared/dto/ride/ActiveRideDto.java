@@ -1,4 +1,4 @@
-package inc.visor.voom.app.driver.dto;
+package inc.visor.voom.app.shared.dto.ride;
 
 
 import java.util.List;
