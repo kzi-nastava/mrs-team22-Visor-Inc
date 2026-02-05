@@ -23,6 +23,16 @@ public class DriverSimulationWsService {
     private final DriverAssignmentListener assignmentListener;
     private final ScheduledRideListener scheduledRideListener;
 
+    public interface OnPositionReceived {
+        void onUpdate(DriverPositionDto dto);
+    }
+
+    private OnPositionReceived positionReceivedListener;
+
+    public void setOnPositionReceivedListener(OnPositionReceived listener) {
+        this.positionReceivedListener = listener;
+    }
+
 
     public DriverSimulationWsService(
             DriverSimulationManager simulationManager,
@@ -82,6 +92,8 @@ public class DriverSimulationWsService {
                             );
 
                     DriverSummaryDto meta = null;
+
+                    if (positionReceivedListener != null) positionReceivedListener.onUpdate(dto);
 
                     if (metaProvider != null) {
                         meta = metaProvider.findActiveDriver((int) dto.driverId);

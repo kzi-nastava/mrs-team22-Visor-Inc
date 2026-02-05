@@ -48,6 +48,10 @@
         android:id="@+id/userProfileFragment"
         android:name="inc.visor.voom.app.user.profile.ProfileFragment"
         android:label="ProfileFragment" />
+    <fragment
+        android:id="@+id/userRideTrackingFragment"
+        android:name="inc.visor.voom.app.user.tracking.UserRideTrackingFragment"
+        android:label="UserRideTrackingFragment" />
 
 
 </navigation>

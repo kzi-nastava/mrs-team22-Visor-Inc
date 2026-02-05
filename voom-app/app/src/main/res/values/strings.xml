@@ -3,6 +3,7 @@
     <string name="voom_logo">Voom logo</string>
     <string name="nav_home">Home</string>
     <string name="nav_services">Services</string>
+    <string name="nav_tracking">Active Ride</string>
     <string name="nav_activity">Activity</string>
     <string name="nav_profile">Profile</string>
     <string name="create_new_account">Create new account</string>
