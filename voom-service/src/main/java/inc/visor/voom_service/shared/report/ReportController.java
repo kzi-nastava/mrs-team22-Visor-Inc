@@ -57,11 +57,7 @@ public class ReportController {
 
         ReportResponseDto response;
 
-        if (user.getUserRole().getId() == 1) {
-            // response = reportService.getAdminReport(fromDateTime, toDateTime);
-            return null;
-        }
-        else if (user.getUserRole().getId() == 2) {
+        if (user.getUserRole().getId() == 2) {
 
             Driver driver = driverService.getDriver(user.getId())
                     .orElseThrow(() -> new RuntimeException("Driver not found"));
@@ -78,12 +74,11 @@ public class ReportController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<AdminReportResponseDto> getAdminReport(
+    public ResponseEntity<ReportResponseDto> getAdminReport(
             @AuthenticationPrincipal VoomUserDetails userDetails,
             @RequestParam("from")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate from,
-
             @RequestParam("to")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate to
@@ -103,14 +98,10 @@ public class ReportController {
         LocalDateTime fromDateTime = from.atStartOfDay();
         LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
 
-        ReportResponseDto drivers =
-                reportService.getAllDriversReport(fromDateTime, toDateTime);
+        ReportResponseDto response =
+                reportService.getSystemReport(fromDateTime, toDateTime);
 
-        ReportResponseDto users =
-                reportService.getAllUsersReport(fromDateTime, toDateTime);
-
-        return ResponseEntity.ok(
-                new AdminReportResponseDto(drivers, users)
-        );
+        return ResponseEntity.ok(response);
     }
+
 }

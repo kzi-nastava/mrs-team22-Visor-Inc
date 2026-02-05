@@ -40,13 +40,13 @@ export class ReportApi {
     return this.apiClient.get<unknown, ReportResponseDTO>(this.baseUrl, config);
   }
 
-  getAdminReport(from: string, to: string): Observable<ApiResponse<AdminReportResponseDTO>> {
+  getAdminReport(from: string, to: string): Observable<ApiResponse<ReportResponseDTO>> {
     const config: RequestConfig = {
       headers: { accept: 'application/json' },
       authenticated: true,
       params: { from, to },
     };
 
-    return this.apiClient.get<unknown, AdminReportResponseDTO>(`${this.baseUrl}/admin`, config);
+    return this.apiClient.get<unknown, ReportResponseDTO>(`${this.baseUrl}/admin`, config);
   }
 }

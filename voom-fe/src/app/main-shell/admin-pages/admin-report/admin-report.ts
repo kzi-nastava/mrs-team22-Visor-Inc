@@ -18,6 +18,8 @@ import { ReportApi, ReportResponseDTO } from '../../../shared/report/report.api'
 
 Chart.register(...registerables);
 
+export const ROUTE_ADMIN_REPORT = 'reports';
+
 @Component({
   selector: 'app-admin-report',
   standalone: true,
@@ -32,7 +34,7 @@ Chart.register(...registerables);
     BaseChartDirective,
   ],
   templateUrl: './admin-report.html',
-  styleUrls: ['./report.css'],
+  styleUrls: ['./admin-report.css'],
 })
 export class AdminReport {
   @ViewChildren(BaseChartDirective) charts?: QueryList<BaseChartDirective>;
@@ -46,21 +48,19 @@ export class AdminReport {
   toDate?: Date;
   loading = false;
 
-  driversChartData: ChartConfiguration<'line'>['data'] = {
-    labels: [],
-    datasets: [
-      { data: [], label: 'Rides' },
-      { data: [], label: 'Kilometers' },
-      { data: [], label: 'Earnings' },
-    ],
+  summary = {
+    totalRides: 0,
+    totalKm: 0,
+    totalMoney: 0,
+    averageMoney: 0,
   };
 
-  usersChartData: ChartConfiguration<'line'>['data'] = {
+  systemChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [
       { data: [], label: 'Rides' },
       { data: [], label: 'Kilometers' },
-      { data: [], label: 'Expenses' },
+      { data: [], label: 'Money' },
     ],
   };
 
@@ -81,85 +81,63 @@ export class AdminReport {
     this.reportApi.getAdminReport(from, to).subscribe({
       next: (res) => {
         if (!res?.data) {
-          this.resetCharts();
+          this.reset();
           return;
         }
 
-        this.populateAdminCharts(res.data.drivers, res.data.users);
+        this.populate(res.data);
       },
-      error: () => {
-        this.resetCharts();
-      },
-      complete: () => {
-        this.loading = false;
-      },
+      error: () => this.reset(),
+      complete: () => (this.loading = false),
     });
   }
 
-  private populateAdminCharts(
-    driversData: ReportResponseDTO,
-    usersData: ReportResponseDTO
-  ) {
-    const driverLabels = driversData.dailyStats.map((d) => d.date);
+  private populate(data: ReportResponseDTO) {
+    const days = data.dailyStats.length;
 
-    this.driversChartData = {
-      labels: driverLabels,
-      datasets: [
-        {
-          data: driversData.dailyStats.map((d) => d.rideCount),
-          label: 'Rides',
-        },
-        {
-          data: driversData.dailyStats.map((d) => d.totalKm),
-          label: 'Kilometers',
-        },
-        {
-          data: driversData.dailyStats.map((d) => d.totalMoney),
-          label: 'Earnings',
-        },
-      ],
+    this.summary = {
+      totalRides: data.totalRides,
+      totalKm: data.totalKm,
+      totalMoney: data.totalMoney,
+      averageMoney: days > 0 ? data.totalMoney / days : 0,
     };
 
-    const userLabels = usersData.dailyStats.map((d) => d.date);
-
-    this.usersChartData = {
-      labels: userLabels,
+    this.systemChartData = {
+      labels: data.dailyStats.map(d => d.date),
       datasets: [
         {
-          data: usersData.dailyStats.map((d) => d.rideCount),
+          data: data.dailyStats.map(d => d.rideCount),
           label: 'Rides',
         },
         {
-          data: usersData.dailyStats.map((d) => d.totalKm),
+          data: data.dailyStats.map(d => d.totalKm),
           label: 'Kilometers',
         },
         {
-          data: usersData.dailyStats.map((d) => d.totalMoney),
-          label: 'Expenses',
+          data: data.dailyStats.map(d => d.totalMoney),
+          label: 'Money',
         },
       ],
     };
 
     this.cdr.detectChanges();
-    this.charts?.forEach((chart) => chart.update());
+    this.charts?.forEach(chart => chart.update());
   }
 
-  private resetCharts() {
-    this.driversChartData = {
-      labels: [],
-      datasets: [
-        { data: [], label: 'Rides' },
-        { data: [], label: 'Kilometers' },
-        { data: [], label: 'Earnings' },
-      ],
+  private reset() {
+    this.summary = {
+      totalRides: 0,
+      totalKm: 0,
+      totalMoney: 0,
+      averageMoney: 0,
     };
 
-    this.usersChartData = {
+    this.systemChartData = {
       labels: [],
       datasets: [
         { data: [], label: 'Rides' },
         { data: [], label: 'Kilometers' },
-        { data: [], label: 'Expenses' },
+        { data: [], label: 'Money' },
       ],
     };
   }
@@ -173,3 +151,4 @@ export class AdminReport {
     return this.fromDate <= this.toDate;
   }
 }
+

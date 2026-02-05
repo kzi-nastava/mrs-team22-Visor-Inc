@@ -113,60 +113,9 @@ public class ReportService {
         return buildResponse(dailyStats);
     }
 
-    public ReportResponseDto getAllDriversReport(
+    public ReportResponseDto getSystemReport(
         LocalDateTime from,
         LocalDateTime to
-        ) {
-
-        List<Ride> rides =
-                rideService.getFinishedRidesInTimeRange(from, to);
-
-        Map<LocalDate, List<Ride>> ridesByDate = rides.stream()
-                .collect(Collectors.groupingBy(
-                        ride -> ride.getFinishedAt().toLocalDate()
-                ));
-
-        List<ReportDailyStatsDto> dailyStats =
-                ridesByDate.entrySet()
-                        .stream()
-                        .map(entry -> {
-
-                                LocalDate date = entry.getKey();
-                                List<Ride> dailyRides = entry.getValue();
-
-                                long rideCount = dailyRides.size();
-
-                                double totalKm = dailyRides.stream()
-                                        .mapToDouble(ride ->
-                                                ride.getRideRequest()
-                                                        .getRideRoute()
-                                                        .getTotalDistanceKm()
-                                        )
-                                        .sum();
-
-                                double totalMoney = dailyRides.stream()
-                                        .mapToDouble(ride ->
-                                                ride.getRideRequest()
-                                                        .getCalculatedPrice()
-                                        )
-                                        .sum();
-
-                                return new ReportDailyStatsDto(
-                                        date,
-                                        rideCount,
-                                        totalKm,
-                                        totalMoney
-                                );
-                        })
-                        .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
-                        .toList();
-
-                return buildResponse(dailyStats);
-        }
-
-        public ReportResponseDto getAllUsersReport(
-                LocalDateTime from,
-                LocalDateTime to
         ) {
 
         List<Ride> rides =

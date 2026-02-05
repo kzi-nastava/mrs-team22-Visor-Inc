@@ -1,4 +1,5 @@
 <div class="reports-container">
+
   <mat-card class="filter-card">
     <div class="filter-content">
 
@@ -29,12 +30,34 @@
     </div>
   </mat-card>
 
-  <mat-card class="chart-card full-width">
-    <h2>Drivers Overview</h2>
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <h3>Total Rides</h3>
+      <p>{{ summary.totalRides }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total Kilometers</h3>
+      <p>{{ summary.totalKm | number:'1.2-2' }} km</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total Money</h3>
+      <p>{{ summary.totalMoney | currency }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Average per Day</h3>
+      <p>{{ summary.averageMoney | currency }}</p>
+    </mat-card>
+  </div>
+
+  <mat-card class="main-chart-card">
+    <h2>System Overview</h2>
     <div class="chart-wrapper">
       <canvas
         baseChart
-        [data]="driversChartData"
+        [data]="systemChartData"
         [options]="chartOptions"
         [legend]="true"
         chartType="line"
@@ -42,16 +65,4 @@
     </div>
   </mat-card>
 
-  <mat-card class="chart-card full-width">
-    <h2>Users Overview</h2>
-    <div class="chart-wrapper">
-      <canvas
-        baseChart
-        [data]="usersChartData"
-        [options]="chartOptions"
-        [legend]="true"
-        chartType="line"
-      ></canvas>
-    </div>
-  </mat-card>
 </div>
