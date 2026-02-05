@@ -1,0 +1,57 @@
+<div class="reports-container">
+  <mat-card class="filter-card">
+    <div class="filter-content">
+
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="generate-btn"
+        (click)="loadAdminReport()"
+        [disabled]="!fromDate || !toDate"
+      >
+        Generate Report
+      </button>
+
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card full-width">
+    <h2>Drivers Overview</h2>
+    <div class="chart-wrapper">
+      <canvas
+        baseChart
+        [data]="driversChartData"
+        [options]="chartOptions"
+        [legend]="true"
+        chartType="line"
+      ></canvas>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card full-width">
+    <h2>Users Overview</h2>
+    <div class="chart-wrapper">
+      <canvas
+        baseChart
+        [data]="usersChartData"
+        [options]="chartOptions"
+        [legend]="true"
+        chartType="line"
+      ></canvas>
+    </div>
+  </mat-card>
+</div>

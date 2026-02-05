@@ -18,6 +18,7 @@ import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.shared.report.dto.AdminReportResponseDto;
 import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,5 +75,42 @@ public class ReportController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<AdminReportResponseDto> getAdminReport(
+            @AuthenticationPrincipal VoomUserDetails userDetails,
+            @RequestParam("from")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate from,
+
+            @RequestParam("to")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate to
+    ) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = userProfileService.getUserByEmail(userDetails.getUsername());
+
+        if (user == null ||
+                !user.getUserRole().getRoleName().equals("ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
+
+        ReportResponseDto drivers =
+                reportService.getAllDriversReport(fromDateTime, toDateTime);
+
+        ReportResponseDto users =
+                reportService.getAllUsersReport(fromDateTime, toDateTime);
+
+        return ResponseEntity.ok(
+                new AdminReportResponseDto(drivers, users)
+        );
     }
 }

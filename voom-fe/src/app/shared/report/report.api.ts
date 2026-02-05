@@ -19,6 +19,11 @@ export type ReportResponseDTO = {
   averageMoneyPerDay: number;
 };
 
+export type AdminReportResponseDTO = {
+  drivers: ReportResponseDTO;
+  users: ReportResponseDTO;
+};
+
 @Injectable({ providedIn: 'root' })
 export class ReportApi {
   private readonly baseUrl = '/api/reports';
@@ -33,5 +38,15 @@ export class ReportApi {
     };
 
     return this.apiClient.get<unknown, ReportResponseDTO>(this.baseUrl, config);
+  }
+
+  getAdminReport(from: string, to: string): Observable<ApiResponse<AdminReportResponseDTO>> {
+    const config: RequestConfig = {
+      headers: { accept: 'application/json' },
+      authenticated: true,
+      params: { from, to },
+    };
+
+    return this.apiClient.get<unknown, AdminReportResponseDTO>(`${this.baseUrl}/admin`, config);
   }
 }

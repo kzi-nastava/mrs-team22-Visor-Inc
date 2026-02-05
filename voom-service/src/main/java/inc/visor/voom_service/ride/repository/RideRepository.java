@@ -38,4 +38,5 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             LocalDateTime to
     );
 
+    List<Ride> findByStatusAndFinishedAtBetween(RideStatus status, LocalDateTime from, LocalDateTime to);
 }
