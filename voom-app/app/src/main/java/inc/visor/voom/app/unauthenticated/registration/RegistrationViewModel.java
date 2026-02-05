@@ -4,13 +4,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class RegistrationViewModel extends ViewModel {
 
     private final MutableLiveData<String> firstName = new MutableLiveData<>();
     private final MutableLiveData<String> lastName = new MutableLiveData<>();
-    private final MutableLiveData<Date> birthDate = new MutableLiveData<>();
+    private final MutableLiveData<LocalDateTime> birthDate = new MutableLiveData<>();
     private final MutableLiveData<String> email = new MutableLiveData<>();
     private final MutableLiveData<String> password = new MutableLiveData<>();
     private final MutableLiveData<String> repeatPassword = new MutableLiveData<>();
@@ -34,11 +36,11 @@ public class RegistrationViewModel extends ViewModel {
         return lastName;
     }
 
-    public void setBirthDate(Date date) {
+    public void setBirthDate(LocalDateTime date) {
         birthDate.setValue(date);
     }
 
-    public LiveData<Date> getBirthDate() {
+    public LiveData<LocalDateTime> getBirthDate() {
         return birthDate;
     }
 
