@@ -32,13 +32,20 @@ public class DataStoreManager {
         return instance;
     }
 
+    public static synchronized DataStoreManager getInstance() {
+        if (instance == null) {
+            throw new RuntimeException("DataStoreManager must be initialized in Application class");
+        }
+        return instance;
+    }
+
     public void saveUserData(TokenDto dto) {
         dataStore.updateDataAsync(prefsIn -> {
             androidx.datastore.preferences.core.MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
             mutablePreferences.set(USER_ID_KEY, dto.getUser().getId());
             mutablePreferences.set(USER_EMAIL_KEY, dto.getUser().getEmail());
             mutablePreferences.set(USER_ROLE_KEY, dto.getUser().getRole());
-            mutablePreferences.set(AUTH_TOKEN_KEY, dto.getRefreshToken());
+            mutablePreferences.set(AUTH_TOKEN_KEY, dto.getAccessToken());
             mutablePreferences.set(IS_LOGGED_IN_KEY, true);
             return Single.just(mutablePreferences);
         }).subscribe();
