@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
 import inc.visor.voom.app.shared.dto.authentication.ResetPasswordDto;
 import inc.visor.voom.app.shared.dto.authentication.TokenDto;
@@ -40,6 +42,9 @@ public class ResetPasswordFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d("DeepLink", "ResetPasswordFragment loaded");
+
+        authenticationApi = RetrofitClient.getInstance().create(AuthenticationApi.class);
 
         viewModel = new ViewModelProvider(this).get(ResetPasswordViewModel.class);
         passwordInput = view.findViewById(R.id.password_input);
@@ -51,9 +56,12 @@ public class ResetPasswordFragment extends Fragment {
         buttonSubmit = view.findViewById(R.id.reset_password_button);
         buttonSubmit.setOnClickListener(v -> {
             final ResetPasswordDto dto = new ResetPasswordDto();
+            assert getArguments() != null;
+            final String token = getArguments().getString("token");
             dto.setPassword(viewModel.getPassword().getValue());
             dto.setConfirmPassword(viewModel.getRepeatPassword().getValue());
-
+            dto.setPassword(viewModel.getPassword().getValue());
+            dto.setToken(token);
             authenticationApi.resetPassword(dto).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -100,6 +108,7 @@ public class ResetPasswordFragment extends Fragment {
             public void afterTextChanged(Editable editable) {
                 final String password = viewModel.getPassword().getValue();
                 final String repeatedPassword = editable.toString();
+
                 if (repeatedPassword.isEmpty()) {
                     passwordInput.setError("Password is required");
                 } else if (repeatedPassword.length() < 8) {

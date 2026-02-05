@@ -1,5 +1,6 @@
 package inc.visor.voom.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().setUserAgentValue(getPackageName());
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
         dataStoreManager = DataStoreManager.getInstance(this);
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.main_nav_host);
@@ -42,9 +42,13 @@ public class MainActivity extends AppCompatActivity {
             navController = navHostFragment.getNavController();
         }
 
-        Uri data = getIntent().getData();
+        Intent intent = getIntent();
+        Uri data = intent.getData();
         if (data != null) {
             Log.d("DEEPLINK", "URI: " + data);
+            navController.handleDeepLink(intent);
+        } else {
+            checkLoginStatusAndNavigate();
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -52,8 +56,12 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
 
-        checkLoginStatusAndNavigate();
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        navController.handleDeepLink(intent);
     }
 
     private void checkLoginStatusAndNavigate() {
