@@ -5,6 +5,8 @@ import java.util.List;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
+import inc.visor.voom.app.shared.dto.route.RouteEstimateRequestDto;
+import inc.visor.voom.app.shared.dto.route.RouteEstimateResponseDto;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
@@ -45,6 +47,9 @@ public interface RideApi {
             @Path("rideId") long rideId,
             @Body StartScheduledRideDto payload
     );
+
+    @POST("/api/routes")
+    Call<RouteEstimateResponseDto> getRouteEstimate(@Body RouteEstimateRequestDto payload);
 
 
 }

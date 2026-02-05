@@ -44,6 +44,10 @@
         android:id="@+id/driverRideHistoryFragment"
         android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
         android:label="fragment_driver_ride_history" />
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="inc.visor.voom.app.user.profile.ProfileFragment"
+        android:label="ProfileFragment" />
 
 
 </navigation>

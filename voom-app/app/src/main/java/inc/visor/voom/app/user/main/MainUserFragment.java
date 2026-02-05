@@ -70,7 +70,7 @@ public class MainUserFragment extends Fragment {
             }
 
             if (id == R.id.nav_profile) {
-                navController.navigate(R.id.profileFragment);
+                navController.navigate(R.id.userProfileFragment);
                 return true;
             }
 
