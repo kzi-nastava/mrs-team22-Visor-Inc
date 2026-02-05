@@ -42,7 +42,10 @@ public class ReportController {
 
             @RequestParam("to")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate to
+            LocalDate to,
+
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "driverId", required = false) Long driverId
     ) {
 
         String username = userDetails != null ? userDetails.getUsername() : null;
@@ -64,8 +67,23 @@ public class ReportController {
 
             response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
             return ResponseEntity.ok(response);
-        }
-        else {
+        } else if (user.getUserRole().getId() == 1) {
+                    if (driverId != null) {
+                    return ResponseEntity.ok(
+                        reportService.getDriverReport(driverId, fromDateTime, toDateTime)
+                    );
+                }
+
+                if (userId != null) {
+                    return ResponseEntity.ok(
+                        reportService.getUserReport(userId, fromDateTime, toDateTime)
+                    );
+                }
+
+                return ResponseEntity.ok(
+                    reportService.getSystemReport(fromDateTime, toDateTime)
+                );
+        } else {
             response = reportService.getUserReport(user.getId(), fromDateTime, toDateTime);
             System.out.println("USER REPORT" + response);
         }

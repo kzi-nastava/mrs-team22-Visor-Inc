@@ -30,11 +30,21 @@ export class ReportApi {
 
   constructor(@Inject(VoomApiService) private apiClient: ApiClient) {}
 
-  getReport(from: string, to: string): Observable<ApiResponse<ReportResponseDTO>> {
+  getReport(
+    from: string,
+    to: string,
+    userId?: number,
+    driverId?: number,
+  ): Observable<ApiResponse<ReportResponseDTO>> {
+    const params: any = { from, to };
+
+    if (userId) params.userId = userId;
+    if (driverId) params.driverId = driverId;
+
     const config: RequestConfig = {
       headers: { accept: 'application/json' },
       authenticated: true,
-      params: { from, to },
+      params,
     };
 
     return this.apiClient.get<unknown, ReportResponseDTO>(this.baseUrl, config);

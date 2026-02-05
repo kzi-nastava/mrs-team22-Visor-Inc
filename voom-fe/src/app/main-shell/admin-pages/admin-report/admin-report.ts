@@ -1,9 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  QueryList,
-  ViewChildren,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, QueryList, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -15,6 +10,12 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
 import { ReportApi, ReportResponseDTO } from '../../../shared/report/report.api';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { UserProfileDto } from '../../../shared/rest/user/user.model';
+import ApiService from '../../../shared/rest/api-service';
+import { MatIconModule } from '@angular/material/icon';
+
 
 Chart.register(...registerables);
 
@@ -32,6 +33,9 @@ export const ROUTE_ADMIN_REPORT = 'reports';
     MatInputModule,
     MatButtonModule,
     BaseChartDirective,
+    MatSelectModule,
+    MatOptionModule,
+    MatIconModule,
   ],
   templateUrl: './admin-report.html',
   styleUrls: ['./admin-report.css'],
@@ -41,12 +45,24 @@ export class AdminReport {
 
   constructor(
     private reportApi: ReportApi,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
+
+  private apiService = inject(ApiService);
 
   fromDate?: Date;
   toDate?: Date;
   loading = false;
+
+  selectedUser?: UserProfileDto | null;
+
+  users: UserProfileDto[] = [];
+
+  ngOnInit() {
+    this.apiService.userApi.getUsers().subscribe((res) => {
+      this.users = res.data || [];
+    });
+  }
 
   summary = {
     totalRides: 0,
@@ -70,27 +86,39 @@ export class AdminReport {
   };
 
   loadAdminReport() {
-    if (!this.fromDate || !this.toDate) return;
-    if (!this.isDateRangeValid()) return;
+  if (!this.fromDate || !this.toDate) return;
 
-    this.loading = true;
+  const from = this.formatDate(this.fromDate);
+  const to = this.formatDate(this.toDate);
 
-    const from = this.formatDate(this.fromDate);
-    const to = this.formatDate(this.toDate);
+  let userId: number | undefined;
+  let driverId: number | undefined;
 
-    this.reportApi.getAdminReport(from, to).subscribe({
+  if (this.selectedUser) {
+    if (this.selectedUser.userRoleId === 2) {
+      driverId = this.selectedUser.id;
+    } else {
+      userId = this.selectedUser.id;
+    }
+  }
+
+  this.loading = true;
+
+  this.reportApi
+    .getReport(from, to, userId, driverId)
+    .subscribe({
       next: (res) => {
         if (!res?.data) {
           this.reset();
           return;
         }
-
         this.populate(res.data);
       },
       error: () => this.reset(),
       complete: () => (this.loading = false),
     });
-  }
+}
+
 
   private populate(data: ReportResponseDTO) {
     const days = data.dailyStats.length;
@@ -103,25 +131,25 @@ export class AdminReport {
     };
 
     this.systemChartData = {
-      labels: data.dailyStats.map(d => d.date),
+      labels: data.dailyStats.map((d) => d.date),
       datasets: [
         {
-          data: data.dailyStats.map(d => d.rideCount),
+          data: data.dailyStats.map((d) => d.rideCount),
           label: 'Rides',
         },
         {
-          data: data.dailyStats.map(d => d.totalKm),
+          data: data.dailyStats.map((d) => d.totalKm),
           label: 'Kilometers',
         },
         {
-          data: data.dailyStats.map(d => d.totalMoney),
+          data: data.dailyStats.map((d) => d.totalMoney),
           label: 'Money',
         },
       ],
     };
 
     this.cdr.detectChanges();
-    this.charts?.forEach(chart => chart.update());
+    this.charts?.forEach((chart) => chart.update());
   }
 
   private reset() {
@@ -151,4 +179,3 @@ export class AdminReport {
     return this.fromDate <= this.toDate;
   }
 }
-

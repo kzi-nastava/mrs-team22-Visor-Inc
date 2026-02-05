@@ -23,6 +23,10 @@
   min-width: 220px;
 }
 
+.user-field {
+  min-width: 250px;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -60,4 +64,23 @@
   position: relative;
   height: 500px;
   width: 100%;
+}
+
+.select-option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.role-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.user-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
