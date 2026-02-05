@@ -46,10 +46,10 @@ public class MainActivity extends AppCompatActivity {
         Uri data = intent.getData();
         if (data != null) {
             Log.d("DEEPLINK", "URI: " + data);
-            navController.handleDeepLink(intent);
-        } else {
-            checkLoginStatusAndNavigate();
+            return;
         }
+
+        checkLoginStatusAndNavigate();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -120,13 +120,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToUnauthenticated() {
         if (navController != null) {
-            navController.navigate(R.id.action_splashFragment_to_unauthenticatedHomeFragment);
+            navController.navigate(R.id.unauthenticatedHomeFragment);
+
         }
     }
-
     private void navigateToDriverHome() {
         if (navController != null) {
-            navController.navigate(R.id.action_splashFragment_to_mainDriverFragment);
+            navController.navigate(R.id.mainDriverFragment);
         }
     }
 

@@ -55,7 +55,6 @@ public class MainUserFragment extends Fragment {
             }
         }
 
-
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -65,7 +64,7 @@ public class MainUserFragment extends Fragment {
                                 requireParentFragment()
                         );
 
-                parentNavController.navigate(R.id.loginFragment);
+                navController.navigate(R.id.userHomeFragment);
                 return true;
             }
 
