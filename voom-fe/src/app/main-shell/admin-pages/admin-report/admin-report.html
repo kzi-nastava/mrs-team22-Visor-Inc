@@ -1,0 +1,104 @@
+<div class="p-8 space-y-8">
+  <mat-card class="filter-card">
+    <div class="filter-content">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="user-field">
+        <mat-label>User</mat-label>
+
+        <mat-select [(ngModel)]="selectedUser">
+          <mat-select-trigger>
+            <div class="select-option-row">
+              <mat-icon *ngIf="!selectedUser">public</mat-icon>
+
+              <mat-icon *ngIf="selectedUser?.userRoleId === 2">directions_car</mat-icon>
+              <mat-icon *ngIf="selectedUser?.userRoleId === 3">person</mat-icon>
+              <mat-icon *ngIf="selectedUser?.userRoleId === 1">admin_panel_settings</mat-icon>
+
+              <span>
+                {{
+                  selectedUser
+                    ? selectedUser.firstName + ' ' + selectedUser.lastName
+                    : 'System Overview'
+                }}
+              </span>
+            </div>
+          </mat-select-trigger>
+
+          <mat-option [value]="null">
+            <div class="select-option-row">
+              <mat-icon>public</mat-icon>
+              <span>System Overview</span>
+            </div>
+          </mat-option>
+
+          <mat-option *ngFor="let u of users" [value]="u">
+            <div class="select-option-row">
+              <mat-icon *ngIf="u.userRoleId === 2">directions_car</mat-icon>
+              <mat-icon *ngIf="u.userRoleId === 3">person</mat-icon>
+              <mat-icon *ngIf="u.userRoleId === 1">admin_panel_settings</mat-icon>
+              <span>{{ u.firstName }} {{ u.lastName }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="generate-btn"
+        (click)="loadAdminReport()"
+        [disabled]="!fromDate || !toDate"
+      >
+        Generate Report
+      </button>
+    </div>
+  </mat-card>
+
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <h3>Total Rides</h3>
+      <p>{{ summary.totalRides }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total Kilometers</h3>
+      <p>{{ summary.totalKm | number: '1.2-2' }} km</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Total Money</h3>
+      <p>{{ summary.totalMoney | currency }}</p>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <h3>Average per Day</h3>
+      <p>{{ summary.averageMoney | currency }}</p>
+    </mat-card>
+  </div>
+
+  <mat-card class="main-chart-card">
+    <h2>System Overview</h2>
+    <div class="chart-wrapper">
+      <canvas
+        baseChart
+        [data]="systemChartData"
+        [options]="chartOptions"
+        [legend]="true"
+        chartType="line"
+      ></canvas>
+    </div>
+  </mat-card>
+</div>

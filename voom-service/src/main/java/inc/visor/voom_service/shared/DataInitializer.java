@@ -246,57 +246,33 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         User user = userRepository.findByEmail("user1@gmail.com").orElseThrow();
-        Driver driver = driverRepository.findAll().get(0);
-        VehicleType vehicleType = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
 
-        for (int i = 1; i <= 4; i++) {
+        Driver driver1 = driverRepository.findAll().get(0);
+        Driver driver2 = driverRepository.findAll().get(1);
 
-            LocalDateTime start = LocalDateTime.now().minusDays(i).withHour(10);
-            LocalDateTime finish = start.plusMinutes(20);
+        VehicleType vehicleType
+                = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
 
-            RideRoute route = new RideRoute();
+        for (int day = 1; day <= 7; day++) {
 
-            double[] coords = ROUTES[i % ROUTES.length];
+            LocalDateTime baseStart
+                    = LocalDateTime.now().minusDays(day).withHour(10);
 
-            RoutePoint pickup = createPoint(
-                    "Pickup Street " + i,
-                    coords[0],
-                    coords[1]
-            );
+            for (int r = 0; r < 3; r++) {
 
-            RoutePoint dropoff = createPoint(
-                    "Dropoff Street " + i,
-                    coords[2],
-                    coords[3]
-            );
+                LocalDateTime start = baseStart.plusHours(r);
+                LocalDateTime finish = start.plusMinutes(20);
 
-            route.setRoutePoints(Arrays.asList(pickup, dropoff));
-            route.setTotalDistanceKm(calculateDistanceKm(
-                    coords[0], coords[1],
-                    coords[2], coords[3]
-            ));
+                createRide(user, driver1, vehicleType, start, finish, day + r);
+            }
 
-            RideRequest request = new RideRequest();
-            request.setCreator(user);
-            request.setRideRoute(route);
-            request.setStatus(RideRequestStatus.ACCEPTED);
-            request.setScheduleType(ScheduleType.NOW);
-            request.setVehicleType(vehicleType);
-            request.setBabyTransport(false);
-            request.setPetTransport(false);
-            request.setCalculatedPrice(5 + i * 1);
-            rideRequestRepository.save(request);
+            LocalDateTime start2 = baseStart.withHour(15);
+            LocalDateTime finish2 = start2.plusMinutes(25);
 
-            Ride ride = new Ride();
-            ride.setRideRequest(request);
-            ride.setDriver(driver);
-            ride.setStatus(RideStatus.FINISHED);
-            ride.setStartedAt(start);
-            ride.setFinishedAt(finish);
-            rideRepository.save(ride);
+            createRide(user, driver2, vehicleType, start2, finish2, day);
         }
 
-        System.out.println("Seeded test rides for reports.");
+        System.out.println("Seeded enhanced test rides for reports.");
     }
 
     private RoutePoint createPoint(String address, double lat, double lng) {
@@ -305,6 +281,59 @@ public class DataInitializer implements ApplicationRunner {
         point.setLatitude(lat);
         point.setLongitude(lng);
         return point;
+    }
+
+    private void createRide(
+            User user,
+            Driver driver,
+            VehicleType vehicleType,
+            LocalDateTime start,
+            LocalDateTime finish,
+            int routeIndex
+    ) {
+
+        double[] coords = ROUTES[routeIndex % ROUTES.length];
+
+        RideRoute route = new RideRoute();
+
+        RoutePoint pickup = createPoint(
+                "Pickup Street",
+                coords[0],
+                coords[1]
+        );
+
+        RoutePoint dropoff = createPoint(
+                "Dropoff Street",
+                coords[2],
+                coords[3]
+        );
+
+        route.setRoutePoints(Arrays.asList(pickup, dropoff));
+        route.setTotalDistanceKm(
+                calculateDistanceKm(
+                        coords[0], coords[1],
+                        coords[2], coords[3]
+                )
+        );
+
+        RideRequest request = new RideRequest();
+        request.setCreator(user);
+        request.setRideRoute(route);
+        request.setStatus(RideRequestStatus.ACCEPTED);
+        request.setScheduleType(ScheduleType.NOW);
+        request.setVehicleType(vehicleType);
+        request.setCalculatedPrice(8 + Math.random() * 5);
+
+        rideRequestRepository.save(request);
+
+        Ride ride = new Ride();
+        ride.setRideRequest(request);
+        ride.setDriver(driver);
+        ride.setStatus(RideStatus.FINISHED);
+        ride.setStartedAt(start);
+        ride.setFinishedAt(finish);
+
+        rideRepository.save(ride);
     }
 
     private static final double[][] ROUTES = {

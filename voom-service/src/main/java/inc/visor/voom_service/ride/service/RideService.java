@@ -1,11 +1,20 @@
 package inc.visor.voom_service.ride.service;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
@@ -15,15 +24,6 @@ import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 
 @Service
 public class RideService {
@@ -31,7 +31,6 @@ public class RideService {
     private final RideRepository rideRepository;
     private final RideRouteService routeService;
     private final EmailService emailService;
-
 
     public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService) {
         this.rideRepository = rideRepository;
@@ -71,7 +70,9 @@ public class RideService {
         return unfiltered.stream()
                 .filter(r -> {
                     LocalDateTime started = r.getStartedAt();
-                    if (started == null) return false;
+                    if (started == null) {
+                        return false;
+                    }
 
                     boolean matchesStart = (start == null) || !started.isBefore(start);
 
@@ -226,7 +227,6 @@ public class RideService {
             );
         }
 
-
     }
 
     public void finishRide(long rideId) {
@@ -288,7 +288,6 @@ public class RideService {
         return dto;
     }
 
-
     public Ride findById(Long rideId) {
         return rideRepository.findById(rideId).orElseThrow();
     }
@@ -318,4 +317,16 @@ public class RideService {
                 to
         );
     }
+
+    public List<Ride> getFinishedRidesInTimeRange(
+            LocalDateTime from,
+            LocalDateTime to
+    ) {
+        return rideRepository.findByStatusAndFinishedAtBetween(
+                RideStatus.FINISHED,
+                from,
+                to
+        );
+    }
+
 }
