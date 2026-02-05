@@ -4,6 +4,7 @@ import {AdminActivity, ROUTE_ADMIN_ACTIVITY} from './admin-activity/admin-activi
 import {AdminUsers, ROUTE_ADMIN_USERS} from './admin-users/admin-users';
 import {AdminPricing, ROUTE_ADMIN_PRICING} from './admin-pricing/admin-pricing';
 import {AdminVehicles, ROUTE_ADMIN_VEHICLES} from './admin-vehicles/admin-vehicles';
+import { ROUTE_ADMIN_REPORT, AdminReport } from '../admin-report/admin-report';
 
 export default [
   {
@@ -17,6 +18,10 @@ export default [
   {
     path: ROUTE_ADMIN_USERS,
     component: AdminUsers,
+  },
+  {
+    path: ROUTE_ADMIN_REPORT,
+    component: AdminReport,
   },
   {
     path: ROUTE_ADMIN_VEHICLES,

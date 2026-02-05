@@ -1,4 +1,5 @@
 import {LatLng} from 'leaflet';
+import {UserProfileDto} from '../user/user.model';
 
 export type RideReportRequestDto = {
   message: string;
@@ -140,7 +141,7 @@ export interface RideRequestResponseDto {
   pickupLng: number | null;
 };
 
-export type RideStatus = 'SCHEDULED' | 'ONGOING' | 'CANCELLED' | 'FINISHED' | 'PANIC';
+export type RideStatus = 'SCHEDULED' | 'ONGOING' | 'CANCELLED' | 'FINISHED' | 'PANIC' | 'USER_CANCELLED' | "DRIVER_CANCELLED";
 
 
 export interface RoutePointDto {
@@ -165,8 +166,8 @@ export type UserStatus = 'PENDING' | 'ACTIVE' | 'BLOCKED';
 
 export interface RoutePoint {
   orderIndex: number;
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
   address: string;
   pointType: RoutePointType;
 }
@@ -218,6 +219,21 @@ export interface RideRequest {
   calculatedPrice: number;
   linkedPassengerEmails: string[];
   cancelledBy?: User;
+  reason: string;
+}
+
+export interface ComplaintSummaryDto {
+  message: string;
+  time: Date;
+  reporter: UserProfileDto;
+}
+
+export interface RatingSummaryDto {
+  message: string;
+  driverRating: number;
+  vehicleRating: number;
+  createdAt: Date;
+  rater: UserProfileDto;
 }
 
 export interface RideHistoryDto {
@@ -225,10 +241,13 @@ export interface RideHistoryDto {
   status: RideStatus;
   rideRequest: RideRequest;
   rideRoute: RideRoute;
+  driver: DriverSummaryDto;
   startedAt: string;
   finishedAt: string;
   passengers: User[];
   cancelledBy?: User;
+  complaints: ComplaintSummaryDto[];
+  ratings: RatingSummaryDto[];
 }
 
 export interface RideCancellationDto {

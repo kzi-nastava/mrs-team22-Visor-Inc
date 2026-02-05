@@ -10,15 +10,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+
+import com.google.android.material.button.MaterialButton;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
+import inc.visor.voom.app.shared.DataStoreManager;
 
 public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private ProfileViewModel viewModel;
+
+    private DataStoreManager storeManager;
 
     @Nullable
     @Override
@@ -44,6 +50,8 @@ public class ProfileFragment extends Fragment {
         setupListeners();
 
         viewModel.loadProfile();
+
+        storeManager = DataStoreManager.getInstance(this.getContext());
 
     }
     private void observeViewModel() {
@@ -76,6 +84,19 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupListeners() {
+
+        binding.btnLogout.setOnClickListener(v -> {
+            storeManager.clearUserData();
+            requireActivity().runOnUiThread(() -> {
+                Navigation.findNavController(requireActivity(), R.id.main_nav_host)
+                        .navigate(R.id.unauthenticatedHomeFragment, null,
+                                new NavOptions.Builder()
+                                        .setPopUpTo(R.id.main_nav_graph, true)
+                                        .build()
+                        );
+            });
+        });
+
         binding.btnSave.setOnClickListener(v ->
                 viewModel.onSaveClicked(
                         binding.etFirstName.getText().toString(),

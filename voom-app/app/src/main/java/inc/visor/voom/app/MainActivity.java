@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isLoggedIn) {
                     getUserTypeAndNavigate();
                 } else {
-                    navigateToLogin();
+                    navigateToUnauthenticated();
                 }
             },
             throwable -> {
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             },
             throwable -> {
                 Log.e("MainActivity", "Error getting user type", throwable);
-                navigateToLogin();
+                navigateToUnauthenticated();
             }
         );
         compositeDisposable.delete(disposable);
@@ -115,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
     private void navigateToLogin() {
         if (navController != null) {
             navController.navigate(R.id.action_splashFragment_to_loginFragment);
+        }
+    }
+
+    private void navigateToUnauthenticated() {
+        if (navController != null) {
+            navController.navigate(R.id.action_splashFragment_to_unauthenticatedHomeFragment);
         }
     }
 

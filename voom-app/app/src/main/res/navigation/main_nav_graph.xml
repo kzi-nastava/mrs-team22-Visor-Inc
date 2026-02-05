@@ -29,6 +29,9 @@
             app:destination="@id/mainAdminFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_splashFragment_to_unauthenticatedHomeFragment"
+            app:destination="@id/unauthenticatedHomeFragment" />
     </fragment>
 
     <fragment
@@ -147,5 +150,12 @@
             android:id="@+id/action_accountActivationFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpToInclusive="true"/>
+        android:id="@+id/unauthenticatedHomeFragment"
+        android:name="inc.visor.voom.app.unauthenticated.home.UnauthenticatedHomeFragment"
+        android:label="UnauthenticatedHomeFragment" >
+        <action
+            android:id="@+id/action_unauthenticatedHomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 </navigation>

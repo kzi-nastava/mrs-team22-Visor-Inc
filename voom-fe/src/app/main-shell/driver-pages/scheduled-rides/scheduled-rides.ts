@@ -8,12 +8,11 @@ import {
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import {MatIcon} from '@angular/material/icon';
-import {MatButton} from '@angular/material/button';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthenticationService} from '../../../shared/service/authentication-service';
-import {BehaviorSubject, catchError, filter, map, merge, of, scan, switchMap} from 'rxjs';
+import {BehaviorSubject, filter, map, merge, of, scan, switchMap} from 'rxjs';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {RideCancellationDto, RideHistoryDto} from '../../../shared/rest/ride/ride.model';
+import {RideHistoryDto} from '../../../shared/rest/ride/ride.model';
 
 export const ROUTE_SCHEDULED_RIDES = "scheduled";
 
@@ -25,8 +24,7 @@ export const ROUTE_SCHEDULED_RIDES = "scheduled";
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
-    MatIcon,
-    MatButton
+    MatIcon
   ],
   templateUrl: './scheduled-rides.html',
   styleUrl: './scheduled-rides.css',

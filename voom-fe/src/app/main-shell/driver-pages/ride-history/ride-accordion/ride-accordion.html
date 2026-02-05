@@ -3,9 +3,9 @@
     <mat-expansion-panel-header>
       <mat-panel-title>
         <div
-          class="grid grid-cols-[2fr_4fr_2fr] w-full place-items-center md:gap-[20px] gap-[10px]"
+          class="grid grid-cols-[2fr_4fr_2fr] w-full place-items-center md:gap-5 gap-2.5"
         >
-          <div class="flex items-center md:gap-[10px] gap-[5px] justify-self-start">
+          <div class="flex items-center md:gap-2.5 gap-[5px] justify-self-start">
             <img src="assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
             <p class="md:text-left text-center">{{ orderedPassengerName }}</p>
           </div>
@@ -19,7 +19,7 @@
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="">
-      <div class="w-full h-[3px] rounded-4xl bg-primary mb-[15px] mt-[10px]"></div>
+      <div class="w-full h-[3px] rounded-4xl bg-primary mb-[15px] mt-2.5"></div>
       <div class="flex gap-[50px]">
         <div class="min-w-[180px]">
           <p><b class="color-blue">Distance: </b>{{ ride.rideRequest.rideRoute.totalDistanceKm }} km</p>
@@ -28,12 +28,12 @@
           <p><b class="color-blue">Panic: </b>{{ `${ride.status === 'PANIC' ? '✔️' : '✖️'}` }}</p>
         </div>
         <div class="w-full">
-          <p class="mb-[10px]">Passengers</p>
+          <p class="mb-2.5">Passengers</p>
           <div
-            class="grid md:grid-cols-[1fr_1fr_1fr] grid-cols-[1fr_1fr] gap-[10px] place-items-center"
+            class="grid md:grid-cols-[1fr_1fr_1fr] grid-cols-[1fr_1fr] gap-2.5 place-items-center"
           >
             @for(passenger of ride.passengers; track passenger) {
-            <div class="flex items-center md:gap-[10px] gap-[2px] justify-self-start mb-[10px]">
+            <div class="flex items-center md:gap-2.5 gap-0.5 justify-self-start mb-2.5">
               <img src="assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
               <p class="md:text-left text-center">
                 {{ `${passenger.person.firstName} ${passenger.person.lastName}` }}
@@ -41,7 +41,7 @@
             </div>
             }
             @if (ride.passengers.length === 0) {
-              <div class="flex items-center md:gap-[10px] gap-[2px] justify-self-start mb-[10px]">
+              <div class="flex items-center md:gap-2.5 gap-0.5 justify-self-start mb-2.5">
                 <p class="text-gray-500">No additional passengers.</p>
               </div>
             }

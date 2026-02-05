@@ -14,7 +14,7 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 @Service
 public class RideEstimateService {
 
-    private static final double PRICE_PER_KM = 120.0;
+    private static final double PRICE_PER_KM = 1.1; // example value
 
     public RideEstimationResult estimate(List<RideRequestCreateDto.RoutePointDto> points, VehicleType vehicleType) {
         if (points.size() < 2) {
@@ -28,10 +28,10 @@ public class RideEstimateService {
     }
 
     public double calculateTotalDistance(List<RideRequestCreateDto.RoutePointDto> dto) {
-        List<RideRequestCreateDto.RoutePointDto> points
-                = dto.stream()
-                        .sorted(Comparator.comparingInt(p -> p.order))
-                        .toList();
+        List<RideRequestCreateDto.RoutePointDto> points =
+            dto.stream()
+                .sorted(Comparator.comparingInt(p -> p.orderIndex))
+                .toList();
 
         double total = 0.0;
 

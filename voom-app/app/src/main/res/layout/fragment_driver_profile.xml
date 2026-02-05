@@ -11,6 +11,17 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Sign Out"
+            android:textColor="#C6C6C6"
+            app:icon="@drawable/baseline_logout_24"
+            app:iconTint="#BDB9B9" />
+
         <ImageView
             android:id="@+id/img_avatar"
             android:layout_width="120dp"

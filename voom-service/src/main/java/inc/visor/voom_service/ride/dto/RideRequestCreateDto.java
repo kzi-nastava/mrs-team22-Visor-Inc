@@ -44,7 +44,7 @@ public class RideRequestCreateDto {
     public static class RoutePointDto {
         public double lat;
         public double lng;
-        public int order;
+        public int orderIndex;
         public String type;
         public String address;
 
@@ -52,7 +52,7 @@ public class RideRequestCreateDto {
             this.lat = point.getLatitude();
             this.lng = point.getLongitude();
             this.address = point.getAddress();
-            this.order = point.getOrderIndex();
+            this.orderIndex = point.getOrderIndex();
             this.type = point.getPointType().toString();
         }
 

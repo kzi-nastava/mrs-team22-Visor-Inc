@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import inc.visor.voom.app.driver.profile.dto.VehicleSummaryDto;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.user.profile.ProfileRepository;
 import inc.visor.voom.app.user.profile.dto.UpdateUserProfileRequestDto;
 import inc.visor.voom.app.user.profile.dto.UserProfileDto;

@@ -14,6 +14,8 @@ import { ROUTE_UNAUTHENTICATED_MAIN } from '../../unauthenticated/unauthenticate
 import { ROUTE_USER_PAGES } from '../../main-shell/user-pages/user-pages';
 import { ROUTE_DRIVER_PAGES } from '../../main-shell/driver-pages/driver-pages';
 import { ROUTE_SCHEDULED_RIDES } from '../../main-shell/user-pages/scheduled-rides/scheduled-rides';
+import { ROUTE_STATISTICS } from '../report/report';
+import {ROUTE_USER_ACTIVITY} from '../../main-shell/user-pages/user-activity/user-activity';
 
 @Component({
   selector: 'app-header',
@@ -34,7 +36,12 @@ export class Header {
   }
 
   protected rideHistory() {
-    this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_DRIVER_RIDE_HISTORY]);
+    const user = this.user();
+    if (user?.role === 'DRIVER') {
+      this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_DRIVER_RIDE_HISTORY]);
+    } else {
+      this.router.navigate([ROUTE_USER_PAGES, ROUTE_USER_ACTIVITY]);
+    }
   }
 
   protected signOut() {
@@ -43,7 +50,7 @@ export class Header {
   }
 
   protected profile() {
-    const user = this.authenticationService.activeUser$.value;
+    const user = this.user();
     if (user?.role === 'DRIVER') {
       this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_USER_PROFILE]);
     } else {
@@ -73,6 +80,14 @@ export class Header {
 
   protected scheduledRidesDriver() {
     this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_SCHEDULED_RIDES]);
+  }
+
+  protected userStatistics() {
+    this.router.navigate([ROUTE_USER_PAGES, ROUTE_STATISTICS]);
+  }
+
+  protected driverStatistics() {
+    this.router.navigate([ROUTE_DRIVER_PAGES, ROUTE_STATISTICS]);
   }
 
 }
