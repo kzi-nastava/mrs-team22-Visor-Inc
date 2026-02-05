@@ -96,8 +96,10 @@ public class DriverProfileViewModel extends ViewModel {
 
             @Override
             public void onError(String error) {
+                vehicleUpdated.postValue(false);
             }
         });
+
     }
 
 

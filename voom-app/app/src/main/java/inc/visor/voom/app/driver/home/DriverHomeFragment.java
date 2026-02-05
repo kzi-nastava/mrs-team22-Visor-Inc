@@ -37,6 +37,7 @@ import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
+import inc.visor.voom.app.shared.dto.RoutePointType;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
@@ -118,6 +119,7 @@ public class DriverHomeFragment extends Fragment {
 
                 Long myId = response.body().driverId;
                 viewModel.setMyDriverId(myId);
+                tryOpenArrivalDialog();
             }
 
             @Override
@@ -352,6 +354,7 @@ public class DriverHomeFragment extends Fragment {
 
                             map.getController().animateTo(point);
                         }
+                        tryOpenArrivalDialog();
                     }
                 });
 
@@ -453,14 +456,68 @@ public class DriverHomeFragment extends Fragment {
         );
 
         for (RoutePointDto p : sorted) {
-            if ("PICKUP".equals(p.type)) {
+            if (RoutePointType.PICKUP.equals(p.type)) {
                 pickupPoint = new GeoPoint(p.lat, p.lng);
+                tryOpenArrivalDialog();
             }
         }
-
         Log.d("ONGOING_RIDE", "Ride restored successfully");
     }
 
+    private void tryOpenArrivalDialog() {
+
+
+        if (arrivalDialogShown) {
+            return;
+        }
+
+        if (pickupPoint == null) {
+            return;
+        }
+
+        Long myId = viewModel.getMyDriverId().getValue();
+
+        if (myId == null) {
+            return;
+        }
+
+        List<SimulatedDriver> drivers =
+                viewModel.getSimulationManager()
+                        .getDrivers()
+                        .getValue();
+
+        if (drivers == null) {
+            return;
+        }
+
+        boolean foundMe = false;
+
+        for (SimulatedDriver d : drivers) {
+
+            if (d.id == myId) {
+
+                foundMe = true;
+
+                if (d.currentPosition == null) {
+                    return;
+                }
+
+                double distance = DistanceHelper.distanceInMeters(
+                        d.currentPosition.getLatitude(),
+                        d.currentPosition.getLongitude(),
+                        pickupPoint.getLatitude(),
+                        pickupPoint.getLongitude()
+                );
+
+
+                if (distance <= 30) {
+                    arrivalDialogShown = true;
+                    openArrivalDialog();
+                } else {
+                }
+            }
+        }
+    }
 
     @Override
     public void onDestroyView() {

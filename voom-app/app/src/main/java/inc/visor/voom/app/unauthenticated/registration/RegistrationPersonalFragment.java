@@ -21,6 +21,11 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -128,10 +133,10 @@ public class RegistrationPersonalFragment extends Fragment {
         birthDateInput.setOnClickListener(v -> datePicker.show(getParentFragmentManager(), "DATE_PICKER"));
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
-            final Date birthDate = new Date(selection);
-            final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            final LocalDateTime birthDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(selection), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            birthDateInput.setText(sdf.format(birthDate));
+            birthDateInput.setText(formatter.format(birthDate));
             viewModel.setBirthDate(birthDate);
         });
     }

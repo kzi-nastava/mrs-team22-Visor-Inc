@@ -171,14 +171,36 @@ public class AuthService {
     }
 
     public void sendVerificationEmail(User user, String token) {
-        String subject = "Verify your email";
-        String body = "Please verify your email by clicking the following link: http://localhost:4200/voom/verifyUser?token=" + token;
+        String subject = "Verify your Voom Account";
+        String webLink = "http://localhost:4200/voom/verifyUser?token=" + token;
+        String mobileLink = "voom://verify-email?token=" + token;
+
+        String body = "<h1>Welcome to Voom!</h1>" +
+                "<p>Hi " + user.getPerson().getFirstName() + ",</p>" +
+                "<p>Please tap the button below to verify your email address on web and get started.</p>" +
+                "<a href=\"" + webLink + "\" style=\"background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;\">Verify Email</a>" +
+                "<p>If the button doesn't work, click here: <a href=\"" + webLink + "\">" + webLink + "</a></p>" +
+                "<p>Please tap the button below to verify your email address on mobile and get started.</p>" +
+                "<a href=\"" + mobileLink + "\" style=\"background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;\">Verify Email</a>" +
+                "<p>If the button doesn't work, click here: <a href=\"" + mobileLink + "\">" + mobileLink + "</a></p>";
+
         emailService.send(user.getEmail(), subject, body);
     }
 
     public void sendForgotPasswordEmail(User user, String token) {
-        String subject = "Reset your password";
-        String body = "You can reset your password by clicking the following link: http://localhost:4200/voom/resetPassword?token=" + token;
+        String subject = "Reset your Voom Password";
+        String webLink = "http://localhost:4200/voom/resetPassword?token=" + token;
+        String mobileLink = "voom://reset-password?token=" + token;
+
+        String body = "<h1>Password Reset Request</h1>" +
+                "<p>We received a request to reset your password. Click the button below to choose a new one [web]:</p>" +
+                "<a href=\"" + webLink + "\" style=\"background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;\">Verify Email</a>" +
+                "<p>If the button doesn't work, click here: <a href=\"" + webLink + "\">" + webLink + "</a></p>" +
+                "<p>We received a request to reset your password. Click the button below to choose a new one [mobile]:</p>" +
+                "<a href=\"" + mobileLink + "\" style=\"background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;\">Reset Password</a>" +
+                "<p>If you didn't request this, you can safely ignore this email.</p>";
+
         emailService.send(user.getEmail(), subject, body);
     }
+
 }

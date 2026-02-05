@@ -23,7 +23,6 @@
 
     </fragment>
 
-
     <fragment
         android:id="@+id/loginFragment"
         android:name="inc.visor.voom.app.unauthenticated.login.LoginFragment"
@@ -52,6 +51,9 @@
         android:id="@+id/userRideTrackingFragment"
         android:name="inc.visor.voom.app.user.tracking.UserRideTrackingFragment"
         android:label="UserRideTrackingFragment" />
-
+    <fragment
+        android:id="@+id/userHomeFragment"
+        android:name="inc.visor.voom.app.user.home.UserHomeFragment"
+        android:label="UserHomeFragment" />
 
 </navigation>

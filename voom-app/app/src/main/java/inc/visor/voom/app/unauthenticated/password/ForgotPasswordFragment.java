@@ -56,7 +56,7 @@ public class ForgotPasswordFragment extends Fragment {
             authenticationApi.forgotPassword(dto).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                    Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_resetPasswordFragment);
+                    Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_loginFragment);
                 }
 
                 @Override

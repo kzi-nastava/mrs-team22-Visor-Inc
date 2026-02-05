@@ -56,12 +56,11 @@ public class MainUserFragment extends Fragment {
             }
         }
 
-
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                navController.navigate(R.id.profileFragment);
+                navController.navigate(R.id.userHomeFragment);
                 return true;
             }
 
