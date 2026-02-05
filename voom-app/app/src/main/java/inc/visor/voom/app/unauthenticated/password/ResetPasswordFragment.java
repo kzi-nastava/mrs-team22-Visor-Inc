@@ -60,7 +60,6 @@ public class ResetPasswordFragment extends Fragment {
             final String token = getArguments().getString("token");
             dto.setPassword(viewModel.getPassword().getValue());
             dto.setConfirmPassword(viewModel.getRepeatPassword().getValue());
-            dto.setPassword(viewModel.getPassword().getValue());
             dto.setToken(token);
             authenticationApi.resetPassword(dto).enqueue(new Callback<Void>() {
                 @Override
