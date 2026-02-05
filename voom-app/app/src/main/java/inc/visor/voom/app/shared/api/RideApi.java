@@ -11,6 +11,9 @@ import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
+import inc.visor.voom.app.user.tracking.dto.ComplaintRequestDto;
+import inc.visor.voom.app.user.tracking.dto.RatingRequestDto;
+import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -52,5 +55,13 @@ public interface RideApi {
     Call<RouteEstimateResponseDto> getRouteEstimate(@Body RouteEstimateRequestDto payload);
 
 
+    @POST("/api/rating/{rideId}")
+    Call<Void> rateRide(@Path("rideId") Long rideId, @Body RatingRequestDto body);
+
+    @POST("/api/complaints/ride/{rideId}")
+    Call<Void> reportRide(@Path("rideId") Long rideId, @Body ComplaintRequestDto body);
+
+    @POST("/api/rides/{rideId}/panic")
+    Call<Void> panic(@Path("rideId") Long rideId, @Body RidePanicDto body);
 }
 

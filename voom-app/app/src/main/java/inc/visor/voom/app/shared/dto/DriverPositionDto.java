@@ -4,5 +4,7 @@ public class DriverPositionDto {
     public long driverId;
     public double lat;
     public double lng;
+    public boolean finished;
+    public int eta;
 }
 

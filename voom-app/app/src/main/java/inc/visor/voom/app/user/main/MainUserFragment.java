@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -59,11 +60,6 @@ public class MainUserFragment extends Fragment {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                NavController parentNavController =
-                        NavHostFragment.findNavController(
-                                requireParentFragment()
-                        );
-
                 navController.navigate(R.id.userHomeFragment);
                 return true;
             }
@@ -75,6 +71,15 @@ public class MainUserFragment extends Fragment {
 
             if (id == R.id.nav_activity) {
                 navController.navigate(R.id.driverRideHistoryFragment);
+                return true;
+            }
+
+            if (id == R.id.nav_services) {
+                NavOptions navOptions = new NavOptions.Builder()
+                        .setPopUpTo(R.id.userRideTrackingFragment, true)
+                        .build();
+
+                navController.navigate(R.id.userRideTrackingFragment, null, navOptions);
                 return true;
             }
 

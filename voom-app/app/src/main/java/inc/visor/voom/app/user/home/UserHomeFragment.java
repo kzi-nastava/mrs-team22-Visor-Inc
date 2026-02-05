@@ -327,7 +327,6 @@ public class UserHomeFragment extends Fragment {
     private void observeViewModel() {
 
         viewModel.getRoutePoints().observe(getViewLifecycleOwner(), points -> {
-
             renderUI(points);
             renderMap(points);
         });
