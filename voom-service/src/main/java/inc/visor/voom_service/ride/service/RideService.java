@@ -300,4 +300,22 @@ public class RideService {
     public List<Ride> getScheduledRides(RideStatus rideStatus) {
         return this.rideRepository.findByStatus(rideStatus);
     }
+
+    public List<Ride> getFinishedRidesByUserIdAndTimeRange(Long userId, LocalDateTime from, LocalDateTime to) {
+        return this.rideRepository.findByRideRequest_Creator_IdAndStatusAndFinishedAtBetween(
+                userId,
+                RideStatus.FINISHED,
+                from,
+                to
+        );
+    }
+
+    public List<Ride> getFinishedRidesByDriverIdAndTimeRange(Long driverId, LocalDateTime from, LocalDateTime to) {
+        return this.rideRepository.findByDriver_IdAndStatusAndFinishedAtBetween(
+                driverId,
+                RideStatus.FINISHED,
+                from,
+                to
+        );
+    }
 }
