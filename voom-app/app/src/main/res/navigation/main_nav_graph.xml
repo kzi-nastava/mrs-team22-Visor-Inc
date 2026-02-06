@@ -150,6 +150,8 @@
             android:id="@+id/action_accountActivationFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
         android:id="@+id/unauthenticatedHomeFragment"
         android:name="inc.visor.voom.app.unauthenticated.home.UnauthenticatedHomeFragment"
         android:label="UnauthenticatedHomeFragment" >

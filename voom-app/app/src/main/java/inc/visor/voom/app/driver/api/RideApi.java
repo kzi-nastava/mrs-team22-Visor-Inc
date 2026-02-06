@@ -18,5 +18,8 @@ public interface RideApi {
     @GET("/api/rides/ongoing")
     Call<ActiveRideDto> getOngoingRide();
 
+    @POST("/api/rides/finish-ongoing")
+    Call<Void> finishOngoing();
+
 }
 

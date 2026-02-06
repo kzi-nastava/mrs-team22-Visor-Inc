@@ -34,6 +34,7 @@ import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.dto.StartRideDto;
+import inc.visor.voom.app.driver.finish.FinishRideDialogFragment;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
@@ -58,7 +59,9 @@ public class DriverHomeFragment extends Fragment {
     private boolean hasFocused = false;
 
     private GeoPoint pickupPoint = null;
+    private GeoPoint dropoffPoint = null;
     private boolean arrivalDialogShown = false;
+    private boolean finishDialogShown = false;
     private DriverAssignedDto currentAssignment = null;
     private Long currentRideId = null;
     private List<RoutePointDto> currentRoute = null;
@@ -120,6 +123,7 @@ public class DriverHomeFragment extends Fragment {
                 Long myId = response.body().driverId;
                 viewModel.setMyDriverId(myId);
                 tryOpenArrivalDialog();
+                tryOpenFinishDialog();
             }
 
             @Override
@@ -149,10 +153,19 @@ public class DriverHomeFragment extends Fragment {
                             .findFirst()
                             .orElse(null);
 
+                    RoutePointDto dropoff = dto.route.stream()
+                            .filter(r -> r.type == RoutePointType.DROPOFF)
+                            .findFirst()
+                            .orElse(null);
+
 
                     Log.d("ARRIVAL_DEBUG", "Route: " + pickup);
                     if (pickup != null) {
                         pickupPoint = new GeoPoint(pickup.lat, pickup.lng);
+                    }
+
+                    if (dropoff != null) {
+                        dropoffPoint = new GeoPoint(dropoff.lat, dropoff.lng);
                     }
 
                 });
@@ -175,7 +188,7 @@ public class DriverHomeFragment extends Fragment {
         if (currentRoute == null || currentRideId == null) return;
 
         String pickupAddress = currentRoute.stream()
-                .filter(p -> "PICKUP".equals(p.type))
+                .filter(p -> RoutePointType.PICKUP == p.type)
                 .findFirst()
                 .map(p -> p.address)
                 .orElse("Unknown location");
@@ -188,6 +201,56 @@ public class DriverHomeFragment extends Fragment {
         });
 
         dialog.show(getParentFragmentManager(), "arrival_dialog");
+    }
+
+    private void openFinishDialog() {
+
+        if (currentRoute == null || currentRideId == null) {
+            return;
+        }
+
+        String destinationAddress = currentRoute.stream()
+                .filter(p -> p.type == RoutePointType.DROPOFF)
+                .findFirst()
+                .map(p -> p.address)
+                .orElse("Unknown location");
+
+        FinishRideDialogFragment dialog = FinishRideDialogFragment.newInstance(destinationAddress);
+        dialog.setListener(this::finishRide);
+
+        dialog.show(getParentFragmentManager(), "finish_dialog");
+
+    }
+
+    private void finishRide() {
+        RideApi rideApi = RetrofitClient
+                .getInstance()
+                .create(RideApi.class);
+
+        rideApi.finishOngoing().enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(),
+                            "Ride finished",
+                            Toast.LENGTH_LONG).show();
+                    finishDialogShown = true;
+                    mapRenderer.clearRoute();
+                    mapRenderer.renderMarkers(List.of(), requireContext().getDrawable(R.drawable.ic_location_24));
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Something went wrong",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(requireContext(),
+                        "Something went wrong",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 
@@ -345,6 +408,20 @@ public class DriverHomeFragment extends Fragment {
                                 }
                             }
 
+                            if (dropoffPoint != null && !finishDialogShown) {
+                                double distance = DistanceHelper.distanceInMeters(
+                                        d.currentPosition.getLatitude(),
+                                        d.currentPosition.getLongitude(),
+                                        dropoffPoint.getLatitude(),
+                                        dropoffPoint.getLongitude()
+                                );
+
+                                if (distance <= 30) {
+                                    arrivalDialogShown = true;
+                                    openFinishDialog();
+                                }
+                            }
+
                             GeoPoint point = d.currentPosition;
 
                             if (!hasFocused) {
@@ -355,6 +432,7 @@ public class DriverHomeFragment extends Fragment {
                             map.getController().animateTo(point);
                         }
                         tryOpenArrivalDialog();
+                        tryOpenFinishDialog();
                     }
                 });
 
@@ -460,6 +538,10 @@ public class DriverHomeFragment extends Fragment {
                 pickupPoint = new GeoPoint(p.lat, p.lng);
                 tryOpenArrivalDialog();
             }
+            if (RoutePointType.DROPOFF == p.type) {
+                dropoffPoint = new GeoPoint(p.lat, p.lng);
+                tryOpenFinishDialog();
+            }
         }
         Log.d("ONGOING_RIDE", "Ride restored successfully");
     }
@@ -514,6 +596,55 @@ public class DriverHomeFragment extends Fragment {
                     arrivalDialogShown = true;
                     openArrivalDialog();
                 } else {
+                }
+            }
+        }
+    }
+
+    private void tryOpenFinishDialog() {
+
+
+        if (finishDialogShown) {
+            return;
+        }
+
+        if (dropoffPoint == null) {
+            return;
+        }
+
+        Long myId = viewModel.getMyDriverId().getValue();
+
+        if (myId == null) {
+            return;
+        }
+
+        List<SimulatedDriver> drivers =
+                viewModel.getSimulationManager()
+                        .getDrivers()
+                        .getValue();
+
+        if (drivers == null) {
+            return;
+        }
+
+        for (SimulatedDriver d : drivers) {
+
+            if (d.id == myId) {
+
+                if (d.currentPosition == null) {
+                    return;
+                }
+
+                double distance = DistanceHelper.distanceInMeters(
+                        d.currentPosition.getLatitude(),
+                        d.currentPosition.getLongitude(),
+                        dropoffPoint.getLatitude(),
+                        dropoffPoint.getLongitude()
+                );
+
+                if (distance <= 30) {
+                    finishDialogShown = true;
+                    openFinishDialog();
                 }
             }
         }

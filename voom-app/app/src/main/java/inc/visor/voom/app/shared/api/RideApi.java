@@ -63,5 +63,10 @@ public interface RideApi {
 
     @POST("/api/rides/{rideId}/panic")
     Call<Void> panic(@Path("rideId") Long rideId, @Body RidePanicDto body);
+
+    @POST("/api/rides/finish-ongoing")
+    Call<Void> finishOngoing();
+
+
 }
 
