@@ -3,10 +3,17 @@ package inc.visor.voom.app.admin.main;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import inc.visor.voom.app.R;
 
@@ -62,5 +69,48 @@ public class MainAdminFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_main_admin, container, false);
+    }
+
+    @Override
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
+
+        NavController navController = NavHostFragment.findNavController(
+                getChildFragmentManager().findFragmentById(R.id.admin_nav_host)
+        );
+
+        BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation_view);
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            // all of these should be changed in future
+
+            if (id == R.id.nav_home) {
+                // implement ts
+                return false;
+            }
+
+            if (id == R.id.nav_services) {
+                // implement me papi
+                return false;
+            }
+
+            if (id == R.id.nav_profile) {
+
+                navController.navigate(R.id.adminProfileFragment);
+                return true;
+            }
+
+            if (id == R.id.nav_activity) {
+                // implement this mother seal
+                return false;
+            }
+
+            return false;
+        });
+
     }
 }
