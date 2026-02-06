@@ -1,6 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -272,7 +273,6 @@ public class RideService {
         } else {
             activeRide = getOngoingRide(user.getId());
         }
-
         if (activeRide == null) {
             return null;
         }
@@ -284,7 +284,17 @@ public class RideService {
         );
         dto.setDriverId(activeRide.getDriver().getId());
         dto.setDriverName(activeRide.getDriver().getUser().getPerson().getFirstName() + " " + activeRide.getDriver().getUser().getPerson().getLastName());
+        String creatorName = activeRide.getRideRequest().getCreator().getPerson().getFirstName() + " " + activeRide.getRideRequest().getCreator().getPerson().getLastName();
+        List<String> passengerNames = activeRide.getPassengers().stream().map(p -> p.getPerson().getFirstName() + " " + p.getPerson().getLastName()).toList();
+        dto.setCreatorName(creatorName);
+        dto.setPassengerNames(passengerNames);
 
+        if (activeRide.getStartedAt() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            dto.setStartedAt(activeRide.getStartedAt().format(formatter));
+        } else {
+            dto.setStartedAt("Not started yet");
+        }
         return dto;
     }
 
