@@ -44,9 +44,9 @@ public class VoomUserDetails implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return switch (user.getUserStatus()) {
-            case INACTIVE, PENDING, ACTIVE ->
+            case INACTIVE, PENDING, ACTIVE, SUSPENDED ->
                 true;
-            case SUSPENDED, NOTACTIVATED ->
+            case NOTACTIVATED ->
                 false;
         };
     }
@@ -59,9 +59,9 @@ public class VoomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return switch (user.getUserStatus()) {
-            case ACTIVE ->
+            case ACTIVE, SUSPENDED ->
                 true;
-            case INACTIVE, PENDING, SUSPENDED, NOTACTIVATED ->
+            case INACTIVE, PENDING, NOTACTIVATED ->
                 false;
         };
     }

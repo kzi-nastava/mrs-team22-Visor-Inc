@@ -52,7 +52,7 @@ public class AuthService {
 
     public TokenDto login(LoginDto dto) {
         User user = userService.getUser(dto.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getUserStatus() != UserStatus.ACTIVE) {
+        if (user.getUserStatus() != UserStatus.ACTIVE && user.getUserStatus() != UserStatus.SUSPENDED) {
             throw new RuntimeException("User is not active.");
         }
 
