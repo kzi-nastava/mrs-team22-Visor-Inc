@@ -52,6 +52,8 @@ public class UserProfileDto {
 
     private String pfpUrl;
 
+    private String status;
+
     public UserProfileDto() {}
 
     public UserProfileDto(User user) {
@@ -65,6 +67,7 @@ public class UserProfileDto {
         this.birthDate = user.getPerson().getBirthDate();
         this.address = user.getPerson().getAddress();
         this.userRoleId = user.getUserRole().getId();
+        this.status = user.getUserStatus().toString();
     }
 
 }

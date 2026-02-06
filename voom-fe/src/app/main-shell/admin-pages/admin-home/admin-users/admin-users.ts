@@ -24,6 +24,7 @@ import { MatFormField, MatLabel } from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { AdminBlockUserDialog } from './admin-block-user-dialog/admin-block-user-dialog';
+import { NgClass } from '@angular/common';
 
 export const ROUTE_ADMIN_USERS = 'users';
 
@@ -46,6 +47,7 @@ export const ROUTE_ADMIN_USERS = 'users';
     MatLabel,
     MatOption,
     MatSelect,
+    NgClass
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
@@ -301,33 +303,6 @@ export class AdminUsers {
             horizontalPosition: 'right',
             duration: 3000,
           });
-        },
-      });
-  }
-
-  protected unblockUser() {
-    const user = this.selectedUser();
-    if (!user) return;
-
-    this.apiService.userApi
-      .unblockUser(user.id!)
-      .pipe(map((response) => response.data))
-      .subscribe({
-        next: (updatedUser) => {
-          this.snackBar.open('User unblocked successfully', '', {
-            horizontalPosition: 'right',
-            duration: 3000,
-          });
-
-          this.userUpdate$.next(updatedUser);
-          this.selectedUser.set(updatedUser);
-
-          this.userGeneralForm.patchValue({
-            userStatus: UserStatus.ACTIVE,
-          });
-        },
-        error: () => {
-          this.snackBar.open('Unblock failed', '', { horizontalPosition: 'right', duration: 3000 });
         },
       });
   }

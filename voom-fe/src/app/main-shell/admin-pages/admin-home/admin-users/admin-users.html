@@ -10,23 +10,31 @@
           @if (user.id === selectedUser()?.id) {
             <mat-card
               appearance="filled"
-              class="py-4 px-2 cursor-pointer outlined"
+              class="py-4 px-2 cursor-pointer outlined relative"
               (click)="selectUser(user)"
             >
               <div class="flex justify-center items-center">
-                <div class="text-lg px-2 text-white">{{ user.firstName }}</div>
-                <div class="text-lg px-2 text-white">{{ user.lastName }}</div>
+                <div class="text-lg px-1 text-white">{{ user.firstName }}</div>
+                <div class="text-lg px-1 text-white">{{ user.lastName }}</div>
+
+                @if (user.status === 'SUSPENDED') {
+                  <mat-icon class="text-red-300 ml-1">block</mat-icon>
+                }
               </div>
             </mat-card>
           } @else {
             <mat-card
               appearance="outlined"
-              class="py-4 px-2 cursor-pointer outlined"
+              class="py-4 px-2 cursor-pointer outlined relative"
               (click)="selectUser(user)"
             >
               <div class="flex justify-center items-center">
-                <div class="text-lg px-2">{{ user.firstName }}</div>
-                <div class="text-lg px-2">{{ user.lastName }}</div>
+                <div class="text-lg px-1">{{ user.firstName }}</div>
+                <div class="text-lg px-1">{{ user.lastName }}</div>
+
+                @if (user.status === 'SUSPENDED') {
+                  <mat-icon class="text-red-600 ml-1">block</mat-icon>
+                }
               </div>
             </mat-card>
           }
@@ -44,24 +52,13 @@
           <div class="flex justify-between items-center">
             <div class="font-medium text-xl">General</div>
             <div class="flex space-x-4 items-center">
-              @if (selectedUser()?.userStatus !== UserStatus.BLOCKED.toString()) {
-                <mat-icon
-                  class="cursor-pointer text-red-600"
-                  (click)="openBlockDialog()"
-                  matTooltip="Block user"
-                >
-                  block
-                </mat-icon>
-              } @else {
-                <mat-icon
-                  class="cursor-pointer text-green-600"
-                  (click)="unblockUser()"
-                  matTooltip="Unblock user"
-                >
-                  lock_open
-                </mat-icon>
-              }
-
+              <mat-icon
+                class="cursor-pointer text-red-600"
+                (click)="openBlockDialog()"
+                matTooltip="Block user"
+              >
+                block
+              </mat-icon>
               <mat-icon class="cursor-pointer" (click)="saveGeneralInfo()">save</mat-icon>
             </div>
           </div>

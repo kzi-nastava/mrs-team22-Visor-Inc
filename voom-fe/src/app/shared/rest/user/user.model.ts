@@ -18,6 +18,7 @@ export interface UserProfileDto {
   birthDate: string;
   address: string;
   userRoleId: number;
+  status?: string;
 }
 
 export interface CreateUserDto {
