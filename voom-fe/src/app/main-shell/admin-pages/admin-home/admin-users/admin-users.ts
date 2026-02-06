@@ -3,7 +3,13 @@ import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/materi
 import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/list';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ValueInputDate } from '../../../../shared/value-input/value-input-date/value-input-date';
 import { ValueInputString } from '../../../../shared/value-input/value-input-string/value-input-string';
 import { BehaviorSubject, filter, map, merge, scan, startWith } from 'rxjs';
@@ -17,8 +23,10 @@ import { AdminVehiclesDialog } from '../admin-vehicles/admin-vehicles-dialog/adm
 import { MatFormField, MatLabel } from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
+import { AdminBlockUserDialog } from './admin-block-user-dialog/admin-block-user-dialog';
+import { NgClass } from '@angular/common';
 
-export const ROUTE_ADMIN_USERS = "users";
+export const ROUTE_ADMIN_USERS = 'users';
 
 @Component({
   selector: 'app-admin-users',
@@ -38,43 +46,82 @@ export const ROUTE_ADMIN_USERS = "users";
     MatFormField,
     MatLabel,
     MatOption,
-    MatSelect
+    MatSelect,
+    NgClass
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',
 })
 export class AdminUsers {
-
   userGeneralForm = new FormGroup({
-    userStatus: new FormControl<UserStatus | null>({ value: null, disabled: false }, Validators.required),
-    firstName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    lastName: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
+    userStatus: new FormControl<UserStatus | null>(
+      { value: null, disabled: false },
+      Validators.required,
+    ),
+    firstName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    lastName: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
     birthDate: new FormControl<Date | null>(null, [Validators.required]),
-    email: new FormControl<string>('', [Validators.required, Validators.email, Validators.maxLength(255)]),
-    address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
-    phoneNumber: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(55)]),
+    email: new FormControl<string>('', [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(255),
+    ]),
+    address: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(255),
+    ]),
+    phoneNumber: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(55),
+    ]),
   });
 
   searchFormControl = new FormControl<string>('');
-  searchTerm = toSignal(this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())));
+  searchTerm = toSignal(
+    this.searchFormControl.valueChanges.pipe(startWith(this.searchFormControl.getRawValue())),
+  );
 
   private apiService = inject(ApiService);
   private snackBar = inject(MatSnackBar);
 
-  constructor(private dialog: MatDialog) {
-  }
+  constructor(private dialog: MatDialog) {}
 
-  initialUsers$ = this.apiService.userApi.getUsers().pipe(
-    map(response => response.data),
-  );
+  initialUsers$ = this.apiService.userApi.getUsers().pipe(map((response) => response.data));
 
   userCreate$ = new BehaviorSubject<UserProfileDto | null>(null);
   userUpdate$ = new BehaviorSubject<UserProfileDto | null>(null);
 
-  users$= merge(
-    this.initialUsers$.pipe(filter(user => !!user), map(response => { return {type:'initial', value: response} })),
-    this.userCreate$.asObservable().pipe(takeUntilDestroyed(), filter(user => !!user), map(response => { return {type:'create', value: [response]} })),
-    this.userUpdate$.asObservable().pipe(takeUntilDestroyed(), filter(user => !!user), map(response => { return {type:'update', value: [response]} })),
+  users$ = merge(
+    this.initialUsers$.pipe(
+      filter((user) => !!user),
+      map((response) => {
+        return { type: 'initial', value: response };
+      }),
+    ),
+    this.userCreate$.asObservable().pipe(
+      takeUntilDestroyed(),
+      filter((user) => !!user),
+      map((response) => {
+        return { type: 'create', value: [response] };
+      }),
+    ),
+    this.userUpdate$.asObservable().pipe(
+      takeUntilDestroyed(),
+      filter((user) => !!user),
+      map((response) => {
+        return { type: 'update', value: [response] };
+      }),
+    ),
   ).pipe(
     takeUntilDestroyed(),
     scan((acc, obj) => {
@@ -84,16 +131,14 @@ export class AdminUsers {
         case 'create':
           return [...acc, ...obj.value];
         case 'update':
-          return [...acc.filter(user => user.id !== obj.value[0].id), obj.value[0]];
+          return [...acc.filter((user) => user.id !== obj.value[0].id), obj.value[0]];
         default:
           return [];
       }
     }, [] as UserProfileDto[]),
   );
 
-  userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(
-    map(response => response.data),
-  );
+  userRoles$ = this.apiService.userRoleApi.getUserRoles().pipe(map((response) => response.data));
 
   users = toSignal(this.users$);
 
@@ -105,7 +150,11 @@ export class AdminUsers {
       return users;
     }
 
-    return users.filter(user => user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || user.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
+    return users.filter(
+      (user) =>
+        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
   });
 
   userRoles = toSignal(this.userRoles$);
@@ -130,18 +179,25 @@ export class AdminUsers {
       userStatus: userForm.userStatus!.toString(),
       pfpUrl: null,
       userRoleId: user.userRoleId,
-    }
+    };
 
-    this.apiService.userApi.updateUser(user.id!, updatedUserDto).pipe(
-      map(response => response.data),
-    ).subscribe((user) => {
-      if (user) {
-        this.snackBar.open("User updated successfully", '', {horizontalPosition: "right", duration : 3000});
-        this.userUpdate$.next(user);
-      } else {
-        this.snackBar.open("User update failed",'', {horizontalPosition: "right", duration : 3000});
-      }
-    });
+    this.apiService.userApi
+      .updateUser(user.id!, updatedUserDto)
+      .pipe(map((response) => response.data))
+      .subscribe((user) => {
+        if (user) {
+          this.snackBar.open('User updated successfully', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
+          });
+          this.userUpdate$.next(user);
+        } else {
+          this.snackBar.open('User update failed', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
+          });
+        }
+      });
   }
 
   protected selectUser(user: UserProfileDto) {
@@ -155,7 +211,7 @@ export class AdminUsers {
       address: user.address,
       phoneNumber: user.phoneNumber,
     });
- }
+  }
 
   protected addUser() {
     const userRoles = this.userRoles();
@@ -164,23 +220,91 @@ export class AdminUsers {
       return;
     }
 
-    this.dialog.open(AdminUsersDialog, { data: userRoles}).afterClosed().subscribe((user) => {
-      if (user) {
-        this.snackBar.open("User added successfully", '', {horizontalPosition: "right", duration : 3000});
-        this.userCreate$.next(user);
-        if (user.userRoleId === userRoles.filter(userRole => userRole.roleName === 'DRIVER').at(0)?.id) {
-          this.dialog.open(AdminVehiclesDialog, { data: user }).afterClosed().subscribe((vehicle) => {
-            if (vehicle) {
-              this.snackBar.open("Vehicle added successfully", '', {horizontalPosition: "right", duration : 3000});
-            } else {
-              this.snackBar.open("Vehicle add failed", '', {horizontalPosition: "right", duration : 3000});
-            }
+    this.dialog
+      .open(AdminUsersDialog, { data: userRoles })
+      .afterClosed()
+      .subscribe((user) => {
+        if (user) {
+          this.snackBar.open('User added successfully', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
+          });
+          this.userCreate$.next(user);
+          if (
+            user.userRoleId ===
+            userRoles.filter((userRole) => userRole.roleName === 'DRIVER').at(0)?.id
+          ) {
+            this.dialog
+              .open(AdminVehiclesDialog, { data: user })
+              .afterClosed()
+              .subscribe((vehicle) => {
+                if (vehicle) {
+                  this.snackBar.open('Vehicle added successfully', '', {
+                    horizontalPosition: 'right',
+                    duration: 3000,
+                  });
+                } else {
+                  this.snackBar.open('Vehicle add failed', '', {
+                    horizontalPosition: 'right',
+                    duration: 3000,
+                  });
+                }
+              });
+          }
+        } else {
+          this.snackBar.open('User add failed', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
           });
         }
-      } else {
-        this.snackBar.open("User add failed",'', {horizontalPosition: "right", duration : 3000});
-      }
-    })
+      });
+  }
+
+  protected openBlockDialog() {
+    const user = this.selectedUser();
+    if (!user) return;
+
+    this.dialog
+      .open(AdminBlockUserDialog, {
+        width: '500px',
+        data: {
+          userId: user.id,
+          fullName: `${user.firstName} ${user.lastName}`,
+        },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.blockUser(result.userId, result.reason);
+        }
+      });
+  }
+
+  private blockUser(userId: number, reason: string) {
+    this.apiService.userApi
+      .blockUser(userId, { reason })
+      .pipe(map((response) => response.data))
+      .subscribe({
+        next: (updatedUser) => {
+          this.snackBar.open('User blocked successfully', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
+          });
+
+          this.userUpdate$.next(updatedUser);
+          this.selectedUser.set(updatedUser);
+
+          this.userGeneralForm.patchValue({
+            userStatus: UserStatus.BLOCKED,
+          });
+        },
+        error: () => {
+          this.snackBar.open('Blocking failed', '', {
+            horizontalPosition: 'right',
+            duration: 3000,
+          });
+        },
+      });
   }
 
   protected readonly UserStatus = UserStatus;

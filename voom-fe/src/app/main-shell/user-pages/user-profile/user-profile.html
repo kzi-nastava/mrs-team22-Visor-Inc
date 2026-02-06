@@ -34,6 +34,8 @@
 
         <button
           type="button"
+          [disabled]="isSuspended()"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': isSuspended() }"
           (click)="openChangePasswordDialog()"
           class="w-full h-14 rounded-full border-2 border-blue-900 bg-transparent text-blue-900 text-base font-medium px-6 flex items-center justify-center cursor-pointer"
         >
@@ -55,7 +57,7 @@
             <div class="text-sm text-gray-400 italic">No favorite routes yet.</div>
           }
 
-          <button mat-stroked-button routerLink="/home" class="mt-4 rounded-full px-6 text-sm">
+          <button mat-stroked-button [disabled]="isSuspended()" routerLink="/home" class="mt-4 rounded-full px-6 text-sm">
             Add Route +
           </button>
         </div>
@@ -66,6 +68,8 @@
   <div class="flex justify-center mt-20">
     <button
       (click)="submit()"
+      [disabled]="isSuspended()"
+      [ngClass]="{ 'opacity-50 cursor-not-allowed': isSuspended() }"
       class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
     >
       Save Profile Changes
@@ -127,6 +131,8 @@
       <div class="flex justify-center">
         <button
           (click)="vehicleSubmit()"
+          [disabled]="isSuspended()"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': isSuspended() }"
           class="rounded-full px-10 md:px-16 py-3 text-sm w-full md:w-3/4 bg-blue-950 text-white hover:bg-blue-800 transition-colors cursor-pointer"
         >
           Save Vehicle Information

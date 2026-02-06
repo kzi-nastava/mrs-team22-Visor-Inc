@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -21,7 +21,8 @@ import { DriverVehicleResponseDto, UserProfileResponseDto } from '../user-home/h
 import { FavoriteRouteDto, FavoriteRoutesApi } from '../favorite-routes/favorite-routes.api';
 import { FavoriteRoute } from '../favorite-routes/favorite-routes';
 import { RouterModule } from '@angular/router';
-
+import { UserApi } from '../../../shared/rest/user/user.api';
+import ApiService from '../../../shared/rest/api-service';
 
 export const ROUTE_USER_PROFILE = 'profile';
 
@@ -47,7 +48,6 @@ export const ROUTE_USER_PROFILE = 'profile';
   styleUrl: './user-profile.css',
 })
 export class UserProfile {
-
   constructor(
     private dialog: MatDialog,
     private profileApi: UserProfileApi,
@@ -60,9 +60,9 @@ export class UserProfile {
   isUser = false;
   isAdmin = false;
   favoriteRoutes = signal<FavoriteRoute[]>([]);
-  topFavoriteRoutes = computed(() =>
-  this.favoriteRoutes().slice(0, 3)
-);
+  isSuspended = signal(false);
+  topFavoriteRoutes = computed(() => this.favoriteRoutes().slice(0, 3));
+  private apiService = inject(ApiService);
 
   openChangePasswordDialog(): void {
     this.dialog.open(ChangePasswordDialog, {
@@ -107,7 +107,7 @@ export class UserProfile {
     seats: new FormControl<number | null>(null, Validators.required),
     babyTransportAllowed: new FormControl<boolean>(false),
     petsAllowed: new FormControl<boolean>(false),
-    activeLast24Hours: new FormControl<number | null>({value: null, disabled: true}),
+    activeLast24Hours: new FormControl<number | null>({ value: null, disabled: true }),
   });
 
   ngOnInit(): void {
@@ -131,7 +131,21 @@ export class UserProfile {
 
         this.profileForm.controls.email.disable();
       },
+    });
 
+    if (!user?.id) return;
+
+    this.apiService.userApi.getActiveBlockNote(user?.id).subscribe({
+      next: (res) => {
+        const note = res.data;
+
+        if (note?.active) {
+          this.isSuspended.set(true);
+
+          this.profileForm.disable({ emitEvent: false });
+          this.vehicleForm.disable({ emitEvent: false });
+        }
+      },
     });
 
     this.favoriteRoutesApi.getFavoriteRoutes().subscribe({
@@ -174,19 +188,19 @@ export class UserProfile {
   }
 
   mapDto(dto: FavoriteRouteDto): FavoriteRoute {
-      const pickup = dto.points.find((p) => p.type === 'PICKUP');
-      const dropoff = dto.points.find((p) => p.type === 'DROPOFF');
+    const pickup = dto.points.find((p) => p.type === 'PICKUP');
+    const dropoff = dto.points.find((p) => p.type === 'DROPOFF');
 
-      return {
-        dto,
-        id: dto.id,
-        name: dto.name,
-        start: this.shortAddress(pickup?.address),
-        end: this.shortAddress(dropoff?.address),
-        distanceKm: dto.totalDistanceKm,
-        stops: dto.points.filter((p) => p.type === 'STOP').map((p) => this.shortAddress(p.address)),
-      };
-    }
+    return {
+      dto,
+      id: dto.id,
+      name: dto.name,
+      start: this.shortAddress(pickup?.address),
+      end: this.shortAddress(dropoff?.address),
+      distanceKm: dto.totalDistanceKm,
+      stops: dto.points.filter((p) => p.type === 'STOP').map((p) => this.shortAddress(p.address)),
+    };
+  }
 
   submit() {
     if (this.profileForm.invalid) {

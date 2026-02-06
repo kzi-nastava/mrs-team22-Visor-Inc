@@ -19,6 +19,7 @@ import ApiService from '../../../shared/rest/api-service';
 import { AuthenticationService } from '../../../shared/service/authentication-service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RideResponseDto } from '../../../shared/rest/ride/ride.model';
+import { UserApi } from '../../../shared/rest/user/user.api';
 
 export const ROUTE_USER_HOME = 'ride';
 
@@ -69,6 +70,8 @@ export class UserHome implements AfterViewInit {
   routePoints = signal<RoutePoint[]>([]);
   passengerEmails = signal<string[]>([]);
   panicRide = signal<RideResponseDto | null>(null);
+  isSuspended = signal<boolean>(false);
+  blockNote = signal<string | null>(null);
 
   selectedVehicle: number | null = null;
   selectedTime: ScheduleType = 'NOW';
@@ -136,7 +139,7 @@ export class UserHome implements AfterViewInit {
   private handleScheduledRides(rides: ScheduledRideDto[]) {
     if (!rides || rides.length === 0) return;
 
-    const now = Date.now(); 
+    const now = Date.now();
     const TEN_MIN = 10 * 60 * 1000;
 
     const ride = rides
@@ -211,7 +214,7 @@ export class UserHome implements AfterViewInit {
     if (!value) return false;
 
     const now = new Date();
-    now.setSeconds(0, 0); 
+    now.setSeconds(0, 0);
 
     const selected = new Date();
     const [h, m] = value.split(':').map(Number);
@@ -403,6 +406,21 @@ export class UserHome implements AfterViewInit {
 
   ngAfterViewInit() {
     const favoriteRoute = history.state?.favoriteRoute;
+
+    const activeUser = this.user();
+
+    if (activeUser?.id) {
+      this.apiService.userApi.getActiveBlockNote(activeUser.id).subscribe({
+        next: (res) => {
+          if (res.data?.active) {
+            this.isSuspended.set(true);
+            this.blockNote.set(res.data.reason);
+
+            this.rideForm.disable({ emitEvent: false });
+          }
+        },
+      });
+    }
 
     if (favoriteRoute) {
       this.applyFavoriteRoute(favoriteRoute);

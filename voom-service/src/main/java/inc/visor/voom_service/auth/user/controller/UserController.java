@@ -1,22 +1,32 @@
 package inc.visor.voom_service.auth.user.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import inc.visor.voom_service.auth.user.dto.BlockUserRequestDto;
 import inc.visor.voom_service.auth.user.dto.CreateUserDto;
+import inc.visor.voom_service.auth.user.dto.UserBlockNoteDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
-import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.auth.user.service.UserBlockService;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,11 +35,13 @@ public class UserController {
     private final UserService userService;
     private final PersonService personService;
     private final UserRoleService userRoleService;
+    private final UserBlockService userBlockService;
 
-    public UserController(UserService userService, PersonService personService, UserRoleService userRoleService) {
+    public UserController(UserService userService, PersonService personService, UserRoleService userRoleService, UserBlockService userBlockService) {
         this.userService = userService;
         this.personService = personService;
         this.userRoleService = userRoleService;
+        this.userBlockService = userBlockService;
     }
 
     @GetMapping
@@ -69,6 +81,46 @@ public class UserController {
         this.userService.getUser(personId).orElseThrow(NotFoundException::new);
         this.userService.deleteUser(personId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("{userId}/block")
+    public ResponseEntity<UserProfileDto> blockUser(
+            @AuthenticationPrincipal VoomUserDetails userDetails,
+            @PathVariable("userId") Long userId,
+            @Valid @RequestBody BlockUserRequestDto dto
+    ) {
+
+        String username = userDetails != null ? userDetails.getUsername() : null;
+
+        if (username == null) {
+            return ResponseEntity.status(403).build();
+        }
+
+        User admin = userService.getUser(username).orElseThrow(NotFoundException::new);
+
+        User user = userBlockService.blockUser(userId, admin.getId(), dto);
+
+        return ResponseEntity.ok(new UserProfileDto(user));
+    }
+
+    @PostMapping("{userId}/unblock")
+    public ResponseEntity<UserProfileDto> unblockUser(
+            @PathVariable("userId") Long userId
+    ) {
+
+        User user = userBlockService.unblockUser(userId);
+
+        return ResponseEntity.ok(new UserProfileDto(user));
+    }
+
+    @GetMapping("{userId}/block-note")
+    public ResponseEntity<UserBlockNoteDto> getActiveBlockNote(
+            @PathVariable("userId") Long userId
+    ) {
+
+        return userBlockService.getActiveBlockNote(userId)
+                .map(note -> ResponseEntity.ok(new UserBlockNoteDto(note)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
