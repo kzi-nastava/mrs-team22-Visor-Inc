@@ -33,7 +33,9 @@ import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.NotificationApi;
 import inc.visor.voom.app.shared.api.RideApi;
+import inc.visor.voom.app.shared.dto.NotificationDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
@@ -101,6 +103,33 @@ public class UserHomeFragment extends Fragment {
                 }, throwable -> {
                     Log.e("NOTIF", "Failed to get userId", throwable);
                 });
+
+
+        NotificationApi api =
+                RetrofitClient.getInstance().create(NotificationApi.class);
+
+        api.getUnread().enqueue(new Callback<List<NotificationDto>>() {
+            @Override
+            public void onResponse(Call<List<NotificationDto>> call,
+                                   Response<List<NotificationDto>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    for (NotificationDto n : response.body()) {
+                        NotificationService.showNotification(
+                                getContext(),
+                                n.title,
+                                n.id,
+                                n.message
+                        );
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<NotificationDto>> call, Throwable t) {
+                Log.e("NOTIF", "Failed to load unread", t);
+            }
+        });
 
 
         mapView = view.findViewById(R.id.mapView);

@@ -74,6 +74,10 @@ public class DriverHomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
+
         NotificationApi api =
                 RetrofitClient.getInstance().create(NotificationApi.class);
 
@@ -101,9 +105,6 @@ public class DriverHomeFragment extends Fragment {
             }
         });
 
-        super.onViewCreated(view, savedInstanceState);
-
-        viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
 
         routeRepository = new RouteRepository();
 
