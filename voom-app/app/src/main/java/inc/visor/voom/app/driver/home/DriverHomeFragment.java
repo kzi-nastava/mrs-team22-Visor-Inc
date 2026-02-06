@@ -24,9 +24,11 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
@@ -37,10 +39,12 @@ import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.history.models.Ride;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.DriverActivityApi;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.driver.DriverStateChangeDto;
 import inc.visor.voom.app.shared.dto.ride.ActiveRideDto;
 import inc.visor.voom.app.shared.dto.ride.LatLng;
 import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
@@ -77,6 +81,8 @@ public class DriverHomeFragment extends Fragment {
     RideApi rideApi;
     DataStoreManager dataStoreManager;
     private SwitchMaterial toggleStatus;
+    DriverActivityApi driverActivityApi;
+    private boolean isUpdatingToggle = false;
 
 
     public DriverHomeFragment() {
@@ -95,15 +101,23 @@ public class DriverHomeFragment extends Fragment {
 
         dataStoreManager = DataStoreManager.getInstance(this.getContext());
 
+        driverActivityApi = RetrofitClient.getInstance().create(DriverActivityApi.class);
+
         toggleStatus = view.findViewById(R.id.toggle_status);
 
         toggleStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isUpdatingToggle) {
+                return;
+            }
+
             if (isChecked) {
                 handleStatusActive();
             } else {
                 handleStatusInactive();
             }
         });
+
+        loadDriverState();
 
         observeAssignedRide();
 
@@ -121,11 +135,12 @@ public class DriverHomeFragment extends Fragment {
                 final long currentRide = currentRideId;
                 final GeoPoint point = currentPosition.getValue();
                 final LatLng currentPosition = new LatLng();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 currentPosition.setLat(point.getLatitude());
                 currentPosition.setLng(point.getLongitude());
                 RideStopDto dto = new RideStopDto();
                 dto.setUserId(userId);
-                dto.setTimestamp(LocalDateTime.now());
+                dto.setTimestamp(LocalDateTime.now().format(formatter));
                 dto.setPoint(currentPosition);
 
                 rideApi.stopRide(currentRide, dto).enqueue(new Callback<RideResponseDto>() {
@@ -180,10 +195,74 @@ public class DriverHomeFragment extends Fragment {
         });
     }
 
+    private void loadDriverState() {
+        DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            driverActivityApi.getDriverState(userId).enqueue(new Callback<DriverStateChangeDto>() {
+                @Override
+                public void onResponse(Call<DriverStateChangeDto> call, Response<DriverStateChangeDto> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        DriverStateChangeDto state = response.body();
+                        isUpdatingToggle = true;
+                        toggleStatus.setChecked(Objects.equals(state.getCurrentState(), "ACTIVE"));
+                        isUpdatingToggle = false;
+                    } else {
+                        // Handle error
+                        Log.e("DriverState", "Failed to load driver state");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<DriverStateChangeDto> call, Throwable t) {
+                    // Handle failure
+                    Log.e("DriverState", "Error loading driver state", t);
+                }
+            });
+        }).dispose();
+
+    }
+
     private void handleStatusInactive() {
+        DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            DriverStateChangeDto dto = new DriverStateChangeDto();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dto.setCurrentState("INACTIVE");
+            dto.setPerformedAt(LocalDateTime.now().format(formatter));
+            dto.setUserId(userId);
+
+            driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
+                @Override
+                public void onResponse(Call<DriverStateChangeDto> call, Response<DriverStateChangeDto> response) {
+
+                }
+
+                @Override
+                public void onFailure(Call<DriverStateChangeDto> call, Throwable t) {
+
+                }
+            });
+        }).dispose();
     }
 
     private void handleStatusActive() {
+        DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            DriverStateChangeDto dto = new DriverStateChangeDto();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dto.setCurrentState("ACTIVE");
+            dto.setPerformedAt(LocalDateTime.now().format(formatter));
+            dto.setUserId(userId);
+
+            driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
+                @Override
+                public void onResponse(Call<DriverStateChangeDto> call, Response<DriverStateChangeDto> response) {
+
+                }
+
+                @Override
+                public void onFailure(Call<DriverStateChangeDto> call, Throwable t) {
+
+                }
+            });
+        }).dispose();
     }
 
     private void setupChart(View view) {

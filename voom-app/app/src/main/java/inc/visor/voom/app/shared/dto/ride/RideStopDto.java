@@ -1,12 +1,10 @@
 package inc.visor.voom.app.shared.dto.ride;
 
-import java.time.LocalDateTime;
-
 public class RideStopDto {
 
     private Long userId;
     private LatLng point;
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     public RideStopDto() {
     }
@@ -27,11 +25,11 @@ public class RideStopDto {
         this.point = point;
     }
 
-    public LocalDateTime getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 }
