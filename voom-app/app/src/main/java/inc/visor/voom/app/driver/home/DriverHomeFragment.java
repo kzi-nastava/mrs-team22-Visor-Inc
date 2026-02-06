@@ -36,7 +36,6 @@ import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
-import inc.visor.voom.app.driver.history.models.Ride;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.DriverActivityApi;
@@ -59,6 +58,7 @@ import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -92,6 +92,7 @@ public class DriverHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        currentPosition = BehaviorSubject.create();
 
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
 
@@ -147,9 +148,9 @@ public class DriverHomeFragment extends Fragment {
                     @Override
                     public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
                         if (response.isSuccessful()) {
-
+                            Toast.makeText(requireContext(), "Stopped ride", Toast.LENGTH_LONG).show();
                         } else {
-                            Log.e("RIDE_API", "Error: " + response.code());
+                            Toast.makeText(requireContext(),"Failed to stop ride",Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -178,9 +179,9 @@ public class DriverHomeFragment extends Fragment {
                     @Override
                     public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
                         if (response.isSuccessful()) {
-
+                            Toast.makeText(requireContext(), "Panic", Toast.LENGTH_LONG).show();
                         } else {
-                            Log.e("PANIC_API", "Error: " + response.code());
+                            Toast.makeText(requireContext(),"Failed to panic",Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -232,7 +233,11 @@ public class DriverHomeFragment extends Fragment {
             driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
                 @Override
                 public void onResponse(Call<DriverStateChangeDto> call, Response<DriverStateChangeDto> response) {
-
+                    if (response.isSuccessful()) {
+                        Toast.makeText(requireContext(), "Status set to inactive", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),"Failed to set status to inactive",Toast.LENGTH_LONG).show();
+                    }
                 }
 
                 @Override
@@ -254,7 +259,11 @@ public class DriverHomeFragment extends Fragment {
             driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
                 @Override
                 public void onResponse(Call<DriverStateChangeDto> call, Response<DriverStateChangeDto> response) {
-
+                    if (response.isSuccessful()) {
+                        Toast.makeText(requireContext(), "Status set to active", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),"Failed to set status to active",Toast.LENGTH_LONG).show();
+                    }
                 }
 
                 @Override
@@ -390,7 +399,11 @@ public class DriverHomeFragment extends Fragment {
             rideApi.cancelRide(currentRide, dto).enqueue(new Callback<RideResponseDto>() {
                 @Override
                 public void onResponse(Call<RideResponseDto> call, Response<RideResponseDto> response) {
-
+                    if (response.isSuccessful()) {
+                        Toast.makeText(requireContext(), "Ride cancelled", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),"Failed to cancel ride",Toast.LENGTH_LONG).show();
+                    }
                 }
 
                 @Override

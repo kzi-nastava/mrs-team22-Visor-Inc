@@ -555,7 +555,7 @@ export class DriverHome implements AfterViewInit {
       .stopRide(rideId, dto)
       .pipe(map((response) => response.data))
       .subscribe((rideResponse) => {
-        this.activeRideId.set(null);toggl
+        this.activeRideId.set(null);
         this.routePoints.set([]);
         this.ridePhase.set('IDLE');
       });
