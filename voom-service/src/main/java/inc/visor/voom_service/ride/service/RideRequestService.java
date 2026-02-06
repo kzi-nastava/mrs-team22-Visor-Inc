@@ -25,6 +25,8 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
+import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
+import inc.visor.voom_service.shared.notification.service.NotificationService;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
@@ -40,13 +42,15 @@ public class RideRequestService {
     private final UserService userService;
     private final VehicleTypeService vehicleTypeService;
     private final RideService rideService;
-    private final RideRepository rideRepository; 
+    private final RideRepository rideRepository;
+    private final NotificationService notificationService;
 
     public RideRequestService(
             RideRequestRepository rideRequestRepository,
             RideEstimateService rideEstimationService,
             DriverService driverService,
             RideWsService rideWsService,
+            NotificationService notificationService,
             Simulator driverSimulator, UserService userService, VehicleTypeService vehicleTypeService, RideService rideService, RideRepository rideRepository
     ) {
         this.rideRequestRepository = rideRequestRepository;
@@ -58,24 +62,25 @@ public class RideRequestService {
         this.userService = userService;
         this.vehicleTypeService = vehicleTypeService;
         this.rideRepository = rideRepository;
+        this.notificationService = notificationService;
     }
 
     public RideRequest update(RideRequest rideRequest) {
         return this.rideRequestRepository.save(rideRequest);
     }
-    
+
     public RideRequestResponseDto createRideRequest(RideRequestCreateDto dto, Long userId) {
         User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
         RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
 
         RideRequest rideRequest = RideRequestMapper.toEntity(
-                        dto,
-                        user,
-                        vehicleType,
-                        estimate.price(),
-                        estimate.distanceKm()
-                );
+                dto,
+                user,
+                vehicleType,
+                estimate.price(),
+                estimate.distanceKm()
+        );
 
         Driver driver = driverService.findDriverForRideRequest(rideRequest, dto.getFreeDriversSnapshot());
 
@@ -110,6 +115,22 @@ public class RideRequestService {
 
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
             this.rideService.save(ride);
+            notificationService.createAndSendNotification(
+                    driver.getUser(),
+                    NotificationType.RIDE_ASSIGNED,
+                    "New ride assigned 🚖",
+                    "You have been assigned a new ride.",
+                    ride.getId()
+            );
+
+            notificationService.createAndSendNotification(
+                    user,
+                    NotificationType.RIDE_ACCEPTED,
+                    "Ride confirmed",
+                    "Your driver is on the way. Ride will start shortly.",
+                    ride.getId()
+            );
+
             DriverAssignedDto driverAssignedDto = new DriverAssignedDto(ride.getId(), driver.getId(), rideRequest.getRideRoute().getRoutePoints());
             System.out.println("Sending driver assigned via WS: " + driverAssignedDto);
             rideWsService.sendDriverAssigned(driverAssignedDto);
@@ -117,6 +138,14 @@ public class RideRequestService {
             driverSimulator.changeDriverRoute(driver.getId(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLatitude(), rideRequest.getRideRoute().getRoutePoints().getFirst().getLongitude());
         } else if (driverFound && rideRequest.getScheduleType() == ScheduleType.LATER) {
             this.rideService.save(ride);
+            notificationService.createAndSendNotification(
+                    user,
+                    NotificationType.RIDE_ACCEPTED,
+                    "Ride scheduled",
+                    "Your ride has been scheduled successfully.",
+                    ride.getId()
+            );
+
         }
 
         return RideRequestResponseDto.from(

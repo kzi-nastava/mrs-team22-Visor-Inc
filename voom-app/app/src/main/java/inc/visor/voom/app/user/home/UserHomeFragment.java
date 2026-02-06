@@ -32,6 +32,7 @@ import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
@@ -46,6 +47,7 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
+import inc.visor.voom.app.shared.service.NotificationWsService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
 import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
@@ -84,6 +86,22 @@ public class UserHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(UserHomeViewModel.class);
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    Log.d("NOTIF", "Connecting WS for user: " + userId);
+
+                    NotificationWsService notificationWsService =
+                            new NotificationWsService(requireContext(), userId);
+
+                    notificationWsService.connect();
+
+                }, throwable -> {
+                    Log.e("NOTIF", "Failed to get userId", throwable);
+                });
+
 
         mapView = view.findViewById(R.id.mapView);
         mapView.setMultiTouchControls(true);
@@ -272,8 +290,6 @@ public class UserHomeFragment extends Fragment {
                             );
 
                             if (distance < 15) {
-
-                                NotificationService.showArrivalNotification(requireContext());
                                 arrivalNotified = true;
                                 break;
                             }

@@ -1,14 +1,24 @@
 package inc.visor.voom_service.auth.user.model;
 
+import java.util.Objects;
+
 import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.person.model.Person;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -55,7 +65,8 @@ public class User {
         this.userStatus = UserStatus.PENDING;
     }
 
-    public User() {}
+    public User() {
+    }
 
     public User(long userId, DriverSummaryDto dto) {
         this.id = userId;
@@ -81,18 +92,20 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", person=" + person +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", userStatus=" + userStatus +
-                '}';
+        return "User{"
+                + "id=" + id
+                + ", person=" + person
+                + ", email='" + email + '\''
+                + ", password='" + password + '\''
+                + ", userStatus=" + userStatus
+                + '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         User user = (User) o;
         return id == user.id && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(userStatus, user.userStatus) && Objects.equals(userRole, user.userRole) && Objects.equals(person, user.person);
     }

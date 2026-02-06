@@ -36,6 +36,8 @@ import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.driver.finish.FinishRideDialogFragment;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.api.NotificationApi;
+import inc.visor.voom.app.shared.dto.NotificationDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
@@ -72,6 +74,33 @@ public class DriverHomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        NotificationApi api =
+                RetrofitClient.getInstance().create(NotificationApi.class);
+
+        api.getUnread().enqueue(new Callback<List<NotificationDto>>() {
+            @Override
+            public void onResponse(Call<List<NotificationDto>> call,
+                                   Response<List<NotificationDto>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    for (NotificationDto n : response.body()) {
+                        NotificationService.showNotification(
+                                getContext(),
+                                n.title,
+                                n.id,
+                                n.message
+                        );
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<NotificationDto>> call, Throwable t) {
+                Log.e("NOTIF", "Failed to load unread", t);
+            }
+        });
+
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
@@ -140,8 +169,6 @@ public class DriverHomeFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), dto -> {
 
                     if (dto == null) return;
-
-                    showAssignedNotification(dto);
                     drawRideMarkers(dto);
                     currentAssignment = dto;
                     arrivalDialogShown = false;
@@ -171,17 +198,6 @@ public class DriverHomeFragment extends Fragment {
                 });
     }
 
-    private void showAssignedNotification(DriverAssignedDto dto) {
-
-        NotificationService.showRideAssignedNotification(
-                requireContext(),
-                dto.route.stream()
-                        .filter(p -> "PICKUP".equals(p.type))
-                        .findFirst()
-                        .map(p -> p.address)
-                        .orElse("Unknown location")
-        );
-    }
 
     private void openArrivalDialog() {
 
