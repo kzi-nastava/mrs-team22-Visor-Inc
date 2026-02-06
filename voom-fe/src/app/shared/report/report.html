@@ -42,7 +42,7 @@
         color="primary"
         class="generate-btn"
         (click)="loadReports()"
-        [disabled]="!fromDate || !toDate || isInvalidRange()"
+        [disabled]="!fromDate || !toDate || isInvalidRange() || isSuspended()"
       >
         Generate Report
       </button>

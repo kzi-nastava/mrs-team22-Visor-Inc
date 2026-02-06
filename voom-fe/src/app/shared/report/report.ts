@@ -1,4 +1,12 @@
-import { ChangeDetectorRef, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  QueryList,
+  signal,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +20,7 @@ import { ReportApi } from './report.api';
 import { ReportResponseDTO } from './report.api';
 import { Chart, registerables } from 'chart.js';
 import { AuthenticationService } from '../service/authentication-service';
+import ApiService from '../rest/api-service';
 
 Chart.register(...registerables);
 
@@ -46,6 +55,8 @@ export class Report {
   isUser = false;
   fromDate?: Date;
   toDate?: Date;
+  private apiService = inject(ApiService);
+  isSuspended = signal(false);
 
   loading = false;
 
@@ -78,8 +89,19 @@ export class Report {
 
   ngOnInit() {
     const user = this.authService.activeUser$.value;
+
     this.isDriver = user?.role === 'DRIVER';
     this.isUser = user?.role === 'USER';
+
+    if (!user?.id) return;
+
+    this.apiService.userApi.getActiveBlockNote(user.id).subscribe({
+      next: (res) => {
+        if (res.data?.active) {
+          this.isSuspended.set(true);
+        }
+      },
+    });
   }
 
   loadReports() {

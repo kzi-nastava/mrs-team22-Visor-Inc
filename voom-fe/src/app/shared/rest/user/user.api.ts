@@ -105,4 +105,15 @@ export class UserApi extends Api {
 
     return this.apiClient.post<void, UserProfileDto>(`/api/users/${id}/unblock`, undefined, config);
   }
+
+  getActiveBlockNote(userId: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.get<void, UserBlockNoteDto>(`/api/users/${userId}/block-note`, config);
+  }
 }

@@ -70,6 +70,8 @@ export class DriverHome implements AfterViewInit {
   pickupPoint = signal<{ lat: number; lng: number } | null>(null);
   activeRideId = signal<number | null>(null);
   ridePhase = signal<RidePhase>('IDLE');
+  isSuspended = signal<boolean>(false);
+  blockReason = signal<string | null>(null);
 
   dropoffPoint = signal<{ lat: number; lng: number } | null>(null);
   finishDialogOpen = signal<boolean>(false);
@@ -326,6 +328,25 @@ export class DriverHome implements AfterViewInit {
           );
         },
         error: (err) => console.error(err),
+      });
+
+    this.authenticationService.activeUser$
+      .pipe(
+        filter((u) => !!u),
+        switchMap((user) =>
+          this.apiService.userApi.getActiveBlockNote(user.id).pipe(
+            map((res) => res.data),
+            catchError((err) => {
+              return of(null);
+            }),
+          ),
+        ),
+      )
+      .subscribe((note) => {
+        if (note && note.active) {
+          this.isSuspended.set(true);
+          this.blockReason.set(note.reason);
+        }
       });
   }
 

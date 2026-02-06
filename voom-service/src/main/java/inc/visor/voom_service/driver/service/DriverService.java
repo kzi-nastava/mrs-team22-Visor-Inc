@@ -346,6 +346,7 @@ public class DriverService {
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
+                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE) 
                 .filter(d -> isDriverCurrentlyActive(d.getId()))
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
