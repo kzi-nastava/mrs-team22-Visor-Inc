@@ -404,16 +404,11 @@ public class RideController {
         System.out.println("date from: " + dateFrom);
         System.out.println("date to: " + dateTo);
 
-//        if (dateTo != null) {
-//            dateTo.plusHours(23);
-//            dateTo.plusMinutes(59);
-//        }
 
         List<Ride> ridesList = rideService.getDriverRides(driver.getId(), dateFrom, dateTo, sort);
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = RideHistoryFormatter.getRideHistoryDto(ride);
-            rides.add(rideHistoryDto);
+            rides.add(new RideHistoryDto(ride));
         }
 
 
