@@ -72,6 +72,8 @@ public class UserHomeFragment extends Fragment {
     private DriverSimulationWsService wsService;
 
     private FavoriteRouteRepository favoriteRouteRepository;
+    private NotificationWsService notificationWsService;
+
 
     private Boolean arrivalNotified = false;
 
@@ -95,7 +97,7 @@ public class UserHomeFragment extends Fragment {
 
                     Log.d("NOTIF", "Connecting WS for user: " + userId);
 
-                    NotificationWsService notificationWsService =
+                    notificationWsService =
                             new NotificationWsService(requireContext(), userId);
 
                     notificationWsService.connect();
@@ -838,5 +840,26 @@ public class UserHomeFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (notificationWsService != null) {
+            notificationWsService.disconnect();
+            notificationWsService = null;
+        }
+
+        if (wsService != null) {
+            wsService.disconnect();
+            wsService = null;
+        }
+
+        if (mapView != null) {
+            mapView.onDetach();
+            mapView = null;
+        }
+    }
+
 
 }

@@ -54,4 +54,14 @@ public class NotificationWsService {
                 dto.message
         );
     }
+
+    public void disconnect() {
+
+        if (stompClient != null) {
+            stompClient.disconnect();
+            stompClient = null;
+            Log.d("WS", "Disconnected notification WS");
+        }
+    }
+
 }
