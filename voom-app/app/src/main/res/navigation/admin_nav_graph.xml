@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/admin_nav_graph">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/admin_nav_graph"
+    app:startDestination="@id/editPricingFragment">
 
+    <fragment
+        android:id="@+id/editPricingFragment"
+        android:name="inc.visor.voom.app.admin.pricing.EditPricingFragment"
+        android:label="fragment_edit_pricing"
+        tools:layout="@layout/fragment_edit_pricing" />
+    <fragment
+        android:id="@+id/adminProfileFragment"
+        android:name="inc.visor.voom.app.user.profile.ProfileFragment"
+        android:label="ProfileFragment" />
 </navigation>
