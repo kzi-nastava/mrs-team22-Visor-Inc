@@ -1,11 +1,23 @@
-import {Api} from '../api';
-import {RequestConfig} from '../rest.model';
-import {CreateUserDto, UserProfileDto} from './user.model';
-import {ApiClient} from '../api-client';
-import {AdminCreateDriverDto, DriverDto} from '../driver/driver.model';
+import { Api } from '../api';
+import { RequestConfig } from '../rest.model';
+import { CreateUserDto, UserProfileDto } from './user.model';
+import { ApiClient } from '../api-client';
+import { AdminCreateDriverDto, DriverDto } from '../driver/driver.model';
+
+export interface BlockUserRequestDto {
+  reason: string;
+}
+
+export interface UserBlockNoteDto {
+  id: number;
+  userId: number;
+  reason: string;
+  createdAt: string;
+  adminId: number;
+  active: boolean;
+}
 
 export class UserApi extends Api {
-
   constructor(apiClient: ApiClient) {
     super(apiClient);
   }
@@ -13,7 +25,7 @@ export class UserApi extends Api {
   getUsers() {
     const config: RequestConfig = {
       headers: {
-        accept: 'application/json'
+        accept: 'application/json',
       },
       authenticated: true,
     };
@@ -24,7 +36,7 @@ export class UserApi extends Api {
   getUser(id: number) {
     const config: RequestConfig = {
       headers: {
-        accept: 'application/json'
+        accept: 'application/json',
       },
       authenticated: true,
     };
@@ -36,7 +48,7 @@ export class UserApi extends Api {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
@@ -48,7 +60,7 @@ export class UserApi extends Api {
     const config: RequestConfig = {
       headers: {
         accept: 'application/json',
-        contentType: 'application/json'
+        contentType: 'application/json',
       },
       authenticated: true,
     };
@@ -59,11 +71,38 @@ export class UserApi extends Api {
   deleteUser(id: number) {
     const config: RequestConfig = {
       headers: {
-        accept: 'application/json'
+        accept: 'application/json',
       },
       authenticated: true,
     };
 
     return this.apiClient.delete<void, void>(`/api/users/${id}`, config);
+  }
+
+  blockUser(id: number, dto: { reason: string }) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.post<{ reason: string }, UserProfileDto>(
+      `/api/users/${id}/block`,
+      dto,
+      config,
+    );
+  }
+
+  unblockUser(id: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+      },
+      authenticated: true,
+    };
+
+    return this.apiClient.post<void, UserProfileDto>(`/api/users/${id}/unblock`, undefined, config);
   }
 }

@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>
+  Block User
+</h2>
+
+<mat-dialog-content class="space-y-4">
+
+  <div class="text-gray-600">
+    You are about to block:
+    <span class="font-semibold">
+      {{ data.fullName }}
+    </span>
+  </div>
+
+  <form [formGroup]="form">
+    <mat-form-field class="w-full">
+      <mat-label>Reason for blocking</mat-label>
+      <textarea
+        matInput
+        rows="4"
+        formControlName="reason">
+      </textarea>
+
+      <mat-error *ngIf="form.controls.reason.hasError('required')">
+        Reason is required
+      </mat-error>
+
+      <mat-error *ngIf="form.controls.reason.hasError('minlength')">
+        Minimum 5 characters
+      </mat-error>
+
+      <mat-error *ngIf="form.controls.reason.hasError('maxlength')">
+        Maximum 500 characters
+      </mat-error>
+    </mat-form-field>
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="space-x-2">
+
+  <button mat-button (click)="close()">
+    Cancel
+  </button>
+
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="confirm()"
+    [disabled]="form.invalid"
+  >
+    Confirm Block
+  </button>
+
+</mat-dialog-actions>

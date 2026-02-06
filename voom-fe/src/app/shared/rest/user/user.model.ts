@@ -3,7 +3,8 @@ export enum UserStatus {
   ACTIVE,
   SUSPENDED,
   PENDING,
-  NOTACTIVATED
+  NOTACTIVATED,
+  BLOCKED,
 }
 
 export interface UserProfileDto {
