@@ -2,11 +2,10 @@ package inc.visor.voom_service.ride.controller;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.websocket.server.PathParam;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -331,6 +330,32 @@ public class RideController {
         return ResponseEntity.ok(activeRide);
     }
 
+    @GetMapping("/ongoing/driver/{driverId}")
+    public ResponseEntity<ActiveRideDto> getOngoingByDriverId(@PathVariable Long driverId, @AuthenticationPrincipal VoomUserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        User admin = userProfileService.getUserByEmail(username);
+
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!admin.getUserRole().getRoleName().equals("ADMIN")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Driver> driver = driverService.getDriver(driverId);
+
+        if (!driver.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User driverUser = userProfileService.getUserByEmail(driver.get().getUser().getEmail());
+
+        ActiveRideDto activeRide = rideService.getActiveRide(driverUser);
+
+        return activeRide != null ? ResponseEntity.ok(activeRide) : ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/finish-ongoing")
     public ResponseEntity<ActiveRideDto> finishRide(@AuthenticationPrincipal VoomUserDetails userDetails) {
         String username = userDetails != null ? userDetails.getUsername() : null;
@@ -379,16 +404,11 @@ public class RideController {
         System.out.println("date from: " + dateFrom);
         System.out.println("date to: " + dateTo);
 
-//        if (dateTo != null) {
-//            dateTo.plusHours(23);
-//            dateTo.plusMinutes(59);
-//        }
 
         List<Ride> ridesList = rideService.getDriverRides(driver.getId(), dateFrom, dateTo, sort);
 
         for (Ride ride : ridesList) {
-            RideHistoryDto rideHistoryDto = RideHistoryFormatter.getRideHistoryDto(ride);
-            rides.add(rideHistoryDto);
+            rides.add(new RideHistoryDto(ride));
         }
 
 

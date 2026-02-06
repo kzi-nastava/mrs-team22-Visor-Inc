@@ -264,6 +264,15 @@ export class Map implements AfterViewInit, OnChanges {
     });
   }
 
+  removeSimulatedDriver(id: number): void {
+    const driverIndex = this.drivers.findIndex(d => d.id === id);
+    if (driverIndex !== -1) {
+      const driver = this.drivers[driverIndex];
+      driver.marker.remove();
+      this.drivers.splice(driverIndex, 1);
+    }
+  }
+
   assignRouteToDriver(driver: any, start: L.LatLng, end: { lat: number; lng: number }) {
     this.getRoute(start, L.latLng(end.lat, end.lng)).subscribe((res) => {
       const coords = res.routes[0].geometry.coordinates;
@@ -359,8 +368,8 @@ export class Map implements AfterViewInit, OnChanges {
   getRoute(from: L.LatLng, to: L.LatLng) {
     return this.http.get<any>(
       `https://router.project-osrm.org/route/v1/driving/` +
-        `${from.lng},${from.lat};${to.lng},${to.lat}` +
-        `?overview=full&geometries=geojson`
+      `${from.lng},${from.lat};${to.lng},${to.lat}` +
+      `?overview=full&geometries=geojson`
     );
   }
 
@@ -418,32 +427,32 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   searchAddress(address: string): Observable<{ lat: number; lng: number }> {
-  return this.http
-    .get<any>(
-      `https://nominatim.openstreetmap.org/search` +
+    return this.http
+      .get<any>(
+        `https://nominatim.openstreetmap.org/search` +
         `?format=json&q=${encodeURIComponent(address)}&limit=1`
-    )
-    .pipe(
-      map((res) => ({
-        lat: parseFloat(res[0].lat),
-        lng: parseFloat(res[0].lon),
-      }))
-    );
-}
+      )
+      .pipe(
+        map((res) => ({
+          lat: parseFloat(res[0].lat),
+          lng: parseFloat(res[0].lon),
+        }))
+      );
+  }
 
-drawRouteFromAddresses(startAddress: string, endAddress: string) {
-  forkJoin({
-    start: this.searchAddress(startAddress),
-    end: this.searchAddress(endAddress),
-  }).subscribe(({ start, end }) => {
-    this.points = [
-      { lat: start.lat, lng: start.lng, type: 'PICKUP', orderIndex: 0 },
-      { lat: end.lat, lng: end.lng, type: 'DROPOFF', orderIndex: 1 },
-    ];
+  drawRouteFromAddresses(startAddress: string, endAddress: string) {
+    forkJoin({
+      start: this.searchAddress(startAddress),
+      end: this.searchAddress(endAddress),
+    }).subscribe(({ start, end }) => {
+      this.points = [
+        { lat: start.lat, lng: start.lng, type: 'PICKUP', orderIndex: 0 },
+        { lat: end.lat, lng: end.lng, type: 'DROPOFF', orderIndex: 1 },
+      ];
 
-    this.syncFromPoints(); // reuse existing logic
-  });
-}
+      this.syncFromPoints(); // reuse existing logic
+    });
+  }
 
 
 }

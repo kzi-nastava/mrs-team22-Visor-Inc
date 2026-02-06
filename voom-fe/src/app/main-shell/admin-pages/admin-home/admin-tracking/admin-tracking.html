@@ -1,0 +1,92 @@
+<div class="p-4 flex flex-col justify-center">
+    <app-map [points]="this.routePoints()"></app-map>
+    <div class="w-[100%] mt-10 flex gap-10">
+        <div class="p-2 space-y-2 w-full">
+            <div class="flex items-center space-x-4 pb-4">
+                <app-value-input-string class="w-full" [label]="'Search'" [formControl]="searchFormControl" />
+            </div>
+            @if (filteredDrivers(); as drivers) {
+            @for (driver of drivers; track driver) {
+            @if (driver.id === selectedDriverId()) {
+            <mat-card appearance="filled" class="py-4 px-2 cursor-pointer outlined relative"
+                (click)="selectedDriverId.set(driver.id)">
+                <div class="flex justify-center items-center">
+                    <div class="text-lg px-1 text-white">{{ driver.firstName }}</div>
+                    <div class="text-lg px-1 text-white">{{ driver.lastName }}</div>
+
+                    @if (driver.status === 'SUSPENDED') {
+                    <mat-icon class="text-red-300 ml-1">block</mat-icon>
+                    }
+                </div>
+            </mat-card>
+            } @else {
+            <mat-card appearance="outlined" class="py-4 px-2 cursor-pointer outlined relative"
+                (click)="selectedDriverId.set(driver.id)">
+                <div class="flex justify-center items-center">
+                    <div class="text-lg px-1">{{ driver.firstName }}</div>
+                    <div class="text-lg px-1">{{ driver.lastName }}</div>
+
+                    @if (driver.status === 'SUSPENDED') {
+                    <mat-icon class="text-red-600 ml-1">block</mat-icon>
+                    }
+                </div>
+            </mat-card>
+            }
+            }
+            } @else {
+            <div class="text-center text-xl">No drivers found yet</div>
+            }
+        </div>
+
+        <div class="w-full flex flex-col items-left space-y-4 p-4">
+            @if (activeRide()) {
+            <div class="text-lg font-medium">Active ride</div>
+            <div class="flex items-start flex-col gap-2 space-x-4">
+
+                @if (pickupPoint(); as pickup) {
+                    <div>Pickup address: {{ pickup.address }}</div>
+                } @else {
+                    <div>Pickup address: Address unknown</div>
+                }
+
+                @if (dropoffPoint(); as dropoff) {
+                    <div>Dropoff address: {{ dropoff.address }}</div>
+                } @else {
+                    <div>Dropoff address: Address unknown</div>
+                }
+
+                @if(activeRide()?.startedAt) {
+                    <div>Started at: {{ activeRide()?.startedAt }}</div>
+                } @else {
+                    <div>Started at: Not started yet</div>
+                }
+
+                <div>Status: {{ activeRide()?.status }}</div>
+
+                <div>Passengers: </div>
+
+                @if(activeRide()?.creatorName) {
+                    <div class="flex gap-2 items-center">
+                        <img src="assets/icons/free driver.png" alt="User Avatar"
+                            class="w-8 h-8 rounded-full inline-block mr-2" />
+                        <span class="font-medium">{{ activeRide()?.creatorName }} (creator)</span>
+                    </div>
+                }
+
+                @if (activeRide()?.passengerNames) {
+                    @for (passenger of activeRide()?.passengerNames; track passenger) {
+                        <div class="flex gap-2 items-center">
+                            <img src="assets/icons/free driver.png" alt="User Avatar"
+                                class="w-8 h-8 rounded-full inline-block mr-2" />
+                            <span>{{ passenger }}</span>
+                        </div>
+                    }
+                }
+
+            </div>
+            } @else {
+                <div class="text-lg font-medium">No active ride</div>
+            }
+        </div>
+
+    </div>
