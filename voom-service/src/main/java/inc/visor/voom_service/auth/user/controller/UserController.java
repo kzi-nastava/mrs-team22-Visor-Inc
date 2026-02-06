@@ -1,22 +1,27 @@
 package inc.visor.voom_service.auth.user.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import inc.visor.voom_service.auth.user.dto.CreateUserDto;
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
-import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.auth.user.service.UserRoleService;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.service.PersonService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")

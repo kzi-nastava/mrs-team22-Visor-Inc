@@ -1,16 +1,16 @@
 package inc.visor.voom_service.auth.user.dto;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
