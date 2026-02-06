@@ -216,10 +216,10 @@ export class RideApi extends Api {
     };
 
     if (dateFrom) {
-      queryParams.start = dateFrom.toISOString();
+      queryParams.dateFrom = dateFrom.toISOString();
     }
     if (dateTo) {
-      queryParams.end = dateTo.toISOString();
+      queryParams.dateTo = dateTo.toISOString();
     }
 
     const config: RequestConfig = {
@@ -287,6 +287,17 @@ export class RideApi extends Api {
     };
 
     return this.apiClient.get<void, RideHistoryDto[]>(`/api/rides/driver/scheduled`, config);
+  }
+
+  getOngoingRideForDriver(driverId: number) {
+    const config: RequestConfig = {
+      headers: {
+        accept: 'application/json',
+        contentType: 'application/json',
+      },
+      authenticated: true,
+    };
+    return this.apiClient.get<void, ActiveRideDto>(`/api/rides/ongoing/driver/${driverId}`, config);
   }
 
   cancelScheduledRide(rideId: number, dto: RideCancellationDto) {

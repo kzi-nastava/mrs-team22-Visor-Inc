@@ -11,6 +11,7 @@ import { ROUTE_ADMIN_PRICING } from './admin-pricing/admin-pricing';
 import { ROUTE_ADMIN_PAGES } from '../admin-pages';
 import { ROUTE_ADMIN_VEHICLES } from './admin-vehicles/admin-vehicles';
 import { ROUTE_ADMIN_REPORT } from '../admin-report/admin-report';
+import { ROUTE_ADMIN_TRACKING } from './admin-tracking/admin-tracking';
 
 export const ROUTE_ADMIN_HOME = 'ride';
 
@@ -26,6 +27,11 @@ export class AdminHome {
       icon: 'sensors',
       title: 'Live',
       routerLink: ROUTE_ADMIN_LIVE,
+    },
+    {
+      icon: 'directions_car',
+      title: 'Tracking',
+      routerLink: ROUTE_ADMIN_TRACKING,
     },
     {
       icon: 'article',

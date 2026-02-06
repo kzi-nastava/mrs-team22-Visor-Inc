@@ -254,6 +254,9 @@ export type ActiveRideDto = {
   status: string;
   routePoints: RideRoutePointDto[];
   driverId: number;
+  creatorName?: string | null;
+  passengerNames?: string[] | null;
+  startedAt?: string | null;
 };
 
 export type StartScheduledRideDto = {
