@@ -14,7 +14,6 @@ import androidx.navigation.Navigation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
@@ -70,7 +69,7 @@ public class RegistrationFragment extends Fragment {
 
                 authenticationApi.register(dto).enqueue(new Callback<UserDto>() {
                     @Override
-                    public void onResponse(Call<UserDto> call, Response<UserDto> response) {
+                    public void onResponse(@NonNull Call<UserDto> call, @NonNull Response<UserDto> response) {
                         if (!response.isSuccessful() || response.body() == null) {
                             return;
                         }
@@ -78,7 +77,7 @@ public class RegistrationFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(Call<UserDto> call, Throwable t) {
+                    public void onFailure(@NonNull Call<UserDto> call, @NonNull Throwable t) {
 
                     }
                 });

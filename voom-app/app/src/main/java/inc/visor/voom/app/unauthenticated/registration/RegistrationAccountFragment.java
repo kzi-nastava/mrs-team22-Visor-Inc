@@ -50,7 +50,7 @@ public class RegistrationAccountFragment extends Fragment {
         buttonPrevious.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationAccountFragment_to_registrationPersonalFragment));
 
         buttonNext = view.findViewById(R.id.fragment_registration_personal_next);
-
+        buttonNext.setEnabled(false);
         buttonNext.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationAccountFragment_to_registrationContactFragment));
     }
 
@@ -66,6 +66,7 @@ public class RegistrationAccountFragment extends Fragment {
                 } else {
                     emailInput.setError(null);
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -92,6 +93,7 @@ public class RegistrationAccountFragment extends Fragment {
                 } else {
                     passwordInput.setError(null);
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -121,7 +123,7 @@ public class RegistrationAccountFragment extends Fragment {
                 } else {
                     passwordInput.setError(null);
                 }
-
+                updateSubmitButton();
             }
 
             @Override
@@ -141,5 +143,21 @@ public class RegistrationAccountFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_registration_account, container, false);
+    }
+
+    private boolean isFormValid() {
+        String email = viewModel.getEmail().getValue();
+        String password = viewModel.getPassword().getValue();
+        String confirmPassword = viewModel.getRepeatPassword().getValue();
+
+        boolean isEmailValid = email != null && !email.isEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        boolean isPasswordValid = password != null && !password.isEmpty() && password.length() >= 8;
+        boolean isConfirmPasswordValid = confirmPassword != null && !confirmPassword.isEmpty() && confirmPassword.length() >= 8;
+
+        return isEmailValid && isConfirmPasswordValid && isPasswordValid && confirmPassword.equals(password);
+    }
+
+    private void updateSubmitButton() {
+        buttonNext.setEnabled(isFormValid());
     }
 }

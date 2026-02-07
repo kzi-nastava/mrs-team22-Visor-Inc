@@ -1,17 +1,16 @@
 package inc.visor.voom.app.unauthenticated.registration;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
@@ -48,12 +47,12 @@ public class AccountActivationFragment extends Fragment {
             final String token = getArguments().getString("token");
             authenticationApi.verifyUser(token).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     Navigation.findNavController(view).navigate(R.id.action_accountActivationFragment_to_loginFragment);
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
 
                 }
             });

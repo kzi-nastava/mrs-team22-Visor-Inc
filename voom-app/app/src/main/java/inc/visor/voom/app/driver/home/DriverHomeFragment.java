@@ -3,6 +3,7 @@ package inc.visor.voom.app.driver.home;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,18 +17,21 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.driver.api.DriverApi;
-import inc.visor.voom.app.driver.api.RideApi;
 import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverAssignedDto;
@@ -37,11 +41,18 @@ import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.driver.finish.FinishRideDialogFragment;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.DriverActivityApi;
 import inc.visor.voom.app.shared.api.NotificationApi;
+import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.NotificationDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.driver.DriverStateChangeDto;
+import inc.visor.voom.app.shared.dto.ride.LatLng;
+import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
@@ -49,7 +60,9 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.service.NotificationWsService;
-import inc.visor.voom.app.user.home.model.RoutePoint;
+import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,6 +83,13 @@ public class DriverHomeFragment extends Fragment {
     private Long currentRideId = null;
     private List<RoutePointDto> currentRoute = null;
     private NotificationWsService notificationWsService;
+    private SwitchMaterial switchMaterial;
+    private DriverActivityApi driverActivityApi;
+    private CompositeDisposable compositeDisposable;
+    private Button stopButton;
+    private Button panicButton;
+    private RideApi rideApi;
+    private GeoPoint lastFocusPoint;
 
 
     public DriverHomeFragment() {
@@ -79,32 +99,70 @@ public class DriverHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        lastFocusPoint = null;
 
+        rideApi = RetrofitClient.getInstance().create(RideApi.class);
+
+        compositeDisposable = new CompositeDisposable();
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
+        switchMaterial = view.findViewById(R.id.toggle_status);
 
+        stopButton = view.findViewById(R.id.stop_ride);
+        panicButton = view.findViewById(R.id.panic_ride);
 
-        DataStoreManager.getInstance()
-                .getUserId()
-                .subscribe(userId -> {
+        Log.d("SWITCH_DEBUG", "Switch found: " + (switchMaterial != null));
+        if (switchMaterial != null) {
+            Log.d("SWITCH_DEBUG", "Switch enabled: " + switchMaterial.isEnabled());
+            Log.d("SWITCH_DEBUG", "Switch clickable: " + switchMaterial.isClickable());
+        }
 
-                    Log.d("NOTIF", "Connecting WS for user: " + userId);
+        Disposable disposable = DataStoreManager.getInstance()
+            .getUserId()
+            .subscribe(userId -> {
 
-                    notificationWsService =
-                            new NotificationWsService(requireContext(), userId);
+                Log.d("NOTIF", "Connecting WS for user: " + userId);
 
-                    notificationWsService.connect();
+                notificationWsService =
+                        new NotificationWsService(requireContext(), userId);
 
-                }, throwable -> {
-                    Log.e("NOTIF", "Failed to get userId", throwable);
-                });
+                notificationWsService.connect();
 
-        NotificationApi api =
-                RetrofitClient.getInstance().create(NotificationApi.class);
+            }, throwable -> {
+                Log.e("NOTIF", "Failed to get userId", throwable);
+            }
+        );
+
+        compositeDisposable.add(disposable);
+
+        driverActivityApi = RetrofitClient.getInstance().create(DriverActivityApi.class);
+
+        handleToggleStatus();
+        disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            driverActivityApi.getDriverState(userId).enqueue(new Callback<DriverStateChangeDto>() {
+                @Override
+                public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String currentState = response.body().getCurrentState();
+                        final boolean isActive = "ACTIVE".equals(currentState);
+
+                        switchMaterial.setOnCheckedChangeListener(null);
+                        switchMaterial.setChecked(isActive);
+                        handleToggleStatus();
+                    }
+                }
+                @Override
+                public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
+                }
+            });
+        });
+
+        compositeDisposable.add(disposable);
+
+        NotificationApi api = RetrofitClient.getInstance().create(NotificationApi.class);
 
         api.getUnread().enqueue(new Callback<List<NotificationDto>>() {
             @Override
-            public void onResponse(Call<List<NotificationDto>> call,
-                                   Response<List<NotificationDto>> response) {
+            public void onResponse(@NonNull Call<List<NotificationDto>> call, @NonNull Response<List<NotificationDto>> response) {
 
                 if (response.isSuccessful() && response.body() != null) {
 
@@ -120,21 +178,22 @@ public class DriverHomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<NotificationDto>> call, Throwable t) {
-                Log.e("NOTIF", "Failed to load unread", t);
+            public void onFailure(@NonNull Call<List<NotificationDto>> call, @NonNull Throwable t) {
+                Log.e("EXCEPTION", "Exception: ", t);
+                Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
             }
         });
-
 
         routeRepository = new RouteRepository();
 
         observeAssignedRide();
-
         setupChart(view);
         setupMap(view);
         loadOngoingRide();
         loadDriversAndStartSimulation();
         observeDrivers();
+        handleRideStop();
+        handleRidePanic();
     }
 
     private void setupChart(View view) {
@@ -165,8 +224,7 @@ public class DriverHomeFragment extends Fragment {
 
         driverApi.getMyVehicle().enqueue(new Callback<DriverVehicleResponse>() {
             @Override
-            public void onResponse(Call<DriverVehicleResponse> call,
-                                   Response<DriverVehicleResponse> response) {
+            public void onResponse(@NonNull Call<DriverVehicleResponse> call, @NonNull Response<DriverVehicleResponse> response) {
 
                 if (!response.isSuccessful() || response.body() == null) return;
 
@@ -177,8 +235,9 @@ public class DriverHomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<DriverVehicleResponse> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(@NonNull Call<DriverVehicleResponse> call, @NonNull Throwable t) {
+                Log.e("EXCEPTION", "Exception: ", t);
+                Toast.makeText(requireContext(), "Something went wrong",Toast.LENGTH_LONG).show();
             }
         });
 
@@ -187,38 +246,37 @@ public class DriverHomeFragment extends Fragment {
     private void observeAssignedRide() {
 
         viewModel.getAssignedRide()
-                .observe(getViewLifecycleOwner(), dto -> {
+            .observe(getViewLifecycleOwner(), dto -> {
+                if (dto == null) return;
+                drawRideMarkers(dto);
+                currentAssignment = dto;
+                arrivalDialogShown = false;
 
-                    if (dto == null) return;
-                    drawRideMarkers(dto);
-                    currentAssignment = dto;
-                    arrivalDialogShown = false;
+                currentRideId = dto.rideId;
+                currentRoute = dto.route;
 
-                    currentRideId = dto.rideId;
-                    currentRoute = dto.route;
+                RoutePointDto pickup = dto.route.stream()
+                        .findFirst()
+                        .orElse(null);
 
-                    RoutePointDto pickup = dto.route.stream()
-                            .findFirst()
-                            .orElse(null);
-
-                    RoutePointDto dropoff = dto.route.stream()
-                            .filter(r -> r.type == RoutePointType.DROPOFF)
-                            .findFirst()
-                            .orElse(null);
+                RoutePointDto dropoff = dto.route.stream()
+                        .filter(r -> r.type == RoutePointType.DROPOFF)
+                        .findFirst()
+                        .orElse(null);
 
 
-                    Log.d("ARRIVAL_DEBUG", "Route: " + pickup);
-                    if (pickup != null) {
-                        pickupPoint = new GeoPoint(pickup.lat, pickup.lng);
-                    }
+                Log.d("ARRIVAL_DEBUG", "Route: " + pickup);
+                if (pickup != null) {
+                    pickupPoint = new GeoPoint(pickup.lat, pickup.lng);
+                }
 
-                    if (dropoff != null) {
-                        dropoffPoint = new GeoPoint(dropoff.lat, dropoff.lng);
-                    }
+                if (dropoff != null) {
+                    dropoffPoint = new GeoPoint(dropoff.lat, dropoff.lng);
+                }
 
-                });
+            }
+        );
     }
-
 
     private void openArrivalDialog() {
 
@@ -230,14 +288,45 @@ public class DriverHomeFragment extends Fragment {
                 .map(p -> p.address)
                 .orElse("Unknown location");
 
-        ArrivalDialogFragment dialog =
-                ArrivalDialogFragment.newInstance(pickupAddress);
+        ArrivalDialogFragment dialog = ArrivalDialogFragment.newInstance(pickupAddress);
 
-        dialog.setListener(() -> {
+        dialog.setOnAcceptRideListener(() -> {
             startRide(currentRideId, currentRoute);
         });
 
+        dialog.setOnCancelRideListener(this::cancelRide);
+
         dialog.show(getParentFragmentManager(), "arrival_dialog");
+    }
+
+    private void cancelRide(String reason) {
+        Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            RideCancellationDto dto = new RideCancellationDto();
+            dto.setUserId(userId);
+            dto.setMessage(reason);
+
+            if (this.currentRideId == null) {
+                showStatusSnackbar(getView(), "There is not current ride available", false);
+                return;
+            }
+
+            rideApi.cancel(this.currentRideId, dto).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        showStatusSnackbar(getView(), "Cancelled ride!", false);
+                    } else {
+                        showStatusSnackbar(getView(), "Failed to cancel ride!", false);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    showStatusSnackbar(getView(), "Network error: Check connection and try again " + t, false);
+                }
+            });
+        });
+        compositeDisposable.add(disposable);
     }
 
     private void openFinishDialog() {
@@ -266,7 +355,7 @@ public class DriverHomeFragment extends Fragment {
 
         rideApi.finishOngoing().enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(requireContext(),
                             "Ride finished",
@@ -275,22 +364,17 @@ public class DriverHomeFragment extends Fragment {
                     mapRenderer.clearRoute();
                     mapRenderer.renderMarkers(List.of(), requireContext().getDrawable(R.drawable.ic_location_24));
                 } else {
-                    Toast.makeText(requireContext(),
-                            "Something went wrong",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Something went wrong",Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(requireContext(),
-                        "Something went wrong",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                Log.e("EXCEPTION", "Exception: ", t);
             }
         });
     }
-
-
 
     private void startRide(Long rideId, List<RoutePointDto> routePoints) {
 
@@ -302,31 +386,29 @@ public class DriverHomeFragment extends Fragment {
         payload.routePoints = routePoints;
 
         rideApi.startRide(rideId, payload)
-                .enqueue(new Callback<Void>() {
+            .enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
 
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
 
-                        if (response.isSuccessful()) {
+                        Toast.makeText(requireContext(),"Ride started", Toast.LENGTH_LONG).show();
 
-                            Toast.makeText(requireContext(),
-                                    "Ride started",
-                                    Toast.LENGTH_LONG).show();
+                        arrivalDialogShown = true;
 
-                            arrivalDialogShown = true;
-
-                        } else {
-                            Toast.makeText(requireContext(),
-                                    "Failed to start ride",
-                                    Toast.LENGTH_LONG).show();
-                        }
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to start ride",
+                                Toast.LENGTH_LONG).show();
                     }
+                }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                    Log.e("EXCEPTION", "Exception: ", t);
+                }
+            });
     }
 
 
@@ -368,8 +450,9 @@ public class DriverHomeFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(Call<OsrmResponse> call, Throwable t) {
-                        t.printStackTrace();
+                    public void onFailure(@NonNull Call<OsrmResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                        Log.e("EXCEPTION", "Exception: ", t);
                     }
                 }
         );
@@ -399,8 +482,7 @@ public class DriverHomeFragment extends Fragment {
         driverApi.getActiveDrivers().enqueue(new Callback<List<DriverSummaryDto>>() {
 
             @Override
-            public void onResponse(Call<List<DriverSummaryDto>> call,
-                                   Response<List<DriverSummaryDto>> response) {
+            public void onResponse(@NonNull Call<List<DriverSummaryDto>> call,@NonNull Response<List<DriverSummaryDto>> response) {
 
                 if (!response.isSuccessful() || response.body() == null) {
                     return;
@@ -412,67 +494,65 @@ public class DriverHomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<DriverSummaryDto>> call, Throwable t) {
-                t.printStackTrace();
+            public void onFailure(@NonNull Call<List<DriverSummaryDto>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                Log.e("EXCEPTION", "Exception: ", t);
             }
         });
     }
 
     private void observeDrivers() {
         viewModel.getSimulationManager()
-                .getDrivers()
-                .observe(getViewLifecycleOwner(), drivers -> {
+            .getDrivers()
+            .observe(getViewLifecycleOwner(), drivers -> {
 
-                    mapRenderer.renderDrivers(drivers);
+                mapRenderer.renderDrivers(drivers);
 
-                    Long myId = viewModel.getMyDriverId().getValue();
-                    if (myId == null) return;
+                Long myId = viewModel.getMyDriverId().getValue();
+                if (myId == null) return;
 
-                    for (SimulatedDriver d : drivers) {
-                        if (d.id == myId) {
-                            if (pickupPoint != null && !arrivalDialogShown) {
+                for (SimulatedDriver d : drivers) {
+                    if (d.id == myId) {
+                        if (pickupPoint != null && !arrivalDialogShown) {
 
-                                double distance = DistanceHelper.distanceInMeters(
-                                        d.currentPosition.getLatitude(),
-                                        d.currentPosition.getLongitude(),
-                                        pickupPoint.getLatitude(),
-                                        pickupPoint.getLongitude()
-                                );
+                            double distance = DistanceHelper.distanceInMeters(
+                                    d.currentPosition.getLatitude(),
+                                    d.currentPosition.getLongitude(),
+                                    pickupPoint.getLatitude(),
+                                    pickupPoint.getLongitude()
+                            );
 
-                                if (distance <= 30) {
-                                    arrivalDialogShown = true;
-                                    openArrivalDialog();
-                                }
+                            if (distance <= 30) {
+                                arrivalDialogShown = true;
+                                openArrivalDialog();
                             }
-
-                            if (dropoffPoint != null && !finishDialogShown) {
-                                double distance = DistanceHelper.distanceInMeters(
-                                        d.currentPosition.getLatitude(),
-                                        d.currentPosition.getLongitude(),
-                                        dropoffPoint.getLatitude(),
-                                        dropoffPoint.getLongitude()
-                                );
-
-                                if (distance <= 30) {
-                                    arrivalDialogShown = true;
-                                    openFinishDialog();
-                                }
-                            }
-
-                            GeoPoint point = d.currentPosition;
-
-                            if (!hasFocused) {
-                                map.getController().setZoom(18.0);
-                                hasFocused = true;
-                            }
-
-                            map.getController().animateTo(point);
                         }
-                        tryOpenArrivalDialog();
-                        tryOpenFinishDialog();
-                    }
-                });
 
+                        if (dropoffPoint != null && !finishDialogShown) {
+                            double distance = DistanceHelper.distanceInMeters(
+                                    d.currentPosition.getLatitude(),
+                                    d.currentPosition.getLongitude(),
+                                    dropoffPoint.getLatitude(),
+                                    dropoffPoint.getLongitude()
+                            );
+
+                            if (distance <= 30) {
+                                arrivalDialogShown = true;
+                                openFinishDialog();
+                            }
+                        }
+
+                        if (!hasFocused) {
+                            map.getController().setZoom(18.0);
+                            hasFocused = true;
+                        }
+
+                        lastFocusPoint = d.currentPosition;
+                    }
+                    tryOpenArrivalDialog();
+                    tryOpenFinishDialog();
+                }
+            });
     }
 
     @Override
@@ -500,8 +580,7 @@ public class DriverHomeFragment extends Fragment {
         rideApi.getOngoingRide().enqueue(new Callback<ActiveRideDto>() {
 
             @Override
-            public void onResponse(Call<ActiveRideDto> call,
-                                   Response<ActiveRideDto> response) {
+            public void onResponse(@NonNull Call<ActiveRideDto> call, @NonNull Response<ActiveRideDto> response) {
 
                 if (!response.isSuccessful() || response.body() == null) {
                     Log.d("ONGOING_RIDE", "No active ride");
@@ -522,8 +601,9 @@ public class DriverHomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<ActiveRideDto> call, Throwable t) {
-                Log.e("ONGOING_RIDE", "Failed to load ongoing ride", t);
+            public void onFailure(@NonNull Call<ActiveRideDto> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                Log.e("EXCEPTION", "Exception: ", t);
             }
         });
     }
@@ -545,8 +625,7 @@ public class DriverHomeFragment extends Fragment {
                 new Callback<OsrmResponse>() {
 
                     @Override
-                    public void onResponse(Call<OsrmResponse> call,
-                                           Response<OsrmResponse> response) {
+                    public void onResponse(@NonNull Call<OsrmResponse> call, @NonNull Response<OsrmResponse> response) {
 
                         if (!response.isSuccessful()
                                 || response.body() == null) return;
@@ -564,8 +643,9 @@ public class DriverHomeFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(Call<OsrmResponse> call, Throwable t) {
-                        t.printStackTrace();
+                    public void onFailure(@NonNull Call<OsrmResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+                        Log.e("EXCEPTION", "Exception: ", t);
                     }
                 }
         );
@@ -632,15 +712,12 @@ public class DriverHomeFragment extends Fragment {
                 if (distance <= 30) {
                     arrivalDialogShown = true;
                     openArrivalDialog();
-                } else {
                 }
             }
         }
     }
 
     private void tryOpenFinishDialog() {
-
-
         if (finishDialogShown) {
             return;
         }
@@ -695,7 +772,129 @@ public class DriverHomeFragment extends Fragment {
             notificationWsService.disconnect();
             notificationWsService = null;
         }
-
+        compositeDisposable.dispose();
         map = null;
+    }
+
+    private void handleToggleStatus() {
+        Log.d("SWITCH_DEBUG", "handleToggleStatus called");
+        switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                final String state = isChecked ? "ACTIVE" : "INACTIVE";
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+                DriverStateChangeDto dto = new DriverStateChangeDto();
+                dto.setCurrentState(state);
+                dto.setPerformedAt(LocalDateTime.now().format(formatter));
+                dto.setUserId(userId);
+
+
+                driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
+                    @Override
+                    public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
+
+                        if (response.isSuccessful()) {
+                            String msg = isChecked ? "You are now online" : "You are now offline";
+                            showStatusSnackbar(switchMaterial, msg, false);
+                        } else {
+                            switchMaterial.setOnCheckedChangeListener(null);
+                            switchMaterial.setChecked(!isChecked);
+                            switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus());
+                            showStatusSnackbar(switchMaterial, "Failed to update status", true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
+                        switchMaterial.setOnCheckedChangeListener(null);
+                        switchMaterial.setChecked(!isChecked);
+                        switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus());
+                        showStatusSnackbar(switchMaterial, "Network error: Status not changed", true);
+                    }
+                });
+            });
+            compositeDisposable.add(disposable);
+        });
+    }
+
+    private void showStatusSnackbar(View view, String message, boolean isError) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        if (isError) {
+            snackbar.setBackgroundTint(getResources().getColor(android.R.color.holo_red_dark, null));
+        }
+        snackbar.show();
+    }
+
+    private void handleRideStop() {
+        stopButton.setOnClickListener(view -> {
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                final RideStopDto dto = new RideStopDto();
+                dto.setUserId(userId);
+
+                if (this.currentRideId == null) {
+                    showStatusSnackbar(view, "There is not current ride available", true);
+                    return;
+                } else if (lastFocusPoint == null) {
+                    showStatusSnackbar(view, "There is no focus point available", true);
+                    return;
+                }
+
+                final LatLng point = new LatLng();
+                point.setLat(lastFocusPoint.getLatitude());
+                point.setLng(lastFocusPoint.getLongitude());
+                dto.setPoint(point);
+
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                dto.setTimestamp(LocalDateTime.now().format(formatter));
+
+                rideApi.stopRide(this.currentRideId, dto).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<RideResponseDto> call, @NonNull Response<RideResponseDto> response) {
+                        if (response.isSuccessful()) {
+                            showStatusSnackbar(view, "Ride ended successfully", false);
+                        } else {
+                            showStatusSnackbar(view, "Could not stop ride: Server error", true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<RideResponseDto> call, @NonNull Throwable t) {
+                        showStatusSnackbar(view, "Network failure: Try stopping again " + t, true);
+                    }
+                });
+            });
+            compositeDisposable.add(disposable);
+        });
+    }
+
+    private void handleRidePanic() {
+        panicButton.setOnClickListener(view -> {
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                RidePanicDto dto = new RidePanicDto();
+                dto.setUserId(userId);
+
+                if (this.currentRideId == null) {
+                    showStatusSnackbar(view, "There is not current ride available", true);
+                    return;
+                }
+
+                rideApi.panic(this.currentRideId, dto).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            showStatusSnackbar(view, "Panic alert sent to dispatcher!", true);
+                        } else {
+                            showStatusSnackbar(view, "Failed to send panic alert!", true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        showStatusSnackbar(view, "Network error: Check connection and try again " + t, true);
+                    }
+                });
+            });
+            compositeDisposable.add(disposable);
+        });
     }
 }

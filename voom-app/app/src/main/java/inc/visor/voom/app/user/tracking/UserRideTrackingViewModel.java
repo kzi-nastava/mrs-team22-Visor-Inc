@@ -22,12 +22,14 @@ import inc.visor.voom.app.shared.dto.DriverPositionDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import inc.visor.voom.app.user.tracking.dto.RatingRequestDto;
 import inc.visor.voom.app.user.tracking.dto.ComplaintRequestDto;
 import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
+import io.reactivex.rxjava3.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -184,7 +186,7 @@ public class UserRideTrackingViewModel extends ViewModel implements DriverMetaPr
     public void panic() {
         if (rideId == null) return;
 
-        DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+        Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
             RidePanicDto body = new RidePanicDto();
             body.setUserId(userId);
 
@@ -192,7 +194,7 @@ public class UserRideTrackingViewModel extends ViewModel implements DriverMetaPr
 
             Log.d("PANIC_DEBUG", "Sending panic request for ride: " + rideId);
 
-            rideApi.panic(rideId, body).enqueue(new Callback<Void>() {
+            rideApi.panic(rideId, body).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {

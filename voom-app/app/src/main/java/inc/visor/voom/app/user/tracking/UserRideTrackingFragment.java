@@ -135,7 +135,7 @@ public class UserRideTrackingFragment extends Fragment {
 
         btnSubmitReview = v.findViewById(R.id.btnSubmitReview);
         this.btnPanic = v.findViewById(R.id.btnPanicUser);
-        Log.println(0, "PORUKA", btnPanic.toString());
+        Log.println(Log.ASSERT, "PORUKA", btnPanic.toString());
         btnSubmitReport = v.findViewById(R.id.btnSubmitReport);
 
         ratingForm = v.findViewById(R.id.ratingForm);

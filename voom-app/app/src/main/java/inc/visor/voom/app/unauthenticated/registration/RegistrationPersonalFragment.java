@@ -1,13 +1,6 @@
 package inc.visor.voom.app.unauthenticated.registration;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,19 +9,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 import inc.visor.voom.app.R;
 
@@ -61,7 +56,7 @@ public class RegistrationPersonalFragment extends Fragment {
         setupBirthDateInput();
 
         buttonNext = view.findViewById(R.id.fragment_registration_personal_next);
-
+        buttonNext.setEnabled(false);
         buttonNext.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationPersonalFragment_to_registrationAccountFragment));
 
         buttonLogin = view.findViewById(R.id.login);
@@ -80,6 +75,7 @@ public class RegistrationPersonalFragment extends Fragment {
                 } else {
                     firstNameInput.setError("First name cannot be empty");
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -104,6 +100,7 @@ public class RegistrationPersonalFragment extends Fragment {
                 } else {
                     firstNameInput.setError("First name cannot be empty");
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -147,5 +144,21 @@ public class RegistrationPersonalFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_registration_personal, container, false);
+    }
+
+    private boolean isFormValid() {
+        String firstName = viewModel.getFirstName().getValue();
+        String lastName = viewModel.getLastName().getValue();
+        LocalDateTime birthDate = viewModel.getBirthDate().getValue();
+
+        boolean isFirstNameValid = firstName != null && !firstName.isEmpty();
+        boolean isLastNameValid = lastName != null && !lastName.isEmpty();
+        boolean isBirthDateValid = birthDate != null;
+
+        return isFirstNameValid && isLastNameValid && isBirthDateValid;
+    }
+
+    private void updateSubmitButton() {
+        buttonNext.setEnabled(isFormValid());
     }
 }
