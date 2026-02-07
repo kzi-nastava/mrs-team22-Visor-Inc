@@ -30,7 +30,7 @@ public class RoutePoint {
         this.lat = dto.lat;
         this.lng = dto.lng;
         this.address = dto.address;
-        this.orderIndex = dto.orderIndex;
+        this.orderIndex = dto.orderIndex != null ? dto.orderIndex : 0;
         this.type = toPointType(dto.type);
     }
 

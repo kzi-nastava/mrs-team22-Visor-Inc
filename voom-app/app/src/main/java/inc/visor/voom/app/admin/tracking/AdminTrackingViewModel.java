@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import inc.visor.voom.app.admin.pricing.dto.VehicleTypeDto;
 import inc.visor.voom.app.driver.api.DriverApi;
+import inc.visor.voom.app.driver.api.DriverMetaProvider;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
@@ -25,7 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AdminTrackingViewModel extends ViewModel {
+public class AdminTrackingViewModel extends ViewModel implements DriverMetaProvider {
     // Replicates your Signals
     private final MutableLiveData<List<DriverSummaryDto>> _allDrivers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<String> _searchTerm = new MutableLiveData<>("");
@@ -123,5 +124,18 @@ public class AdminTrackingViewModel extends ViewModel {
     }
 
     public void setAllDrivers(List<DriverSummaryDto> drivers) { _allDrivers.setValue(drivers); }
+
     public void setSearchTerm(String term) { _searchTerm.setValue(term); }
+
+    public long getSelectedDriverId() {
+        if (_selectedDriverId.getValue() != null) {
+            return _selectedDriverId.getValue();
+        }
+        return -1;
+    }
+
+    @Override
+    public DriverSummaryDto findActiveDriver(int id) {
+        return _allDrivers.getValue().stream().filter(d -> d.getId() == id).findFirst().orElse(null);
+    }
 }

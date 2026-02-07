@@ -71,6 +71,16 @@ public class MapRendererService {
             mapView.invalidate();
         }
     }
+
+    public void removeDriver(long driverId) {
+        Marker marker = driverMarkers.remove(driverId);
+
+        if (marker != null) {
+            mapView.getOverlays().remove(marker);
+
+            mapView.invalidate();
+        }
+    }
     
     public void renderDrivers(List<SimulatedDriver> drivers) {
 

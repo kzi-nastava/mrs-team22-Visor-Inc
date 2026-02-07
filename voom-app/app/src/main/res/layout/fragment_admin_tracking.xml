@@ -61,6 +61,39 @@
                     android:layout_marginTop="8dp"
                     android:text="No active ride" />
 
+                <TextView
+                    android:id="@+id/tvPickupAddress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:text="Pickup: Unknown address" />
+
+                <TextView
+                    android:id="@+id/tvDropoffAddress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:text="Dropoff: Unknown address" />
+
+                <TextView
+                    android:id="@+id/tvStartedAt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:text="Started at: -" />
+
+                <TextView
+                    android:id="@+id/tvCurrentRideStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:text="Status: -" />
+
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvPassengers"
                     android:layout_width="match_parent"

@@ -14,6 +14,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -29,6 +30,7 @@ import inc.visor.voom.app.databinding.FragmentAdminTrackingBinding;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
@@ -60,12 +62,12 @@ public class AdminTrackingFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(AdminTrackingViewModel.class);
+        this.routeRepository = new RouteRepository();
 
         setupRecyclerViews();
         setupSearch();
         observeViewModel();
 
-        viewModel.fetchActiveDrivers();
 
         binding.mapView.setOnTouchListener((v, event) -> {
             v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -77,6 +79,35 @@ public class AdminTrackingFragment extends Fragment {
         binding.mapView.getController().setZoom(14.0);
         binding.mapView.getController().setCenter(new GeoPoint(45.2396, 19.8227));
 
+        simulationManager = viewModel.getSimulationManager();
+        simulationManager.startInterpolationLoop();
+
+        if (wsService == null) {
+            wsService = new DriverSimulationWsService(
+                    simulationManager,
+                    viewModel,
+                    null,
+                    null
+            );
+            wsService.connect();
+        }
+
+        viewModel.fetchActiveDrivers();
+
+        simulationManager.getDrivers().observe(getViewLifecycleOwner(), drivers -> {
+            if (drivers != null && viewModel.getSelectedDriverId() == -1) {
+                mapRenderer.renderDrivers(drivers);
+            }
+            if (viewModel.getSelectedDriverId() != -1) {
+                for (SimulatedDriver driver : drivers) {
+                    mapRenderer.removeDriver(driver.id);
+                    if (driver.id == viewModel.getSelectedDriverId()) {
+                        mapRenderer.renderDrivers(List.of(driver));
+                    }
+                }
+                ;
+            }
+        });
 
     }
 
@@ -113,7 +144,12 @@ public class AdminTrackingFragment extends Fragment {
                 RoutePointDto dropoff = ride.getRoutePoints().stream().filter(rp -> rp.type == RoutePointType.DROPOFF).findFirst().orElse(null);
                 String pickupAddress = pickup != null ? pickup.address : "Unknown address";
                 String dropoffAddress = dropoff != null ? dropoff.address : "Unknown adress";
-                binding.tvRideDetails.setText("From: " + pickupAddress + "\nTo: " + dropoffAddress);
+                binding.tvRideDetails.setText("");
+                binding.tvCurrentRideStatus.setText(String.format("Status: %s", ride.getStatus()));
+                binding.tvPickupAddress.setText(String.format("Pickup address: %s", pickupAddress));
+                binding.tvDropoffAddress.setText(String.format("Dropoff address: %s", dropoffAddress));
+                String startedAt = ride.getStartedAt() != null ? ride.getStartedAt() : "Not yet started";
+                binding.tvStartedAt.setText(String.format("Started at: %s", startedAt));
                 String creatorText = ride.getCreatorName() + " (creator)";
                 List<String> combined = Stream.concat(
                         Stream.of(creatorText),
@@ -121,12 +157,22 @@ public class AdminTrackingFragment extends Fragment {
                 ).collect(Collectors.toList());
                 passengerAdapter.setPassengers(combined);
                 binding.rvPassengers.setVisibility(View.VISIBLE);
+                binding.tvCurrentRideStatus.setVisibility(View.VISIBLE);
+                binding.tvPickupAddress.setVisibility(View.VISIBLE);
+                binding.tvDropoffAddress.setVisibility(View.VISIBLE);
+                binding.tvStartedAt.setVisibility(View.VISIBLE);
                 mapRenderer.renderRouteMarkers(ride.getRoutePoints(), requireContext().getDrawable(R.drawable.ic_location_24));
-                drawRoute(ride.getRoutePoints().stream().map(RoutePoint::new).toList());
+                List<RoutePoint> routePoints = ride.getRoutePoints().stream().map(RoutePoint::new).collect(Collectors.toList());
+                drawRoute(routePoints);
             } else {
                 binding.tvRideDetails.setText("No active ride");
                 binding.rvPassengers.setVisibility(View.GONE);
+                binding.tvCurrentRideStatus.setVisibility(View.GONE);
+                binding.tvPickupAddress.setVisibility(View.GONE);
+                binding.tvDropoffAddress.setVisibility(View.GONE);
+                binding.tvStartedAt.setVisibility(View.GONE);
                 mapRenderer.clearRoute();
+                mapRenderer.renderRouteMarkers(List.of());
             }
         });
     }
