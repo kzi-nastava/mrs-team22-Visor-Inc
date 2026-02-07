@@ -1,5 +1,6 @@
 package inc.visor.voom.app.driver.create;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 import inc.visor.voom.app.databinding.FragmentCreateDriverBinding;
 
@@ -43,6 +47,7 @@ public class CreateDriverFragment extends Fragment {
         setupVehicleTypeDropdown();
         setupObservers();
         setupListeners();
+        setupBirthDatePicker();
     }
 
     private void setupListeners() {
@@ -52,6 +57,7 @@ public class CreateDriverFragment extends Fragment {
                         binding.etEmail.getText().toString(),
                         binding.etFirstName.getText().toString(),
                         binding.etLastName.getText().toString(),
+                        binding.etBirthDate.getText().toString(),
                         binding.etPhoneNumber.getText().toString(),
                         binding.etAddress.getText().toString(),
                         binding.etVehicleModel.getText().toString(),
@@ -65,6 +71,35 @@ public class CreateDriverFragment extends Fragment {
                         binding.cbPetTransport.isChecked()
                 )
         );
+    }
+
+    private void setupBirthDatePicker() {
+
+        binding.etBirthDate.setOnClickListener(v -> {
+
+            Calendar calendar = Calendar.getInstance();
+
+            DatePickerDialog dialog = new DatePickerDialog(
+                    requireContext(),
+                    (view, year, month, dayOfMonth) -> {
+
+                        String formatted = String.format(
+                                Locale.getDefault(),
+                                "%04d-%02d-%02d",
+                                year,
+                                month + 1,
+                                dayOfMonth
+                        );
+
+                        binding.etBirthDate.setText(formatted);
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+
+            dialog.show();
+        });
     }
 
     private void setupObservers() {

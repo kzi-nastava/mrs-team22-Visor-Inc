@@ -9,10 +9,13 @@ public class CreateDriverRequestDto {
     private String address;
     private CreateVehicleRequestDto vehicle;
 
+    private String birthDate;
+
     public CreateDriverRequestDto(
             String email,
             String firstName,
             String lastName,
+            String birthDate,
             String phoneNumber,
             String address,
             CreateVehicleRequestDto vehicle
@@ -20,8 +23,10 @@ public class CreateDriverRequestDto {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.birthDate = birthDate;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.vehicle = vehicle;
     }
+
 }
