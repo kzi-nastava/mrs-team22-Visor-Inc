@@ -36,6 +36,9 @@ import inc.visor.voom.app.driver.dto.DriverVehicleResponse;
 import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.driver.finish.FinishRideDialogFragment;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.NotificationApi;
+import inc.visor.voom.app.shared.dto.NotificationDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
@@ -45,6 +48,7 @@ import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
+import inc.visor.voom.app.shared.service.NotificationWsService;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,6 +69,8 @@ public class DriverHomeFragment extends Fragment {
     private DriverAssignedDto currentAssignment = null;
     private Long currentRideId = null;
     private List<RoutePointDto> currentRoute = null;
+    private NotificationWsService notificationWsService;
+
 
     public DriverHomeFragment() {
         super(R.layout.fragment_driver_home);
@@ -75,6 +81,50 @@ public class DriverHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
+
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    Log.d("NOTIF", "Connecting WS for user: " + userId);
+
+                    notificationWsService =
+                            new NotificationWsService(requireContext(), userId);
+
+                    notificationWsService.connect();
+
+                }, throwable -> {
+                    Log.e("NOTIF", "Failed to get userId", throwable);
+                });
+
+        NotificationApi api =
+                RetrofitClient.getInstance().create(NotificationApi.class);
+
+        api.getUnread().enqueue(new Callback<List<NotificationDto>>() {
+            @Override
+            public void onResponse(Call<List<NotificationDto>> call,
+                                   Response<List<NotificationDto>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    for (NotificationDto n : response.body()) {
+                        NotificationService.showNotification(
+                                getContext(),
+                                n.title,
+                                n.id,
+                                n.message
+                        );
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<NotificationDto>> call, Throwable t) {
+                Log.e("NOTIF", "Failed to load unread", t);
+            }
+        });
+
 
         routeRepository = new RouteRepository();
 
@@ -140,8 +190,6 @@ public class DriverHomeFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), dto -> {
 
                     if (dto == null) return;
-
-                    showAssignedNotification(dto);
                     drawRideMarkers(dto);
                     currentAssignment = dto;
                     arrivalDialogShown = false;
@@ -171,17 +219,6 @@ public class DriverHomeFragment extends Fragment {
                 });
     }
 
-    private void showAssignedNotification(DriverAssignedDto dto) {
-
-        NotificationService.showRideAssignedNotification(
-                requireContext(),
-                dto.route.stream()
-                        .filter(p -> "PICKUP".equals(p.type))
-                        .findFirst()
-                        .map(p -> p.address)
-                        .orElse("Unknown location")
-        );
-    }
 
     private void openArrivalDialog() {
 
@@ -653,6 +690,12 @@ public class DriverHomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        if (notificationWsService != null) {
+            notificationWsService.disconnect();
+            notificationWsService = null;
+        }
+
         map = null;
     }
 }

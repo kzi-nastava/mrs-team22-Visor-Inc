@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.mail.EmailService;
@@ -25,6 +26,8 @@ import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
+import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
+import inc.visor.voom_service.shared.notification.service.NotificationService;
 
 @Service
 public class RideService {
@@ -32,11 +35,15 @@ public class RideService {
     private final RideRepository rideRepository;
     private final RideRouteService routeService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
+    private final UserService userService;
 
-    public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService) {
+    public RideService(RideRepository rideRepository, RideRouteService routeService, EmailService emailService, NotificationService notificationService, UserService userService) {
         this.rideRepository = rideRepository;
         this.routeService = routeService;
         this.emailService = emailService;
+        this.notificationService = notificationService;
+        this.userService = userService;
     }
 
     public void updateRidePosition(RideLocationDto dto) {
@@ -207,9 +214,12 @@ public class RideService {
         ride.setStatus(RideStatus.STARTED);
         rideRepository.save(ride);
 
+        User driverUser = ride.getDriver().getUser();
+        User creator = ride.getRideRequest().getCreator();
+
         String pickupAddress = formatAddress(ride.getPickupAddress());
         String dropoffAddress = formatAddress(ride.getDropoffAddress());
-        String address = pickupAddress + " - " + dropoffAddress;
+        String address = pickupAddress + " → " + dropoffAddress;
 
         String trackingUrl = "http://localhost:4200/user/ride/tracking";
 
@@ -220,6 +230,22 @@ public class RideService {
                 trackingUrl
         );
 
+        notificationService.createAndSendNotification(
+                driverUser,
+                NotificationType.RIDE_STARTED,
+                "Ride started",
+                "You started the ride: " + address,
+                ride.getId()
+        );
+
+        notificationService.createAndSendNotification(
+                creator,
+                NotificationType.RIDE_STARTED,
+                "Ride started",
+                "Your ride has started: " + address,
+                ride.getId()
+        );
+        
         for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
             emailService.sendRideTrackingLink(
                     email,

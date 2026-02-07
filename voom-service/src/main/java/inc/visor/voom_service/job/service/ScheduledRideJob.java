@@ -15,6 +15,8 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.shared.RoutePointDto;
+import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
+import inc.visor.voom_service.shared.notification.service.NotificationService;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -23,15 +25,18 @@ public class ScheduledRideJob {
     private final RideRequestRepository rideRequestRepository;
     private final RideRepository rideRepository;
     private final RideWsService rideWsService;
+    private final NotificationService notificationService;
 
     public ScheduledRideJob(
             RideRequestRepository rideRequestRepository,
             RideRepository rideRepository,
-            RideWsService rideWsService
+            RideWsService rideWsService,
+            NotificationService notificationService
     ) {
         this.rideRequestRepository = rideRequestRepository;
         this.rideRepository = rideRepository;
         this.rideWsService = rideWsService;
+        this.notificationService = notificationService;
     }
 
     @Transactional()
@@ -59,7 +64,28 @@ public class ScheduledRideJob {
             }
 
             if (ride.getStatus() != RideStatus.SCHEDULED) {
-                continue;   // <-- ovde PRESKAČEŠ kompletan ride
+                continue;
+            }
+
+            if (!ride.isReminderSent()) {
+
+                notificationService.createAndSendNotification(
+                        req.getCreator(),
+                        NotificationType.SCHEDULE_REMINDER,
+                        "Upcoming Ride Reminder",
+                        "Your scheduled ride is starting soon.",
+                        ride.getId()
+                );
+
+                notificationService.createAndSendNotification(
+                        ride.getDriver().getUser(),
+                        NotificationType.SCHEDULE_REMINDER,
+                        "Upcoming Ride Reminder",
+                        "A scheduled ride you are assigned to is starting soon. Pick up location: " + req.getRideRoute().getRoutePoints().get(0).getAddress(),
+                        ride.getId()
+                );
+                ride.setReminderSent(true);
+                rideRepository.save(ride);
             }
 
             ScheduledRideDto dto = new ScheduledRideDto();

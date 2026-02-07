@@ -32,7 +32,10 @@ import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.NotificationApi;
 import inc.visor.voom.app.shared.api.RideApi;
+import inc.visor.voom.app.shared.dto.NotificationDto;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
@@ -46,6 +49,7 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
+import inc.visor.voom.app.shared.service.NotificationWsService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
 import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
@@ -68,6 +72,8 @@ public class UserHomeFragment extends Fragment {
     private DriverSimulationWsService wsService;
 
     private FavoriteRouteRepository favoriteRouteRepository;
+    private NotificationWsService notificationWsService;
+
 
     private Boolean arrivalNotified = false;
 
@@ -84,6 +90,49 @@ public class UserHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(UserHomeViewModel.class);
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    Log.d("NOTIF", "Connecting WS for user: " + userId);
+
+                    notificationWsService =
+                            new NotificationWsService(requireContext(), userId);
+
+                    notificationWsService.connect();
+
+                }, throwable -> {
+                    Log.e("NOTIF", "Failed to get userId", throwable);
+                });
+
+
+        NotificationApi api =
+                RetrofitClient.getInstance().create(NotificationApi.class);
+
+        api.getUnread().enqueue(new Callback<List<NotificationDto>>() {
+            @Override
+            public void onResponse(Call<List<NotificationDto>> call,
+                                   Response<List<NotificationDto>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    for (NotificationDto n : response.body()) {
+                        NotificationService.showNotification(
+                                getContext(),
+                                n.title,
+                                n.id,
+                                n.message
+                        );
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<NotificationDto>> call, Throwable t) {
+                Log.e("NOTIF", "Failed to load unread", t);
+            }
+        });
+
 
         mapView = view.findViewById(R.id.mapView);
         mapView.setMultiTouchControls(true);
@@ -272,8 +321,6 @@ public class UserHomeFragment extends Fragment {
                             );
 
                             if (distance < 15) {
-
-                                NotificationService.showArrivalNotification(requireContext());
                                 arrivalNotified = true;
                                 break;
                             }
@@ -793,5 +840,26 @@ public class UserHomeFragment extends Fragment {
     public void onPause() {
         super.onPause();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (notificationWsService != null) {
+            notificationWsService.disconnect();
+            notificationWsService = null;
+        }
+
+        if (wsService != null) {
+            wsService.disconnect();
+            wsService = null;
+        }
+
+        if (mapView != null) {
+            mapView.onDetach();
+            mapView = null;
+        }
+    }
+
 
 }
