@@ -107,7 +107,19 @@ public abstract class BaseStatisticsFragment extends Fragment {
         binding.txtTotalRides.setText(String.valueOf(dto.getTotalRides()));
         binding.txtTotalKm.setText(kmFmt.format(dto.getTotalKm()) + " km");
         binding.txtTotalMoney.setText(moneyFmt.format(dto.getTotalMoney()));
-        binding.txtAverageMoney.setText(moneyFmt.format(dto.getAverageMoneyPerDay()));
+        double totalMoney = dto.getTotalMoney();
+
+        long days = 1;
+        if (fromDate != null && toDate != null) {
+            long diff = toDate.getTime() - fromDate.getTime();
+            days = (diff / (1000 * 60 * 60 * 24)) + 1;
+            if (days <= 0) days = 1;
+        }
+
+        double average = totalMoney / days;
+
+        binding.txtAverageMoney.setText(moneyFmt.format(average));
+
 
         binding.txtTotalMoneyLabel.setText(getMoneySummaryLabel());
         binding.txtMoneyChartTitle.setText(getMoneyChartLabel());
