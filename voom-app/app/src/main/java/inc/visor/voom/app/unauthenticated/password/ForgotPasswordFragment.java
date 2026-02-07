@@ -1,13 +1,6 @@
 package inc.visor.voom.app.unauthenticated.password;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,14 +8,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+
 import com.google.android.material.textfield.TextInputEditText;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
 import inc.visor.voom.app.shared.dto.authentication.ForgotPasswordDto;
-import inc.visor.voom.app.shared.dto.authentication.TokenDto;
-import inc.visor.voom.app.unauthenticated.registration.RegistrationViewModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,14 +50,14 @@ public class ForgotPasswordFragment extends Fragment {
             final ForgotPasswordDto dto = new ForgotPasswordDto();
             final String email = viewModel.getEmail().getValue();
             dto.setEmail(email);
-            authenticationApi.forgotPassword(dto).enqueue(new Callback<Void>() {
+            authenticationApi.forgotPassword(dto).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     Navigation.findNavController(view).navigate(R.id.action_forgotPasswordFragment_to_loginFragment);
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
 
                 }
             });
@@ -79,6 +76,7 @@ public class ForgotPasswordFragment extends Fragment {
                 } else {
                     emailInput.setError(null);
                 }
+                updateSubmitButtonState();
             }
 
             @Override
@@ -98,5 +96,15 @@ public class ForgotPasswordFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_forgot_password, container, false);
+    }
+
+    private boolean isFormValid() {
+        String email = viewModel.getEmail().getValue();
+
+        return email != null && !email.isEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    private void updateSubmitButtonState() {
+        buttonSubmit.setEnabled(isFormValid());
     }
 }
