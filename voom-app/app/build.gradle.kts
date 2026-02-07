@@ -66,5 +66,6 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
     implementation("com.auth0.android:jwtdecode:2.0.2")
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
 
 }
