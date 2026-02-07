@@ -19,4 +19,15 @@
         android:name="inc.visor.voom.app.admin.tracking.AdminTrackingFragment"
         android:label="fragment_admin_tracking"
         tools:layout="@layout/fragment_admin_tracking" />
+
+    <fragment
+        android:id="@+id/adminUsersFragment"
+        android:name="inc.visor.voom.app.admin.users.AdminUsersFragment"
+        android:label="Users" />
+
+    <fragment
+        android:id="@+id/createDriverFragment"
+        android:name="inc.visor.voom.app.driver.create.CreateDriverFragment"
+        android:label="Create Driver" />
+
 </navigation>
