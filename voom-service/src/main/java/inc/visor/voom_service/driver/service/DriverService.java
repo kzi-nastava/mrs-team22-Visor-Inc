@@ -290,12 +290,66 @@ public class DriverService {
         ActivationToken activationToken
                 = activationTokenService.createForUser(user);
 
-        String activationLink
-                = "http://localhost:4200/voom/activate?token=" + activationToken.getToken();
+        String token = activationToken.getToken();
+
+        String webLink = "http://localhost:4200/voom/activate?token=" + token;
+        String mobileLink = "voom://activate?token=" + token;
+
+        String subject = "Activate your Voom Driver Account";
+
+        String body = """
+<div style="font-family: Arial, sans-serif; padding: 16px;">
+    <h2>Welcome to Voom 🚗</h2>
+
+    <p>Your driver account has been successfully created.</p>
+
+    <p>Please activate your account using one of the options below:</p>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <p><strong>🌐 Activate via Web:</strong></p>
+        <a href="%s"
+           style="display:inline-block;
+                  padding:10px 16px;
+                  background-color:#1976d2;
+                  color:white;
+                  text-decoration:none;
+                  border-radius:6px;">
+            Activate on Web
+        </a>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <p><strong>📱 Activate via Mobile App:</strong></p>
+        <a href="%s"
+           style="display:inline-block;
+                  padding:10px 16px;
+                  background-color:#2e7d32;
+                  color:white;
+                  text-decoration:none;
+                  border-radius:6px;">
+            Open in Voom App
+        </a>
+    </div>
+
+    <br/>
+
+    <p>If the buttons do not work, you can copy the links below:</p>
+
+    <p>Web: %s</p>
+    <p>Mobile: %s</p>
+</div>
+""".formatted(
+                webLink,
+                mobileLink,
+                webLink,
+                mobileLink
+        );
+
+        emailService.send(user.getEmail(), subject, body);
 
         emailService.sendActivationEmail(
                 user.getEmail(),
-                activationLink
+                activationToken.getToken()
         );
 
         return driver;
@@ -346,7 +400,7 @@ public class DriverService {
         List<Driver> candidates = snapshot.stream()
                 .map(s -> driverRepository.findById(s.driverId).orElse(null))
                 .filter(Objects::nonNull)
-                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE) 
+                .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .filter(d -> isDriverCurrentlyActive(d.getId()))
                 .filter(d -> vehicleMatches(d, rideRequest))
                 .toList();
