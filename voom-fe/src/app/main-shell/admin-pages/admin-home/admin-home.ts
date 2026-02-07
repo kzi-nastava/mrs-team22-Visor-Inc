@@ -12,6 +12,7 @@ import { ROUTE_ADMIN_PAGES } from '../admin-pages';
 import { ROUTE_ADMIN_VEHICLES } from './admin-vehicles/admin-vehicles';
 import { ROUTE_ADMIN_REPORT } from '../admin-report/admin-report';
 import { ROUTE_ADMIN_TRACKING } from './admin-tracking/admin-tracking';
+import { ROUTE_ADMIN_CHAT } from './admin-chat/admin-chat';
 
 export const ROUTE_ADMIN_HOME = 'ride';
 
@@ -52,6 +53,11 @@ export class AdminHome {
       icon: 'attach_money',
       title: 'Pricing',
       routerLink: ROUTE_ADMIN_PRICING,
+    },
+    {
+      icon: 'chat',
+      title: 'Chat',
+      routerLink: ROUTE_ADMIN_CHAT,
     },
     {
       icon: 'bar_chart',

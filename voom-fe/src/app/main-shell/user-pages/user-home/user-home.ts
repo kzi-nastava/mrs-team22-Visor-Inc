@@ -20,6 +20,7 @@ import { AuthenticationService } from '../../../shared/service/authentication-se
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RideResponseDto } from '../../../shared/rest/ride/ride.model';
 import { UserApi } from '../../../shared/rest/user/user.api';
+import { UserChat } from "../../../shared/user-chat/user-chat";
 
 export const ROUTE_USER_HOME = 'ride';
 
@@ -48,7 +49,8 @@ export interface RoutePoint {
     MatTooltipModule,
     MatCheckboxModule,
     MatSnackBarModule,
-  ],
+    UserChat
+],
   templateUrl: './user-home.html',
   styleUrl: './user-home.css',
 })
