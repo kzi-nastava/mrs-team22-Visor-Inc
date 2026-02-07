@@ -27,15 +27,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AdminTrackingViewModel extends ViewModel implements DriverMetaProvider {
-    // Replicates your Signals
     private final MutableLiveData<List<DriverSummaryDto>> _allDrivers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<String> _searchTerm = new MutableLiveData<>("");
     private final MutableLiveData<Integer> _selectedDriverId = new MutableLiveData<>(-1);
 
-    // Replicates filteredDrivers = computed(...)
     public final MediatorLiveData<List<DriverSummaryDto>> filteredDrivers = new MediatorLiveData<>();
 
-    // Replicates activeRide = toSignal(...)
     private final MutableLiveData<ActiveRideDto> _activeRide = new MutableLiveData<>();
     public LiveData<ActiveRideDto> activeRide = _activeRide;
 
@@ -53,7 +50,6 @@ public class AdminTrackingViewModel extends ViewModel implements DriverMetaProvi
             new MutableLiveData<>(new HashMap<>());
 
     public AdminTrackingViewModel() {
-        // Combine allDrivers and searchTerm to create the filtered list
         filteredDrivers.addSource(_allDrivers, drivers -> filter());
         filteredDrivers.addSource(_searchTerm, term -> filter());
     }
@@ -90,7 +86,6 @@ public class AdminTrackingViewModel extends ViewModel implements DriverMetaProvi
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("FETCHED RIDE", "ride id: " + response.body().rideId);
                     _activeRide.setValue(response.body());
-//                    routePoints.setValue(_activeRide.getValue().getRoutePoints().str);
                 } else {
                     _activeRide.setValue(null);
                 }
