@@ -94,8 +94,8 @@ public class MainAdminFragment extends Fragment {
             }
 
             if (id == R.id.nav_services) {
-                // implement me papi
-                return false;
+                navController.navigate(R.id.adminTrackingFragment);
+                return true;
             }
 
             if (id == R.id.nav_profile) {

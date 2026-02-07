@@ -139,6 +139,32 @@ public class MapRendererService {
         mapView.invalidate();
     }
 
+    public void renderRouteMarkers(List<RoutePointDto> points, Drawable icon) {
+
+        for (Marker m : routeMarkers) {
+            mapView.getOverlays().remove(m);
+        }
+        routeMarkers.clear();
+
+        for (RoutePointDto point : points) {
+
+            GeoPoint geoPoint = new GeoPoint(
+                    point.lat,
+                    point.lng
+            );
+
+            Marker marker = new Marker(mapView);
+            marker.setPosition(geoPoint);
+            marker.setIcon(icon);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+            mapView.getOverlays().add(marker);
+            routeMarkers.add(marker);
+        }
+
+        mapView.invalidate();
+    }
+
 
     public void renderSimpleRoute(List<RoutePoint> points) {
 
