@@ -157,10 +157,23 @@ public abstract class BaseStatisticsFragment extends Fragment {
         chart.getAxisRight().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.setNoDataText("No data");
+
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        chart.setPinchZoom(true);
+        chart.setDoubleTapToZoomEnabled(true);
+
+        chart.setScaleXEnabled(true);
+        chart.setScaleYEnabled(false);
+
+        chart.setVisibleXRangeMaximum(7f);
+        chart.setVisibleXRangeMinimum(3f);
+
         XAxis x = chart.getXAxis();
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setGranularity(1f);
         x.setDrawGridLines(false);
+
         chart.getAxisLeft().setGranularity(1f);
     }
 
@@ -169,12 +182,24 @@ public abstract class BaseStatisticsFragment extends Fragment {
         chart.getAxisRight().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.setNoDataText("No data");
+
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        chart.setPinchZoom(true);
+        chart.setDoubleTapToZoomEnabled(true);
+
+        chart.setScaleXEnabled(true);
+        chart.setScaleYEnabled(false);
+
+        chart.setVisibleXRangeMaximum(7f);
+        chart.setVisibleXRangeMinimum(3f);
+
         XAxis x = chart.getXAxis();
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setGranularity(1f);
         x.setDrawGridLines(false);
     }
-
+    
     private void setupRidesChart(LineChart chart, List<ReportDailyStatsDto> stats) {
         List<Entry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
