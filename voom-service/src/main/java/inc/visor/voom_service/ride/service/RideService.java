@@ -245,19 +245,7 @@ public class RideService {
                 "Your ride has started: " + address,
                 ride.getId()
         );
-
-        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
-            userService.getUser(email).ifPresent(passenger -> {
-                notificationService.createAndSendNotification(
-                        passenger,
-                        NotificationType.RIDE_STARTED,
-                        "Ride started",
-                        "Ride you joined has started: " + address,
-                        ride.getId()
-                );
-            });
-        }
-
+        
         for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
             emailService.sendRideTrackingLink(
                     email,

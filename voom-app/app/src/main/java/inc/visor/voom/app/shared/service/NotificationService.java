@@ -51,7 +51,12 @@ public class NotificationService {
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        manager.notify((int) System.currentTimeMillis(), notification);
+        int id = notificationId != null
+                ? notificationId.intValue()
+                : (int) System.currentTimeMillis();
+
+        manager.notify(id, notification);
+
         markNotificationAsRead(context, notificationId);
     }
 
