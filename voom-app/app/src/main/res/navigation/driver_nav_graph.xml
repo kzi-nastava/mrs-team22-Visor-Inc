@@ -37,4 +37,11 @@
         android:label="fragment_driver_home"
         tools:layout="@layout/fragment_driver_home" />
 
+    <fragment
+        android:id="@+id/driverStatisticsFragment"
+        android:name="inc.visor.voom.app.driver.statistics.DriverStatisticsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_user_statistics" />
+
+
 </navigation>

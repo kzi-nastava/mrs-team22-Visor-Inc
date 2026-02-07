@@ -55,5 +55,10 @@
         android:id="@+id/userHomeFragment"
         android:name="inc.visor.voom.app.user.home.UserHomeFragment"
         android:label="UserHomeFragment" />
+    <fragment
+        android:id="@+id/userStatisticsFragment"
+        android:name="inc.visor.voom.app.user.statistics.UserStatisticsFragment"
+        android:label="Statistics"
+        tools:layout="@layout/fragment_user_statistics" />
 
 </navigation>

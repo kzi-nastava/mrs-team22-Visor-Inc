@@ -68,6 +68,12 @@ public class MainDriverFragment extends Fragment {
                 return true;
             }
 
+            if (id == R.id.nav_statistics) {
+                navController.navigate(R.id.driverStatisticsFragment);
+                return true;
+            }
+
+
             if (id == R.id.nav_activity) {
                 navController.navigate(R.id.driverRideHistoryFragment);
                 return true;

@@ -11,6 +11,11 @@
         android:title="@string/nav_tracking"/>
 
     <item
+        android:id="@+id/nav_statistics"
+        android:icon="@drawable/outline_bar_chart_24"
+        android:title="@string/nav_statistics"/>
+
+    <item
         android:id="@+id/nav_activity"
         android:icon="@drawable/round_assignment_24"
         android:title="@string/nav_activity"/>
