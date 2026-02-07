@@ -6,6 +6,8 @@ import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateRequestDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateResponseDto;
 import inc.visor.voom.app.user.favorite_route.dto.FavoriteRouteDto;
@@ -77,26 +79,7 @@ public interface RideApi {
             @Body StartRideDto dto
     );
 
-    @POST("/api/rides/{rideId}/accept")
-    Call<Void> acceptRide(@Path("rideId") long rideId);
-
-    @POST("/api/rides/{rideId}/reject")
-    Call<Void> rejectRide(@Path("rideId") long rideId);
-
-    @POST("/api/rides/{rideId}/cancel")
-    Call<Void> cancelRide(@Path("rideId") long rideId);
-
-    @GET("/api/rides/user/history")
-    Call<List<RideHistoryDto>> getUserRideHistory(
-            @Query("dateFrom") String dateFrom,
-            @Query("dateTo") String dateTo,
-            @Query("sort") String sort
-    );
-
-    @GET("/api/rides/scheduled")
-    Call<List<RideHistoryDto>> getScheduledRides();
-
-    @GET("/api/rides/{rideId}")
-    Call<ActiveRideDto> getRideById(@Path("rideId") long rideId);
+    @POST("/api/rides/{id}/stop")
+    Call<RideResponseDto> stopRide(@Path("id") Long id, @Body RideStopDto dto);
 }
 

@@ -3,6 +3,7 @@ package inc.visor.voom.app.driver.home;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,6 +49,9 @@ import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
 import inc.visor.voom.app.shared.dto.driver.DriverStateChangeDto;
+import inc.visor.voom.app.shared.dto.ride.LatLng;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
 import inc.visor.voom.app.shared.helper.DistanceHelper;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
@@ -55,6 +59,7 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.service.NotificationWsService;
+import inc.visor.voom.app.user.tracking.dto.RidePanicDto;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import retrofit2.Call;
@@ -80,6 +85,10 @@ public class DriverHomeFragment extends Fragment {
     private SwitchMaterial switchMaterial;
     private DriverActivityApi driverActivityApi;
     private CompositeDisposable compositeDisposable;
+    private Button stopButton;
+    private Button panicButton;
+    private RideApi rideApi;
+    private GeoPoint lastFocusPoint;
 
 
     public DriverHomeFragment() {
@@ -89,10 +98,16 @@ public class DriverHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        lastFocusPoint = null;
+
+        rideApi = RetrofitClient.getInstance().create(RideApi.class);
 
         compositeDisposable = new CompositeDisposable();
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
         switchMaterial = view.findViewById(R.id.toggle_status);
+
+        stopButton = view.findViewById(R.id.stop_ride);
+        panicButton = view.findViewById(R.id.panic_ride);
 
         Log.d("SWITCH_DEBUG", "Switch found: " + (switchMaterial != null));
         if (switchMaterial != null) {
@@ -119,28 +134,23 @@ public class DriverHomeFragment extends Fragment {
         compositeDisposable.add(disposable);
 
         driverActivityApi = RetrofitClient.getInstance().create(DriverActivityApi.class);
-        Log.d("SWITCH_DEBUG", "Listener attached");
 
         handleToggleStatus();
         disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
             driverActivityApi.getDriverState(userId).enqueue(new Callback<DriverStateChangeDto>() {
                 @Override
                 public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
-                    Log.d("SWITCH_DEBUG", "API response received");
                     if (response.isSuccessful() && response.body() != null) {
                         String currentState = response.body().getCurrentState();
                         final boolean isActive = "ACTIVE".equals(currentState);
 
-                        Log.d("SWITCH_DEBUG", "Setting initial state to: " + isActive);
                         switchMaterial.setOnCheckedChangeListener(null);
                         switchMaterial.setChecked(isActive);
                         handleToggleStatus();
-                        Log.d("SWITCH_DEBUG", "Listener re-attached");
                     }
                 }
                 @Override
                 public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
-                    Log.e("SWITCH_DEBUG", "API call failed", t);
                 }
             });
         });
@@ -181,6 +191,8 @@ public class DriverHomeFragment extends Fragment {
         loadOngoingRide();
         loadDriversAndStartSimulation();
         observeDrivers();
+        handleRideStop();
+        handleRidePanic();
     }
 
     private void setupChart(View view) {
@@ -234,7 +246,6 @@ public class DriverHomeFragment extends Fragment {
 
         viewModel.getAssignedRide()
             .observe(getViewLifecycleOwner(), dto -> {
-
                 if (dto == null) return;
                 drawRideMarkers(dto);
                 currentAssignment = dto;
@@ -499,14 +510,12 @@ public class DriverHomeFragment extends Fragment {
                             }
                         }
 
-                        GeoPoint point = d.currentPosition;
-
                         if (!hasFocused) {
                             map.getController().setZoom(18.0);
                             hasFocused = true;
                         }
 
-//                            map.getController().animateTo(point);
+                        lastFocusPoint = d.currentPosition;
                     }
                     tryOpenArrivalDialog();
                     tryOpenFinishDialog();
@@ -738,7 +747,6 @@ public class DriverHomeFragment extends Fragment {
     private void handleToggleStatus() {
         Log.d("SWITCH_DEBUG", "handleToggleStatus called");
         switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Log.d("SWITCH_DEBUG", "Switch toggled to: " + isChecked);
             Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
                 final String state = isChecked ? "ACTIVE" : "INACTIVE";
                 final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -748,40 +756,27 @@ public class DriverHomeFragment extends Fragment {
                 dto.setPerformedAt(LocalDateTime.now().format(formatter));
                 dto.setUserId(userId);
 
-                Log.d("SWITCH_DEBUG", "Sending state change: " + state);
 
                 driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
                     @Override
                     public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
-                        Log.d("SWITCH_DEBUG", "State change response: " + response.isSuccessful());
-                        Log.d("SWITCH_DEBUG", "Response code: " + response.code());
-
-                        if (!response.isSuccessful()) {
-                            try {
-                                String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                                Log.e("SWITCH_DEBUG", "Error response: " + errorBody);
-                            } catch (Exception e) {
-                                Log.e("SWITCH_DEBUG", "Could not read error body", e);
-                            }
-                        }
 
                         if (response.isSuccessful()) {
                             String msg = isChecked ? "You are now online" : "You are now offline";
                             showStatusSnackbar(switchMaterial, msg, false);
                         } else {
-                            switchMaterial.setOnCheckedChangeListener(null); // Prevent triggering listener
+                            switchMaterial.setOnCheckedChangeListener(null);
                             switchMaterial.setChecked(!isChecked);
-                            switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus()); // Re-attach
+                            switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus());
                             showStatusSnackbar(switchMaterial, "Failed to update status", true);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
-                        Log.e("SWITCH_DEBUG", "State change failed", t);
-                        switchMaterial.setOnCheckedChangeListener(null); // Prevent triggering listener
+                        switchMaterial.setOnCheckedChangeListener(null);
                         switchMaterial.setChecked(!isChecked);
-                        switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus()); // Re-attach
+                        switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus());
                         showStatusSnackbar(switchMaterial, "Network error: Status not changed", true);
                     }
                 });
@@ -796,5 +791,78 @@ public class DriverHomeFragment extends Fragment {
             snackbar.setBackgroundTint(getResources().getColor(android.R.color.holo_red_dark, null));
         }
         snackbar.show();
+    }
+
+    private void handleRideStop() {
+        stopButton.setOnClickListener(view -> {
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                final RideStopDto dto = new RideStopDto();
+                dto.setUserId(userId);
+
+                if (this.currentRideId == null) {
+                    showStatusSnackbar(view, "There is not current ride available", true);
+                    return;
+                } else if (lastFocusPoint == null) {
+                    showStatusSnackbar(view, "There is no focus point available", true);
+                    return;
+                }
+
+                final LatLng point = new LatLng();
+                point.setLat(lastFocusPoint.getLatitude());
+                point.setLng(lastFocusPoint.getLongitude());
+                dto.setPoint(point);
+
+                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                dto.setTimestamp(LocalDateTime.now().format(formatter));
+
+                rideApi.stopRide(this.currentRideId, dto).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<RideResponseDto> call, @NonNull Response<RideResponseDto> response) {
+                        if (response.isSuccessful()) {
+                            showStatusSnackbar(view, "Ride ended successfully", false);
+                        } else {
+                            showStatusSnackbar(view, "Could not stop ride: Server error", true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<RideResponseDto> call, @NonNull Throwable t) {
+                        showStatusSnackbar(view, "Network failure: Try stopping again " + t, true);
+                    }
+                });
+            });
+            compositeDisposable.add(disposable);
+        });
+    }
+
+    private void handleRidePanic() {
+        panicButton.setOnClickListener(view -> {
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+                RidePanicDto dto = new RidePanicDto();
+                dto.setUserId(userId);
+
+                if (this.currentRideId == null) {
+                    showStatusSnackbar(view, "There is not current ride available", true);
+                    return;
+                }
+
+                rideApi.panic(this.currentRideId, dto).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            showStatusSnackbar(view, "Panic alert sent to dispatcher!", true);
+                        } else {
+                            showStatusSnackbar(view, "Failed to send panic alert!", true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        showStatusSnackbar(view, "Network error: Check connection and try again " + t, true);
+                    }
+                });
+            });
+            compositeDisposable.add(disposable);
+        });
     }
 }

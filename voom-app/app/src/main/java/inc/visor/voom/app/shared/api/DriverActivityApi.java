@@ -12,6 +12,6 @@ public interface DriverActivityApi {
     @POST("/api/activity")
     Call<DriverStateChangeDto> changeDriverState(@Body DriverStateChangeDto dto);
 
-    @GET("/api/activity/{driverId}")
-    Call<DriverStateChangeDto> getDriverState(@Path("driverId") long rideId);
+    @GET("/api/activity/{userId}")
+    Call<DriverStateChangeDto> getDriverState(@Path("userId") long userId);
 }

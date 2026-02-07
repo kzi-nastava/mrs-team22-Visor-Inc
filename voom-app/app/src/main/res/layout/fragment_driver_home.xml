@@ -106,5 +106,35 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingVertical="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/stop_ride"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="16dp"
+                android:text="@string/stop"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/secondary"
+                app:cornerRadius="32dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/panic_ride"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/panic"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/panic"
+                app:cornerRadius="32dp" />
+        </LinearLayout>
+
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

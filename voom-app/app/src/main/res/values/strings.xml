@@ -64,4 +64,6 @@
     <string name="change_vehicle_information">Change vehicle information\n</string>
     <string name="activate_account">Activate account</string>
     <string name="nav_statistics">Statistics</string>
+    <string name="stop">stop ride</string>
+    <string name="panic">panic</string>
 </resources>
