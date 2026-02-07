@@ -1,5 +1,6 @@
 package inc.visor.voom.app.shared.model;
 
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.model.enums.RoutePointType;
 
 public class RoutePoint {
@@ -49,4 +50,23 @@ public class RoutePoint {
     public double lng;
     public String address;
     public RoutePointType pointType;
+
+    public RoutePoint(RoutePointDto dto) {
+        this.lat = dto.lat;
+        this.lng = dto.lng;
+        this.address = dto.address;
+        switch (dto.type) {
+            case DROPOFF:
+                this.pointType = RoutePointType.DROPOFF;
+                break;
+            case PICKUP:
+                this.pointType = RoutePointType.PICKUP;
+                break;
+            case STOP:
+                this.pointType = RoutePointType.STOP;
+                break;
+        };
+        this.orderIndex = dto.orderIndex;
+
+    }
 }

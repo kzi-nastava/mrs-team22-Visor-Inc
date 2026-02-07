@@ -2,6 +2,7 @@ package inc.visor.voom.app.user.home.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
 
 public class RoutePoint {
@@ -25,6 +26,14 @@ public class RoutePoint {
         this.type = type;
     }
 
+    public RoutePoint(RoutePointDto dto) {
+        this.lat = dto.lat;
+        this.lng = dto.lng;
+        this.address = dto.address;
+        this.orderIndex = dto.orderIndex != null ? dto.orderIndex : 0;
+        this.type = toPointType(dto.type);
+    }
+
     public static RoutePointType toPointType(PointType type) {
         if (type == PointType.STOP) {
             return RoutePointType.STOP;
@@ -32,6 +41,16 @@ public class RoutePoint {
             return RoutePointType.PICKUP;
         } else {
             return RoutePointType.DROPOFF;
+        }
+    }
+
+    public static PointType toPointType(RoutePointType type) {
+        if (type == RoutePointType.STOP) {
+            return PointType.STOP;
+        } else if (type == RoutePointType.PICKUP) {
+            return PointType.PICKUP;
+        } else {
+            return PointType.DROPOFF;
         }
     }
 }

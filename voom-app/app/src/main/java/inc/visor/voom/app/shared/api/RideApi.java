@@ -67,6 +67,8 @@ public interface RideApi {
     @POST("/api/rides/finish-ongoing")
     Call<Void> finishOngoing();
 
+    @GET("/api/rides/ongoing/driver/{driverId}")
+    Call<ActiveRideDto> getOngoingByDriverId(@Path("driverId") long driverId);
 
 }
 

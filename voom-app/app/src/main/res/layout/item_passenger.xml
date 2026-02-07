@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="@drawable/baseline_person_24"
-            tools:src="@drawable/baseline_home_24"/>
+            tools:src="@drawable/baseline_person_24"/>
     </androidx.cardview.widget.CardView>
 
     <TextView
