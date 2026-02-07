@@ -3,6 +3,7 @@ package inc.visor.voom.app.shared.api;
 import java.util.List;
 
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
+import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateRequestDto;
@@ -70,5 +71,32 @@ public interface RideApi {
     @GET("/api/rides/ongoing/driver/{driverId}")
     Call<ActiveRideDto> getOngoingByDriverId(@Path("driverId") long driverId);
 
+    @POST("/api/rides/{rideId}/start")
+    Call<Void> startRide(
+            @Path("rideId") long rideId,
+            @Body StartRideDto dto
+    );
+
+    @POST("/api/rides/{rideId}/accept")
+    Call<Void> acceptRide(@Path("rideId") long rideId);
+
+    @POST("/api/rides/{rideId}/reject")
+    Call<Void> rejectRide(@Path("rideId") long rideId);
+
+    @POST("/api/rides/{rideId}/cancel")
+    Call<Void> cancelRide(@Path("rideId") long rideId);
+
+    @GET("/api/rides/user/history")
+    Call<List<RideHistoryDto>> getUserRideHistory(
+            @Query("dateFrom") String dateFrom,
+            @Query("dateTo") String dateTo,
+            @Query("sort") String sort
+    );
+
+    @GET("/api/rides/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRides();
+
+    @GET("/api/rides/{rideId}")
+    Call<ActiveRideDto> getRideById(@Path("rideId") long rideId);
 }
 
