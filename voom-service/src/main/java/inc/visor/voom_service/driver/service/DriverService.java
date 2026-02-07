@@ -347,11 +347,6 @@ public class DriverService {
 
         emailService.send(user.getEmail(), subject, body);
 
-        emailService.sendActivationEmail(
-                user.getEmail(),
-                activationToken.getToken()
-        );
-
         return driver;
     }
 
