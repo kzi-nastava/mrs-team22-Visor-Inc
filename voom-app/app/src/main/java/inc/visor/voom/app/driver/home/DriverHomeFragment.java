@@ -55,6 +55,8 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.service.NotificationWsService;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,6 +79,7 @@ public class DriverHomeFragment extends Fragment {
     private NotificationWsService notificationWsService;
     private SwitchMaterial switchMaterial;
     private DriverActivityApi driverActivityApi;
+    private CompositeDisposable compositeDisposable;
 
 
     public DriverHomeFragment() {
@@ -87,10 +90,17 @@ public class DriverHomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        compositeDisposable = new CompositeDisposable();
         viewModel = new ViewModelProvider(this).get(DriverHomeViewModel.class);
+        switchMaterial = view.findViewById(R.id.toggle_status);
 
+        Log.d("SWITCH_DEBUG", "Switch found: " + (switchMaterial != null));
+        if (switchMaterial != null) {
+            Log.d("SWITCH_DEBUG", "Switch enabled: " + switchMaterial.isEnabled());
+            Log.d("SWITCH_DEBUG", "Switch clickable: " + switchMaterial.isClickable());
+        }
 
-        DataStoreManager.getInstance()
+        Disposable disposable = DataStoreManager.getInstance()
             .getUserId()
             .subscribe(userId -> {
 
@@ -103,31 +113,39 @@ public class DriverHomeFragment extends Fragment {
 
             }, throwable -> {
                 Log.e("NOTIF", "Failed to get userId", throwable);
-            }).dispose();
+            }
+        );
+
+        compositeDisposable.add(disposable);
 
         driverActivityApi = RetrofitClient.getInstance().create(DriverActivityApi.class);
+        Log.d("SWITCH_DEBUG", "Listener attached");
 
-        DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+        handleToggleStatus();
+        disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
             driverActivityApi.getDriverState(userId).enqueue(new Callback<DriverStateChangeDto>() {
                 @Override
                 public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
+                    Log.d("SWITCH_DEBUG", "API response received");
                     if (response.isSuccessful() && response.body() != null) {
                         String currentState = response.body().getCurrentState();
                         final boolean isActive = "ACTIVE".equals(currentState);
 
+                        Log.d("SWITCH_DEBUG", "Setting initial state to: " + isActive);
                         switchMaterial.setOnCheckedChangeListener(null);
                         switchMaterial.setChecked(isActive);
-
                         handleToggleStatus();
+                        Log.d("SWITCH_DEBUG", "Listener re-attached");
                     }
                 }
                 @Override
                 public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
-                    Log.e("EXCEPTION", "Exception: ", t);
-                    handleToggleStatus();
+                    Log.e("SWITCH_DEBUG", "API call failed", t);
                 }
             });
-        }).dispose();
+        });
+
+        compositeDisposable.add(disposable);
 
         NotificationApi api = RetrofitClient.getInstance().create(NotificationApi.class);
 
@@ -713,13 +731,15 @@ public class DriverHomeFragment extends Fragment {
             notificationWsService.disconnect();
             notificationWsService = null;
         }
-
+        compositeDisposable.dispose();
         map = null;
     }
 
     private void handleToggleStatus() {
+        Log.d("SWITCH_DEBUG", "handleToggleStatus called");
         switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            Log.d("SWITCH_DEBUG", "Switch toggled to: " + isChecked);
+            Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
                 final String state = isChecked ? "ACTIVE" : "INACTIVE";
                 final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -728,25 +748,45 @@ public class DriverHomeFragment extends Fragment {
                 dto.setPerformedAt(LocalDateTime.now().format(formatter));
                 dto.setUserId(userId);
 
+                Log.d("SWITCH_DEBUG", "Sending state change: " + state);
+
                 driverActivityApi.changeDriverState(dto).enqueue(new Callback<DriverStateChangeDto>() {
                     @Override
                     public void onResponse(@NonNull Call<DriverStateChangeDto> call, @NonNull Response<DriverStateChangeDto> response) {
+                        Log.d("SWITCH_DEBUG", "State change response: " + response.isSuccessful());
+                        Log.d("SWITCH_DEBUG", "Response code: " + response.code());
+
+                        if (!response.isSuccessful()) {
+                            try {
+                                String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                                Log.e("SWITCH_DEBUG", "Error response: " + errorBody);
+                            } catch (Exception e) {
+                                Log.e("SWITCH_DEBUG", "Could not read error body", e);
+                            }
+                        }
+
                         if (response.isSuccessful()) {
                             String msg = isChecked ? "You are now online" : "You are now offline";
                             showStatusSnackbar(switchMaterial, msg, false);
                         } else {
+                            switchMaterial.setOnCheckedChangeListener(null); // Prevent triggering listener
                             switchMaterial.setChecked(!isChecked);
+                            switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus()); // Re-attach
                             showStatusSnackbar(switchMaterial, "Failed to update status", true);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<DriverStateChangeDto> call, @NonNull Throwable t) {
+                        Log.e("SWITCH_DEBUG", "State change failed", t);
+                        switchMaterial.setOnCheckedChangeListener(null); // Prevent triggering listener
                         switchMaterial.setChecked(!isChecked);
+                        switchMaterial.setOnCheckedChangeListener((buttonView2, isChecked2) -> handleToggleStatus()); // Re-attach
                         showStatusSnackbar(switchMaterial, "Network error: Status not changed", true);
                     }
                 });
-            }).dispose();
+            });
+            compositeDisposable.add(disposable);
         });
     }
 

@@ -9,9 +9,9 @@ import retrofit2.http.Path;
 
 public interface DriverActivityApi {
 
-    @POST("/api/ride-activity")
+    @POST("/api/activity")
     Call<DriverStateChangeDto> changeDriverState(@Body DriverStateChangeDto dto);
 
-    @GET("/api/ride-activity/{rideId}")
-    Call<DriverStateChangeDto> getDriverState(@Path("rideId") long rideId);
+    @GET("/api/activity/{driverId}")
+    Call<DriverStateChangeDto> getDriverState(@Path("driverId") long rideId);
 }
