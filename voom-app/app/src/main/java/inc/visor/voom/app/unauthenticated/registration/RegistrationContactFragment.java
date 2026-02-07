@@ -68,7 +68,7 @@ public class RegistrationContactFragment extends Fragment {
                     imageView.setImageBitmap(bitmap);
                     imageView.setVisibility(VISIBLE);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.d("EXCEPTION", "onViewCreated: " + e);
                 }
             }
         });
@@ -78,7 +78,7 @@ public class RegistrationContactFragment extends Fragment {
         buttonPrevious.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.action_registrationContactFragment_to_registrationAccountFragment));
 
         buttonSignup = view.findViewById(R.id.fragment_registration_contact_signup);
-
+        buttonSignup.setEnabled(false);
         buttonSignup.setOnClickListener(v -> viewModel.setRegistrationComplete(true));
 
         buttonProfileImage = view.findViewById(R.id.upload_profile_image);
@@ -102,12 +102,13 @@ public class RegistrationContactFragment extends Fragment {
             public void afterTextChanged(Editable editable) {
                 final String phoneNumber = editable.toString();
                 if (phoneNumber.isEmpty()) {
-                    phoneNumberInput.setError("Email is required");
-                } else if (phoneNumber.length() < 10) {
+                    phoneNumberInput.setError("Phone number is required");
+                } else if (phoneNumber.length() < 9) {
                     phoneNumberInput.setError("Phone number must be at least 10 numbers long");
                 } else {
                     phoneNumberInput.setError(null);
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -128,12 +129,13 @@ public class RegistrationContactFragment extends Fragment {
             public void afterTextChanged(Editable editable) {
                 final String address = editable.toString();
                 if (address.isEmpty()) {
-                    addressInput.setError("Email is required");
+                    addressInput.setError("Address is required");
                 } else if (address.length() < 10) {
-                    addressInput.setError("Phone number must be at least 10 numbers long");
+                    addressInput.setError("Address must be at least 10 characters long");
                 } else {
                     addressInput.setError(null);
                 }
+                updateSubmitButton();
             }
 
             @Override
@@ -149,9 +151,23 @@ public class RegistrationContactFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_registration_contact, container, false);
+    }
+
+    private boolean isFormValid() {
+        String phoneNumber = viewModel.getPhoneNumber().getValue();
+        String address = viewModel.getAddress().getValue();
+
+        boolean isPhoneNumberValid = phoneNumber != null && !phoneNumber.isEmpty()
+                && phoneNumber.length() >= 9;
+        boolean isAddressValid = address != null && !address.isEmpty()
+                && address.length() >= 10;
+
+        return isPhoneNumberValid && isAddressValid;
+    }
+
+    private void updateSubmitButton() {
+        buttonSignup.setEnabled(isFormValid());
     }
 }
