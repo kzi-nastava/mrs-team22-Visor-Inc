@@ -6,6 +6,7 @@ import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.StartRideDto;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
 import inc.visor.voom.app.shared.dto.StartScheduledRideDto;
+import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
 import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.dto.route.RouteEstimateRequestDto;
@@ -67,6 +68,8 @@ public interface RideApi {
     @POST("/api/rides/{rideId}/panic")
     Call<Void> panic(@Path("rideId") Long rideId, @Body RidePanicDto body);
 
+    @POST("/api/rides/{rideId}/cancel")
+    Call<Void> cancel(@Path("rideId") Long rideId, @Body RideCancellationDto body);
     @POST("/api/rides/finish-ongoing")
     Call<Void> finishOngoing();
 

@@ -66,4 +66,9 @@
     <string name="nav_statistics">Statistics</string>
     <string name="stop">stop ride</string>
     <string name="panic">panic</string>
+    <string name="cancel_ride">Cancel Ride</string>
+    <string name="cancellation_reason">Cancellation reason</string>
+    <string name="accept_ride">Accept Ride</string>
+    <string name="you_have_arrived_at_the_pickup_location">You have arrived at the pickup location.</string>
+    <string name="arrived_at_pickup">Arrived at Pickup</string>
 </resources>

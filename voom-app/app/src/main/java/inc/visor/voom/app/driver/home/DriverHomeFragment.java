@@ -50,6 +50,7 @@ import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
 import inc.visor.voom.app.shared.dto.driver.DriverStateChangeDto;
 import inc.visor.voom.app.shared.dto.ride.LatLng;
+import inc.visor.voom.app.shared.dto.ride.RideCancellationDto;
 import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.dto.ride.RideStopDto;
 import inc.visor.voom.app.shared.helper.ConvertHelper;
@@ -287,14 +288,45 @@ public class DriverHomeFragment extends Fragment {
                 .map(p -> p.address)
                 .orElse("Unknown location");
 
-        ArrivalDialogFragment dialog =
-                ArrivalDialogFragment.newInstance(pickupAddress);
+        ArrivalDialogFragment dialog = ArrivalDialogFragment.newInstance(pickupAddress);
 
-        dialog.setListener(() -> {
+        dialog.setOnAcceptRideListener(() -> {
             startRide(currentRideId, currentRoute);
         });
 
+        dialog.setOnCancelRideListener(this::cancelRide);
+
         dialog.show(getParentFragmentManager(), "arrival_dialog");
+    }
+
+    private void cancelRide(String reason) {
+        Disposable disposable = DataStoreManager.getInstance().getUserId().subscribe(userId -> {
+            RideCancellationDto dto = new RideCancellationDto();
+            dto.setUserId(userId);
+            dto.setMessage(reason);
+
+            if (this.currentRideId == null) {
+                showStatusSnackbar(getView(), "There is not current ride available", false);
+                return;
+            }
+
+            rideApi.cancel(this.currentRideId, dto).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        showStatusSnackbar(getView(), "Cancelled ride!", false);
+                    } else {
+                        showStatusSnackbar(getView(), "Failed to cancel ride!", false);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                    showStatusSnackbar(getView(), "Network error: Check connection and try again " + t, false);
+                }
+            });
+        });
+        compositeDisposable.add(disposable);
     }
 
     private void openFinishDialog() {
