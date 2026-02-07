@@ -1,4 +1,4 @@
-package inc.visor.voom.app.user.statistics;
+package inc.visor.voom.app.driver.statistics;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,14 +17,13 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class UserStatisticsFragment extends BaseStatisticsFragment {
+public class DriverStatisticsFragment extends BaseStatisticsFragment {
 
-    private UserStatisticsViewModel viewModel;
+    private DriverStatisticsViewModel viewModel;
     private DataStoreManager storeManager;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    private Long currentUserId = null;
-    private boolean isSuspended = false;
+    private Long currentDriverId = null;
 
     @Nullable
     @Override
@@ -44,14 +43,14 @@ public class UserStatisticsFragment extends BaseStatisticsFragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(UserStatisticsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(DriverStatisticsViewModel.class);
         storeManager = DataStoreManager.getInstance(requireContext());
 
         disposables.add(
                 storeManager.getUserId()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(id -> currentUserId = id)
+                        .subscribe(id -> currentDriverId = id)
         );
 
         viewModel.getReport().observe(getViewLifecycleOwner(), dto -> {
@@ -65,23 +64,23 @@ public class UserStatisticsFragment extends BaseStatisticsFragment {
 
     @Override
     protected void onGenerate(String from, String to) {
-        if (currentUserId == null) return;
-        viewModel.loadReport(from, to, currentUserId.intValue());
+        if (currentDriverId == null) return;
+        viewModel.loadReport(from, to, currentDriverId.intValue());
     }
 
     @Override
     protected String getMoneySummaryLabel() {
-        return "Total expenses";
+        return "Total earnings";
     }
 
     @Override
     protected String getMoneyChartLabel() {
-        return "Expenses per day";
+        return "Earnings per day";
     }
 
     @Override
     protected boolean canGenerateInternal() {
-        return currentUserId != null && !isSuspended;
+        return currentDriverId != null;
     }
 
     @Override
@@ -91,3 +90,4 @@ public class UserStatisticsFragment extends BaseStatisticsFragment {
         binding = null;
     }
 }
+
