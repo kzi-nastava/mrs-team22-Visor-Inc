@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Set;
 
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -301,12 +302,14 @@ public class DataInitializer implements ApplicationRunner {
                 coords[0],
                 coords[1]
         );
+        pickup.setPointType(RoutePointType.PICKUP);
 
         RoutePoint dropoff = createPoint(
                 "Dropoff Street",
                 coords[2],
                 coords[3]
         );
+        dropoff.setPointType(RoutePointType.DROPOFF);
 
         route.setRoutePoints(Arrays.asList(pickup, dropoff));
         route.setTotalDistanceKm(
