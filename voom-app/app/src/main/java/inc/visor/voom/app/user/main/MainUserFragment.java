@@ -75,7 +75,7 @@ public class MainUserFragment extends Fragment {
             }
 
             if (id == R.id.nav_activity) {
-                navController.navigate(R.id.driverRideHistoryFragment);
+                navController.navigate(R.id.scheduledRidesFragment);
                 return true;
             }
 

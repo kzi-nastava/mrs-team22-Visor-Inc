@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -189,24 +190,23 @@ public class UnauthenticatedHomeFragment extends Fragment {
 
     private void renderForm(List<RoutePoint> points) {
 
-        var pickup = requireView().findViewById(R.id.et_pickup);
-        var dropoff = requireView().findViewById(R.id.et_dropoff);
+        EditText pickup = requireView().findViewById(R.id.et_pickup);
+        EditText dropoff = requireView().findViewById(R.id.et_dropoff);
 
         if (points.isEmpty()) {
-            ((android.widget.EditText) pickup).setText("");
-            ((android.widget.EditText) dropoff).setText("");
+            pickup.setText("");
+            dropoff.setText("");
             return;
         }
 
-        ((android.widget.EditText) pickup)
-                .setText(points.get(0).address);
+        pickup.setText(points.get(0).address);
 
         if (points.size() > 1) {
             RoutePoint last = points.get(points.size() - 1);
-            ((android.widget.EditText) dropoff)
+            dropoff
                     .setText(last.address);
         } else {
-            ((android.widget.EditText) dropoff).setText("");
+            dropoff.setText("");
         }
     }
 
