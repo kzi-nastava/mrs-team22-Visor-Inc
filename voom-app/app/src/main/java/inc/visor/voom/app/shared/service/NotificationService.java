@@ -19,12 +19,39 @@ public class NotificationService {
 
     private static final String CHANNEL_ID = "voom_channel";
 
+    public static void createChannel(Context context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            NotificationManager manager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            NotificationChannel existing =
+                    manager.getNotificationChannel(CHANNEL_ID);
+
+            if (existing != null) return;
+
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Voom Notifications",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+
+            channel.setDescription("Ride and system notifications");
+            channel.enableVibration(true);
+
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+
     public static void showNotification(
             Context context,
             String title,
             Long notificationId,
             String message
     ) {
+        createChannel(context);
 
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
