@@ -123,6 +123,7 @@ public class UnauthenticatedHomeFragment extends Fragment {
                         simulationManager,
                         mViewModel,
                         null,
+                        null,
                         null
                 );
                 wsService.connect();

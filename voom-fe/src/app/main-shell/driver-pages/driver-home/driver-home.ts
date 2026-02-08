@@ -319,6 +319,7 @@ export class DriverHome implements AfterViewInit {
                 this.activeRideId.set(null);
                 this.routePoints.set([]);
                 this.ridePhase.set('IDLE');
+                this.finishDialogOpen.set(false);
                 this.snackBar.open('Ride status ' + panic.status, '', {
                   duration: 3000,
                   horizontalPosition: 'right',

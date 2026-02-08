@@ -73,7 +73,6 @@ export class AdminLive {
         },
         () => {},
         (panic) => {
-          console.log(panic);
           const ride = this.panic();
           if (!ride) {
             this.panic.set(panic);

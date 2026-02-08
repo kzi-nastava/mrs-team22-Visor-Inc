@@ -10,7 +10,10 @@ import inc.visor.voom.app.driver.dto.DriverAssignedDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
 import inc.visor.voom.app.shared.dto.DriverPositionDto;
 import inc.visor.voom.app.shared.dto.ScheduledRideDto;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
 
@@ -22,35 +25,32 @@ public class DriverSimulationWsService {
     private StompClient stompClient;
     private final DriverAssignmentListener assignmentListener;
     private final ScheduledRideListener scheduledRideListener;
+    private final PanicListener ridePanicListener;
 
     public interface OnPositionReceived {
         void onUpdate(DriverPositionDto dto);
     }
 
     private OnPositionReceived positionReceivedListener;
+    private CompositeDisposable compositeDisposable;
 
     public void setOnPositionReceivedListener(OnPositionReceived listener) {
         this.positionReceivedListener = listener;
-    }
-
-
-    public DriverSimulationWsService(
-            DriverSimulationManager simulationManager,
-            DriverMetaProvider metaProvider
-    ) {
-        this(simulationManager, metaProvider, null, null);
     }
 
     public DriverSimulationWsService(
             DriverSimulationManager simulationManager,
             DriverMetaProvider metaProvider,
             DriverAssignmentListener assignmentListener,
-            ScheduledRideListener scheduleListener
+            ScheduledRideListener scheduleListener,
+            PanicListener panicListener
     ) {
         this.simulationManager = simulationManager;
         this.metaProvider = metaProvider;
         this.assignmentListener = assignmentListener;
         this.scheduledRideListener = scheduleListener;
+        this.compositeDisposable = new CompositeDisposable();
+        this.ridePanicListener = panicListener;
     }
 
     public void connect() {
@@ -62,7 +62,7 @@ public class DriverSimulationWsService {
                 wsUrl
         );
 
-        stompClient.lifecycle().subscribe(lifecycleEvent -> {
+         Disposable disposable = stompClient.lifecycle().subscribe(lifecycleEvent -> {
 
             switch (lifecycleEvent.getType()) {
 
@@ -79,10 +79,11 @@ public class DriverSimulationWsService {
                     break;
             }
         });
+        compositeDisposable.add(disposable);
 
         stompClient.connect();
 
-        stompClient.topic("/topic/drivers-positions")
+        disposable = stompClient.topic("/topic/drivers-positions")
                 .subscribe(topicMessage -> {
 
                     DriverPositionDto dto =
@@ -106,8 +107,9 @@ public class DriverSimulationWsService {
                             meta
                     );
                 });
+        compositeDisposable.add(disposable);
 
-        stompClient.topic("/topic/driver-assigned")
+        disposable = stompClient.topic("/topic/driver-assigned")
                 .subscribe(topicMessage -> {
                     DriverAssignedDto dto =
                             new Gson().fromJson(
@@ -122,8 +124,9 @@ public class DriverSimulationWsService {
                 }, throwable -> {
                     Log.e("WS_ASSIGN", "Assigned topic error", throwable);
                 });
+        compositeDisposable.add(disposable);
 
-        stompClient.topic("/topic/scheduled-rides")
+        disposable = stompClient.topic("/topic/scheduled-rides")
                 .subscribe(topicMessage -> {
 
                     ScheduledRideDto[] rides =
@@ -140,11 +143,34 @@ public class DriverSimulationWsService {
                     Log.e("WS_SCHEDULE", "Scheduled rides topic error", throwable);
                 });
 
+        compositeDisposable.add(disposable);
 
+        disposable = stompClient.topic("/topic/ride-panic")
+                .subscribe(topicMessage -> {
+
+                    RideResponseDto dto =
+                            new Gson().fromJson(
+                                    topicMessage.getPayload(),
+                                    RideResponseDto.class
+                            );
+
+                    Log.d("WS_PANIC", "Panic received: " + dto.toString());
+
+                    if (ridePanicListener != null) {
+                        ridePanicListener.onRidePanic(dto);
+                    }
+
+                }, throwable -> {
+                    Log.e("WS_PANIC", "Panic topic error", throwable);
+                });
+        compositeDisposable.add(disposable);
 
     }
 
     public void disconnect() {
+        if (compositeDisposable != null && !compositeDisposable.isDisposed()) {
+            compositeDisposable.dispose();
+        }
         if (stompClient != null) {
             stompClient.disconnect();
         }
