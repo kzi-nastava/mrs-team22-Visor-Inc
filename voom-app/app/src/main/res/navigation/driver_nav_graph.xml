@@ -42,6 +42,10 @@
         android:name="inc.visor.voom.app.driver.statistics.DriverStatisticsFragment"
         android:label="Statistics"
         tools:layout="@layout/fragment_user_statistics" />
+    <fragment
+        android:id="@+id/driverScheduledRidesFragment"
+        android:name="inc.visor.voom.app.shared.component.scheduled.ScheduledRidesFragment"
+        android:label="ScheduledRidesFragment" />
 
 
 </navigation>
