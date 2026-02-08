@@ -43,10 +43,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Intent intent = getIntent();
-        Uri data = intent.getData();
-        if (data != null) {
-            Log.d("DEEPLINK", "URI: " + data);
-            return;
+
+        if (intent != null && intent.getData() != null && navController != null) {
+            boolean handled = navController.handleDeepLink(intent);
+            if (handled) {
+                return;
+            }
         }
 
         checkLoginStatusAndNavigate();

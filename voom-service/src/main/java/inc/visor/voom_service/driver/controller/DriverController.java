@@ -58,7 +58,12 @@ public class DriverController {
     }
 
     @PostMapping
-    public ResponseEntity<DriverSummaryDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
+    public ResponseEntity<DriverSummaryDto> createDriver(@RequestBody CreateDriverDto request) {
+        System.out.println("RAW BODY:");
+        System.out.println("EMAIL: " + request.getEmail());
+        System.out.println("BIRTHDATE: " + request.getBirthDate());
+        System.out.println("VEHICLE: " + request.getVehicle());
+
         Driver driver = driverService.createDriver(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new DriverSummaryDto(driver));
     }

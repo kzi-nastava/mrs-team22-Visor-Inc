@@ -1,20 +1,17 @@
 package inc.visor.voom.app.unauthenticated.home;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -39,7 +36,6 @@ import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
-import inc.visor.voom.app.user.home.UserHomeViewModel;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
