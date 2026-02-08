@@ -294,7 +294,7 @@ public class RideController {
         ride.setRideRequest(updatedRideRequest);
         ride.setFinishedAt(LocalDateTime.now());
 
-        final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
+        final Driver driver = this.driverService.getDriverFromUser(ride.getDriver().getId()).orElseThrow(RuntimeException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
         this.driverService.updateDriver(driver);
 
