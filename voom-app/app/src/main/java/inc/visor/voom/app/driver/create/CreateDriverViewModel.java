@@ -1,5 +1,7 @@
 package inc.visor.voom.app.driver.create;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -20,6 +22,7 @@ public class CreateDriverViewModel extends ViewModel {
             String email,
             String firstName,
             String lastName,
+            String birthDate,
             String phoneNumber,
             String address,
             String vehicleModel,
@@ -33,6 +36,7 @@ public class CreateDriverViewModel extends ViewModel {
         if (email == null || email.isBlank()
                 || firstName == null || firstName.isBlank()
                 || lastName == null || lastName.isBlank()
+                || birthDate == null || birthDate.isBlank()
                 || phoneNumber == null || phoneNumber.isBlank()
                 || address == null || address.isBlank()
                 || vehicleModel == null || vehicleModel.isBlank()
@@ -55,11 +59,24 @@ public class CreateDriverViewModel extends ViewModel {
                         petTransportAllowed
                 );
 
+        Log.d("CREATE_DRIVER_DEBUG", "email=" + email);
+        Log.d("CREATE_DRIVER_DEBUG", "firstName=" + firstName);
+        Log.d("CREATE_DRIVER_DEBUG", "lastName=" + lastName);
+        Log.d("CREATE_DRIVER_DEBUG", "birthDate=" + birthDate);
+        Log.d("CREATE_DRIVER_DEBUG", "phoneNumber=" + phoneNumber);
+        Log.d("CREATE_DRIVER_DEBUG", "address=" + address);
+        Log.d("CREATE_DRIVER_DEBUG", "vehicleType=" + vehicleType);
+        Log.d("CREATE_DRIVER_DEBUG", "vehicleModel=" + vehicleModel);
+        Log.d("CREATE_DRIVER_DEBUG", "licensePlate=" + licensePlate);
+
+        String formattedBirthDate = birthDate + "T00:00:00";
+
         CreateDriverRequestDto body =
                 new CreateDriverRequestDto(
                         email,
                         firstName,
                         lastName,
+                        formattedBirthDate,
                         phoneNumber,
                         address,
                         vehicle

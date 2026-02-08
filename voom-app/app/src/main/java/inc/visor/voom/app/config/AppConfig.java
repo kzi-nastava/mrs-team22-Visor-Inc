@@ -10,7 +10,7 @@ public class AppConfig {
 
     private static SharedPreferences preferences;
 
-    private static final String DEFAULT_IP = "192.168.0.10";
+    private static final String DEFAULT_IP = "192.168.1.7";
     private static final String PORT = "8080";
 
     public static void init(Context context) {

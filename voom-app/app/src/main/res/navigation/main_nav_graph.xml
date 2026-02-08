@@ -35,6 +35,28 @@
     </fragment>
 
     <fragment
+        android:id="@+id/driverActivationFragment"
+        android:name="inc.visor.voom.app.driver.activate.AccountActivationFragment"
+        android:label="Driver Activation"
+        tools:layout="@layout/fragment_account_activation2">
+
+        <argument
+            android:name="token"
+            app:argType="string"
+            app:nullable="false" />
+
+        <deepLink
+            app:uri="voom://activate?token={token}" />
+
+        <action
+            android:id="@+id/action_driverActivationFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+
+
+    <fragment
         android:id="@+id/registrationFragment"
         android:name="inc.visor.voom.app.unauthenticated.registration.RegistrationFragment"
         android:label="fragment_registration"

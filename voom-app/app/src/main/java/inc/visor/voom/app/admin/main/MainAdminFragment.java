@@ -98,6 +98,11 @@ public class MainAdminFragment extends Fragment {
                 return true;
             }
 
+            if (id == R.id.nav_statistics) {
+                navController.navigate(R.id.adminUsersFragment);
+                return true;
+            }
+
             if (id == R.id.nav_profile) {
 
                 navController.navigate(R.id.adminProfileFragment);
