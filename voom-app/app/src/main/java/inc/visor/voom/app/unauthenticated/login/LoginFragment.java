@@ -59,6 +59,7 @@ public class LoginFragment extends Fragment {
         setupPasswordInput();
 
         buttonLogin = view.findViewById(R.id.login);
+        buttonLogin.setEnabled(false);
 
         dataStoreManager = DataStoreManager.getInstance(this.getContext());
 
@@ -67,16 +68,12 @@ public class LoginFragment extends Fragment {
             final String email = viewModel.getEmail().getValue();
             final String password = viewModel.getPassword().getValue();
 
-            Log.d("TEST", "Input values: " + email + " " + password);
-
             dto.setEmail(email);
             dto.setPassword(password);
 
-            Log.d("TEST", "DTO: " + dto);
-
-            authenticationApi.login(dto).enqueue(new Callback<TokenDto>() {
+            authenticationApi.login(dto).enqueue(new Callback<>() {
                 @Override
-                public void onResponse(Call<TokenDto> call, Response<TokenDto> response) {
+                public void onResponse(@NonNull Call<TokenDto> call, @NonNull Response<TokenDto> response) {
                     Log.d("TEST", "Request: " + call + " " + response);
                     if (!response.isSuccessful() || response.body() == null) {
                         return;
@@ -101,7 +98,7 @@ public class LoginFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Call<TokenDto> call, Throwable t) {
+                public void onFailure(@NonNull Call<TokenDto> call, @NonNull Throwable t) {
                 }
             });
         });
@@ -128,6 +125,7 @@ public class LoginFragment extends Fragment {
                 } else {
                     emailInput.setError(null);
                 }
+                updateLoginButtonState();
             }
 
             @Override
@@ -154,6 +152,7 @@ public class LoginFragment extends Fragment {
                 } else {
                     passwordInput.setError(null);
                 }
+                updateLoginButtonState();
             }
 
             @Override
@@ -168,11 +167,24 @@ public class LoginFragment extends Fragment {
         });
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_login, container, false);
+    }
+
+    private boolean isFormValid() {
+        String email = viewModel.getEmail().getValue();
+        String password = viewModel.getPassword().getValue();
+
+        boolean isEmailValid = email != null && !email.isEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        boolean isPasswordValid = password != null && !password.isEmpty() && password.length() >= 8;
+
+        return isEmailValid && isPasswordValid;
+    }
+
+    private void updateLoginButtonState() {
+        buttonLogin.setEnabled(isFormValid());
     }
 }
