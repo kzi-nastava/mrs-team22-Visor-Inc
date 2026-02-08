@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -113,13 +114,14 @@ public class CreateDriverFragment extends Fragment {
 
         viewModel.isDriverCreated().observe(getViewLifecycleOwner(), created -> {
             if (Boolean.TRUE.equals(created)) {
+
                 Snackbar.make(
                         requireView(),
                         "Driver successfully created",
-                        Snackbar.LENGTH_LONG
+                        Snackbar.LENGTH_SHORT
                 ).show();
 
-                clearForm();
+                NavHostFragment.findNavController(this).popBackStack();
             }
         });
 
