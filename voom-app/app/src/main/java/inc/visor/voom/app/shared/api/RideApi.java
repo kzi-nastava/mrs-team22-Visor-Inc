@@ -58,7 +58,6 @@ public interface RideApi {
     @POST("/api/routes")
     Call<RouteEstimateResponseDto> getRouteEstimate(@Body RouteEstimateRequestDto payload);
 
-
     @POST("/api/rating/{rideId}")
     Call<Void> rateRide(@Path("rideId") Long rideId, @Body RatingRequestDto body);
 
@@ -99,5 +98,21 @@ public interface RideApi {
             @Path("id") Long id,
             @Body RideCancellationDto dto
     );
+
+    @GET("/api/rides")
+    Call<List<RideHistoryDto>> getRides(
+            @Query("start") String start,
+            @Query("end") String end,
+            @Query("sort") String sort
+    );
+
+    @GET("/api/rides/user/{userId}/history")
+    Call<List<RideHistoryDto>> getRidesForUser(
+            @Path("userId") long userId,
+            @Query("start") String start,
+            @Query("end") String end,
+            @Query("sort") String sort
+    );
+
 }
 

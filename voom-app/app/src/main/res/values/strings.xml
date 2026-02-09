@@ -72,4 +72,6 @@
     <string name="you_have_arrived_at_the_pickup_location">You have arrived at the pickup location.</string>
     <string name="arrived_at_pickup">Arrived at Pickup</string>
     <string name="create_password">Create Password\n</string>
+    <string name="date_to">Date to</string>
+    <string name="date_from">Date from</string>
 </resources>
