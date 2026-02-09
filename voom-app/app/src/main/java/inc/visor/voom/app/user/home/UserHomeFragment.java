@@ -193,7 +193,8 @@ public class UserHomeFragment extends Fragment {
                         simulationManager,
                         viewModel,
                         null,
-                        rides -> handleScheduledRides(rides)
+                        rides -> handleScheduledRides(rides),
+                        null
                 );
                 wsService.connect();
             }

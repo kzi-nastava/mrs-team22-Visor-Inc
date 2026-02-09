@@ -1,8 +1,7 @@
 package inc.visor.voom.app.user.tracking;
 
-import android.content.Context;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,21 +19,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.dto.ActiveRideDto;
-import inc.visor.voom.app.network.RetrofitClient;
-import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
-import inc.visor.voom.app.shared.dto.RoutePointDto;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
@@ -92,6 +86,7 @@ public class UserRideTrackingFragment extends Fragment {
         wsService = new DriverSimulationWsService(
                 simulationManager,
                 mViewModel,
+                null,
                 null,
                 null
         );

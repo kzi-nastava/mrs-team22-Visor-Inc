@@ -1,20 +1,18 @@
 package inc.visor.voom.app.admin.tracking;
 
-import androidx.lifecycle.ViewModelProvider;
-
+import android.app.AlertDialog;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -30,11 +28,13 @@ import inc.visor.voom.app.databinding.FragmentAdminTrackingBinding;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RoutePointDto;
 import inc.visor.voom.app.shared.dto.RoutePointType;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.model.SimulatedDriver;
 import inc.visor.voom.app.shared.repository.LocationRepository;
 import inc.visor.voom.app.shared.repository.RouteRepository;
 import inc.visor.voom.app.shared.service.DriverSimulationWsService;
 import inc.visor.voom.app.shared.service.MapRendererService;
+import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
 import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
@@ -46,12 +46,12 @@ public class AdminTrackingFragment extends Fragment {
     private AdminTrackingViewModel viewModel;
     private DriverAdapter driverAdapter;
     private PassengerAdapter passengerAdapter;
-
     private MapRendererService mapRenderer;
     private RouteRepository routeRepository;
     private LocationRepository locationRepository;
     private DriverSimulationManager simulationManager;
     private DriverSimulationWsService wsService;
+    private AlertDialog currentPanicDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,7 +67,6 @@ public class AdminTrackingFragment extends Fragment {
         setupRecyclerViews();
         setupSearch();
         observeViewModel();
-
 
         binding.mapView.setOnTouchListener((v, event) -> {
             v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -87,7 +86,8 @@ public class AdminTrackingFragment extends Fragment {
                     simulationManager,
                     viewModel,
                     null,
-                    null
+                    null,
+                    this::handlePanicEvent
             );
             wsService.connect();
         }
@@ -209,4 +209,50 @@ public class AdminTrackingFragment extends Fragment {
                 }
         );
     }
+
+    private void handlePanicEvent(RideResponseDto panicDto) {
+        requireActivity().runOnUiThread(() -> {
+            // Dismiss previous panic dialog if still showing
+            if (currentPanicDialog != null && currentPanicDialog.isShowing()) {
+                currentPanicDialog.dismiss();
+            }
+
+            NotificationService.showNotification(
+                    getContext(),
+                    "PANIC",
+                    123L,
+                    "PANIC ON RIDE NUMBER " + panicDto.getId().toString()
+            );
+
+            // Create and show panic alert dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("🚨 PANIC ALERT")
+                    .setMessage(buildPanicMessage(panicDto))
+                    .setNegativeButton("Dismiss", (dialog, which) -> {
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false);
+
+            currentPanicDialog = builder.create();
+            currentPanicDialog.show();
+        });
+    }
+
+    private String buildPanicMessage(RideResponseDto panicDto) {
+        StringBuilder message = new StringBuilder();
+        message.append("Ride ID: ").append(panicDto.getId()).append("\n\n");
+
+        if (panicDto.getDriverName() != null) {
+            message.append("Driver: ").append(panicDto.getDriverName()).append("\n");
+        }
+
+        if (panicDto.getPassengerName() != null) {
+            message.append("Passenger: ").append(panicDto.getPassengerName()).append("\n");
+        }
+
+        message.append("\nStatus: ").append(panicDto.getStatus());
+
+        return message.toString();
+    }
+
 }
