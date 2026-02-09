@@ -1,6 +1,5 @@
 package inc.visor.voom.app.shared.component.history;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.LocalDateTime;
@@ -19,16 +19,16 @@ import java.time.temporal.ChronoField;
 import java.util.List;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
-import inc.visor.voom.app.shared.dto.RoutePointType;
 
 public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.ViewHolder> {
 
     private List<RideHistoryDto> rides;
+    private FragmentManager fragmentManager;
 
-    public RideHistoryAdapter(List<RideHistoryDto> rides) {
+    public RideHistoryAdapter(List<RideHistoryDto> rides, FragmentManager parentFragmentManager) {
         this.rides = rides;
+        this.fragmentManager = parentFragmentManager;
     }
 
     @NonNull
@@ -68,7 +68,6 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
         holder.tvPetTransport.setText(ride.getRideRequest().isPetTransport() ? "Yes" : "No");
         holder.tvBabyTransport.setText(ride.getRideRequest().isBabyTransport() ? "Yes" : "No");
 
-        // Handle cancellation details visibility
         if ("cancelled".equalsIgnoreCase(ride.getStatus().toString())) {
             holder.layoutCancellationDetails.setVisibility(View.VISIBLE);
             holder.tvCancelledBy.setText("Cancelled by: " + ride.getCancelledBy());
@@ -77,26 +76,22 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
             holder.layoutCancellationDetails.setVisibility(View.GONE);
         }
 
-        // Handle expand/collapse functionality
-        boolean isExpanded = ride.isExpanded(); // Add this field to your RideHistory model
+        boolean isExpanded = ride.isExpanded();
         holder.expandedContent.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
 
-        // Click listener for header to toggle expansion
         holder.headerLayout.setOnClickListener(v -> {
             ride.setExpanded(!ride.isExpanded());
             notifyItemChanged(position);
         });
 
-        // Open route button click listener
         holder.btnOpenRoute.setOnClickListener(v -> {
-            // Open map with route
             openRouteOnMap(ride);
         });
     }
 
-    // Helper method to open route on map
     private void openRouteOnMap(RideHistoryDto ride) {
-//        RideHistoryDialog dialog = RideHistoryDialog.newInstance(ride);
+        RideHistoryDialog dialog = RideHistoryDialog.newInstance(ride);
+        dialog.show(fragmentManager, "RideHistoryDialog");
     }
 
     @Override

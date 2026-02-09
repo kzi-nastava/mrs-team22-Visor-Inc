@@ -40,7 +40,7 @@ public class RideHistoryFragment extends Fragment {
                 tvEmptyState.setVisibility(View.GONE);
                 rvRides.setVisibility(View.VISIBLE);
 
-                adapter = new RideHistoryAdapter(rides);
+                adapter = new RideHistoryAdapter(rides, getChildFragmentManager());
                 rvRides.setAdapter(adapter);
             }
         });

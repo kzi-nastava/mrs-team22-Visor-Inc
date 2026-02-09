@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingVertical="32dp"
-        android:paddingHorizontal="8dp">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="-229dp">
 
         <TextView
             android:id="@+id/title"
@@ -41,10 +41,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Driver"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvDriverName"
@@ -58,8 +58,8 @@
                     android:id="@+id/tvDriverStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
                     android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
                     tools:text="Active" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -81,26 +81,27 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Complaints"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvComplaints"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
-                    tools:listitem="@layout/item_complaint" />
+                    tools:listitem="@layout/item_complaint"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvNoComplaints"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="No complaints reported."
-                    android:textSize="14sp"
                     android:textColor="@android:color/darker_gray"
-                    android:visibility="gone" />
+                    android:textSize="14sp"
+                    />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -121,10 +122,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Ratings"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvRatings"
@@ -132,16 +133,16 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     tools:itemCount="2"
-                    tools:listitem="@layout/item_rating" />
+                    tools:listitem="@layout/item_rating"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/tvNoRatings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="No ratings."
-                    android:textSize="14sp"
                     android:textColor="@android:color/darker_gray"
-                    android:visibility="gone" />
+                    android:textSize="14sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -162,10 +163,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="Time"
-                    android:textSize="14sp"
                     android:textColor="@android:color/darker_gray"
-                    android:layout_marginBottom="8dp" />
+                    android:textSize="14sp" />
 
                 <Spinner
                     android:id="@+id/spinnerTime"
@@ -203,29 +204,30 @@
                             android:id="@+id/et_scheduled_time"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:focusable="false"
                             android:clickable="true"
-                            android:inputType="none"/>
+                            android:focusable="false"
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:id="@+id/tv_time_error"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="Time must be within the next 5 hours"
-                        android:textSize="12sp"
                         android:textColor="@android:color/holo_red_dark"
-                        android:visibility="gone"
-                        android:layout_marginTop="4dp"/>
+                        android:textSize="12sp"
+                        android:visibility="gone" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
                 <Button
                     android:id="@+id/btnScheduleRide"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Schedule ride"
-                    android:layout_marginTop="16dp" />
+                    android:layout_marginTop="16dp"
+                    android:text="Schedule ride" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -236,10 +238,10 @@
             app:cardCornerRadius="32dp"
             app:cardUseCompatPadding="true">
 
-            <org.osmdroid.views.MapView
-                android:id="@+id/map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+<!--            <org.osmdroid.views.MapView-->
+<!--                android:id="@+id/map"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
 
         </com.google.android.material.card.MaterialCardView>
 
