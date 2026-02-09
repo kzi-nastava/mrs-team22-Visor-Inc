@@ -112,6 +112,11 @@ public class MainAdminFragment extends Fragment {
                 return true;
             }
 
+            if (id == R.id.nav_activity) {
+                navController.navigate(R.id.rideHistoryFragment);
+                return false;
+            }
+
             return false;
         });
 

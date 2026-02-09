@@ -36,6 +36,11 @@
         android:name="inc.visor.voom.app.driver.create.CreateDriverFragment"
         android:label="Create Driver" />
     <fragment
+        android:id="@+id/rideHistoryFragment"
+        android:name="inc.visor.voom.app.shared.component.history.RideHistoryFragment"
+        android:label="fragment_ride_history"
+        tools:layout="@layout/fragment_ride_history" />
+    <fragment
         android:id="@+id/chatListFragment"
         android:name="inc.visor.voom.app.chat.ChatListFragment"
         android:label="ChatListFragment" />

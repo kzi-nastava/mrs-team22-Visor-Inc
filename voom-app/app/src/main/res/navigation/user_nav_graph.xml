@@ -40,10 +40,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/driverRideHistoryFragment"
-        android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
-        android:label="fragment_driver_ride_history" />
-    <fragment
         android:id="@+id/userProfileFragment"
         android:name="inc.visor.voom.app.user.profile.ProfileFragment"
         android:label="ProfileFragment" />
@@ -64,5 +60,10 @@
         android:id="@+id/scheduledRidesFragment"
         android:name="inc.visor.voom.app.shared.component.scheduled.ScheduledRidesFragment"
         android:label="ScheduledRidesFragment" />
+    <fragment
+        android:id="@+id/rideHistoryFragment2"
+        android:name="inc.visor.voom.app.shared.component.history.RideHistoryFragment"
+        android:label="fragment_ride_history"
+        tools:layout="@layout/fragment_ride_history" />
 
 </navigation>

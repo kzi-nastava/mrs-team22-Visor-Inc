@@ -1,14 +1,14 @@
 package inc.visor.voom.app.shared.model;
 
 public class VehicleType {
-    public Long id;
+    public int id;
     public String type;
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

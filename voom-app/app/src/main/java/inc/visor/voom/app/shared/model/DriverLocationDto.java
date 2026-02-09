@@ -12,6 +12,9 @@ public class DriverLocationDto {
         this.lng = lng;
     }
 
+    public DriverLocationDto() {
+    }
+
     public long getDriverId() {
         return driverId;
     }
@@ -22,6 +25,18 @@ public class DriverLocationDto {
 
     public double getLng() {
         return lng;
+    }
+
+    public void setDriverId(long driverId) {
+        this.driverId = driverId;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 }
 
