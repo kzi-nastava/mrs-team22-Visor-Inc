@@ -14,6 +14,7 @@ import java.util.List;
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 import inc.visor.voom.app.shared.dto.authentication.UserDto;
+import inc.visor.voom.app.shared.model.enums.UserStatus;
 
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
@@ -41,7 +42,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         holder.tvRole.setText(user.userRoleName);
         holder.tvStatus.setText(user.userStatus);
 
-        if ("BLOCKED".equals(user.userStatus)) {
+        if (UserStatus.SUSPENDED.toString().equals(user.userStatus)) {
             holder.tvStatus.setTextColor(Color.RED);
         } else {
             holder.tvStatus.setTextColor(Color.GRAY);
@@ -58,6 +59,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
                 blockClickListener.onBlockClick(userDto);
             }
         });
+
+        if (UserStatus.SUSPENDED.toString().equals(user.userStatus)) {
+            holder.btnBlock.setVisibility(View.GONE);
+        } else {
+            holder.btnBlock.setVisibility(View.VISIBLE);
+        }
+
 
     }
 
