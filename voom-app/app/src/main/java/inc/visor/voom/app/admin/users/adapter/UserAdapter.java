@@ -13,6 +13,8 @@ import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
+import inc.visor.voom.app.shared.dto.authentication.UserDto;
+import inc.visor.voom.app.shared.model.enums.UserStatus;
 
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
@@ -40,11 +42,41 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         holder.tvRole.setText(user.userRoleName);
         holder.tvStatus.setText(user.userStatus);
 
-        if ("BLOCKED".equals(user.userStatus)) {
+        if (UserStatus.SUSPENDED.toString().equals(user.userStatus)) {
             holder.tvStatus.setTextColor(Color.RED);
         } else {
             holder.tvStatus.setTextColor(Color.GRAY);
         }
+
+        holder.btnBlock.setOnClickListener(v -> {
+            UserDto userDto = new UserDto();
+            userDto.setId(user.id);
+            userDto.setFirstName(user.firstName);
+            userDto.setLastName(user.lastName);
+            userDto.setEmail(user.email);
+            userDto.setRole(user.userRoleName);
+            if (blockClickListener != null) {
+                blockClickListener.onBlockClick(userDto);
+            }
+        });
+
+        if (UserStatus.SUSPENDED.toString().equals(user.userStatus)) {
+            holder.btnBlock.setVisibility(View.GONE);
+        } else {
+            holder.btnBlock.setVisibility(View.VISIBLE);
+        }
+
+
+    }
+
+    public interface OnBlockClickListener {
+        void onBlockClick(UserDto user);
+    }
+
+    private OnBlockClickListener blockClickListener;
+
+    public void setOnBlockClickListener(OnBlockClickListener listener) {
+        this.blockClickListener = listener;
     }
 
     @Override

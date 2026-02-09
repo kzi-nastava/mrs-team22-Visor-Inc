@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
@@ -74,11 +77,14 @@ public class UserHomeFragment extends Fragment {
     private FavoriteRouteRepository favoriteRouteRepository;
     private NotificationWsService notificationWsService;
 
+    private boolean isSuspended = false;
+    private String blockReason = null;
+
+
 
     private Boolean arrivalNotified = false;
 
     private boolean scheduledDriverSent = false;
-
 
 
     public UserHomeFragment() {
@@ -88,6 +94,8 @@ public class UserHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        checkIfBlocked(view);
 
         viewModel = new ViewModelProvider(this).get(UserHomeViewModel.class);
 
@@ -483,6 +491,66 @@ public class UserHomeFragment extends Fragment {
             ((android.widget.EditText) dropoff).setText("");
         }
     }
+
+    private void checkIfBlocked(View view) {
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    UserApi userApi = RetrofitClient.getInstance()
+                            .create(UserApi.class);
+
+                    userApi.getActiveBlock(userId)
+                            .enqueue(new Callback<BlockNoteDto>() {
+
+                                @Override
+                                public void onResponse(@NonNull Call<BlockNoteDto> call,
+                                                       @NonNull Response<BlockNoteDto> response) {
+
+                                    if (!response.isSuccessful()
+                                            || response.body() == null) {
+                                        return;
+                                    }
+
+                                    if (response.body().active) {
+
+                                        isSuspended = true;
+                                        blockReason = response.body().reason;
+
+                                        showSuspendedState(view);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<BlockNoteDto> call,
+                                                      @NonNull Throwable t) {
+                                }
+                            });
+                });
+    }
+
+    private void showSuspendedState(View view) {
+
+        View content = view.findViewById(R.id.root_container);
+        View suspendedLayout = view.findViewById(R.id.layout_suspended);
+        TextView tvReason = view.findViewById(R.id.tv_block_reason);
+
+        if (tvReason != null && blockReason != null) {
+            tvReason.setText("Reason: " + blockReason);
+        }
+
+        if (suspendedLayout != null) {
+            suspendedLayout.setVisibility(View.VISIBLE);
+        }
+
+        // Opcionalno: disable klikova
+        if (content != null) {
+            setEnabledRecursive(content, false);
+        }
+    }
+
+
 
     private void renderPitstops(List<RoutePoint> points) {
 
