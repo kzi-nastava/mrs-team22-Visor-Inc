@@ -10,6 +10,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DriverSimulationWsService} from '../../../../shared/websocket/DriverSimulationWsService';
 import {MatDialog} from '@angular/material/dialog';
 import {PanicDialog} from '../../../../shared/panic/panic-dialog/panic-dialog';
+import {NotificationService} from '../../../../shared/service/notification-service';
 
 export const ROUTE_ADMIN_LIVE = "live"
 
@@ -29,11 +30,13 @@ export class AdminLive {
   private apiService = inject(ApiService);
   private ws = inject(DriverSimulationWsService);
   private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
 
   renderedDrivers = signal<number[]>([]);
   isSupportChatOpen = signal<boolean>(false);
   panic = signal<RideResponseDto | null>(null);
   routePoints = signal<RoutePoint[]>([]);
+  selectedDriverId = signal<number | null>(null);
 
   activeDrivers$ = this.apiService.rideApi.getActiveDrivers().pipe(
     map(result => result.data ?? []),
@@ -85,6 +88,12 @@ export class AdminLive {
       const panic = this.panic();
       if (!panic) return;
 
+      this.notificationService.show({
+        title: 'PANIC',
+        message: 'Panic in a ride' ,
+        type: 'warning',
+        duration: 0,
+      });
       const ref = this.dialog.open(PanicDialog, { data: panic });
 
       ref.afterClosed().subscribe(() => {

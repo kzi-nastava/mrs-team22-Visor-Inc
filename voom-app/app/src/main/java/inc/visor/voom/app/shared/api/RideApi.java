@@ -84,5 +84,20 @@ public interface RideApi {
 
     @POST("/api/rides/{id}/stop")
     Call<RideResponseDto> stopRide(@Path("id") Long id, @Body RideStopDto dto);
+
+    // User scheduled rides
+    @GET("/api/rides/user/{userId}/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRides(
+            @Path("userId") long userId
+    );
+
+    @GET("/api/rides/driver/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRidesDriver();
+
+    @POST("/api/rides/scheduled/{id}/cancel")
+    Call<RideHistoryDto> cancelScheduledRide(
+            @Path("id") Long id,
+            @Body RideCancellationDto dto
+    );
 }
 

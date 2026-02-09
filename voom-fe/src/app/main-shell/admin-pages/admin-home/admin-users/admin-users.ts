@@ -47,7 +47,7 @@ export const ROUTE_ADMIN_USERS = 'users';
     MatLabel,
     MatOption,
     MatSelect,
-    NgClass
+    // NgClass
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.css',

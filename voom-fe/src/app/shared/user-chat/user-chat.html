@@ -1,0 +1,68 @@
+<div class="fixed bottom-6 right-6 z-[999999999999999999] flex flex-col items-end">
+
+    @if(isExpanded) {
+        <div
+        class="mb-4 w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden transition-all duration-300 ease-in-out">
+
+        <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="font-semibold">Voom Support</span>
+            </div>
+            <button (click)="toggleChat()" class="hover:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+            @for(msg of messages(); track msg) {
+            <div [ngClass]="{'justify-end': msg.sender === 'user'}" class="flex">
+                <div [ngClass]="{
+          'bg-blue-600 text-white rounded-bl-none': msg.sender === 'user',
+          'bg-gray-200 text-gray-800 rounded-br-none': msg.sender === 'admin'
+        }" class="max-w-[85%] p-2 px-3 rounded-xl text-sm shadow-sm">
+                    {{ msg.text }}
+                </div>
+            </div>
+            }
+
+        </div>
+
+        <div class="p-3 border-t bg-white flex items-center space-x-2">
+            <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
+                class="flex-1 text-sm p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+            <button (click)="sendMessage()" class="text-blue-600 hover:text-blue-800 transform rotate-90">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    }
+    
+
+    <button (click)="toggleChat()"
+        class="w-14 h-14 bg-blue-600 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-blue-700 hover:scale-110 transition-all duration-200 cursor-pointer">
+
+        @if(!isExpanded) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+        } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+        }
+        
+
+        
+    </button>
+</div>
