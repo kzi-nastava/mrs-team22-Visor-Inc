@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.users.adapter.UserAdapter;
 import inc.visor.voom.app.databinding.FragmentAdminUsersBinding;
+import inc.visor.voom.app.shared.dto.authentication.UserDto;
 
 public class AdminUsersFragment extends Fragment {
 
@@ -60,7 +61,24 @@ public class AdminUsersFragment extends Fragment {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.createDriverFragment)
         );
+
+        adapter.setOnBlockClickListener(user -> {
+            showBlockDialog(user);
+        });
+
     }
+
+    private void showBlockDialog(UserDto user) {
+
+        BlockUserDialog dialog = new BlockUserDialog();
+
+        dialog.setOnConfirmListener(reason -> {
+            viewModel.blockUser(user.getId(), reason);
+        });
+
+        dialog.show(getParentFragmentManager(), "blockDialog");
+    }
+
 
     @Override
     public void onDestroyView() {

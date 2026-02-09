@@ -13,6 +13,7 @@ import java.util.List;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
+import inc.visor.voom.app.shared.dto.authentication.UserDto;
 
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
@@ -45,6 +46,29 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         } else {
             holder.tvStatus.setTextColor(Color.GRAY);
         }
+
+        holder.btnBlock.setOnClickListener(v -> {
+            UserDto userDto = new UserDto();
+            userDto.setId(user.id);
+            userDto.setFirstName(user.firstName);
+            userDto.setLastName(user.lastName);
+            userDto.setEmail(user.email);
+            userDto.setRole(user.userRoleName);
+            if (blockClickListener != null) {
+                blockClickListener.onBlockClick(userDto);
+            }
+        });
+
+    }
+
+    public interface OnBlockClickListener {
+        void onBlockClick(UserDto user);
+    }
+
+    private OnBlockClickListener blockClickListener;
+
+    public void setOnBlockClickListener(OnBlockClickListener listener) {
+        this.blockClickListener = listener;
     }
 
     @Override

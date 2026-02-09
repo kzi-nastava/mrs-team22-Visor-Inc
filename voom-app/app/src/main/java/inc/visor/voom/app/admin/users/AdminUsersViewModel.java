@@ -1,15 +1,20 @@
 package inc.visor.voom.app.admin.users;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockUserRequestDto;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import retrofit2.Call;
@@ -79,6 +84,49 @@ public class AdminUsersViewModel extends ViewModel {
             }
         });
     }
+
+    public void blockUser(Long userId, String reason) {
+
+        UserApi api = RetrofitClient.getInstance().create(UserApi.class);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("reason", reason);
+
+        api.blockUser(userId, body)
+                .enqueue(new Callback<UserProfileDto>() {
+                    @Override
+                    public void onResponse(Call<UserProfileDto> call,
+                                           Response<UserProfileDto> response) {
+
+                        if (response.isSuccessful() && response.body() != null) {
+
+                            UserProfileDto updatedUser = response.body();
+
+                            List<UserProfileDto> current = _allUsers.getValue();
+                            if (current == null) return;
+
+                            List<UserProfileDto> updated = new ArrayList<>();
+
+                            for (UserProfileDto u : current) {
+                                if (u.id == updatedUser.id) {
+                                    updated.add(updatedUser);
+                                } else {
+                                    updated.add(u);
+                                }
+                            }
+
+                            _allUsers.setValue(updated);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserProfileDto> call, Throwable t) {
+                        Log.e("BLOCK", "Error blocking user", t);
+                    }
+                });
+    }
+
+
 
     public LiveData<List<UserProfileDto>> getFilteredUsers() {
         return filteredUsers;
