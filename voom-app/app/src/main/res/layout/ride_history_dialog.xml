@@ -238,10 +238,10 @@
             app:cardCornerRadius="32dp"
             app:cardUseCompatPadding="true">
 
-<!--            <org.osmdroid.views.MapView-->
-<!--                android:id="@+id/map"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent" />-->
+            <org.osmdroid.views.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         </com.google.android.material.card.MaterialCardView>
 

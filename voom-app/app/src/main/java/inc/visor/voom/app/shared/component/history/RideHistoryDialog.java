@@ -2,34 +2,47 @@ package inc.visor.voom.app.shared.component.history;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import inc.visor.voom.app.R;
-import inc.visor.voom.app.driver.history.models.Ride;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
-import io.reactivex.rxjava3.disposables.Disposable;
+import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
+import inc.visor.voom.app.shared.model.DriverLocationDto;
+import inc.visor.voom.app.user.home.UserHomeViewModel;
+import inc.visor.voom.app.user.home.dto.RideRequestDto;
+import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RideHistoryDialog extends DialogFragment {
 
@@ -109,8 +122,7 @@ public class RideHistoryDialog extends DialogFragment {
     private void setupDriverInfo() {
         if (ride != null && ride.getDriver() != null) {
             tvDriverName.setText(ride.getDriver().getFirstName() + " " + ride.getDriver().getLastName());
-            tvDriverStatus.setText(ride.getDriver().getStatus() != null ?
-                    ride.getDriver().getStatus().toString() : "Active");
+            tvDriverStatus.setText(ride.getDriver().getStatus() != null ? ride.getDriver().getStatus().toString() : "Active");
         }
     }
 
@@ -161,7 +173,7 @@ public class RideHistoryDialog extends DialogFragment {
 
         etScheduledTime.setOnClickListener(v -> showTimePicker());
 
-        btnScheduleRide.setOnClickListener(v -> scheduleRide());
+        btnScheduleRide.setOnClickListener(v -> confirmRide());
 
         viewModel.getScheduledTimeValid().observe(this, isValid -> {
             tvTimeError.setVisibility(isValid ? View.GONE : View.VISIBLE);
@@ -215,19 +227,145 @@ public class RideHistoryDialog extends DialogFragment {
         }
     }
 
-    private void scheduleRide() {
-        // TODO: Implement ride scheduling logic
-        String scheduledTime = viewModel.getScheduledTime().getValue();
-
-        if (scheduledTime != null) {
-            // Schedule for later
-
-            // rideApi.scheduleRide(ride.getRideRoute(), scheduledTime)...
-        } else {
-            // Schedule for now
-            // rideApi.scheduleRide(ride.getRideRoute(), null)...
+    private String buildScheduledDate() {
+        String timeString = viewModel.getScheduledTime().getValue();
+        if (timeString == null) {
+            return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toString();
         }
 
-        dismiss();
+        String[] parts = timeString.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = Integer.parseInt(parts[1]);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // If scheduled time is before now, assume it's for tomorrow
+        if (calendar.before(Calendar.getInstance())) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        // Convert to ISO 8601 format
+        LocalDateTime dateTime = LocalDateTime.ofInstant(calendar.toInstant(), ZoneId.systemDefault());
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toString();
+    }
+
+    private void confirmRide() {
+        if (ride == null || ride.getRideRoute() == null) {
+            Toast.makeText(getContext(), "Invalid ride data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Build schedule object
+        String selectedTimeOption = ddTime.getText().toString();
+        RideRequestDto.Schedule schedule;
+
+        if ("Later".equals(selectedTimeOption)) {
+            schedule = new RideRequestDto.Schedule();
+            schedule.setType(RideHistoryDialogViewModel.ScheduleType.LATER.toString());
+            schedule.setStartAt(buildScheduledDate());
+        } else {
+            schedule = new RideRequestDto.Schedule();
+            schedule.setType(RideHistoryDialogViewModel.ScheduleType.NOW.toString());
+            schedule.setStartAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toString());
+        }
+
+        // Build route with points
+        List<RideRequestDto.Point> routePoints = ride.getRideRoute().getRoutePoints().stream()
+                .map(p -> {
+                    RideRequestDto.Point dto = new RideRequestDto.Point();
+                    dto.setLat(p.getLat());
+                    dto.setLng(p.getLng());
+                    dto.setOrderIndex(p.getOrderIndex());
+                    dto.setType(p.getPointType().toString());
+                    dto.setAddress(p.getAddress());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        RideRequestDto.Route route = new RideRequestDto.Route();
+        route.setPoints(routePoints);
+
+        // Build preferences
+        RideRequestDto.Preferences preferences = new RideRequestDto.Preferences();
+        preferences.setPets(ride.getRideRequest().isPetTransport());
+        preferences.setBaby(ride.getRideRequest().isBabyTransport());
+
+        List<DriverLocationDto> freeDriversSnapshot = new ArrayList<>();
+        if (ride.getDriver() != null && !ride.getRideRoute().getRoutePoints().isEmpty()) {
+            DriverLocationDto driverSnapshot = new DriverLocationDto();
+            driverSnapshot.setDriverId(ride.getDriver().getId());
+            driverSnapshot.setLat(ride.getRideRoute().getRoutePoints().get(0).getLat());
+            driverSnapshot.setLng(ride.getRideRoute().getRoutePoints().get(0).getLng());
+            freeDriversSnapshot.add(driverSnapshot);
+        }
+
+        RideRequestDto payload = new RideRequestDto();
+        payload.setRoute(route);
+        payload.setSchedule(schedule);
+        payload.setVehicleTypeId(ride.getRideRequest().getVehicleType().getId());
+        payload.setPreferences(preferences);
+        payload.setLinkedPassengers(ride.getRideRequest().getLinkedPassengerEmails());
+        payload.setFreeDriversSnapshot(freeDriversSnapshot);
+
+        btnScheduleRide.setEnabled(false);
+        btnScheduleRide.setText("Scheduling...");
+
+        rideApi.createRideRequest(payload)
+                .enqueue(new Callback<RideRequestResponseDto>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<RideRequestResponseDto> call,
+                            Response<RideRequestResponseDto> response
+                    ) {
+
+                        if (!response.isSuccessful()
+                                || response.body() == null) {
+
+                            Log.e("RIDE", "Request failed");
+                            return;
+                        }
+
+                        RideRequestResponseDto res = response.body();
+
+                        if ("ACCEPTED".equals(res.status)
+                                && res.driver != null) {
+
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Ride accepted. Driver: "
+                                            + res.driver.firstName
+                                            + " "
+                                            + res.driver.lastName,
+                                    android.widget.Toast.LENGTH_LONG
+                            ).show();
+
+
+                        } else {
+                            android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "No drivers available",
+                                    android.widget.Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<RideRequestResponseDto> call,
+                            Throwable t
+                    ) {
+                        Log.e("RIDE", "Network error", t);
+                    }
+                });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }
