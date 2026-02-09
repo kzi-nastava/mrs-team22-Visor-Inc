@@ -82,6 +82,10 @@ export class AuthenticationService {
     return this._isReady$.asObservable();
   }
 
+  public get currentUserValue(): User | null {
+    return this._activeUser$.value;
+  }
+
   public get accessToken() {
     if (this.tokenDto && this.isValid(this.tokenDto.accessToken)) {
       return of(this.tokenDto.accessToken);
