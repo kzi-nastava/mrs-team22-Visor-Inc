@@ -37,6 +37,12 @@ public class AdminStatisticsFragment extends Fragment {
         setupDatePickers();
         setupSpinner();
 
+        binding.lineChart.getDescription().setEnabled(false);
+        binding.lineChart.setPinchZoom(true);
+        binding.lineChart.setScaleEnabled(true);
+        binding.lineChart.animateX(800);
+
+
         binding.generateButton.setOnClickListener(v -> generate());
 
         viewModel.getReport().observe(getViewLifecycleOwner(), this::populateUi);
@@ -48,19 +54,18 @@ public class AdminStatisticsFragment extends Fragment {
         String from = formatDate(fromDate);
         String to = formatDate(toDate);
 
-        // TODO: uzmi selektovanog usera i izracunaj userId / driverId
         viewModel.loadReport(from, to, null, null);
     }
 
     private void populateUi(ReportResponseDto dto) {
 
-        binding.totalRides.setText("Total rides: " + dto.totalRides);
-        binding.totalKm.setText("Total km: " + dto.totalKm);
-        binding.totalMoney.setText("Total money: " + dto.totalMoney);
-
         int days = dto.dailyStats.size();
         double avg = days > 0 ? dto.totalMoney / days : 0;
-        binding.averageMoney.setText("Average per day: " + avg);
+
+        binding.totalRides.setText(String.format(Locale.getDefault(), "%.2f", (double) dto.totalRides));
+        binding.totalKm.setText(String.format(Locale.getDefault(), "%.2f km", dto.totalKm));
+        binding.totalMoney.setText(String.format(Locale.getDefault(), "%.2f €", dto.totalMoney));
+        binding.averageMoney.setText(String.format(Locale.getDefault(), "%.2f €", avg));
 
         List<Entry> rides = new ArrayList<>();
         List<Entry> km = new ArrayList<>();
@@ -73,9 +78,37 @@ public class AdminStatisticsFragment extends Fragment {
         }
 
         LineDataSet ds1 = new LineDataSet(rides, "Rides");
-        LineDataSet ds2 = new LineDataSet(km, "Kilometers");
-        LineDataSet ds3 = new LineDataSet(money, "Money");
+        ds1.setColor(getResources().getColor(R.color.secondary));
+        ds1.setCircleColor(getResources().getColor(R.color.secondary));
+        ds1.setCircleRadius(4f);
+        ds1.setLineWidth(2.5f);
+        ds1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        ds1.setDrawFilled(true);
+        ds1.setFillColor(getResources().getColor(R.color.secondary));
+        ds1.setFillAlpha(60);
 
+        LineDataSet ds2 = new LineDataSet(km, "Kilometers");
+        ds2.setColor(getResources().getColor(R.color.light_blue_A400));
+        ds2.setCircleColor(getResources().getColor(R.color.light_blue_A400));
+        ds2.setCircleRadius(4f);
+        ds2.setLineWidth(2.5f);
+        ds2.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        ds2.setDrawFilled(true);
+        ds2.setFillColor(getResources().getColor(R.color.light_blue_A400));
+        ds2.setFillAlpha(60);
+
+        LineDataSet ds3 = new LineDataSet(money, "Money");
+        ds3.setColor(getResources().getColor(R.color.orange));
+        ds3.setCircleColor(getResources().getColor(R.color.orange));
+        ds3.setCircleRadius(4f);
+        ds3.setLineWidth(2.5f);
+        ds3.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        ds3.setDrawFilled(true);
+        ds3.setFillColor(getResources().getColor(R.color.orange));
+        ds3.setFillAlpha(60);
+
+        LineData lineData = new LineData(ds1, ds2, ds3);
+        binding.lineChart.setData(lineData);
         binding.lineChart.setData(new LineData(ds1, ds2, ds3));
         binding.lineChart.invalidate();
     }

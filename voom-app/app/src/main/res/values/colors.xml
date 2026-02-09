@@ -13,4 +13,5 @@
     <color name="black_overlay">#66000000</color>
     <color name="gray_600">#4B5563</color>>
     <color name="card_stroke">#E0E0E0</color>
+    <color name="orange">#FF9800</color>
 </resources>
