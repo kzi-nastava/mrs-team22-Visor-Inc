@@ -70,4 +70,22 @@ public class ChatController {
             return dto;
         }).toList());
     }
+
+    @GetMapping("/api/chat/history/{userEmail}/{partnerEmail}")
+    public ResponseEntity<List<ChatMessageDto>> getChatHistory(
+            @PathVariable String userEmail,
+            @PathVariable String partnerEmail) {
+
+        return ResponseEntity.ok(repository.findConversationHistory(userEmail, partnerEmail).stream().map(cm -> {
+            User sender = userRepository.findByEmail(cm.getSenderEmail()).orElse(null);
+            ChatMessageDto dto;
+            if (sender != null) {
+                dto = new ChatMessageDto(cm, sender.getPerson().getFirstName(), sender.getPerson().getLastName());
+            }
+            else {
+                dto = new ChatMessageDto(cm, "Unknown", "Unknown");
+            }
+            return dto;
+        }).toList());
+    }
 }
