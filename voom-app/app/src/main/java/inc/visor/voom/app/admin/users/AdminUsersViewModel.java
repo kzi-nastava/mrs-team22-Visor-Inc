@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import inc.visor.voom.app.admin.users.api.UserApi;
-import inc.visor.voom.app.admin.users.dto.BlockUserRequestDto;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 import inc.visor.voom.app.network.RetrofitClient;
 import retrofit2.Call;

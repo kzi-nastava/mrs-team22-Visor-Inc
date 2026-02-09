@@ -3,6 +3,7 @@ package inc.visor.voom.app.admin.users.api;
 import java.util.List;
 import java.util.Map;
 
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -20,4 +21,6 @@ public interface UserApi {
             @Path("id") Long id,
             @Body Map<String, String> body
     );
+    @GET("/api/users/{id}/block-note")
+    Call<BlockNoteDto> getActiveBlock(@Path("id") Long userId);
 }

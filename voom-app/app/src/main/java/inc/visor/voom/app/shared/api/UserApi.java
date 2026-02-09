@@ -1,7 +1,9 @@
 package inc.visor.voom.app.shared.api;
 
 import java.util.List;
+import java.util.Map;
 
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.shared.dto.user.CreateUserDto;
 import inc.visor.voom.app.shared.dto.user.UserProfileDto;
 import retrofit2.Call;

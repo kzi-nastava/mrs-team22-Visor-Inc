@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
@@ -90,6 +93,10 @@ public class DriverHomeFragment extends Fragment {
     private Button panicButton;
     private RideApi rideApi;
     private GeoPoint lastFocusPoint;
+
+    private boolean isSuspended = false;
+    private String blockReason = null;
+
 
 
     public DriverHomeFragment() {
@@ -184,6 +191,59 @@ public class DriverHomeFragment extends Fragment {
             }
         });
 
+        Disposable disposableBlock = DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    UserApi userApi = RetrofitClient.getInstance()
+                            .create(UserApi.class);
+
+                    userApi.getActiveBlock(userId)
+                            .enqueue(new Callback<BlockNoteDto>() {
+                                @Override
+                                public void onResponse(@NonNull Call<BlockNoteDto> call,
+                                                       @NonNull Response<BlockNoteDto> response) {
+
+                                    Log.d("BLOCK_CHECK", "HTTP CODE: " + response.code());
+                                    Log.d("BLOCK_CHECK", "RAW BODY: " + response.body());
+
+                                    if (!response.isSuccessful()) {
+                                        Log.d("BLOCK_CHECK", "Request not successful");
+                                        return;
+                                    }
+
+                                    if (response.body() == null) {
+                                        Log.d("BLOCK_CHECK", "Body is NULL");
+                                        return;
+                                    }
+
+                                    Log.d("BLOCK_CHECK", "Active: " + response.body().active);
+                                    Log.d("BLOCK_CHECK", "Reason: " + response.body().reason);
+
+                                    if (response.body().active) {
+                                        isSuspended = true;
+                                        blockReason = response.body().reason;
+
+                                        Log.d("BLOCK_CHECK", "USER IS SUSPENDED → SHOWING UI");
+
+                                        showSuspendedState(view);
+                                    } else {
+                                        Log.d("BLOCK_CHECK", "User is NOT suspended");
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<BlockNoteDto> call,
+                                                      @NonNull Throwable t) {
+                                    Log.e("BLOCK_CHECK", "FAILED REQUEST", t);
+                                }
+                            });
+
+                });
+
+        compositeDisposable.add(disposableBlock);
+
+
         routeRepository = new RouteRepository();
 
         observeAssignedRide();
@@ -242,6 +302,27 @@ public class DriverHomeFragment extends Fragment {
         });
 
     }
+
+    private void showSuspendedState(View view) {
+
+        TextView tvReason = view.findViewById(R.id.tv_block_reason);
+        if (tvReason != null && blockReason != null) {
+            tvReason.setText("Reason: " + blockReason);
+        }
+
+        View content = view.findViewById(R.id.layout_content);
+        View suspendedLayout = view.findViewById(R.id.layout_suspended);
+
+        if (content != null) {
+            content.setVisibility(View.GONE);
+        }
+
+        if (suspendedLayout != null) {
+            suspendedLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+
 
     private void observeAssignedRide() {
 
