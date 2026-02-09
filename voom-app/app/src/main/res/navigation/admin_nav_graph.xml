@@ -22,8 +22,14 @@
 
     <fragment
         android:id="@+id/adminUsersFragment"
+        android:name="inc.visor.voom.app.admin.users.AdminUsersFragment"
+        android:label="Users" />
+
+    <fragment
+        android:id="@+id/adminStatisticsFragment"
         android:name="inc.visor.voom.app.admin.statistics.AdminStatisticsFragment"
         android:label="Users" />
+
 
     <fragment
         android:id="@+id/createDriverFragment"
