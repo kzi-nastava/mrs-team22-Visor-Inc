@@ -10,9 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.GsonBuilder;
 
 import org.osmdroid.views.overlay.MapEventsOverlay;
@@ -31,6 +33,7 @@ import java.util.List;
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.users.api.UserApi;
 import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
+import inc.visor.voom.app.chat.ChatFragment;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
@@ -337,6 +340,18 @@ public class UserHomeFragment extends Fragment {
                         }
                     }
                 });
+
+        FloatingActionButton fabChat = view.findViewById(R.id.fabChatBubble);
+        CardView chatCard = view.findViewById(R.id.chatContainer);
+
+        fabChat.setOnClickListener(v -> {
+            chatCard.setVisibility(View.VISIBLE);
+            fabChat.setVisibility(View.GONE);
+
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.chat_fragment_placeholder, new ChatFragment())
+                    .commit();
+        });
 
 
     }

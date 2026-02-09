@@ -103,6 +103,10 @@ public class MainAdminFragment extends Fragment {
                 return false;
             }
 
+            if (id == R.id.nav_activity) {
+                navController.navigate(R.id.chatListFragment);
+            }
+
             if (id == R.id.nav_profile) {
                 navController.navigate(R.id.adminProfileFragment);
                 return true;

@@ -266,7 +266,7 @@
                         android:layout_width="72dp"
                         android:layout_height="72dp"
                         android:src="@drawable/ic_warning"
-                        android:tint="@color/panic"
+                        app:tint="@color/panic"
                         android:layout_marginBottom="16dp"/>
 
                     <TextView
@@ -294,6 +294,35 @@
         </LinearLayout>
 
     </FrameLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/chatContainer"
+        android:layout_width="0dp"
+        android:layout_height="450dp"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <FrameLayout
+            android:id="@+id/chat_fragment_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChatBubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        app:srcCompat="@drawable/outline_chat_bubble_24"
+        app:backgroundTint="#2563EB"
+        app:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

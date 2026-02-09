@@ -29,6 +29,7 @@ import { MatDivider } from '@angular/material/list';
 import { MatButton } from '@angular/material/button';
 import { RideStopDto } from '../../../shared/rest/ride/ride.model';
 import { LatLng } from 'leaflet';
+import { UserChat } from "../../../shared/user-chat/user-chat";
 
 export const ROUTE_DRIVER_HOME = 'ride';
 
@@ -57,7 +58,8 @@ type RidePhase = 'IDLE' | 'GOING_TO_PICKUP' | 'AT_PICKUP' | 'RIDE_STARTED' | 'AT
     MatDialogModule,
     MatDivider,
     MatButton,
-  ],
+    UserChat
+],
   templateUrl: './driver-home.html',
   styleUrl: './driver-home.css',
 })
