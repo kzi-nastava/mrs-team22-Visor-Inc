@@ -12,4 +12,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query("SELECT DISTINCT CASE WHEN m.senderEmail = 'admin' THEN m.recipientEmail ELSE m.senderEmail END " +
             "FROM ChatMessage m WHERE m.senderEmail = 'admin' OR m.recipientEmail = 'admin'")
     List<String> findDistinctChatPartners();
+
+
+    @Query("SELECT m FROM ChatMessage m WHERE " +
+            "(m.senderEmail = :user1 AND m.recipientEmail = :user2) OR " +
+            "(m.senderEmail = :user2 AND m.recipientEmail = :user1) " +
+            "ORDER BY m.timestamp ASC")
+    List<ChatMessage> findConversationHistory(String user1, String user2);
 }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -84,27 +85,29 @@ public class MainAdminFragment extends Fragment {
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation_view);
 
         bottomNav.setOnItemSelectedListener(item -> {
+
             int id = item.getItemId();
 
-            // all of these should be changed in future
-
             if (id == R.id.nav_home) {
-                // implement ts
-                return false;
+                navController.navigate(R.id.editPricingFragment);
+                return true;
             }
 
-            if (id == R.id.nav_services) {
+            if (id == R.id.nav_tracking) {
                 navController.navigate(R.id.adminTrackingFragment);
                 return true;
             }
 
-            if (id == R.id.nav_statistics) {
-                navController.navigate(R.id.adminUsersFragment);
-                return true;
+            if (id == R.id.nav_insights) {
+                showInsightsSheet(navController);
+                return false;
+            }
+
+            if (id == R.id.nav_activity) {
+                navController.navigate(R.id.chatListFragment);
             }
 
             if (id == R.id.nav_profile) {
-
                 navController.navigate(R.id.adminProfileFragment);
                 return true;
             }
@@ -118,4 +121,28 @@ public class MainAdminFragment extends Fragment {
         });
 
     }
+
+    private void showInsightsSheet(NavController navController) {
+
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View sheetView = getLayoutInflater()
+                .inflate(R.layout.bottom_sheet_insights, null);
+
+        dialog.setContentView(sheetView);
+
+        sheetView.findViewById(R.id.btn_users)
+                .setOnClickListener(v -> {
+                    dialog.dismiss();
+                    navController.navigate(R.id.adminUsersFragment);
+                });
+
+        sheetView.findViewById(R.id.btn_statistics)
+                .setOnClickListener(v -> {
+                    dialog.dismiss();
+                    navController.navigate(R.id.adminStatisticsFragment);
+                });
+
+        dialog.show();
+    }
+
 }

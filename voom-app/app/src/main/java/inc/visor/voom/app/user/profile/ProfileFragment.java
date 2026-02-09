@@ -14,10 +14,18 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.databinding.FragmentProfileBinding;
+import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.DataStoreManager;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 public class ProfileFragment extends Fragment {
 
@@ -43,6 +51,8 @@ public class ProfileFragment extends Fragment {
             @Nullable Bundle savedInstanceState
     ) {
         super.onViewCreated(view, savedInstanceState);
+
+        checkIfBlocked();
 
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
@@ -122,6 +132,60 @@ public class ProfileFragment extends Fragment {
                 )
                 .show();
     }
+
+    private void checkIfBlocked() {
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    UserApi userApi = RetrofitClient.getInstance()
+                            .create(UserApi.class);
+
+                    userApi.getActiveBlock(userId)
+                            .enqueue(new Callback<BlockNoteDto>() {
+
+                                @Override
+                                public void onResponse(@NonNull Call<BlockNoteDto> call,
+                                                       @NonNull Response<BlockNoteDto> response) {
+
+                                    if (!response.isSuccessful()
+                                            || response.body() == null) {
+                                        return;
+                                    }
+
+                                    if (response.body().active) {
+                                        disableAllInputs(response.body().reason);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<BlockNoteDto> call,
+                                                      @NonNull Throwable t) {
+                                }
+                            });
+                });
+    }
+
+    private void disableAllInputs(String reason) {
+
+        binding.etFirstName.setEnabled(false);
+        binding.etLastName.setEnabled(false);
+        binding.etEmail.setEnabled(false);
+        binding.etAddress.setEnabled(false);
+        binding.etPhoneNumber.setEnabled(false);
+
+        binding.btnSave.setEnabled(false);
+        binding.btnChangePassword.setEnabled(false);
+
+        Snackbar.make(
+                binding.getRoot(),
+                "Account suspended: " + reason,
+                Snackbar.LENGTH_LONG
+        ).show();
+    }
+
+
 
 
     @Override
