@@ -38,31 +38,6 @@
                 android:layout_marginHorizontal="8dp"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tvStartAddr"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:gravity="end"
-                    android:text="Address A" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginHorizontal="4dp"
-                    android:src="@drawable/outline_arrow_forward_24" />
-
-                <TextView
-                    android:id="@+id/tvEndAddr"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:gravity="start"
-                    android:text="Address B" />
             </LinearLayout>
 
             <TextView
@@ -71,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:text="Username"
                 android:textSize="14sp"
+                android:paddingHorizontal="16sp"
                 android:textColor="@android:color/black" />
 
             <ImageView
@@ -96,6 +72,44 @@
                 android:columnCount="2"
                 android:rowCount="1"
                 android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:padding="4dp"
+                    android:paddingVertical="32dp"
+                    android:layout_columnSpan="2">
+
+                    <TextView
+                        android:id="@+id/tvStartAddr"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:gravity="end"
+                        android:text="Address A" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginHorizontal="4dp"
+                        android:src="@drawable/outline_arrow_forward_24" />
+
+                    <TextView
+                        android:id="@+id/tvEndAddr"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:gravity="start"
+                        android:text="Address B" />
+
+                </LinearLayout>
 
                 <!-- Price -->
                 <LinearLayout

@@ -16,6 +16,7 @@ public class RideHistoryDto {
     public String finishedAt;
     public List<User> passengers;
     public User cancelledBy;
+    public boolean isExpanded;
 
     public Long getId() {
         return id;
@@ -79,5 +80,13 @@ public class RideHistoryDto {
 
     public void setCancelledBy(User cancelledBy) {
         this.cancelledBy = cancelledBy;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public void setExpanded(boolean b) {
+        this.isExpanded = b;
     }
 }

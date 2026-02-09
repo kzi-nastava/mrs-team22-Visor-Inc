@@ -110,7 +110,7 @@ public class MainAdminFragment extends Fragment {
             }
 
             if (id == R.id.nav_activity) {
-                // implement this mother seal
+                navController.navigate(R.id.rideHistoryFragment);
                 return false;
             }
 

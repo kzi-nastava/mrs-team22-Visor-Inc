@@ -115,4 +115,5 @@ public class RideRequest {
     public double calculatedPrice;
     public List<String> linkedPassengerEmails;
     public User cancelledBy;
+    public String reason;
 }
