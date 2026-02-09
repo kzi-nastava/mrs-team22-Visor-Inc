@@ -67,4 +67,10 @@ public class RideHistoryFragment extends Fragment {
 
         return view;
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mViewModel.dispose();
+    }
 }

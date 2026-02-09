@@ -1,5 +1,6 @@
 package inc.visor.voom.app.shared.component.history;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,9 @@ import java.time.temporal.ChronoField;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.driver.arrival.ArrivalDialogFragment;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
+import inc.visor.voom.app.shared.dto.RoutePointType;
 
 public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.ViewHolder> {
 
@@ -93,7 +96,7 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
 
     // Helper method to open route on map
     private void openRouteOnMap(RideHistoryDto ride) {
-
+//        RideHistoryDialog dialog = RideHistoryDialog.newInstance(ride);
     }
 
     @Override
@@ -112,18 +115,13 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
         View expandedContent;
         TextView tvPrice, tvDistance, tvVehicle, tvStatus;
         TextView tvPetTransport, tvBabyTransport;
-
-        // Cancellation details
         LinearLayout layoutCancellationDetails;
         TextView tvCancelledBy, tvCancelReason;
-
-        // Buttons
         Button btnOpenRoute;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Initialize header elements
             headerLayout = itemView.findViewById(R.id.headerLayout);
             tvTime = itemView.findViewById(R.id.tvTime);
             tvStartAddr = itemView.findViewById(R.id.tvStartAddr);
@@ -131,23 +129,19 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
             tvUserName = itemView.findViewById(R.id.tvUserName);
             ivDriverIcon = itemView.findViewById(R.id.ivDriverIcon);
 
-            // Initialize expanded content
             expandedContent = itemView.findViewById(R.id.expandedContent);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvDistance = itemView.findViewById(R.id.tvDistance);
             tvVehicle = itemView.findViewById(R.id.tvVehicle);
             tvStatus = itemView.findViewById(R.id.tvStatus);
 
-            // Initialize transport options
             tvPetTransport = itemView.findViewById(R.id.tvPetTransport);
             tvBabyTransport = itemView.findViewById(R.id.tvBabyTransport);
 
-            // Initialize cancellation details
             layoutCancellationDetails = itemView.findViewById(R.id.layoutCancellationDetails);
             tvCancelledBy = itemView.findViewById(R.id.tvCancelledBy);
             tvCancelReason = itemView.findViewById(R.id.tvCancelReason);
 
-            // Initialize buttons
             btnOpenRoute = itemView.findViewById(R.id.btnOpenRoute);
         }
     }

@@ -46,7 +46,7 @@ public class RideHistoryViewModel extends ViewModel {
             final String userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
             switch (userRole) {
                 case "ADMIN":
-                    this.rideApi.getRides(null, null, "DESC").enqueue(new Callback<List<RideHistoryDto>>() {
+                    this.rideApi.getRides(null, null, "ASC").enqueue(new Callback<List<RideHistoryDto>>() {
                         @Override
                         public void onResponse(@NonNull Call<List<RideHistoryDto>> call, @NonNull Response<List<RideHistoryDto>> response) {
                             if (response.isSuccessful()) {
@@ -65,7 +65,7 @@ public class RideHistoryViewModel extends ViewModel {
                     });
                     break;
                 case "USER":
-                    this.rideApi.getRidesForUser(userId, null, null, "DESC").enqueue(new Callback<List<RideHistoryDto>>() {
+                    this.rideApi.getRidesForUser(userId, null, null, "ASC").enqueue(new Callback<List<RideHistoryDto>>() {
                         @Override
                         public void onResponse(@NonNull Call<List<RideHistoryDto>> call, @NonNull Response<List<RideHistoryDto>> response) {
                             if (response.isSuccessful()) {
