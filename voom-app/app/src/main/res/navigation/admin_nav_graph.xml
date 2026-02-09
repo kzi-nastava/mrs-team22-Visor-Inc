@@ -35,5 +35,13 @@
         android:id="@+id/createDriverFragment"
         android:name="inc.visor.voom.app.driver.create.CreateDriverFragment"
         android:label="Create Driver" />
+    <fragment
+        android:id="@+id/chatListFragment"
+        android:name="inc.visor.voom.app.chat.ChatListFragment"
+        android:label="ChatListFragment" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="inc.visor.voom.app.chat.ChatFragment"
+        android:label="ChatFragment" />
 
 </navigation>
