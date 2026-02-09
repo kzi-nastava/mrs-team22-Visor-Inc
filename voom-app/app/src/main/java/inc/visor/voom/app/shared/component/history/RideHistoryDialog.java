@@ -1,5 +1,7 @@
 package inc.visor.voom.app.shared.component.history;
 
+import static inc.visor.voom.app.shared.helper.ConvertHelper.convertToRoutePoints;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,11 +19,13 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,12 +38,15 @@ import java.util.stream.Collectors;
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.RideApi;
+import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
-import inc.visor.voom.app.shared.dto.ride.RideResponseDto;
 import inc.visor.voom.app.shared.model.DriverLocationDto;
-import inc.visor.voom.app.user.home.UserHomeViewModel;
+import inc.visor.voom.app.shared.model.enums.RoutePointType;
+import inc.visor.voom.app.shared.repository.RouteRepository;
+import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
 import inc.visor.voom.app.user.home.dto.RideRequestResponseDto;
+import inc.visor.voom.app.user.home.model.RoutePoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -62,6 +69,10 @@ public class RideHistoryDialog extends DialogFragment {
     private TextInputLayout tilScheduledTime;
     private TextInputEditText etScheduledTime;
     private Button btnScheduleRide;
+
+    private RouteRepository routeRepository;
+    private MapView mapView;
+    private MapRendererService mapRenderer;
 
     public static RideHistoryDialog newInstance(RideHistoryDto ride) {
         RideHistoryDialog fragment = new RideHistoryDialog();
@@ -98,7 +109,7 @@ public class RideHistoryDialog extends DialogFragment {
         setupRatings();
         setupComplaints();
         setupScheduling();
-        setupRoutePoints();
+        setupMap();
 
         return dialog;
     }
@@ -117,6 +128,84 @@ public class RideHistoryDialog extends DialogFragment {
         tilScheduledTime = view.findViewById(R.id.til_scheduled_time);
         etScheduledTime = view.findViewById(R.id.et_scheduled_time);
         btnScheduleRide = view.findViewById(R.id.btnScheduleRide);
+        mapView = view.findViewById(R.id.map);
+
+        mapView.getController().setZoom(14.0);
+        mapView.getController().setCenter(new GeoPoint(45.2396, 19.8227));
+        mapRenderer = new MapRendererService(mapView);
+        routeRepository = new RouteRepository();
+    }
+
+    private void setupMap() {
+        if (mapView == null || ride == null || ride.getRideRoute() == null) {
+            return;
+        }
+
+        List<inc.visor.voom.app.shared.model.RoutePoint> routePoints = ride.getRideRoute().getRoutePoints();
+
+        if (routePoints != null && !routePoints.isEmpty()) {
+            viewModel.getRoutePoints().setValue(routePoints);
+
+            inc.visor.voom.app.shared.model.RoutePoint firstPoint = routePoints.get(0);
+            mapView.getController().setCenter(new GeoPoint(firstPoint.lat, firstPoint.lng));
+
+            drawRouteOnMap(routePoints);
+        }
+    }
+
+    private void drawRoute(List<RoutePoint> points) {
+
+        routeRepository.fetchRouteFromPoints(
+                points,
+                new Callback<OsrmResponse>() {
+
+                    @Override
+                    public void onResponse(Call<OsrmResponse> call,
+                                           Response<OsrmResponse> response) {
+
+                        if (!response.isSuccessful()
+                                || response.body() == null) return;
+
+                        List<List<Double>> coords =
+                                response.body().routes.get(0).geometry.coordinates;
+
+                        List<GeoPoint> geoPoints = new ArrayList<>();
+
+                        for (List<Double> c : coords) {
+                            geoPoints.add(new GeoPoint(c.get(1), c.get(0)));
+                        }
+
+                        mapRenderer.renderRoute(geoPoints);
+                    }
+
+                    @Override
+                    public void onFailure(Call<OsrmResponse> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+        );
+    }
+
+    private void drawRouteOnMap(List<inc.visor.voom.app.shared.model.RoutePoint> points) {
+        if (mapRenderer == null || points == null || points.isEmpty()) {
+            return;
+        }
+
+        mapRenderer.clearRoute();
+
+        List<RoutePoint> geoPoints = points.stream().map(RoutePoint::new).collect(Collectors.toList());
+
+        mapRenderer.renderMarkers(
+                geoPoints,
+                requireContext().getDrawable(R.drawable.ic_location_24)
+        );
+
+        if (points.size() < 2) {
+            mapRenderer.clearRoute();
+            return;
+        }
+
+        drawRoute(geoPoints);
     }
 
     private void setupDriverInfo() {
@@ -218,15 +307,6 @@ public class RideHistoryDialog extends DialogFragment {
         viewModel.getScheduledTimeValid().setValue(isValid);
     }
 
-    private void setupRoutePoints() {
-        if (ride != null && ride.getRideRoute() != null && ride.getRideRoute().getRoutePoints() != null) {
-            viewModel.getRoutePoints().setValue(ride.getRideRoute().getRoutePoints());
-
-            // TODO: Setup map view here if you want to display the route
-            // This would require initializing your map library (OSM or Google Maps)
-        }
-    }
-
     private String buildScheduledDate() {
         String timeString = viewModel.getScheduledTime().getValue();
         if (timeString == null) {
@@ -319,8 +399,8 @@ public class RideHistoryDialog extends DialogFragment {
 
                     @Override
                     public void onResponse(
-                            Call<RideRequestResponseDto> call,
-                            Response<RideRequestResponseDto> response
+                            @NonNull Call<RideRequestResponseDto> call,
+                            @NonNull Response<RideRequestResponseDto> response
                     ) {
 
                         if (!response.isSuccessful()
@@ -356,8 +436,8 @@ public class RideHistoryDialog extends DialogFragment {
 
                     @Override
                     public void onFailure(
-                            Call<RideRequestResponseDto> call,
-                            Throwable t
+                            @NonNull Call<RideRequestResponseDto> call,
+                            @NonNull Throwable t
                     ) {
                         Log.e("RIDE", "Network error", t);
                     }
@@ -367,5 +447,12 @@ public class RideHistoryDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (mapView != null) {
+            mapView.onDetach();
+            mapView = null;
+        }
+
+        mapRenderer = null;
     }
 }
