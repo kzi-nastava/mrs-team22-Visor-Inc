@@ -32,8 +32,8 @@ public class AdminStatisticsViewModel extends ViewModel {
     public void loadReport(
             String from,
             String to,
-            Integer userId,
-            Integer driverId
+            Long userId,
+            Long driverId
     ) {
         loading.setValue(true);
 

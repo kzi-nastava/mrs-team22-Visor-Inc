@@ -18,8 +18,8 @@ public class AdminStatisticsRepository {
     public void getReport(
             String from,
             String to,
-            Integer userId,
-            Integer driverId,
+            Long userId,
+            Long driverId,
             Callback<ReportResponseDto> callback
     ) {
         api.getReport(from, to, userId, driverId)

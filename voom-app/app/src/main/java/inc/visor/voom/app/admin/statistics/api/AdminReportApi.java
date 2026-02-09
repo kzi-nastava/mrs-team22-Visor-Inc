@@ -11,7 +11,7 @@ public interface AdminReportApi {
     Call<ReportResponseDto> getReport(
             @Query("from") String from,
             @Query("to") String to,
-            @Query("userId") Integer userId,
-            @Query("driverId") Integer driverId
+            @Query("userId") Long userId,
+            @Query("driverId") Long driverId
     );
 }

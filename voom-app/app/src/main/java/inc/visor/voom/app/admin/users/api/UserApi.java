@@ -23,4 +23,5 @@ public interface UserApi {
     );
     @GET("/api/users/{id}/block-note")
     Call<BlockNoteDto> getActiveBlock(@Path("id") Long userId);
+
 }

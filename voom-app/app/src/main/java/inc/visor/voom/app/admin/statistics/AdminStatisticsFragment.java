@@ -1,11 +1,15 @@
 package inc.visor.voom.app.admin.statistics;
 
 import android.app.DatePickerDialog;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -16,12 +20,27 @@ import java.util.*;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.admin.statistics.dto.ReportResponseDto;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 import inc.visor.voom.app.databinding.FragmentAdminStatisticsBinding;
+
+import inc.visor.voom.app.network.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Callback;
+import android.widget.AdapterView;
+import android.widget.TextView;
+
 
 public class AdminStatisticsFragment extends Fragment {
 
     private FragmentAdminStatisticsBinding binding;
     private AdminStatisticsViewModel viewModel;
+
+    private UserApi userApi;
+    private List<UserProfileDto> users = new ArrayList<>();
+    private UserProfileDto selectedUser = null;
+
 
     private Date fromDate, toDate;
 
@@ -34,8 +53,11 @@ public class AdminStatisticsFragment extends Fragment {
         binding = FragmentAdminStatisticsBinding.bind(view);
         viewModel = new ViewModelProvider(this).get(AdminStatisticsViewModel.class);
 
+
+        userApi = RetrofitClient.getInstance().create(UserApi.class);
+        loadUsers();
+
         setupDatePickers();
-        setupSpinner();
 
         binding.lineChart.getDescription().setEnabled(false);
         binding.lineChart.setPinchZoom(true);
@@ -48,13 +70,108 @@ public class AdminStatisticsFragment extends Fragment {
         viewModel.getReport().observe(getViewLifecycleOwner(), this::populateUi);
     }
 
+    private View createView(int position) {
+
+        TextView tv = new TextView(requireContext());
+        tv.setPadding(32, 24, 32, 24);
+        tv.setTextSize(16f);
+
+        UserProfileDto u = users.get(position);
+
+        int iconRes;
+
+        if (u == null) {
+            tv.setText("System Overview");
+            iconRes = R.drawable.ic_system;
+        } else if (u.userRoleId == 2) {
+            tv.setText(u.firstName + " " + u.lastName);
+            iconRes = R.drawable.ic_car;
+        } else {
+            tv.setText(u.firstName + " " + u.lastName);
+            iconRes = R.drawable.ic_driver;
+        }
+
+        Drawable icon = ContextCompat.getDrawable(requireContext(), iconRes);
+        tv.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
+        tv.setCompoundDrawablePadding(16);
+
+        return tv;
+    }
+
+
     private void generate() {
         if (fromDate == null || toDate == null) return;
 
         String from = formatDate(fromDate);
         String to = formatDate(toDate);
 
-        viewModel.loadReport(from, to, null, null);
+        Long userId = null;
+        Long driverId = null;
+
+        if (selectedUser != null) {
+            if (selectedUser.userRoleId == 2) {
+                driverId = selectedUser.id;
+            } else {
+                userId = selectedUser.id;
+            }
+        }
+
+        viewModel.loadReport(from, to, userId, driverId);
+    }
+
+    private void loadUsers() {
+        Log.d("ADMIN", "loadUsers called");
+
+        userApi.getUsers().enqueue(new Callback<List<UserProfileDto>>() {
+            @Override
+            public void onResponse(Call<List<UserProfileDto>> call,
+                                   Response<List<UserProfileDto>> response) {
+                Log.d("ADMIN", "Users count: " + response.body().size());
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    users.clear();
+                    users.add(null);
+
+                    users.addAll(response.body());
+
+                    ArrayAdapter<UserProfileDto> adapter =
+                            new ArrayAdapter<UserProfileDto>(
+                                    requireContext(),
+                                    android.R.layout.simple_spinner_item,
+                                    users
+                            ) {
+
+                                @Override
+                                public View getView(int position, View convertView, ViewGroup parent) {
+                                    return createView(position);
+                                }
+
+                                @Override
+                                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                                    return createView(position);
+                                }
+                            };
+
+                    binding.userSpinner.setAdapter(adapter);
+
+                    binding.userSpinner.setAdapter(adapter);
+
+                    binding.userSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            selectedUser = users.get(position);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) { }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserProfileDto>> call, Throwable t) { }
+        });
     }
 
     private void populateUi(ReportResponseDto dto) {
