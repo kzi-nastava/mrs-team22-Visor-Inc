@@ -1,16 +1,25 @@
 package inc.visor.voom.app.shared.component.history;
 
+import static java.security.AccessController.getContext;
+
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,16 +28,30 @@ import java.time.temporal.ChronoField;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.dto.UserProfileDto;
+import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
+import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
+import inc.visor.voom.app.shared.dto.ride.RatingSummaryDto;
+import inc.visor.voom.app.user.tracking.dto.RatingRequestDto;
 
 public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.ViewHolder> {
 
     private List<RideHistoryDto> rides;
     private FragmentManager fragmentManager;
 
+    private String currentUserEmail;
+
+    private String userRole;
+
+//    DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
     public RideHistoryAdapter(List<RideHistoryDto> rides, FragmentManager parentFragmentManager) {
         this.rides = rides;
         this.fragmentManager = parentFragmentManager;
+        this.currentUserEmail = DataStoreManager.getInstance().getUserEmail().blockingGet();
+        this.userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
     }
 
     @NonNull
@@ -87,6 +110,15 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
         holder.btnOpenRoute.setOnClickListener(v -> {
             openRouteOnMap(ride);
         });
+
+        if (canRate(ride)) {
+            holder.btnOpenRating.setVisibility(View.VISIBLE);
+            holder.btnOpenRating.setOnClickListener(v -> {
+                showRatingDialog(v.getContext(), ride);
+            });
+        } else {
+            holder.btnOpenRating.setVisibility(View.GONE);
+        }
     }
 
     private void openRouteOnMap(RideHistoryDto ride) {
@@ -112,7 +144,7 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
         TextView tvPetTransport, tvBabyTransport;
         LinearLayout layoutCancellationDetails;
         TextView tvCancelledBy, tvCancelReason;
-        Button btnOpenRoute;
+        Button btnOpenRoute, btnOpenRating;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -138,6 +170,87 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
             tvCancelReason = itemView.findViewById(R.id.tvCancelReason);
 
             btnOpenRoute = itemView.findViewById(R.id.btnOpenRoute);
+            btnOpenRating = itemView.findViewById(R.id.btnOpenRating);
+        }
+    }
+
+    private void showRatingDialog(Context context, RideHistoryDto ride) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_rate_ride, null);
+        bottomSheetDialog.setContentView(view);
+
+        RatingBar ratingDriver = view.findViewById(R.id.ratingDriver);
+        RatingBar ratingCar = view.findViewById(R.id.ratingCar);
+        EditText etComment = view.findViewById(R.id.etReviewComment);
+        Button btnSubmit = view.findViewById(R.id.btnSubmitReview);
+
+        btnSubmit.setOnClickListener(v -> {
+            int driverRating = (int) ratingDriver.getRating();
+            int carRating = (int) ratingCar.getRating();
+            String comment = etComment.getText().toString();
+
+            RideApi rideApi = RetrofitClient.getInstance().create(RideApi.class);
+            RatingRequestDto dto = new RatingRequestDto();
+            dto.setVehicleRating(carRating);
+            dto.setDriverRating(driverRating);
+            dto.setComment(comment);
+            rideApi.rateRide(ride.getId(), dto).enqueue(new retrofit2.Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull retrofit2.Call<Void> call, @NonNull retrofit2.Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        RatingSummaryDto newLocalRating = new RatingSummaryDto();
+                        UserProfileDto dto = new UserProfileDto();
+                        dto.setEmail(currentUserEmail);
+                        dto.setFirstName("By");
+                        dto.setLastName("Yourself");
+                        newLocalRating.setRater(dto);
+                        newLocalRating.setMessage(comment);
+                        newLocalRating.setCreatedAt(LocalDateTime.now().toString());
+                        newLocalRating.setDriverRating(driverRating);
+                        newLocalRating.setVehicleRating(carRating);
+                        ride.getRatings().add(newLocalRating);
+                        Toast.makeText(view.getContext(), "Review submitted successfully", Toast.LENGTH_SHORT).show();
+                        notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(view.getContext(), "Failed to submit", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull retrofit2.Call<Void> call, @NonNull Throwable t) {
+                    Log.e("RATING_ERROR", "Network failure", t);
+                    Toast.makeText(view.getContext(), "Network error", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private boolean canRate(RideHistoryDto ride) {
+
+        if (ride.getFinishedAt() == null || !"finished".equalsIgnoreCase(ride.getStatus().toString())) {
+            return false;
+        }
+
+        if (!userRole.equals("USER")) {
+            return false;
+        }
+
+        for (RatingSummaryDto rating : ride.getRatings()) {
+            if (rating.getRater().getEmail().equals(currentUserEmail)) {
+                return false;
+            }
+        }
+
+        try {
+            LocalDateTime finishedDate = LocalDateTime.parse(ride.getFinishedAt());
+            return finishedDate.isAfter(LocalDateTime.now().minusDays(3));
+
+        } catch (Exception e) {
+            return false;
         }
     }
 

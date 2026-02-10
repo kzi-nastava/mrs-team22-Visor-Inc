@@ -105,6 +105,7 @@ public class MainAdminFragment extends Fragment {
 
             if (id == R.id.nav_activity) {
                 navController.navigate(R.id.chatListFragment);
+                return true;
             }
 
             if (id == R.id.nav_profile) {
@@ -112,10 +113,10 @@ public class MainAdminFragment extends Fragment {
                 return true;
             }
 
-            if (id == R.id.nav_activity) {
-                navController.navigate(R.id.rideHistoryFragment);
-                return false;
-            }
+//            if (id == R.id.nav_activity) {
+//                navController.navigate(R.id.rideHistoryFragment);
+//                return false;
+//            }
 
             return false;
         });
