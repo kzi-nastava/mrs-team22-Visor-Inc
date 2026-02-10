@@ -6,7 +6,7 @@ import inc.visor.voom.app.admin.users.dto.UserProfileDto;
 
 public class ComplaintSummaryDto {
     String message;
-    LocalDateTime time;
+    String time;
     UserProfileDto reporter;
 
     public ComplaintSummaryDto() {
@@ -20,11 +20,11 @@ public class ComplaintSummaryDto {
         this.message = message;
     }
 
-    public LocalDateTime getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(LocalDateTime time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

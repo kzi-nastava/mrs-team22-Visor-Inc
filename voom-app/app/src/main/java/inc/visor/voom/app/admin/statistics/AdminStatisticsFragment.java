@@ -83,7 +83,7 @@ public class AdminStatisticsFragment extends Fragment {
         if (u == null) {
             tv.setText("System Overview");
             iconRes = R.drawable.ic_system;
-        } else if (u.userRoleId == 2) {
+        } else if (u.getUserRoleName().equals("DRIVER")) {
             tv.setText(u.firstName + " " + u.lastName);
             iconRes = R.drawable.ic_car;
         } else {
@@ -109,7 +109,7 @@ public class AdminStatisticsFragment extends Fragment {
         Long driverId = null;
 
         if (selectedUser != null) {
-            if (selectedUser.userRoleId == 2) {
+            if (selectedUser.getUserRoleName().equals("DRIVER")) {
                 driverId = selectedUser.id;
             } else {
                 userId = selectedUser.id;

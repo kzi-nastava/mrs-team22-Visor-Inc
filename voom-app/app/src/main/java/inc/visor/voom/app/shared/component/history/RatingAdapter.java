@@ -42,10 +42,10 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
         }
 
         // Set driver rating
-        holder.tvDriverRating.setText(String.format("Driver rating: %.1f", rating.getDriverRating()));
+        holder.tvDriverRating.setText(String.format("Driver rating: %.1f", (float) rating.getDriverRating()));
 
         // Set vehicle rating
-        holder.tvVehicleRating.setText(String.format("Vehicle rating: %.1f", rating.getVehicleRating()));
+        holder.tvVehicleRating.setText(String.format("Vehicle rating: %.1f", (float) rating.getVehicleRating()));
 
         // Set rater name
         if (rating.getRater() != null) {

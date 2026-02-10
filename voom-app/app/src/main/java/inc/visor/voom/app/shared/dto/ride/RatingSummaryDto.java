@@ -8,7 +8,7 @@ public class RatingSummaryDto {
     String message;
     int driverRating;
     int vehicleRating;
-    LocalDateTime createdAt;
+    String createdAt;
     UserProfileDto rater;
 
     public RatingSummaryDto() {
@@ -38,11 +38,11 @@ public class RatingSummaryDto {
         this.vehicleRating = vehicleRating;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
