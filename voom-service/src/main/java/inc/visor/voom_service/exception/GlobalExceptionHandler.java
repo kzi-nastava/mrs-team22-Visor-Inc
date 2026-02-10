@@ -32,4 +32,27 @@ public class GlobalExceptionHandler {
         final ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(DriverNotAvailableException.class)
+    public ResponseEntity<String> handleDriverUnavailable(DriverNotAvailableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("No active drivers available");
+    }
+
+    @ExceptionHandler(RideScheduleTooLateException.class)
+    public ResponseEntity<String> handleSchedule(RideScheduleTooLateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Ride can be scheduled max 5 hours ahead");
+    }
+
+    @ExceptionHandler(DriverOverworkedException.class)
+    public ResponseEntity<String> handleDriverHours(DriverOverworkedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Driver exceeded allowed working hours");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGeneric(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unexpected server error");
+    }
 }

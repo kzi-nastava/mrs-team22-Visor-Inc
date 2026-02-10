@@ -1,5 +1,7 @@
 package inc.visor.voom_service.ride.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
+import inc.visor.voom_service.exception.RideScheduleTooLateException;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
@@ -85,6 +88,11 @@ public class RideRequestService {
         Driver driver = driverService.findDriverForRideRequest(rideRequest, dto.getFreeDriversSnapshot());
 
         boolean driverFound = driver != null;
+
+        if (dto.schedule.type.equals("LATER")
+                && dto.schedule.startAt.isAfter(Instant.now().plus(5, ChronoUnit.HOURS))) {
+            throw new RideScheduleTooLateException();
+        }
 
         if (driverFound && rideRequest.getScheduleType() == ScheduleType.NOW) {
             driver.setStatus(DriverStatus.BUSY);
