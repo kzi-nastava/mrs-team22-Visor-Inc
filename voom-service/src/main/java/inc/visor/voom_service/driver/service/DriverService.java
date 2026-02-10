@@ -37,6 +37,7 @@ import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.utils.GeoUtil;
@@ -403,6 +404,12 @@ public class DriverService {
 
         if (candidates.isEmpty()) {
             return null;
+        }
+
+        if (rideRequest.getScheduleType() == ScheduleType.NOW) {
+            candidates = candidates.stream()
+                    .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
+                    .toList();
         }
 
         List<Driver> freeDrivers = candidates.stream()

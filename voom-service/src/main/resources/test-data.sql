@@ -1,27 +1,22 @@
--- PERMISSIONS
 INSERT INTO permission (permission_id, permission_name) VALUES
 (1, 'USER'),
 (2, 'DRIVER'),
 (3, 'ADMIN');
 
--- ROLES
 INSERT INTO user_role (user_role_id, role_name) VALUES
 (1, 'USER'),
 (2, 'DRIVER'),
 (3, 'ADMIN');
 
--- VEHICLE TYPES
 INSERT INTO vehicle_type (vehicle_type_id, vehicle_type_name, vehicle_type_price) VALUES
 (1, 'STANDARD', 150),
 (2, 'LUXURY', 250),
 (3, 'VAN', 200);
 
--- PERSON
 INSERT INTO person (person_id, first_name, last_name, phone_number, address, birth_date)
 VALUES
 (1, 'Test', 'User', '0651111111', 'Test Address', '1980-01-01T00:00:00');
 
--- USER (password = Test123)
 INSERT INTO users (user_id, person_id, email, password, user_status, user_role_id)
 VALUES
 (
@@ -50,7 +45,7 @@ VALUES
 
 INSERT INTO drivers (driver_id, user_id, driver_status)
 VALUES
-(1, 2, 0);
+(1, 2, 1);
 
 INSERT INTO vehicles (
     vehicle_id,

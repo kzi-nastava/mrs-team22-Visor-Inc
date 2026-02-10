@@ -1,5 +1,26 @@
 package inc.visor.voom_service.ride.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
@@ -11,8 +32,23 @@ import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
-import inc.visor.voom_service.ride.dto.*;
-import inc.visor.voom_service.ride.model.*;
+import inc.visor.voom_service.ride.dto.ActiveRideDto;
+import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
+import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
+import inc.visor.voom_service.ride.dto.RideCancellationDto;
+import inc.visor.voom_service.ride.dto.RideHistoryDto;
+import inc.visor.voom_service.ride.dto.RidePanicDto;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
+import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
+import inc.visor.voom_service.ride.dto.RideResponseDto;
+import inc.visor.voom_service.ride.dto.RideStopDto;
+import inc.visor.voom_service.ride.dto.StartRideDto;
+import inc.visor.voom_service.ride.dto.StartScheduleRideDto;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideEstimationResult;
+import inc.visor.voom_service.ride.model.RideRequest;
+import inc.visor.voom_service.ride.model.RideRoute;
+import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.Sorting;
 import inc.visor.voom_service.ride.service.FavoriteRouteService;
@@ -23,19 +59,6 @@ import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.simulation.Simulator;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController

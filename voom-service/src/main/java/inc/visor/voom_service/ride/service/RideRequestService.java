@@ -8,11 +8,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.exception.AccessDeniedException;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.exception.RideScheduleTooLateException;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
@@ -76,6 +78,10 @@ public class RideRequestService {
         User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
         RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
+
+        if (user.getUserStatus() == UserStatus.SUSPENDED) {
+            throw new AccessDeniedException();
+        }
 
         RideRequest rideRequest = RideRequestMapper.toEntity(
                 dto,
