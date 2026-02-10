@@ -8,75 +8,84 @@
     </div>
   </div>
   @if (userRideHistory(); as history) {
-    @if (history.length !== 0) {
-      <div class="py-8 space-y-4">
-        @for (ride of history; track ride.id) {
-          <mat-expansion-panel hideToggle>
-            <mat-expansion-panel-header>
-              <mat-panel-title class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                  <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt)}} - {{ getParsedTime(ride.finishedAt) }}</div>
-                </div>
-                <div class="flex items-center space-x-4">
-                  @for (routePoint of ride.rideRoute.routePoints; track $index) {
-                    <div class="text-lg font-normal">{{ routePoint.address }}</div>
-                  }
-                </div>
-                <div class="flex items-center space-x-4">
-                  <div class="text-lg font-normal">{{ ride.driver.firstName + ' ' + ride.driver.lastName }}</div>
-                  <img src="assets/icons/free%20driver.png" alt="" class="w-8 h-8" />
-                </div>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="grid grid-cols-4 gap-4 pt-8 px-4">
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Price:</div>
-                <div class="text-lg font-normal">$ {{ ride.rideRequest.calculatedPrice }}</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Distance:</div>
-                <div class="text-lg font-normal">{{ ride.rideRequest.rideRoute.totalDistanceKm }} km</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Vehicle type:</div>
-                <div class="text-lg font-normal">{{ ride.rideRequest.vehicleType.type.toLowerCase() }}</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Status:</div>
-                <div class="text-lg font-normal">{{ ride.status.toLowerCase() }}</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Pet transport:</div>
-                <div class="text-lg font-normal">{{ ride.rideRequest.petTransport }}</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Baby transport:</div>
-                <div class="text-lg font-normal">{{ ride.rideRequest.babyTransport }}</div>
-              </div>
-              <div class="flex items-center justify-center space-x-2">
-                <div class="text-lg font-normal">Passengers:</div>
-                @if (ride.passengers.length !== 0) {
-                  @for(passenger of ride.passengers; track passenger) {
-                    <div class="flex items-center justify-self-start">
-                      <img src="assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
-                      <p class="md:text-left text-center">
-                        {{ `${passenger.person.firstName} ${passenger.person.lastName}` }}
-                      </p>
-                    </div>
-                  }
-                } @else {
-                  <div class="text-lg font-normal">No passengers found</div>
-                }
-              </div>
-              <button matButton="outlined" (click)="openMap(ride)">Open route</button>
+  @if (history.length !== 0) {
+  <div class="py-8 space-y-4">
+    @for (ride of history; track ride.id) {
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt)}} - {{ getParsedTime(ride.finishedAt) }}
             </div>
-          </mat-expansion-panel>
+          </div>
+          <div class="flex items-center space-x-4">
+            @for (routePoint of ride.rideRoute.routePoints; track $index) {
+            <div class="text-lg font-normal">{{ routePoint.address }}</div>
+            }
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="text-lg font-normal">{{ ride.driver.firstName + ' ' + ride.driver.lastName }}</div>
+            <img src="assets/icons/free%20driver.png" alt="" class="w-8 h-8" />
+          </div>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="grid grid-cols-4 gap-4 pt-8 px-4">
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Price:</div>
+          <div class="text-lg font-normal">$ {{ ride.rideRequest.calculatedPrice }}</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Distance:</div>
+          <div class="text-lg font-normal">{{ ride.rideRequest.rideRoute.totalDistanceKm }} km</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Vehicle type:</div>
+          <div class="text-lg font-normal">{{ ride.rideRequest.vehicleType.type.toLowerCase() }}</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Status:</div>
+          <div class="text-lg font-normal">{{ ride.status.toLowerCase() }}</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Pet transport:</div>
+          <div class="text-lg font-normal">{{ ride.rideRequest.petTransport }}</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Baby transport:</div>
+          <div class="text-lg font-normal">{{ ride.rideRequest.babyTransport }}</div>
+        </div>
+        <div class="flex items-center justify-center space-x-2">
+          <div class="text-lg font-normal">Passengers:</div>
+          @if (ride.passengers.length !== 0) {
+          @for(passenger of ride.passengers; track passenger) {
+          <div class="flex items-center justify-self-start">
+            <img src="assets/icons/free driver.png" alt="" class="w-[30px] h-[30px]" />
+            <p class="md:text-left text-center">
+              {{ `${passenger.person.firstName} ${passenger.person.lastName}` }}
+            </p>
+          </div>
+          }
+          } @else {
+          <div class="text-lg font-normal">No passengers found</div>
+          }
+        </div>
+        <button matButton="outlined" (click)="openMap(ride)">Open route</button>
+        @if(canRate(ride)) {
+          <div class="flex items-center justify-center w-full col-span-full">
+              <button type="button" (click)="openRateRide(ride)"
+                class="text-blue-600 hover:text-blue-800 underline text-sm font-medium bg-transparent border-none cursor-pointer p-0">
+                Rate ride
+              </button>
+          </div>
         }
       </div>
-    } @else {
-      <div class="py-8">
-        <div class="text-center text-xl">No activity found yet</div>
-      </div>
+    </mat-expansion-panel>
     }
+  </div>
+  } @else {
+  <div class="py-8">
+    <div class="text-center text-xl">No activity found yet</div>
+  </div>
+  }
   }
 </div>

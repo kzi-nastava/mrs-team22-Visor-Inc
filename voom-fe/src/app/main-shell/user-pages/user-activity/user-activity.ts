@@ -1,16 +1,17 @@
-import {Component, inject, signal} from '@angular/core';
-import {MatIcon} from '@angular/material/icon';
+import { Component, inject, signal } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 import ApiService from '../../../shared/rest/api-service';
-import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {ValueInputDate} from '../../../shared/value-input/value-input-date/value-input-date';
-import {AuthenticationService} from '../../../shared/service/authentication-service';
-import {combineLatest, map, of, startWith, switchMap} from 'rxjs';
-import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
-import {MatButton} from '@angular/material/button';
-import {RideHistoryDto} from '../../../shared/rest/ride/ride.model';
-import {MatDialog} from '@angular/material/dialog';
-import {ActivityMap} from '../../../shared/activity-map/activity-map';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ValueInputDate } from '../../../shared/value-input/value-input-date/value-input-date';
+import { AuthenticationService } from '../../../shared/service/authentication-service';
+import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatButton } from '@angular/material/button';
+import { RideHistoryDto } from '../../../shared/rest/ride/ride.model';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivityMap } from '../../../shared/activity-map/activity-map';
+import { RateRideForm } from '../../../shared/rate-ride-form/rate-ride-form';
 
 export const ROUTE_USER_ACTIVITY = "activity";
 
@@ -37,6 +38,8 @@ export class UserActivity {
 
   fromDate = new FormControl<Date | null>(null);
   toDate = new FormControl<Date | null>(null);
+
+  locallyRatedRideIds = signal<number[]>([]);
 
   userRideHistory$ = combineLatest([
     this.authenticationService.activeUser$,
@@ -76,5 +79,40 @@ export class UserActivity {
 
   protected openMap(ride: RideHistoryDto) {
     this.dialog.open(ActivityMap, { data: ride });
+  }
+
+  protected openRateRide(ride: RideHistoryDto) {
+
+    const dialogRef = this.dialog.open(RateRideForm, {
+      data: { rideId: ride.id },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.locallyRatedRideIds.update(ids => [...ids, ride.id]);
+    }
+  });
+  }
+
+  protected canRate(ride: RideHistoryDto): boolean {
+    const currentUser = this.authenticationService.currentUserValue;
+
+    if (this.locallyRatedRideIds().includes(ride.id)) {
+      return false;
+    }
+
+    if (!currentUser || !ride.finishedAt || ride.status !== 'FINISHED') {
+      return false;
+    }
+
+    const alreadyRated = ride.ratings.some(
+      (rating) => rating.rater.email === currentUser.email
+    );
+
+    const finishedDate = new Date(ride.finishedAt).getTime();
+    const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+    const isTooOld = Date.now() - finishedDate > threeDaysInMs;
+
+    return !alreadyRated && !isTooOld;
   }
 }
