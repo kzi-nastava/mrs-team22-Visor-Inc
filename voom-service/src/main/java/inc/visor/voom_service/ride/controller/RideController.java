@@ -344,7 +344,7 @@ public class RideController {
 
         long userId = user.getId();
 
-        Driver driver = driverService.getDriver(userId).orElseThrow(NotFoundException::new);
+        Driver driver = driverService.getDriverFromUser(userId).orElseThrow(NotFoundException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
 
         driverService.save(driver);
@@ -407,7 +407,7 @@ public class RideController {
 
         long userId = user.getId();
 
-        return driverService.getDriver(userId).orElseThrow(NotFoundException::new);
+        return driverService.getDriverFromUser(userId).orElseThrow(NotFoundException::new);
     }
 
     @GetMapping("/user/{userId}/scheduled")

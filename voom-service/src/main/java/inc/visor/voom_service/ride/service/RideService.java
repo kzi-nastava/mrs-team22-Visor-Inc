@@ -245,14 +245,24 @@ public class RideService {
                 "Your ride has started: " + address,
                 ride.getId()
         );
-        
-        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+
+        for (User passenger : ride.getPassengers()) {
+            String email = passenger.getEmail();
             emailService.sendRideTrackingLink(
                     email,
                     address,
                     trackingUrl
             );
+
+            notificationService.createAndSendNotification(
+                    passenger,
+                    NotificationType.RIDE_STARTED,
+                    "Ride started",
+                    "Ride that you have been added to by " + creator.getPerson().getFirstName() + " has started. Track it here.",
+                    ride.getId()
+            );
         }
+
 
     }
 
@@ -278,6 +288,13 @@ public class RideService {
                     email,
                     address
             );
+        }
+
+        User creator = ride.getRideRequest().getCreator();
+        notificationService.createAndSendNotification(creator, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
+
+        for (User passenger : ride.getPassengers()) {
+            notificationService.createAndSendNotification(passenger, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
         }
     }
 

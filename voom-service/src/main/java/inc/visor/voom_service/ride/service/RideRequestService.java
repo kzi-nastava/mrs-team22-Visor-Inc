@@ -148,6 +148,16 @@ public class RideRequestService {
 
         }
 
+        for (User passenger : passengers) {
+            notificationService.createAndSendNotification(
+                    passenger,
+                    NotificationType.ADDED_TO_RIDE,
+                    "You were added to the ride.",
+                    "You have been added to the ride by " + user.getPerson().getFirstName(),
+                    ride.getId()
+            );
+        }
+
         return RideRequestResponseDto.from(
                 rideRequest,
                 estimate.distanceKm(),
