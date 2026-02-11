@@ -246,25 +246,20 @@ class CreateRideRequestIntegrationalTest {
 
         RideRequestCreateDto request = buildValidRequest();
 
-        ResponseEntity<RideRequestResponseDto> response
+        ResponseEntity<String> response
                 = restTemplateUser.postForEntity(
                         getBaseUrl() + "/rides/requests",
                         request,
-                        RideRequestResponseDto.class
+                        String.class
                 );
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
 
-        RideRequestResponseDto body = response.getBody();
-
-        assertNotNull(body);
-        assertTrue(body.getRequestId() > 0);
-        assertEquals(RideRequestStatus.REJECTED, body.getStatus());
-
-        assertTrue(
-                rideRequestRepository.findById(body.getRequestId()).isPresent(),
-                "RideRequest should be persisted in database"
+        assertEquals(
+                "No active drivers available",
+                response.getBody()
         );
+
     }
 
     @Test
@@ -301,34 +296,27 @@ class CreateRideRequestIntegrationalTest {
     @Test
     @Order(7)
     @DisplayName("07 - Should reject scheduled ride and return REJECTED when no driver is available")
-    @Sql(scripts = "/sql/driver-busy.sql",
+    @Sql(scripts = "/sql/driver-has-overlapping-scheduled-ride.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldRejectScheduledRideWhenNoDriverAvailable() {
 
         RideRequestCreateDto request = buildValidRequest();
 
         request.schedule.type = "LATER";
-        request.schedule.startAt = Instant.now().plusSeconds(3600);
+        request.schedule.startAt = Instant.parse("2026-01-01T11:00:00Z");
 
-        ResponseEntity<RideRequestResponseDto> response
+        ResponseEntity<String> response
                 = restTemplateUser.postForEntity(
                         getBaseUrl() + "/rides/requests",
                         request,
-                        RideRequestResponseDto.class
+                        String.class
                 );
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
 
-        RideRequestResponseDto body = response.getBody();
+        String body = response.getBody();
         assertNotNull(body);
-
-        assertEquals(RideRequestStatus.REJECTED, body.getStatus());
-        assertNotNull(body.getDriver());
-
-        assertTrue(
-                rideRequestRepository.findById(body.getRequestId()).isPresent(),
-                "RideRequest should be persisted"
-        );
+        assertEquals("No active drivers available", body);
     }
 
     @Test
@@ -339,7 +327,7 @@ class CreateRideRequestIntegrationalTest {
         RideRequestCreateDto request = buildValidRequest();
 
         request.schedule.type = "LATER";
-        request.schedule.startAt = Instant.now().plusSeconds(6 * 3600); 
+        request.schedule.startAt = Instant.now().plusSeconds(6 * 3600);
 
         ResponseEntity<String> response
                 = restTemplateUser.postForEntity(
@@ -398,5 +386,4 @@ class CreateRideRequestIntegrationalTest {
 
         return dto;
     }
-
 }
