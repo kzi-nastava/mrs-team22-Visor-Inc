@@ -1,0 +1,497 @@
+package inc.visor.voom_service.ride.service;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.UserStatus;
+import inc.visor.voom_service.auth.user.service.UserService;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.exception.InvalidRouteOrderException;
+import inc.visor.voom_service.exception.NotFoundException;
+import inc.visor.voom_service.osrm.service.RideWsService;
+import inc.visor.voom_service.person.model.Person;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
+import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.RideEstimationResult;
+import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.repository.RideRequestRepository;
+import inc.visor.voom_service.shared.notification.service.NotificationService;
+import inc.visor.voom_service.simulation.Simulator;
+import inc.visor.voom_service.vehicle.model.VehicleType;
+import inc.visor.voom_service.vehicle.service.VehicleTypeService;
+
+@ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class RideRequestServiceTest {
+
+    @InjectMocks
+    private RideRequestService rideRequestService;
+
+    @Mock
+    private RideRequestRepository rideRequestRepository;
+
+    @Mock
+    private RideEstimateService rideEstimationService;
+
+    @Mock
+    private DriverService driverService;
+
+    @Mock
+    private RideWsService rideWsService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private Simulator simulator;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private VehicleTypeService vehicleTypeService;
+
+    @Mock
+    private RideService rideService;
+
+    @Mock
+    private RideRepository rideRepository;
+
+    @FunctionalInterface
+    interface ScenarioMockSetup {
+
+        void apply(RideRequestCreateDto dto, Long userId);
+    }
+
+    @Test
+    @Order(1)
+    @DisplayName("01 - Should successfully create NOW ride and assign driver")
+    void shouldCreateNowRideSuccessfully() {
+        Long userId = 1L;
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(1L);
+        Driver driver = buildAvailableDriver(10L);
+        RideRequestCreateDto dto = buildValidRequest();
+
+        when(userService.getUser(userId)).thenReturn(Optional.of(user));
+        when(vehicleTypeService.getVehicleType(1L))
+                .thenReturn(Optional.of(vehicleType));
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(10.0, 12.5));
+
+        when(driverService.findDriverForRideRequest(
+                any(),
+                eq(dto.getFreeDriversSnapshot())
+        )).thenReturn(driver);
+
+        when(driverService.updateDriver(driver)).thenReturn(driver);
+
+        ArgumentCaptor<Ride> rideCaptor = ArgumentCaptor.forClass(Ride.class);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.ACCEPTED, response.getStatus());
+        assertNotNull(response.getDriver());
+
+        assertEquals(DriverStatus.BUSY, driver.getStatus());
+
+        verify(rideRequestRepository, times(1)).save(any());
+        verify(rideService, times(1)).save(rideCaptor.capture());
+
+        Ride savedRide = rideCaptor.getValue();
+        assertNotNull(savedRide);
+        assertEquals(ScheduleType.NOW, savedRide.getRideRequest().getScheduleType());
+        assertEquals(10.0, response.getDistanceKm());
+        assertEquals(12.5, response.getPrice());
+        assertEquals("Nikola", response.getDriver().getFirstName());
+        assertEquals("Bjelica", response.getDriver().getLastName());
+        assertEquals(driver, savedRide.getDriver());
+        assertEquals(ScheduleType.NOW, savedRide.getRideRequest().getScheduleType());
+        assertEquals(savedRide.getRideRequest().getStatus(), RideRequestStatus.ACCEPTED);
+        assertEquals(savedRide.getStatus(), inc.visor.voom_service.ride.model.enums.RideStatus.ONGOING);
+
+        verify(notificationService, times(2))
+                .createAndSendNotification(any(), any(), any(), any(), any());
+
+        verify(rideWsService, times(1)).sendDriverAssigned(any());
+
+        verify(simulator, times(1))
+                .changeDriverRoute(eq(10L), anyDouble(), anyDouble());
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("02 - Should successfully create SCHEDULED ride and not trigger WS or simulator")
+    void shouldCreateScheduledRideSuccessfully() {
+
+        Long userId = 1L;
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(1L);
+        Driver driver = buildAvailableDriver(10L);
+
+        RideRequestCreateDto dto = buildValidRequest();
+
+        dto.schedule.type = "LATER";
+        dto.schedule.startAt = Instant.now().plusSeconds(3600);
+
+        when(userService.getUser(userId)).thenReturn(Optional.of(user));
+        when(vehicleTypeService.getVehicleType(1L))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(20.0, 30.0));
+
+        when(driverService.findDriverForRideRequest(
+                any(),
+                eq(dto.getFreeDriversSnapshot())
+        )).thenReturn(driver);
+
+        ArgumentCaptor<Ride> rideCaptor = ArgumentCaptor.forClass(Ride.class);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.ACCEPTED, response.getStatus());
+        assertNotNull(response.getDriver());
+
+        assertEquals(DriverStatus.AVAILABLE, driver.getStatus());
+
+        verify(rideRequestRepository, times(1)).save(any());
+        verify(rideService, times(1)).save(rideCaptor.capture());
+
+        Ride savedRide = rideCaptor.getValue();
+
+        assertEquals(ScheduleType.LATER, savedRide.getRideRequest().getScheduleType());
+        assertEquals(RideRequestStatus.ACCEPTED, savedRide.getRideRequest().getStatus());
+
+        assertEquals(
+                inc.visor.voom_service.ride.model.enums.RideStatus.SCHEDULED,
+                savedRide.getStatus()
+        );
+
+        assertEquals(30.0, response.getPrice());
+        assertEquals(20.0, response.getDistanceKm());
+
+        assertEquals("Nikola", response.getDriver().getFirstName());
+        assertEquals("Bjelica", response.getDriver().getLastName());
+
+        verify(notificationService, times(1))
+                .createAndSendNotification(any(), any(), any(), any(), any());
+
+        verify(rideWsService, times(0)).sendDriverAssigned(any());
+
+        verify(simulator, times(0))
+                .changeDriverRoute(anyLong(), anyDouble(), anyDouble());
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("03 - Should throw NotFoundException when user not found")
+    void shouldThrowWhenUserNotFound() {
+
+        Long userId = 1L;
+        RideRequestCreateDto dto = buildValidRequest();
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("04 - Should throw NotFoundException when vehicle type not found")
+    void shouldThrowWhenVehicleTypeNotFound() {
+
+        Long userId = 1L;
+        RideRequestCreateDto dto = buildValidRequest();
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(buildActiveUser(userId)));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
+
+        verify(rideRequestRepository, times(0)).save(any());
+        verify(rideService, times(0)).save(any());
+        verifyNoInteractions(driverService);
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("05 - Should throw InvalidRouteOrderException when route order invalid")
+    void shouldThrowWhenRouteOrderInvalid() {
+
+        Long userId = 1L;
+        RideRequestCreateDto dto = buildValidRequest();
+
+        dto.route.points.get(0).orderIndex = 3;
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(buildActiveUser(userId)));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(buildVehicleType(1L)));
+
+        when(rideEstimationService.estimate(any(), any()))
+                .thenReturn(new RideEstimationResult(10.0, 12.0));
+
+        assertThrows(InvalidRouteOrderException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
+
+        verify(rideRequestRepository, times(0)).save(any());
+        verify(rideService, times(0)).save(any());
+        verifyNoInteractions(driverService);
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("06 - Should reject NOW ride when no driver found")
+    void shouldRejectNowRideWhenNoDriverFound() {
+
+        Long userId = 1L;
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequestCreateDto dto = buildValidRequest();
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(user));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(15.0, 25.0));
+
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(null);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.REJECTED, response.getStatus());
+        assertEquals(25.0, response.getPrice());
+        assertEquals(15.0, response.getDistanceKm());
+        assertEquals(null, response.getDriver());
+
+        verify(rideRequestRepository, times(1)).save(any());
+        verify(rideService, times(0)).save(any());
+
+        verifyNoInteractions(notificationService);
+        verifyNoInteractions(rideWsService);
+        verifyNoInteractions(simulator);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("07 - Should reject SCHEDULED ride when no driver found")
+    void shouldRejectScheduledRideWhenNoDriverFound() {
+
+        Long userId = 1L;
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.schedule.type = "LATER";
+        dto.schedule.startAt = Instant.now().plusSeconds(3600);
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(user));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(50.0, 70.0));
+
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(null);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.REJECTED, response.getStatus());
+        assertEquals(70.0, response.getPrice());
+        assertEquals(50.0, response.getDistanceKm());
+        assertEquals(null, response.getDriver());
+
+        verify(rideRequestRepository, times(1)).save(any());
+
+        verify(rideService, times(0)).save(any());
+
+        verifyNoInteractions(notificationService);
+        verifyNoInteractions(rideWsService);
+        verifyNoInteractions(simulator);
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("08 - Should throw AccessDeniedException when user is suspended")
+    void shouldThrowWhenUserSuspended() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+
+        User suspendedUser = buildActiveUser(userId);
+        suspendedUser.setUserStatus(UserStatus.SUSPENDED);
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(suspendedUser));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(buildVehicleType(1L)));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                any()
+        )).thenReturn(new RideEstimationResult(10.0, 12.0));
+
+        assertThrows(
+                inc.visor.voom_service.exception.AccessDeniedException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
+
+        verify(rideRequestRepository, times(0)).save(any());
+        verify(rideService, times(0)).save(any());
+        verifyNoInteractions(driverService);
+        verifyNoInteractions(notificationService);
+    }
+
+    private User buildActiveUser(Long id) {
+        User user = new User();
+        user.setId(id);
+        user.setUserStatus(UserStatus.ACTIVE);
+        return user;
+    }
+
+    private VehicleType buildVehicleType(Long id) {
+        VehicleType vehicleType = new VehicleType();
+        vehicleType.setId(id);
+        return vehicleType;
+    }
+
+    private Driver buildAvailableDriver(Long id) {
+
+        Person person = new Person();
+        person.setFirstName("Nikola");
+        person.setLastName("Bjelica");
+
+        User driverUser = new User();
+        driverUser.setPerson(person);
+
+        Driver driver = new Driver();
+        driver.setId(id);
+        driver.setStatus(DriverStatus.AVAILABLE);
+        driver.setUser(driverUser);
+
+        return driver;
+    }
+
+    private static RideRequestCreateDto buildValidRequest() {
+
+        RideRequestCreateDto dto = new RideRequestCreateDto();
+
+        RideRequestCreateDto.RouteDto route = new RideRequestCreateDto.RouteDto();
+
+        RideRequestCreateDto.RoutePointDto p1 = new RideRequestCreateDto.RoutePointDto();
+        p1.lat = 45.0;
+        p1.lng = 19.0;
+        p1.orderIndex = 0;
+        p1.type = "PICKUP";
+        p1.address = "Start";
+
+        RideRequestCreateDto.RoutePointDto p2 = new RideRequestCreateDto.RoutePointDto();
+        p2.lat = 45.1;
+        p2.lng = 19.1;
+        p2.orderIndex = 1;
+        p2.type = "STOP";
+        p2.address = "End";
+
+        route.points = List.of(p1, p2);
+        dto.route = route;
+
+        RideRequestCreateDto.ScheduleDto schedule = new RideRequestCreateDto.ScheduleDto();
+        schedule.type = "NOW";
+        schedule.startAt = Instant.now();
+        dto.schedule = schedule;
+
+        dto.vehicleTypeId = 1L;
+
+        RideRequestCreateDto.PreferencesDto preferences = new RideRequestCreateDto.PreferencesDto();
+        preferences.baby = false;
+        preferences.pets = false;
+        dto.preferences = preferences;
+
+        dto.linkedPassengers = List.of();
+
+        RideRequestCreateDto.DriverLocationDto driverLoc
+                = new RideRequestCreateDto.DriverLocationDto();
+        driverLoc.driverId = 10L;
+        driverLoc.lat = 45.0;
+        driverLoc.lng = 19.0;
+
+        dto.freeDriversSnapshot = List.of(driverLoc);
+
+        return dto;
+    }
+
+}
