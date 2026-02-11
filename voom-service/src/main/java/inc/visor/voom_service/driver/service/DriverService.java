@@ -400,6 +400,7 @@ public class DriverService {
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .filter(d -> isDriverCurrentlyActive(d.getId()))
                 .filter(d -> vehicleMatches(d, rideRequest))
+                .filter(d -> !isDriverOverWorked(d))
                 .toList();
 
         if (candidates.isEmpty()) {
@@ -438,6 +439,11 @@ public class DriverService {
                 LocalDateTime.now(),
                 rideService.estimateRideEndTime(r)
         ).toMinutes() <= 10);
+    }
+
+    private boolean isDriverOverWorked(Driver driver) {
+        double activeHours = calculateActiveHoursLast24h(driver.getId());
+        return activeHours >= 8;
     }
 
     private boolean vehicleMatches(Driver driver, RideRequest req) {
@@ -509,11 +515,18 @@ public class DriverService {
         List<DriverStateChange> changes
                 = driverActivityService.findChangesSince(driverId, since);
 
-        if (changes.isEmpty()) {
-            return 0;
-        }
+        List<DriverStateChange> lastBefore
+                = driverActivityService.findLastChangeBefore(driverId, since);
 
         double activeSeconds = 0;
+
+        if (!lastBefore.isEmpty() && lastBefore.get(0).getCurrentState() == DriverState.ACTIVE) {
+
+            LocalDateTime end
+                    = changes.isEmpty() ? now : changes.get(0).getPerformedAt();
+
+            activeSeconds += Duration.between(since, end).getSeconds();
+        }
 
         for (int i = 0; i < changes.size(); i++) {
 
@@ -522,13 +535,17 @@ public class DriverService {
             if (current.getCurrentState() == DriverState.ACTIVE) {
 
                 LocalDateTime start = current.getPerformedAt();
-                LocalDateTime end;
+                LocalDateTime end
+                        = (i + 1 < changes.size())
+                        ? changes.get(i + 1).getPerformedAt()
+                        : now;
 
-                if (i + 1 < changes.size()) {
-                    end = changes.get(i + 1).getPerformedAt();
-                } else {
-                    end = now;
+                if (end.isBefore(since)) {
+                    continue;
                 }
+
+                start = start.isBefore(since) ? since : start;
+                end = end.isAfter(now) ? now : end;
 
                 activeSeconds += Duration.between(start, end).getSeconds();
             }

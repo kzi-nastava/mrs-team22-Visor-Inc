@@ -236,7 +236,7 @@ class CreateRideRequestIntegrationalTest {
     @Test
     @Order(6)
     @DisplayName("06 - Should return CONFLICT when no drivers available")
-    @Sql(scripts = "/sql/driver-busy.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/sql/all-drivers-inactive.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldReturnRejectedWhenNoDriverIsAvailable() {
 
         RideRequestCreateDto request = buildValidRequest();
@@ -339,6 +339,93 @@ class CreateRideRequestIntegrationalTest {
                 );
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("11 - Should return CONFLICT when no active drivers in system")
+    @Sql(scripts = "/sql/all-drivers-inactive.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void shouldRejectWhenNoActiveDriversExist() {
+
+        RideRequestCreateDto request = buildValidRequest();
+
+        ResponseEntity<String> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        String.class
+                );
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("No active drivers available", response.getBody());
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("12 - Should accept scheduled ride exactly 5 hours ahead")
+    void shouldAcceptWhenExactly5HoursAhead() {
+
+        RideRequestCreateDto request = buildValidRequest();
+
+        request.schedule.type = "LATER";
+        request.schedule.startAt = Instant.now().plusSeconds(5 * 3600 - 1);
+
+        ResponseEntity<RideRequestResponseDto> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        RideRequestResponseDto.class
+                );
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        RideRequestResponseDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RideRequestStatus.ACCEPTED, body.getStatus());
+
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("13 - Should reject when no free drivers snapshot provided")
+    void shouldRejectWhenFreeDriversSnapshotEmpty() {
+
+        RideRequestCreateDto request = buildValidRequest();
+        request.freeDriversSnapshot = List.of();
+
+        ResponseEntity<RideRequestResponseDto> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        RideRequestResponseDto.class
+                );
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        RideRequestResponseDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RideRequestStatus.REJECTED, body.getStatus());
+    }
+
+    @Test
+    @Order(14)
+    @DisplayName("14 - Should return CONFLICT when driver exceeded working hours")
+    @Sql(scripts = "/sql/driver-overworked.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void shouldRejectWhenDriverExceededHours() {
+
+        RideRequestCreateDto request = buildValidRequest();
+
+        ResponseEntity<RideRequestResponseDto> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        RideRequestResponseDto.class
+                );
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        RideRequestResponseDto body = response.getBody();
+        assertNotNull(body);
+        assertEquals(RideRequestStatus.REJECTED, body.getStatus());
     }
 
     private static RideRequestCreateDto buildValidRequest() {
