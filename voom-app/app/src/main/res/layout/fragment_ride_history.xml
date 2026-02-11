@@ -29,6 +29,34 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/sort_by"
+            android:textColorHint="@color/primary"
+            app:boxBackgroundColor="@color/white"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="32dp"
+            app:boxCornerRadiusBottomStart="32dp"
+            app:boxCornerRadiusTopEnd="32dp"
+            app:boxCornerRadiusTopStart="32dp"
+            app:boxStrokeColor="@color/primary"
+            app:boxStrokeErrorColor="@color/error"
+            app:boxStrokeWidth="2dp"
+            app:endIconMode="dropdown_menu">
+
+        <AutoCompleteTextView
+                android:id="@+id/sort_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:minHeight="56dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="@string/date_from"
             android:textColorHint="@color/primary"
             app:boxBackgroundColor="@color/white"
@@ -41,7 +69,7 @@
             app:boxStrokeErrorColor="@color/error"
             app:boxStrokeWidth="2dp">
 
-            <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/date_from_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

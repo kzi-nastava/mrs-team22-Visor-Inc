@@ -24,15 +24,24 @@ public class RideHistoryViewModel extends ViewModel {
 
     private final MutableLiveData<List<RideHistoryDto>> _rides = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<String> _toastMessage = new MutableLiveData<>();
+    private final MutableLiveData<String> _startDate = new MutableLiveData<>();
+    private final MutableLiveData<String> _endDate = new MutableLiveData<>();
+    private final MutableLiveData<String> _column = new MutableLiveData<>();
+    private final MutableLiveData<String> _order = new MutableLiveData<>();
 
     RideApi rideApi;
     DataStoreManager dataStoreManager;
     CompositeDisposable compositeDisposable;
+    RideHistoryAdapter adapter;
 
     public RideHistoryViewModel() {
         rideApi = RetrofitClient.getInstance().create(RideApi.class);
         dataStoreManager = DataStoreManager.getInstance();
         compositeDisposable = new CompositeDisposable();
+        _startDate.setValue(null);
+        _endDate.setValue(null);
+        _column.setValue(null);
+        _order.setValue(null);
     }
 
     public LiveData<List<RideHistoryDto>> getRides() {
@@ -41,12 +50,33 @@ public class RideHistoryViewModel extends ViewModel {
 
     public LiveData<String> getToastMessage() { return _toastMessage; }
 
+    public MutableLiveData<String> get_order() {
+        return _order;
+    }
+
+    public MutableLiveData<String> get_column() {
+        return _column;
+    }
+
+    public MutableLiveData<String> get_endDate() {
+        return _endDate;
+    }
+
+    public MutableLiveData<String> get_startDate() {
+        return _startDate;
+    }
+
     public void loadRideHistory() {
+        final String startDate = _startDate.getValue();
+        final String endDate = _endDate.getValue();
+        final String order = _order.getValue();
+        final String column = _column.getValue();
+
         final Disposable disposable = dataStoreManager.getUserId().subscribe((userId) -> {
             final String userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
             switch (userRole) {
                 case "ADMIN":
-                    this.rideApi.getRides(null, null, "ASC").enqueue(new Callback<List<RideHistoryDto>>() {
+                    this.rideApi.getRides(startDate, endDate, column, order).enqueue(new Callback<List<RideHistoryDto>>() {
                         @Override
                         public void onResponse(@NonNull Call<List<RideHistoryDto>> call, @NonNull Response<List<RideHistoryDto>> response) {
                             if (response.isSuccessful()) {
@@ -65,7 +95,7 @@ public class RideHistoryViewModel extends ViewModel {
                     });
                     break;
                 case "USER":
-                    this.rideApi.getRidesForUser(userId, null, null, "ASC").enqueue(new Callback<List<RideHistoryDto>>() {
+                    this.rideApi.getRidesForUser(userId, startDate, endDate, column, order).enqueue(new Callback<List<RideHistoryDto>>() {
                         @Override
                         public void onResponse(@NonNull Call<List<RideHistoryDto>> call, @NonNull Response<List<RideHistoryDto>> response) {
                             if (response.isSuccessful()) {

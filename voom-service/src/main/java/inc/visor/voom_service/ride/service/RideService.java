@@ -108,18 +108,15 @@ public class RideService {
     }
 
     public List<Ride> getSortedFilteredRides(LocalDateTime start, LocalDateTime end, Sorting sort, Column column, List<Ride> unfiltered) {
-        return unfiltered
-                .stream()
+        return unfiltered.stream()
                 .filter(r -> {
-                    LocalDateTime started = r.getStartedAt();
+                    final LocalDateTime started = r.getStartedAt();
                     if (started == null) {
                         return false;
                     }
 
-                    boolean matchesStart = (start == null) || !started.isBefore(start);
-
-                    boolean matchesEnd = (end == null) || !started.isAfter(end);
-
+                    final boolean matchesStart = (start == null) || !started.isBefore(start);
+                    final boolean matchesEnd = (end == null) || !started.isAfter(end);
                     return matchesStart && matchesEnd;
                 }).sorted(applySorting(getComparator(column),sort)).collect(Collectors.toList());
     }

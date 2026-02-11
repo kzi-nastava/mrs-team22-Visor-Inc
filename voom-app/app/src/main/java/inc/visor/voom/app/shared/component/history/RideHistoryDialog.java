@@ -294,7 +294,6 @@ public class RideHistoryDialog extends DialogFragment {
     }
 
     private void validateScheduledTime(int hour, int minute) {
-        // Simple validation - you can make this more sophisticated
         java.util.Calendar now = java.util.Calendar.getInstance();
         java.util.Calendar scheduled = java.util.Calendar.getInstance();
         scheduled.set(java.util.Calendar.HOUR_OF_DAY, hour);
@@ -323,12 +322,10 @@ public class RideHistoryDialog extends DialogFragment {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        // If scheduled time is before now, assume it's for tomorrow
         if (calendar.before(Calendar.getInstance())) {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
 
-        // Convert to ISO 8601 format
         LocalDateTime dateTime = LocalDateTime.ofInstant(calendar.toInstant(), ZoneId.systemDefault());
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toString();
     }
@@ -353,7 +350,6 @@ public class RideHistoryDialog extends DialogFragment {
             schedule.setStartAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toString());
         }
 
-        // Build route with points
         List<RideRequestDto.Point> routePoints = ride.getRideRoute().getRoutePoints().stream()
                 .map(p -> {
                     RideRequestDto.Point dto = new RideRequestDto.Point();
@@ -369,7 +365,6 @@ public class RideHistoryDialog extends DialogFragment {
         RideRequestDto.Route route = new RideRequestDto.Route();
         route.setPoints(routePoints);
 
-        // Build preferences
         RideRequestDto.Preferences preferences = new RideRequestDto.Preferences();
         preferences.setPets(ride.getRideRequest().isPetTransport());
         preferences.setBaby(ride.getRideRequest().isBabyTransport());
