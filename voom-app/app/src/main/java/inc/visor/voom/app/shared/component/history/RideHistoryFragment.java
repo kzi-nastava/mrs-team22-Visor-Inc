@@ -1,5 +1,8 @@
 package inc.visor.voom.app.shared.component.history;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +45,11 @@ public class RideHistoryFragment extends Fragment {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private LocalDateTime fromDate;
     private LocalDateTime toDate;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private ShakeDetector shakeDetector;
+    private boolean isDateAscending;
+    private AutoCompleteTextView sortType;
 
     private List<RideHistorySortOption> rideHistorySortOptions = List.of(
             new RideHistorySortOption("Newest first", "DATE_DESC"),
@@ -107,7 +115,7 @@ public class RideHistoryFragment extends Fragment {
 
         rvRides.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        AutoCompleteTextView sortType = view.findViewById(R.id.sort_type);
+        sortType = view.findViewById(R.id.sort_type);
 
         ArrayAdapter<RideHistorySortOption> adapter = new ArrayAdapter<RideHistorySortOption>(getContext(), android.R.layout.simple_dropdown_item_1line, rideHistorySortOptions);
 
@@ -127,6 +135,8 @@ public class RideHistoryFragment extends Fragment {
             mViewModel.get_order().setValue(direction);
             mViewModel.loadRideHistory();
         });
+
+        setupShakeDetector();
 
         return view;
     }
@@ -171,6 +181,46 @@ public class RideHistoryFragment extends Fragment {
                 mViewModel.loadRideHistory();
             });
         });
+    }
+
+    private void setupShakeDetector() {
+        sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
+
+        if (sensorManager != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+            if (accelerometer != null) {
+                shakeDetector = new ShakeDetector();
+                shakeDetector.setOnShakeListener(() -> {
+                    isDateAscending = !isDateAscending;
+
+                    String sortOrder = isDateAscending ? "ASC" : "DESC";
+                    String sortLabel = isDateAscending ? "Oldest first" : "Newest first";
+
+                    sortType.setText(sortLabel, false);
+
+                    mViewModel.get_column().setValue("DATE");
+                    mViewModel.get_order().setValue(sortOrder);
+                    mViewModel.loadRideHistory();
+
+                    Toast.makeText(requireContext(),"Sorted by date: " + sortLabel,Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                Toast.makeText(requireContext(), "Accelerometer not available on this device",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void onResume() {
+        super.onResume();
+        // Register shake detector when fragment is visible
+        if (sensorManager != null && accelerometer != null && shakeDetector != null) {
+            sensorManager.registerListener(
+                    shakeDetector,
+                    accelerometer,
+                    SensorManager.SENSOR_DELAY_UI
+            );
+        }
     }
 
     @Override
