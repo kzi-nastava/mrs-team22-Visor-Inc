@@ -1,11 +1,13 @@
 package inc.visor.voom.app.shared.service;
 
+import android.app.Notification;
 import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
 import inc.visor.voom.app.config.AppConfig;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.dto.NotificationSocketDto;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.StompClient;
@@ -17,9 +19,11 @@ public class NotificationWsService {
     private final Long userId;
     private StompClient stompClient;
 
+    private final String userRole;
     public NotificationWsService(Context context, Long userId) {
         this.context = context;
         this.userId = userId;
+        this.userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
     }
 
     public void connect() {
@@ -47,12 +51,20 @@ public class NotificationWsService {
         NotificationSocketDto dto =
                 new Gson().fromJson(json, NotificationSocketDto.class);
 
-        NotificationService.showNotification(
-                context,
-                dto.title,
-                dto.id,
-                dto.message
-        );
+        String notificationType = dto.type;
+
+        if (userRole.equals("USER") && notificationType.equals("RIDE_STARTED")) {
+            NotificationService.showRideTrackingNotification(context, dto.title, dto.id, dto.message);
+        }
+        else {
+            NotificationService.showNotification(
+                    context,
+                    dto.title,
+                    dto.id,
+                    dto.message
+            );
+        }
+
     }
 
     public void disconnect() {

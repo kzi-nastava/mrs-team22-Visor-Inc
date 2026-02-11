@@ -6,9 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import inc.visor.voom.app.MainActivity;
 import inc.visor.voom.app.R;
@@ -74,6 +77,49 @@ public class NotificationService {
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .build();
 
+
+        NotificationManager manager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int id = notificationId != null
+                ? notificationId.intValue()
+                : (int) System.currentTimeMillis();
+
+        manager.notify(id, notification);
+
+        markNotificationAsRead(context, notificationId);
+    }
+
+    public static void showRideTrackingNotification(
+            Context context,
+            String title,
+            Long notificationId,
+            String message
+    ) {
+        createChannel(context);
+
+        Uri deepLinkUri = Uri.parse("voom://ride-tracking");
+
+        Log.d("DEEPLINK:" , "handling");
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, deepLinkUri);
+        intent.setPackage(context.getPackageName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = new NavDeepLinkBuilder(context)
+                .setGraph(R.navigation.user_nav_graph)
+                .setDestination(R.id.userRideTrackingFragment)
+                .createPendingIntent();
+
+        Notification notification =
+                new NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setSmallIcon(R.drawable.ic_notification)
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .build();
 
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

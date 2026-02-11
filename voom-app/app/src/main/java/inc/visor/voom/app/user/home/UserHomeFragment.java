@@ -79,6 +79,7 @@ public class UserHomeFragment extends Fragment {
     private boolean isSuspended = false;
     private String blockReason = null;
 
+    private String userRole;
 
 
     private Boolean arrivalNotified = false;
@@ -93,6 +94,8 @@ public class UserHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+         userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
 
         checkIfBlocked(view);
 
@@ -125,12 +128,19 @@ public class UserHomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
 
                     for (NotificationDto n : response.body()) {
-                        NotificationService.showNotification(
-                                getContext(),
-                                n.title,
-                                n.id,
-                                n.message
-                        );
+                        String notificationType = n.type;
+
+                        if (userRole.equals("USER") && notificationType.equals("RIDE_STARTED")) {
+                            NotificationService.showRideTrackingNotification(getContext(), n.title, n.id, n.message);
+                        } else {
+                            NotificationService.showNotification(
+                                    getContext(),
+                                    n.title,
+                                    n.id,
+                                    n.message
+                            );
+                        }
+
                     }
                 }
             }
