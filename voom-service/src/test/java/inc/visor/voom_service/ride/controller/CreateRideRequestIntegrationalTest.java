@@ -428,6 +428,44 @@ class CreateRideRequestIntegrationalTest {
         assertEquals(RideRequestStatus.REJECTED, body.getStatus());
     }
 
+    @Test
+    @Order(15)
+    @DisplayName("15 - Should reject NOW ride when all drivers are BUSY")
+    @Sql(scripts = "/sql/driver-busy-status.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void shouldRejectWhenDriverBusyForNowRide() {
+
+        RideRequestCreateDto request = buildValidRequest();
+        request.schedule.type = "NOW";
+
+        ResponseEntity<String> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        String.class
+                );
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should reject when scheduled more than 5 hours ahead")
+    void shouldRejectWhenMoreThan5HoursAhead() {
+
+        RideRequestCreateDto request = buildValidRequest();
+        request.schedule.type = "LATER";
+        request.schedule.startAt = Instant.now().plusSeconds(5 * 3600 + 10);
+
+        ResponseEntity<String> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        String.class
+                );
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
     private static RideRequestCreateDto buildValidRequest() {
 
         RideRequestCreateDto dto = new RideRequestCreateDto();
