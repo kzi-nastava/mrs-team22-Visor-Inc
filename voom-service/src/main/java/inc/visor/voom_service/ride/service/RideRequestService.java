@@ -15,6 +15,7 @@ import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.AccessDeniedException;
+import inc.visor.voom_service.exception.InvalidRouteOrderException;
 import inc.visor.voom_service.exception.NotFoundException;
 import inc.visor.voom_service.exception.RideScheduleTooLateException;
 import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
@@ -78,6 +79,8 @@ public class RideRequestService {
         User user = this.userService.getUser(userId).orElseThrow(NotFoundException::new);
         VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
         RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
+
+        validateRouteOrder(dto.route.points);
 
         if (user.getUserStatus() == UserStatus.SUSPENDED) {
             throw new AccessDeniedException();
@@ -170,4 +173,38 @@ public class RideRequestService {
                         : null
         );
     }
+
+    private void validateRouteOrder(List<RideRequestCreateDto.RoutePointDto> points) {
+
+        if (points == null || points.isEmpty()) {
+            return;
+        }
+
+        boolean anyOrderIndexPresent
+                = points.stream().anyMatch(p -> p.orderIndex != null);
+
+        if (!anyOrderIndexPresent) {
+            return;
+        }
+
+        if (points.stream().anyMatch(p -> p.orderIndex == null)) {
+            throw new InvalidRouteOrderException("All route points must have orderIndex defined.");
+        }
+
+        List<Integer> sortedIndexes = points.stream()
+                .map(p -> p.orderIndex)
+                .sorted()
+                .toList();
+
+        if (sortedIndexes.get(0) != 0) {
+            throw new InvalidRouteOrderException("orderIndex must start from 0.");
+        }
+
+        for (int i = 0; i < sortedIndexes.size(); i++) {
+            if (!sortedIndexes.get(i).equals(i)) {
+                throw new InvalidRouteOrderException("orderIndex must be continuous and without duplicates.");
+            }
+        }
+    }
+
 }

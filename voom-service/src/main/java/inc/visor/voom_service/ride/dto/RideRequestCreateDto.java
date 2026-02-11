@@ -44,7 +44,7 @@ public class RideRequestCreateDto {
     public static class RoutePointDto {
         public double lat;
         public double lng;
-        public int orderIndex;
+        public Integer orderIndex;
         public String type;
         public String address;
 

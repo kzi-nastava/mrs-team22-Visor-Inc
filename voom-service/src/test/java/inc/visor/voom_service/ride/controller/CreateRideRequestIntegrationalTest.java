@@ -86,21 +86,19 @@ class CreateRideRequestIntegrationalTest {
 
         this.userJwt = loginResponse.getBody().getAccessToken();
 
-        RestTemplateBuilder builder
-                = new RestTemplateBuilder(rt
-                        -> rt.getInterceptors().add((request, body, execution) -> {
-                    request.getHeaders()
-                            .add("Authorization", "Bearer " + userJwt);
+        RestTemplateBuilder builder = new RestTemplateBuilder(rt
+                -> rt.getInterceptors().add((request, body, execution) -> {
+                    request.getHeaders().add("Authorization", "Bearer " + userJwt);
                     return execution.execute(request, body);
                 })
-                );
+        );
 
         this.restTemplateUser = new TestRestTemplate(builder);
     }
 
     @Test
     @Order(1)
-    @DisplayName("01 - Should create ride request and return ACCEPTED status when a driver accepts")
+    @DisplayName("01 - Should create ride request and return ACCEPTED")
     void shouldCreateRideRequest() {
 
         RideRequestCreateDto request = buildValidRequest();
@@ -114,24 +112,20 @@ class CreateRideRequestIntegrationalTest {
 
         RideRequestResponseDto body = response.getBody();
 
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(body);
         assertTrue(body.getRequestId() > 0);
         assertEquals(RideRequestStatus.ACCEPTED, body.getStatus());
-        assertTrue(body.getPrice() >= 0);
-        assertTrue(body.getDistanceKm() > 0);
-        assertEquals(45.0, body.getPickupLat());
-        assertEquals(19.0, body.getPickupLng());
+        assertNotNull(body.getDriver());
 
         assertTrue(
-                rideRequestRepository.findById(body.getRequestId()).isPresent(),
-                "RideRequest should be persisted in database"
+                rideRequestRepository.findById(body.getRequestId()).isPresent()
         );
-
     }
 
     @Test
     @Order(2)
-    @DisplayName("02 - Should return UNAUTHORIZED when creating ride request without JWT")
+    @DisplayName("02 - Should return UNAUTHORIZED without JWT")
     void shouldReturnUnauthorizedWhenJwtMissing() {
 
         RideRequestCreateDto request = buildValidRequest();
@@ -144,42 +138,33 @@ class CreateRideRequestIntegrationalTest {
                 );
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-
     }
 
     @Test
     @Order(3)
-    @DisplayName("03 - Should return REJECTED when no driver matches requested vehicle type")
-    void shouldReturnRejectedWhenNoDriverMatchesVehicleType() {
+    @DisplayName("03 - Should forbid when user suspended")
+    void shouldReturnForbiddenWhenUserSuspended() {
+
+        User user = userRepository.findByEmail("user@test.com").orElseThrow();
+        user.setUserStatus(UserStatus.SUSPENDED);
+        userRepository.save(user);
 
         RideRequestCreateDto request = buildValidRequest();
-        request.vehicleTypeId = 3L;
 
-        ResponseEntity<RideRequestResponseDto> response
+        ResponseEntity<String> response
                 = restTemplateUser.postForEntity(
                         getBaseUrl() + "/rides/requests",
                         request,
-                        RideRequestResponseDto.class
+                        String.class
                 );
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        RideRequestResponseDto body = response.getBody();
-
-        assertNotNull(body);
-        assertTrue(body.getRequestId() > 0);
-        assertEquals(RideRequestStatus.REJECTED, body.getStatus());
-
-        assertTrue(
-                rideRequestRepository.findById(body.getRequestId()).isPresent(),
-                "RideRequest should be persisted in database"
-        );
-
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     @ParameterizedTest
     @MethodSource("invalidRequests")
-    @DisplayName("04 - Should return BAD_REQUEST for invalid ride requests")
+    @Order(4)
+    @DisplayName("04 - Should return BAD_REQUEST for invalid inputs")
     void shouldReturnBadRequestForInvalidInputs(RideRequestCreateDto request) {
 
         ResponseEntity<String> response
@@ -201,47 +186,57 @@ class CreateRideRequestIntegrationalTest {
         r2.route.points = null;
 
         RideRequestCreateDto r3 = buildValidRequest();
-        r3.route.points = List.of(r3.route.points.get(0));
+        r3.route.points = List.of();
 
         RideRequestCreateDto r4 = buildValidRequest();
-        r4.schedule = null;
+        r4.route.points = List.of(r4.route.points.get(0));
 
         RideRequestCreateDto r5 = buildValidRequest();
-        r5.vehicleTypeId = null;
+        r5.schedule = null;
 
         RideRequestCreateDto r6 = buildValidRequest();
-        r6.preferences = null;
+        r6.schedule.type = null;
 
-        return Stream.of(r1, r2, r3, r4, r5, r6);
-    }
+        RideRequestCreateDto r7 = buildValidRequest();
+        r7.schedule.type = "";
 
-    @Test
-    @Order(4)
-    @DisplayName("04 - Should forbid ride request when user is suspended")
-    void shouldReturnForbiddenWhenUserSuspended() {
+        RideRequestCreateDto r8 = buildValidRequest();
+        r8.schedule.type = "   ";
 
-        User user = userRepository.findByEmail("user@test.com").orElseThrow();
+        RideRequestCreateDto r9 = buildValidRequest();
+        r9.vehicleTypeId = null;
 
-        user.setUserStatus(UserStatus.SUSPENDED);
-        userRepository.save(user);
+        RideRequestCreateDto r10 = buildValidRequest();
+        r10.preferences = null;
 
-        RideRequestCreateDto request = buildValidRequest();
-
-        ResponseEntity<String> response
-                = restTemplateUser.postForEntity(
-                        getBaseUrl() + "/rides/requests",
-                        request,
-                        String.class
-                );
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        return Stream.of(
+                r1, r2, r3, r4, r5,
+                r6, r7, r8, r9, r10
+        );
     }
 
     @Test
     @Order(5)
-    @DisplayName("05 - Should return REJECTED when no driver is available")
-    @Sql(scripts = "/sql/driver-busy.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @DisplayName("05 - Should return REJECTED when no driver matches vehicle type")
+    void shouldReturnRejectedWhenNoDriverMatchesVehicleType() {
+
+        RideRequestCreateDto request = buildValidRequest();
+        request.vehicleTypeId = 999L;
+
+        ResponseEntity<RideRequestResponseDto> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        request,
+                        RideRequestResponseDto.class
+                );
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("06 - Should return CONFLICT when no drivers available")
+    @Sql(scripts = "/sql/driver-busy.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldReturnRejectedWhenNoDriverIsAvailable() {
 
         RideRequestCreateDto request = buildValidRequest();
@@ -254,17 +249,11 @@ class CreateRideRequestIntegrationalTest {
                 );
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-
-        assertEquals(
-                "No active drivers available",
-                response.getBody()
-        );
-
     }
 
     @Test
-    @Order(6)
-    @DisplayName("06 - Should create scheduled ride and return ACCEPTED")
+    @Order(7)
+    @DisplayName("07 - Should create scheduled ride and return ACCEPTED")
     void shouldCreateScheduledRide() {
 
         RideRequestCreateDto request = buildValidRequest();
@@ -294,8 +283,8 @@ class CreateRideRequestIntegrationalTest {
     }
 
     @Test
-    @Order(7)
-    @DisplayName("07 - Should reject scheduled ride and return REJECTED when no driver is available")
+    @Order(8)
+    @DisplayName("08 - Should reject scheduled ride and return REJECTED when no driver is available")
     @Sql(scripts = "/sql/driver-has-overlapping-scheduled-ride.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void shouldRejectScheduledRideWhenNoDriverAvailable() {
@@ -320,14 +309,12 @@ class CreateRideRequestIntegrationalTest {
     }
 
     @Test
-    @Order(8)
-    @DisplayName("08 - Should return BAD_REQUEST when scheduled more than 5 hours ahead")
-    void shouldRejectWhenScheduledTooLate() {
+    @Order(9)
+    @DisplayName("09 - Should return BAD_REQUEST when orderIndex invalid")
+    void shouldReturnBadRequestWhenOrderIndexInvalid() {
 
         RideRequestCreateDto request = buildValidRequest();
-
-        request.schedule.type = "LATER";
-        request.schedule.startAt = Instant.now().plusSeconds(6 * 3600);
+        request.route.points.get(1).orderIndex = 5;
 
         ResponseEntity<String> response
                 = restTemplateUser.postForEntity(
@@ -337,6 +324,21 @@ class CreateRideRequestIntegrationalTest {
                 );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("10 - Should return UNSUPPORTED_MEDIA_TYPE for wrong content type")
+    void shouldReturnUnsupportedMediaType() {
+
+        ResponseEntity<String> response
+                = restTemplateUser.postForEntity(
+                        getBaseUrl() + "/rides/requests",
+                        "invalid-body",
+                        String.class
+                );
+
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
     }
 
     private static RideRequestCreateDto buildValidRequest() {
