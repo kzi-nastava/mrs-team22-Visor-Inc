@@ -36,7 +36,7 @@ public class Vehicle {
     @JoinColumn(name = "vehicle_type_id", nullable = false)
     private VehicleType vehicleType;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "year1", nullable = false)
     private int year;
 
     @Column(name = "model", nullable = false)

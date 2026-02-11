@@ -28,6 +28,7 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
+import inc.visor.voom_service.exception.DriverNotAvailableException;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
@@ -36,6 +37,7 @@ import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.utils.GeoUtil;
@@ -398,10 +400,17 @@ public class DriverService {
                 .filter(d -> d.getUser().getUserStatus() == UserStatus.ACTIVE)
                 .filter(d -> isDriverCurrentlyActive(d.getId()))
                 .filter(d -> vehicleMatches(d, rideRequest))
+                .filter(d -> !isDriverOverWorked(d))
                 .toList();
 
         if (candidates.isEmpty()) {
             return null;
+        }
+
+        if (rideRequest.getScheduleType() == ScheduleType.NOW) {
+            candidates = candidates.stream()
+                    .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
+                    .toList();
         }
 
         List<Driver> freeDrivers = candidates.stream()
@@ -420,7 +429,7 @@ public class DriverService {
             return nearestDriver(finishingSoon, pickup, locMap);
         }
 
-        return null;
+        throw new DriverNotAvailableException();
     }
 
     private boolean finishesInNext10Minutes(Driver driver) {
@@ -430,6 +439,11 @@ public class DriverService {
                 LocalDateTime.now(),
                 rideService.estimateRideEndTime(r)
         ).toMinutes() <= 10);
+    }
+
+    private boolean isDriverOverWorked(Driver driver) {
+        double activeHours = calculateActiveHoursLast24h(driver.getId());
+        return activeHours >= 8;
     }
 
     private boolean vehicleMatches(Driver driver, RideRequest req) {
@@ -501,11 +515,18 @@ public class DriverService {
         List<DriverStateChange> changes
                 = driverActivityService.findChangesSince(driverId, since);
 
-        if (changes.isEmpty()) {
-            return 0;
-        }
+        List<DriverStateChange> lastBefore
+                = driverActivityService.findLastChangeBefore(driverId, since);
 
         double activeSeconds = 0;
+
+        if (!lastBefore.isEmpty() && lastBefore.get(0).getCurrentState() == DriverState.ACTIVE) {
+
+            LocalDateTime end
+                    = changes.isEmpty() ? now : changes.get(0).getPerformedAt();
+
+            activeSeconds += Duration.between(since, end).getSeconds();
+        }
 
         for (int i = 0; i < changes.size(); i++) {
 
@@ -514,13 +535,17 @@ public class DriverService {
             if (current.getCurrentState() == DriverState.ACTIVE) {
 
                 LocalDateTime start = current.getPerformedAt();
-                LocalDateTime end;
+                LocalDateTime end
+                        = (i + 1 < changes.size())
+                        ? changes.get(i + 1).getPerformedAt()
+                        : now;
 
-                if (i + 1 < changes.size()) {
-                    end = changes.get(i + 1).getPerformedAt();
-                } else {
-                    end = now;
+                if (end.isBefore(since)) {
+                    continue;
                 }
+
+                start = start.isBefore(since) ? since : start;
+                end = end.isAfter(now) ? now : end;
 
                 activeSeconds += Duration.between(start, end).getSeconds();
             }

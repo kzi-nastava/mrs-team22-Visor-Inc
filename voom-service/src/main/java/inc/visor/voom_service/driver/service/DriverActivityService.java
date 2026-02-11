@@ -29,4 +29,8 @@ public class DriverActivityService {
         return this.driverActivityRepository.findChangesSince(driverId, since);
     }
 
+    public List<DriverStateChange> findLastChangeBefore(long driverId, java.time.LocalDateTime before) {
+        return this.driverActivityRepository.findLastChangeBefore(driverId, before);
+    }
+
 }
