@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import inc.visor.voom.app.MainActivity;
 import inc.visor.voom.app.R;
@@ -96,19 +98,18 @@ public class NotificationService {
     ) {
         createChannel(context);
 
-        Uri deepLinkUri = Uri.parse("voom://ride/tracking");
+        Uri deepLinkUri = Uri.parse("voom://ride-tracking");
+
+        Log.d("DEEPLINK:" , "handling");
 
         Intent intent = new Intent(Intent.ACTION_VIEW, deepLinkUri);
         intent.setPackage(context.getPackageName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent pendingIntent =
-                PendingIntent.getActivity(
-                        context,
-                        notificationId != null ? notificationId.intValue() : 1,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                );
+        PendingIntent pendingIntent = new NavDeepLinkBuilder(context)
+                .setGraph(R.navigation.user_nav_graph)
+                .setDestination(R.id.userRideTrackingFragment)
+                .createPendingIntent();
 
         Notification notification =
                 new NotificationCompat.Builder(context, CHANNEL_ID)

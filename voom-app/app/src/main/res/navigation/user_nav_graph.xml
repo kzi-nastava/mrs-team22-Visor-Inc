@@ -47,7 +47,7 @@
         android:id="@+id/userRideTrackingFragment"
         android:name="inc.visor.voom.app.user.tracking.UserRideTrackingFragment"
         android:label="UserRideTrackingFragment">
-        <deepLink app:uri="voom://ride/tracking" />
+        <deepLink app:uri="voom://ride-tracking" />
     </fragment>
     <fragment
         android:id="@+id/userHomeFragment"
