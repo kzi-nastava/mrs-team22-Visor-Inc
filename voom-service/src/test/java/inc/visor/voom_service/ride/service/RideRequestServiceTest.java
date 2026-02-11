@@ -7,6 +7,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -238,6 +239,11 @@ class RideRequestServiceTest {
         assertThrows(NotFoundException.class,
                 () -> rideRequestService.createRideRequest(dto, userId)
         );
+
+        verify(rideRequestRepository, times(0)).save(any());
+        verify(rideService, times(0)).save(any());
+        verifyNoInteractions(driverService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -414,6 +420,164 @@ class RideRequestServiceTest {
         verify(rideService, times(0)).save(any());
         verifyNoInteractions(driverService);
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("09 - Should throw RideScheduleTooLateException when scheduled more than 5h ahead")
+    void shouldThrowWhenScheduleTooLate() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.schedule.type = "LATER";
+        dto.schedule.startAt = Instant.now().plusSeconds(6 * 3600);
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(user));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(10.0, 12.0));
+
+        // driver može da postoji — nije bitno
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(buildAvailableDriver(10L));
+
+        assertThrows(
+                inc.visor.voom_service.exception.RideScheduleTooLateException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
+
+        verifyNoInteractions(rideRequestRepository);
+        verifyNoInteractions(rideService);
+        verifyNoInteractions(notificationService);
+        verifyNoInteractions(rideWsService);
+        verifyNoInteractions(simulator);
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("10 - Should accept scheduled ride when exactly at 5h boundary")
+    void shouldAcceptWhenExactly5HoursAhead() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.schedule.type = "LATER";
+        dto.schedule.startAt = Instant.now().plusSeconds(5 * 3600 - 1);
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
+        Driver driver = buildAvailableDriver(10L);
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(user));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(100.0, 200.0));
+
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(driver);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.ACCEPTED, response.getStatus());
+        assertNotNull(response.getDriver());
+
+        verify(rideRequestRepository, times(1)).save(any());
+        verify(rideService, times(1)).save(any());
+
+        verify(notificationService, times(1))
+                .createAndSendNotification(any(), any(), any(), any(), any());
+
+        verifyNoInteractions(rideWsService);
+        verifyNoInteractions(simulator);
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("11 - Should attach linked passengers to ride")
+    void shouldAttachLinkedPassengers() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.schedule.type = "NOW";
+
+        dto.linkedPassengers = List.of(
+                "pera@mail.com",
+                "mika@mail.com",
+                "random@mail.com" 
+        );
+
+        User creator = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
+        Driver driver = buildAvailableDriver(10L);
+
+        User pera = new User();
+        pera.setId(2L);
+
+        User mika = new User();
+        mika.setId(3L);
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(creator));
+
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(10.0, 20.0));
+
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(driver);
+
+        when(driverService.updateDriver(driver))
+                .thenReturn(driver);
+
+        when(userService.getUser("pera@mail.com"))
+                .thenReturn(Optional.of(pera));
+
+        when(userService.getUser("mika@mail.com"))
+                .thenReturn(Optional.of(mika));
+
+        when(userService.getUser("random@mail.com"))
+                .thenReturn(Optional.empty());
+
+        ArgumentCaptor<Ride> rideCaptor
+                = ArgumentCaptor.forClass(Ride.class);
+
+        RideRequestResponseDto response
+                = rideRequestService.createRideRequest(dto, userId);
+
+        assertNotNull(response);
+        assertEquals(RideRequestStatus.ACCEPTED, response.getStatus());
+
+        verify(rideService).save(rideCaptor.capture());
+        Ride savedRide = rideCaptor.getValue();
+
+        List<User> passengers = savedRide.getPassengers();
+
+        assertEquals(2, passengers.size());
+        assertTrue(passengers.contains(pera));
+        assertTrue(passengers.contains(mika));
     }
 
     private User buildActiveUser(Long id) {
