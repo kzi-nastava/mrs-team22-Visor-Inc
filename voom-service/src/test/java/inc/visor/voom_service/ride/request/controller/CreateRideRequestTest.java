@@ -1,14 +1,17 @@
 package inc.visor.voom_service.ride.request.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import inc.visor.voom_service.auth.token.service.JwtService;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.complaints.service.ComplaintService;
+import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.exception.DriverNotAvailableException;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.ride.controller.RideController;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.dto.RideRequestResponseDto;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
@@ -18,38 +21,30 @@ import inc.visor.voom_service.ride.service.RideRequestService;
 import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.simulation.Simulator;
-import inc.visor.voom_service.auth.token.service.JwtService;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
-import inc.visor.voom_service.driver.dto.DriverSummaryDto;
-import inc.visor.voom_service.exception.DriverNotAvailableException;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RideController.class)
 @AutoConfigureMockMvc
