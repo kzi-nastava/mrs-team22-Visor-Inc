@@ -16,6 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -46,6 +47,7 @@ import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
+import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
 import inc.visor.voom_service.shared.notification.service.NotificationService;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
@@ -53,7 +55,7 @@ import inc.visor.voom_service.vehicle.service.VehicleTypeService;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class RideRequestServiceTest {
 
     @InjectMocks
@@ -88,12 +90,6 @@ class RideRequestServiceTest {
 
     @Mock
     private RideRepository rideRepository;
-
-    @FunctionalInterface
-    interface ScenarioMockSetup {
-
-        void apply(RideRequestCreateDto dto, Long userId);
-    }
 
     @Test
     @Order(1)
@@ -177,7 +173,10 @@ class RideRequestServiceTest {
                 .thenReturn(Optional.of(vehicleType));
 
         when(rideEstimationService.estimate(
-                eq(dto.route.points),
+                ArgumentMatchers.argThat(points
+                        -> points != null
+                && points.size() == 2
+                ),
                 eq(vehicleType)
         )).thenReturn(new RideEstimationResult(20.0, 30.0));
 
@@ -522,7 +521,7 @@ class RideRequestServiceTest {
         dto.linkedPassengers = List.of(
                 "pera@mail.com",
                 "mika@mail.com",
-                "random@mail.com" 
+                "random@mail.com"
         );
 
         User creator = buildActiveUser(userId);
@@ -578,6 +577,155 @@ class RideRequestServiceTest {
         assertEquals(2, passengers.size());
         assertTrue(passengers.contains(pera));
         assertTrue(passengers.contains(mika));
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("12 - Should send correct notification types for NOW ride")
+    void shouldSendCorrectNotificationTypesForNowRide() {
+
+        Long userId = 1L;
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(1L);
+        Driver driver = buildAvailableDriver(10L);
+
+        RideRequestCreateDto dto = buildValidRequest();
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(user));
+
+        when(vehicleTypeService.getVehicleType(1L))
+                .thenReturn(Optional.of(vehicleType));
+
+        when(rideEstimationService.estimate(
+                eq(dto.route.points),
+                eq(vehicleType)
+        )).thenReturn(new RideEstimationResult(10.0, 12.5));
+
+        when(driverService.findDriverForRideRequest(
+                any(),
+                eq(dto.getFreeDriversSnapshot())
+        )).thenReturn(driver);
+
+        when(driverService.updateDriver(driver))
+                .thenReturn(driver);
+
+        rideRequestService.createRideRequest(dto, userId);
+
+        ArgumentCaptor<User> recipientCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<NotificationType> typeCaptor
+                = ArgumentCaptor.forClass(NotificationType.class);
+
+        verify(notificationService, times(2))
+                .createAndSendNotification(
+                        recipientCaptor.capture(),
+                        typeCaptor.capture(),
+                        any(),
+                        any(),
+                        any()
+                );
+
+        List<inc.visor.voom_service.shared.notification.model.enums.NotificationType> sentTypes
+                = typeCaptor.getAllValues();
+
+        assertEquals(2, sentTypes.size());
+        assertTrue(sentTypes.contains(
+                inc.visor.voom_service.shared.notification.model.enums.NotificationType.RIDE_ASSIGNED));
+        assertTrue(sentTypes.contains(
+                inc.visor.voom_service.shared.notification.model.enums.NotificationType.RIDE_ACCEPTED));
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("13 - Should not update driver status for SCHEDULED ride")
+    void shouldNotUpdateDriverForScheduledRide() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.schedule.type = "LATER";
+        dto.schedule.startAt = Instant.now().plusSeconds(3600);
+
+        User user = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
+        Driver driver = buildAvailableDriver(10L);
+
+        when(userService.getUser(userId)).thenReturn(Optional.of(user));
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+        when(rideEstimationService.estimate(any(), eq(vehicleType)))
+                .thenReturn(new RideEstimationResult(10.0, 20.0));
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(driver);
+
+        rideRequestService.createRideRequest(dto, userId);
+
+        verify(driverService, times(0)).updateDriver(any());
+        assertEquals(DriverStatus.AVAILABLE, driver.getStatus());
+    }
+
+    @Test
+    @Order(14)
+    @DisplayName("14 - Should not duplicate linked passengers")
+    void shouldNotDuplicateLinkedPassengers() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.linkedPassengers = List.of("pera@mail.com", "pera@mail.com");
+
+        User creator = buildActiveUser(userId);
+        VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
+        Driver driver = buildAvailableDriver(10L);
+
+        User pera = new User();
+        pera.setId(2L);
+
+        when(userService.getUser(userId)).thenReturn(Optional.of(creator));
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(vehicleType));
+        when(rideEstimationService.estimate(any(), eq(vehicleType)))
+                .thenReturn(new RideEstimationResult(10.0, 20.0));
+        when(driverService.findDriverForRideRequest(any(), any()))
+                .thenReturn(driver);
+        when(driverService.updateDriver(driver)).thenReturn(driver);
+        when(userService.getUser("pera@mail.com"))
+                .thenReturn(Optional.of(pera));
+
+        ArgumentCaptor<Ride> rideCaptor
+                = ArgumentCaptor.forClass(Ride.class);
+
+        rideRequestService.createRideRequest(dto, userId);
+
+        verify(rideService).save(rideCaptor.capture());
+
+        Ride savedRide = rideCaptor.getValue();
+
+        assertEquals(1, savedRide.getPassengers().size());
+    }
+
+    @Test
+    @Order(15)
+    @DisplayName("15 - Should throw when route has less than 2 points")
+    void shouldThrowWhenRouteInvalid() {
+
+        Long userId = 1L;
+
+        RideRequestCreateDto dto = buildValidRequest();
+        dto.route.points = List.of(dto.route.points.get(0));
+
+        when(userService.getUser(userId))
+                .thenReturn(Optional.of(buildActiveUser(userId)));
+        when(vehicleTypeService.getVehicleType(dto.vehicleTypeId))
+                .thenReturn(Optional.of(buildVehicleType(dto.vehicleTypeId)));
+        when(rideEstimationService.estimate(any(), any()))
+                .thenReturn(new RideEstimationResult(10.0, 20.0));
+
+        assertThrows(
+                InvalidRouteOrderException.class,
+                () -> rideRequestService.createRideRequest(dto, userId)
+        );
     }
 
     private User buildActiveUser(Long id) {
