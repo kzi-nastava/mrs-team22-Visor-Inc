@@ -1,7 +1,5 @@
 package inc.visor.voom.app.shared.component.history;
 
-import static java.security.AccessController.getContext;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -45,7 +44,13 @@ public class RideHistoryAdapter extends RecyclerView.Adapter<RideHistoryAdapter.
 
     private String userRole;
 
-//    DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    public void updateRides(List<RideHistoryDto> newRides) {
+        this.rides.clear();
+        if (newRides != null) {
+            this.rides.addAll(newRides);
+        }
+        notifyDataSetChanged();
+    }
 
     public RideHistoryAdapter(List<RideHistoryDto> rides, FragmentManager parentFragmentManager) {
         this.rides = rides;

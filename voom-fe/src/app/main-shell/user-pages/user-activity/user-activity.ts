@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
 import ApiService from '../../../shared/rest/api-service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ValueInputDate } from '../../../shared/value-input/value-input-date/value-input-date';
@@ -12,29 +11,45 @@ import { RideHistoryDto } from '../../../shared/rest/ride/ride.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivityMap } from '../../../shared/activity-map/activity-map';
 import { RateRideForm } from '../../../shared/rate-ride-form/rate-ride-form';
+import { Dropdown } from '../../../shared/dropdown/dropdown';
 
 export const ROUTE_USER_ACTIVITY = "activity";
 
 @Component({
   selector: 'app-user-activity',
   imports: [
-    MatIcon,
     ValueInputDate,
     ReactiveFormsModule,
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
-    MatButton
+    MatButton,
+    Dropdown
   ],
   templateUrl: './user-activity.html',
   styleUrl: './user-activity.css',
 })
 export class UserActivity {
 
+  protected values: { label: string; value: string }[] = [
+    { label: 'Newest first', value: 'DATE_DESC' },
+    { label: 'Oldest first', value: 'DATE_ASC' },
+
+    { label: 'Price: low → high', value: 'PRICE_ASC' },
+    { label: 'Price: high → low', value: 'PRICE_DESC' },
+
+    { label: 'Shortest distance', value: 'DISTANCE_ASC' },
+    { label: 'Longest distance', value: 'DISTANCE_DESC' },
+
+    { label: 'Status ascending', value: 'STATUS_ASC' },
+    { label: 'Status descending', value: 'STATUS_DESC' }
+  ];
+
   private apiService = inject(ApiService);
   private authenticationService = inject(AuthenticationService);
 
-  sortDirection = signal<'ASC' | 'DESC'>('DESC');
+  selectedColumnName = signal< "DATE" | "PRICE" |"DISTANCE" | "STATUS">("DATE")
+  sortDirection = signal<"ASC" | "DESC">("DESC");
 
   fromDate = new FormControl<Date | null>(null);
   toDate = new FormControl<Date | null>(null);
@@ -52,8 +67,9 @@ export class UserActivity {
 
       const startStr = from instanceof Date ? from.toISOString() : from;
       const endStr = to instanceof Date ? to.toISOString() : to;
+      const columnName = this.selectedColumnName();
 
-      return this.apiService.rideApi.getUserRideHistory(user.id, startStr ?? null, endStr ?? null, sort).pipe(
+      return this.apiService.rideApi.getUserRideHistory(user.id, startStr ?? null, endStr ?? null, columnName ?? null, sort).pipe(
         map(response => response.data ?? [])
       );
     })
@@ -114,5 +130,49 @@ export class UserActivity {
     const isTooOld = Date.now() - finishedDate > threeDaysInMs;
 
     return !alreadyRated && !isTooOld;
+  }
+
+  protected onSortChange($event: string | number) {
+    switch ($event) {
+      case 'DATE_DESC':
+        this.selectedColumnName.set("DATE");
+        this.sortDirection.set("DESC");
+        break;
+
+      case 'DATE_ASC':
+        this.selectedColumnName.set("DATE");
+        this.sortDirection.set("ASC");
+        break;
+
+      case 'PRICE_DESC':
+        this.selectedColumnName.set("PRICE");
+        this.sortDirection.set("DESC");
+        break;
+
+      case 'PRICE_ASC':
+        this.selectedColumnName.set("PRICE");
+        this.sortDirection.set("ASC");
+        break;
+
+      case 'DISTANCE_DESC':
+        this.selectedColumnName.set("DISTANCE");
+        this.sortDirection.set("DESC");
+        break;
+
+      case 'DISTANCE_ASC':
+        this.selectedColumnName.set("DISTANCE");
+        this.sortDirection.set("ASC");
+        break;
+
+      case 'STATUS_ASC':
+        this.selectedColumnName.set("STATUS");
+        this.sortDirection.set("DESC");
+        break;
+
+      case 'STATUS_DESC':
+        this.selectedColumnName.set("STATUS");
+        this.sortDirection.set("ASC");
+        break;
+    }
   }
 }

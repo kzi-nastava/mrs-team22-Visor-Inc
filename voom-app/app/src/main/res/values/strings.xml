@@ -75,4 +75,6 @@
     <string name="date_to">Date to</string>
     <string name="date_from">Date from</string>
     <string name="ride">Ride</string>
+    <string name="sortBy">Sort by</string>
+    <string name="sort_by">Sort by</string>
 </resources>

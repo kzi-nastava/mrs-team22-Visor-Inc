@@ -103,6 +103,7 @@ public interface RideApi {
     Call<List<RideHistoryDto>> getRides(
             @Query("start") String start,
             @Query("end") String end,
+            @Query("column") String column,
             @Query("sort") String sort
     );
 
@@ -111,6 +112,7 @@ public interface RideApi {
             @Path("userId") long userId,
             @Query("start") String start,
             @Query("end") String end,
+            @Query("column") String column,
             @Query("sort") String sort
     );
 
