@@ -183,6 +183,15 @@ describe('Registration', () => {
       expect(component.accountForm.valid).toBeFalse();
     });
 
+    it('should not return mismatch error if one password field is empty', () => {
+      component.accountForm.patchValue({
+        password1: 'OnlyOnePassword',
+        password2: ''
+      });
+
+      expect(component.accountForm.hasError('passwordsMismatch')).toBeFalse();
+    });
+
     it('should validate entire account form with valid data', () => {
       component.accountForm.patchValue({
         email: 'test@example.com',
