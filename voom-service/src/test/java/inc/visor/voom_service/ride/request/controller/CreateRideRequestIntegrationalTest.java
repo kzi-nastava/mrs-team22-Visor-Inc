@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.controller;
+package inc.visor.voom_service.ride.request.controller;
 
 import java.time.Instant;
 import java.util.List;
