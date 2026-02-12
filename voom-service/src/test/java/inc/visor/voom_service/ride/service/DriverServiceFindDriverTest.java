@@ -79,7 +79,7 @@ class DriverServiceFindDriverTest {
     }
 
     @Test
-    @DisplayName("01 - Should return nearest AVAILABLE driver for NOW ride")
+    @DisplayName("01 - Should return AVAILABLE driver for NOW ride")
     void shouldReturnNearestAvailableDriverForNowRide() {
 
         VehicleType vehicleType = buildVehicleType(1L);
@@ -737,6 +737,97 @@ class DriverServiceFindDriverTest {
         doReturn(2.0)
                 .when(driverService)
                 .calculateActiveHoursLast24h(130L);
+
+        Driver result = driverService.findDriverForRideRequest(
+                rideRequest,
+                snapshot
+        );
+
+        assertNull(result);
+    }
+
+    @Test
+    @DisplayName("15 - Should return null when all drivers are not currently ACTIVE")
+    void shouldReturnNullWhenDriversNotCurrentlyActive() {
+
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequest rideRequest = buildValidRideRequest(
+                ScheduleType.NOW,
+                vehicleType,
+                false,
+                false,
+                0
+        );
+
+        Driver driver = buildDriver(
+                150L,
+                DriverStatus.AVAILABLE,
+                UserStatus.ACTIVE
+        );
+
+        List<RideRequestCreateDto.DriverLocationDto> snapshot = List.of(
+                loc(150L, 45.0, 19.0)
+        );
+
+        when(driverRepository.findById(150L))
+                .thenReturn(Optional.of(driver));
+
+        mockDriverInactive(150L);
+
+        Driver result = driverService.findDriverForRideRequest(
+                rideRequest,
+                snapshot
+        );
+
+        assertNull(result);
+    }
+
+    @Test
+    @DisplayName("16 - Should return null when all drivers are overworked")
+    void shouldReturnNullWhenAllDriversOverworked() {
+
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequest rideRequest = buildValidRideRequest(
+                ScheduleType.NOW,
+                vehicleType,
+                false,
+                false,
+                0
+        );
+
+        Driver driver1 = buildDriver(
+                160L,
+                DriverStatus.AVAILABLE,
+                UserStatus.ACTIVE
+        );
+
+        Driver driver2 = buildDriver(
+                161L,
+                DriverStatus.AVAILABLE,
+                UserStatus.ACTIVE
+        );
+
+        Vehicle vehicle1 = buildVehicle(driver1, vehicleType, false, false, 4);
+        Vehicle vehicle2 = buildVehicle(driver2, vehicleType, false, false, 4);
+
+        List<RideRequestCreateDto.DriverLocationDto> snapshot = List.of(
+                loc(160L, 45.0, 19.0),
+                loc(161L, 45.01, 19.01)
+        );
+
+        when(driverRepository.findById(160L)).thenReturn(Optional.of(driver1));
+        when(driverRepository.findById(161L)).thenReturn(Optional.of(driver2));
+
+        when(vehicleRepository.findByDriverId(160L)).thenReturn(Optional.of(vehicle1));
+        when(vehicleRepository.findByDriverId(161L)).thenReturn(Optional.of(vehicle2));
+
+        mockDriverActive(160L);
+        mockDriverActive(161L);
+
+        doReturn(9.0).when(driverService).calculateActiveHoursLast24h(160L);
+        doReturn(8.5).when(driverService).calculateActiveHoursLast24h(161L);
 
         Driver result = driverService.findDriverForRideRequest(
                 rideRequest,
