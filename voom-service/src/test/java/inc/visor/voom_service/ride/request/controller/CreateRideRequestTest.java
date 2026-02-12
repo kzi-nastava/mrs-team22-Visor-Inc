@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.controller;
+package inc.visor.voom_service.ride.request.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

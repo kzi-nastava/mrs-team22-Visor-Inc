@@ -1,29 +1,4 @@
-package inc.visor.voom_service.ride.service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+package inc.visor.voom_service.ride.request.service;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserStatus;
@@ -42,10 +17,28 @@ import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.service.RideService;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
