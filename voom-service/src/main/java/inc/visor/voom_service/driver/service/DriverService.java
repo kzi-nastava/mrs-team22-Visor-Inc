@@ -431,7 +431,7 @@ public class DriverService {
         return null;
     }
 
-    private boolean finishesInNext10Minutes(Driver driver) {
+    public boolean finishesInNext10Minutes(Driver driver) {
         return rideService.findActiveRides(driver.getId())
                 .stream()
                 .anyMatch(r -> Duration.between(

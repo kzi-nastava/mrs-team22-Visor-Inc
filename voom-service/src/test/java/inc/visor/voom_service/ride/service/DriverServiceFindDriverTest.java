@@ -3,6 +3,8 @@ package inc.visor.voom_service.ride.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doReturn;
@@ -237,6 +242,237 @@ class DriverServiceFindDriverTest {
         assertNull(result);
     }
 
+    @Test
+    @DisplayName("04 - Should return finishingSoon driver for SCHEDULED ride")
+    void shouldReturnFinishingSoonDriverForNowRide() {
+
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequest rideRequest = buildValidRideRequest(
+                ScheduleType.LATER,
+                vehicleType,
+                false,
+                false,
+                0
+        );
+
+        Driver driver = buildDriver(
+                40L,
+                DriverStatus.BUSY,
+                UserStatus.ACTIVE
+        );
+
+        Vehicle vehicle = buildVehicle(
+                driver,
+                vehicleType,
+                false,
+                false,
+                4
+        );
+
+        List<RideRequestCreateDto.DriverLocationDto> snapshot = List.of(
+                loc(40L, 45.0, 19.0)
+        );
+
+        when(driverRepository.findById(40L))
+                .thenReturn(Optional.of(driver));
+
+        when(vehicleRepository.findByDriverId(40L))
+                .thenReturn(Optional.of(vehicle));
+
+        mockDriverActive(40L);
+
+        doReturn(2.0)
+                .when(driverService)
+                .calculateActiveHoursLast24h(40L);
+
+        when(rideService.isDriverFreeForRide(driver, rideRequest))
+                .thenReturn(false);
+
+        doReturn(true)
+                .when(driverService)
+                .finishesInNext10Minutes(driver);
+
+        Driver result = driverService.findDriverForRideRequest(
+                rideRequest,
+                snapshot
+        );
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(40L, result.getId());
+    }
+
+    @Test
+    @DisplayName("05 - Should return null when driver worked more than 8h in last 24h")
+    void shouldReturnNullWhenDriverOverworked() {
+
+        VehicleType vehicleType = buildVehicleType(1L);
+
+        RideRequest rideRequest = buildValidRideRequest(
+                ScheduleType.NOW,
+                vehicleType,
+                false,
+                false,
+                0
+        );
+
+        Driver driver = buildDriver(
+                50L,
+                DriverStatus.AVAILABLE,
+                UserStatus.ACTIVE
+        );
+
+        Vehicle vehicle = buildVehicle(
+                driver,
+                vehicleType,
+                false,
+                false,
+                4
+        );
+
+        List<RideRequestCreateDto.DriverLocationDto> snapshot = List.of(
+                loc(50L, 45.0, 19.0)
+        );
+
+        when(driverRepository.findById(50L))
+                .thenReturn(Optional.of(driver));
+
+        when(vehicleRepository.findByDriverId(50L))
+                .thenReturn(Optional.of(vehicle));
+
+        mockDriverActive(50L);
+
+        doReturn(8.0)
+                .when(driverService)
+                .calculateActiveHoursLast24h(50L);
+
+        Driver result = driverService.findDriverForRideRequest(
+                rideRequest,
+                snapshot
+        );
+
+        assertNull(result);
+    }
+
+    @ParameterizedTest(name = "{index} => {0}")
+    @MethodSource("vehicleMismatchProvider")
+    @DisplayName("06 - Should return null when vehicle does not match ride requirements")
+    void shouldReturnNullWhenVehicleDoesNotMatch(
+            String scenario,
+            VehicleType vehicleType,
+            VehicleType requestVehicleType,
+            boolean vehicleBaby,
+            boolean vehiclePet,
+            int vehicleSeats,
+            boolean requestBaby,
+            boolean requestPet,
+            int linkedPassengers
+    ) {
+
+        RideRequest rideRequest = buildValidRideRequest(
+                ScheduleType.NOW,
+                requestVehicleType,
+                requestBaby,
+                requestPet,
+                linkedPassengers
+        );
+
+        Driver driver = buildDriver(
+                60L,
+                DriverStatus.AVAILABLE,
+                UserStatus.ACTIVE
+        );
+
+        Vehicle vehicle = buildVehicle(
+                driver,
+                vehicleType,
+                vehicleBaby,
+                vehiclePet,
+                vehicleSeats
+        );
+
+        List<RideRequestCreateDto.DriverLocationDto> snapshot = List.of(
+                loc(60L, 45.0, 19.0)
+        );
+
+        when(driverRepository.findById(60L))
+                .thenReturn(Optional.of(driver));
+
+        when(vehicleRepository.findByDriverId(60L))
+                .thenReturn(Optional.of(vehicle));
+
+        mockDriverActive(60L);
+
+        Driver result = driverService.findDriverForRideRequest(
+                rideRequest,
+                snapshot
+        );
+
+        assertNull(result);
+    }
+
+    static Stream<Arguments> vehicleMismatchProvider() {
+
+        VehicleType standard = new VehicleType();
+        standard.setId(1L);
+        standard.setType("STANDARD");
+
+        VehicleType luxury = new VehicleType();
+        luxury.setId(2L);
+        luxury.setType("LUXURY");
+
+        return Stream.of(
+                // Vehicle type mismatch
+                Arguments.of(
+                        "Vehicle type mismatch",
+                        standard,
+                        luxury,
+                        false,
+                        false,
+                        4,
+                        false,
+                        false,
+                        0
+                ),
+                // Pet required but vehicle not petFriendly
+                Arguments.of(
+                        "Pet required but vehicle not pet friendly",
+                        standard,
+                        standard,
+                        false,
+                        false,
+                        4,
+                        false,
+                        true,
+                        0
+                ),
+                // Baby seat required but vehicle doesnt have it
+                Arguments.of(
+                        "Baby seat required but vehicle doesn't have it",
+                        standard,
+                        standard,
+                        false,
+                        false,
+                        4,
+                        true,
+                        false,
+                        0
+                ),
+                // Not enough seats
+                Arguments.of(
+                        "Not enough seats",
+                        standard,
+                        standard,
+                        false,
+                        false,
+                        2,
+                        false,
+                        false,
+                        2
+                )
+        );
+    }
+
     protected RideRequest buildValidRideRequest(
             ScheduleType scheduleType,
             VehicleType vehicleType,
@@ -250,8 +486,11 @@ class DriverServiceFindDriverTest {
         req.setBabyTransport(baby);
         req.setPetTransport(pets);
         req.setLinkedPassengerEmails(
-                List.of(new String[linkedPassengersCount])
+                IntStream.range(0, linkedPassengersCount)
+                        .mapToObj(i -> "passenger" + i + "@mail.com")
+                        .toList()
         );
+
         req.setRideRoute(buildRoute());
         return req;
     }
