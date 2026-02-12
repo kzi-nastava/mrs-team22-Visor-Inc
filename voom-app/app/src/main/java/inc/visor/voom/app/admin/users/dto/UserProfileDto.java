@@ -11,6 +11,7 @@ public class UserProfileDto {
     public String birthDate;
     public String userStatus;
     public String userRoleName;
+    public int userRoleId;
 
     public UserProfileDto() {
     }
