@@ -34,6 +34,15 @@ public class RoutePoint {
         this.type = toPointType(dto.type);
     }
 
+    public RoutePoint(inc.visor.voom.app.shared.model.RoutePoint routePoint) {
+        this.lat = routePoint.getLat();
+        this.lng = routePoint.getLng();
+        this.address = routePoint.getAddress();
+        this.orderIndex = routePoint.getOrderIndex();
+        this.type = PointType.valueOf(routePoint.getPointType().toString());
+    }
+
+
     public static RoutePointType toPointType(PointType type) {
         if (type == PointType.STOP) {
             return RoutePointType.STOP;

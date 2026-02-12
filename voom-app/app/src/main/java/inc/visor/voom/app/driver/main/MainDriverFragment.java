@@ -54,12 +54,7 @@ public class MainDriverFragment extends Fragment {
             }
 
             if (id == R.id.nav_services) {
-                NavController parentNavController =
-                        NavHostFragment.findNavController(
-                                requireParentFragment()
-                        );
-
-                parentNavController.navigate(R.id.loginFragment);
+                navController.navigate(R.id.driverScheduledRidesFragment);
                 return true;
             }
 

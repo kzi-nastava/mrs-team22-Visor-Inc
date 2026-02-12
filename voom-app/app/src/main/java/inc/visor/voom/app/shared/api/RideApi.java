@@ -58,7 +58,6 @@ public interface RideApi {
     @POST("/api/routes")
     Call<RouteEstimateResponseDto> getRouteEstimate(@Body RouteEstimateRequestDto payload);
 
-
     @POST("/api/rating/{rideId}")
     Call<Void> rateRide(@Path("rideId") Long rideId, @Body RatingRequestDto body);
 
@@ -84,5 +83,38 @@ public interface RideApi {
 
     @POST("/api/rides/{id}/stop")
     Call<RideResponseDto> stopRide(@Path("id") Long id, @Body RideStopDto dto);
+
+    // User scheduled rides
+    @GET("/api/rides/user/{userId}/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRides(
+            @Path("userId") long userId
+    );
+
+    @GET("/api/rides/driver/scheduled")
+    Call<List<RideHistoryDto>> getScheduledRidesDriver();
+
+    @POST("/api/rides/scheduled/{id}/cancel")
+    Call<RideHistoryDto> cancelScheduledRide(
+            @Path("id") Long id,
+            @Body RideCancellationDto dto
+    );
+
+    @GET("/api/rides")
+    Call<List<RideHistoryDto>> getRides(
+            @Query("start") String start,
+            @Query("end") String end,
+            @Query("column") String column,
+            @Query("sort") String sort
+    );
+
+    @GET("/api/rides/user/{userId}/history")
+    Call<List<RideHistoryDto>> getRidesForUser(
+            @Path("userId") long userId,
+            @Query("start") String start,
+            @Query("end") String end,
+            @Query("column") String column,
+            @Query("sort") String sort
+    );
+
 }
 

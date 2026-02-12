@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import inc.visor.voom_service.ride.model.enums.Column;
 import org.springframework.stereotype.Service;
 
 import inc.visor.voom_service.auth.user.model.User;
@@ -102,10 +103,50 @@ public class RideService {
                 .collect(Collectors.toList());
     }
 
-    public List<Ride> getUserRides(long userId, LocalDateTime start, LocalDateTime end, Sorting sort) {
-        List<Ride> unfiltered = rideRepository.findByRideRequest_Creator_Id(userId);
+    public List<Ride> getUserRides(long userId) {
+        return rideRepository.findByRideRequest_Creator_Id(userId);
+    }
 
-        return getRidesFilteredSortedByDate(start, end, sort, unfiltered);
+    public List<Ride> getSortedFilteredRides(LocalDateTime start, LocalDateTime end, Sorting sort, Column column, List<Ride> unfiltered) {
+        return unfiltered.stream()
+                .filter(r -> {
+                    final LocalDateTime started = r.getStartedAt();
+                    if (started == null) {
+                        return false;
+                    }
+
+                    final boolean matchesStart = (start == null) || !started.isBefore(start);
+                    final boolean matchesEnd = (end == null) || !started.isAfter(end);
+                    return matchesStart && matchesEnd;
+                }).sorted(applySorting(getComparator(column),sort)).collect(Collectors.toList());
+    }
+
+    private Comparator<Ride> getComparator(Column column) {
+
+        Comparator<Ride> dateComparator = Comparator.comparing(Ride::getStartedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+
+        return switch (column) {
+            case DATE -> dateComparator;
+
+            case PRICE -> Comparator.comparing(
+                    (Ride r) -> r.getRideRequest().getCalculatedPrice(),
+                    Comparator.nullsLast(Comparator.naturalOrder())
+            ).thenComparing(dateComparator);
+
+            case DISTANCE -> Comparator.comparing(
+                    (Ride r) -> r.getRideRequest().getRideRoute().getTotalDistanceKm(),
+                    Comparator.nullsLast(Comparator.naturalOrder())
+            ).thenComparing(dateComparator);
+
+            case STATUS -> Comparator.comparing(
+                    Ride::getStatus,
+                    Comparator.nullsLast(Comparator.naturalOrder())
+            ).thenComparing(dateComparator);
+        };
+    }
+
+    private Comparator<Ride> applySorting(Comparator<Ride> comparator, Sorting sortDirection) {
+        return sortDirection == Sorting.DESC ? comparator.reversed() : comparator;
     }
 
     public boolean existsOverlappingRide(
@@ -245,14 +286,24 @@ public class RideService {
                 "Your ride has started: " + address,
                 ride.getId()
         );
-        
-        for (String email : ride.getRideRequest().getLinkedPassengerEmails()) {
+
+        for (User passenger : ride.getPassengers()) {
+            String email = passenger.getEmail();
             emailService.sendRideTrackingLink(
                     email,
                     address,
                     trackingUrl
             );
+
+            notificationService.createAndSendNotification(
+                    passenger,
+                    NotificationType.RIDE_STARTED,
+                    "Ride started",
+                    "Ride that you have been added to by " + creator.getPerson().getFirstName() + " has started. Track it here.",
+                    ride.getId()
+            );
         }
+
 
     }
 
@@ -278,6 +329,13 @@ public class RideService {
                     email,
                     address
             );
+        }
+
+        User creator = ride.getRideRequest().getCreator();
+        notificationService.createAndSendNotification(creator, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
+
+        for (User passenger : ride.getPassengers()) {
+            notificationService.createAndSendNotification(passenger, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
         }
     }
 

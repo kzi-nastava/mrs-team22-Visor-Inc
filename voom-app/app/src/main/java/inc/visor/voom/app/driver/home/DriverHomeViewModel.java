@@ -71,6 +71,7 @@ public class DriverHomeViewModel extends ViewModel implements DriverMetaProvider
                 simulationManager,
                 this,
                 this,
+                null,
                 null
         );
 

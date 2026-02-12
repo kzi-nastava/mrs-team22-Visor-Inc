@@ -27,4 +27,16 @@ public interface DriverActivityRepository extends JpaRepository<DriverStateChang
             @Param("since") LocalDateTime since
     );
 
+    @Query("""
+    SELECT dsc
+    FROM DriverStateChange dsc
+    WHERE dsc.driver.id = :driverId
+    AND dsc.performedAt < :before
+    ORDER BY dsc.performedAt DESC
+    """)
+    List<DriverStateChange> findLastChangeBefore(
+            @Param("driverId") Long driverId,
+            @Param("before") LocalDateTime before
+    );
+
 }

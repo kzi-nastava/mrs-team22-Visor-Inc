@@ -6,28 +6,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.GsonBuilder;
 
-import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
+import inc.visor.voom.app.chat.ChatFragment;
 import inc.visor.voom.app.driver.api.DriverApi;
 import inc.visor.voom.app.driver.dto.ActiveRideDto;
 import inc.visor.voom.app.driver.dto.DriverSummaryDto;
@@ -51,7 +54,6 @@ import inc.visor.voom.app.shared.service.MapRendererService;
 import inc.visor.voom.app.shared.service.NotificationService;
 import inc.visor.voom.app.shared.service.NotificationWsService;
 import inc.visor.voom.app.shared.simulation.DriverSimulationManager;
-import inc.visor.voom.app.user.favorite_route.FavoriteRoutesFragment;
 import inc.visor.voom.app.user.home.dialog.FavoriteRouteNameDialog;
 import inc.visor.voom.app.user.home.dto.CreateFavoriteRouteDto;
 import inc.visor.voom.app.user.home.dto.RideRequestDto;
@@ -74,11 +76,15 @@ public class UserHomeFragment extends Fragment {
     private FavoriteRouteRepository favoriteRouteRepository;
     private NotificationWsService notificationWsService;
 
+    private boolean isSuspended = false;
+    private String blockReason = null;
+
+    private String userRole;
+
 
     private Boolean arrivalNotified = false;
 
     private boolean scheduledDriverSent = false;
-
 
 
     public UserHomeFragment() {
@@ -88,6 +94,10 @@ public class UserHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+         userRole = DataStoreManager.getInstance().getUserRole().blockingGet();
+
+        checkIfBlocked(view);
 
         viewModel = new ViewModelProvider(this).get(UserHomeViewModel.class);
 
@@ -118,12 +128,19 @@ public class UserHomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
 
                     for (NotificationDto n : response.body()) {
-                        NotificationService.showNotification(
-                                getContext(),
-                                n.title,
-                                n.id,
-                                n.message
-                        );
+                        String notificationType = n.type;
+
+                        if (userRole.equals("USER") && notificationType.equals("RIDE_STARTED")) {
+                            NotificationService.showRideTrackingNotification(getContext(), n.title, n.id, n.message);
+                        } else {
+                            NotificationService.showNotification(
+                                    getContext(),
+                                    n.title,
+                                    n.id,
+                                    n.message
+                            );
+                        }
+
                     }
                 }
             }
@@ -193,7 +210,8 @@ public class UserHomeFragment extends Fragment {
                         simulationManager,
                         viewModel,
                         null,
-                        rides -> handleScheduledRides(rides)
+                        rides -> handleScheduledRides(rides),
+                        null
                 );
                 wsService.connect();
             }
@@ -328,6 +346,18 @@ public class UserHomeFragment extends Fragment {
                         }
                     }
                 });
+
+        FloatingActionButton fabChat = view.findViewById(R.id.fabChatBubble);
+        CardView chatCard = view.findViewById(R.id.chatContainer);
+
+        fabChat.setOnClickListener(v -> {
+            chatCard.setVisibility(View.VISIBLE);
+            fabChat.setVisibility(View.GONE);
+
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.chat_fragment_placeholder, new ChatFragment())
+                    .commit();
+        });
 
 
     }
@@ -482,6 +512,66 @@ public class UserHomeFragment extends Fragment {
             ((android.widget.EditText) dropoff).setText("");
         }
     }
+
+    private void checkIfBlocked(View view) {
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    UserApi userApi = RetrofitClient.getInstance()
+                            .create(UserApi.class);
+
+                    userApi.getActiveBlock(userId)
+                            .enqueue(new Callback<BlockNoteDto>() {
+
+                                @Override
+                                public void onResponse(@NonNull Call<BlockNoteDto> call,
+                                                       @NonNull Response<BlockNoteDto> response) {
+
+                                    if (!response.isSuccessful()
+                                            || response.body() == null) {
+                                        return;
+                                    }
+
+                                    if (response.body().active) {
+
+                                        isSuspended = true;
+                                        blockReason = response.body().reason;
+
+                                        showSuspendedState(view);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<BlockNoteDto> call,
+                                                      @NonNull Throwable t) {
+                                }
+                            });
+                });
+    }
+
+    private void showSuspendedState(View view) {
+
+        View content = view.findViewById(R.id.root_container);
+        View suspendedLayout = view.findViewById(R.id.layout_suspended);
+        TextView tvReason = view.findViewById(R.id.tv_block_reason);
+
+        if (tvReason != null && blockReason != null) {
+            tvReason.setText("Reason: " + blockReason);
+        }
+
+        if (suspendedLayout != null) {
+            suspendedLayout.setVisibility(View.VISIBLE);
+        }
+
+        // Opcionalno: disable klikova
+        if (content != null) {
+            setEnabledRecursive(content, false);
+        }
+    }
+
+
 
     private void renderPitstops(List<RoutePoint> points) {
 

@@ -138,23 +138,23 @@ export class ActivityMap {
     this.apiService.rideApi.createRideRequest(payload).pipe(
       map(response => response.data),
     ).subscribe({
-        next: (res) => {
-          if (!res) {
-            return;
-          }
-          if (res.status === 'ACCEPTED' && res.driver) {
-            this.snackBar.open(
-              `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
-              'Close',
-              { duration: 4000 },
-            );
-          } else {
-            this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
-          }
-        },
-        error: () => {
-          this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
-        },
-      });
+      next: (res) => {
+        if (!res) {
+          return;
+        }
+        if (res.status === 'ACCEPTED' && res.driver) {
+          this.snackBar.open(
+            `Ride accepted. Price: ${res.price}, Driver: ${res.driver?.firstName} ${res.driver?.lastName}`,
+            'Close',
+            { duration: 4000 },
+          );
+        } else {
+          this.snackBar.open('No drivers available. Ride rejected.', 'Close', { duration: 4000 });
+        }
+      },
+      error: () => {
+        this.snackBar.open('Failed to create ride request', 'Close', { duration: 4000 });
+      },
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -12,6 +12,8 @@ import { ROUTE_ADMIN_PAGES } from '../admin-pages';
 import { ROUTE_ADMIN_VEHICLES } from './admin-vehicles/admin-vehicles';
 import { ROUTE_ADMIN_REPORT } from '../admin-report/admin-report';
 import { ROUTE_ADMIN_TRACKING } from './admin-tracking/admin-tracking';
+import { ROUTE_ADMIN_CHAT } from './admin-chat/admin-chat';
+import {NotificationService} from '../../../shared/service/notification-service';
 
 export const ROUTE_ADMIN_HOME = 'ride';
 
@@ -54,13 +56,22 @@ export class AdminHome {
       routerLink: ROUTE_ADMIN_PRICING,
     },
     {
+      icon: 'chat',
+      title: 'Chat',
+      routerLink: ROUTE_ADMIN_CHAT,
+    },
+    {
       icon: 'bar_chart',
       title: 'Reports',
       routerLink: ROUTE_ADMIN_REPORT,
     },
   ];
 
-  constructor(private router: Router) {}
+  private notificationService = inject(NotificationService);
+
+  constructor(private router: Router) {
+    this.notificationService.requestPermission();
+  }
 
   protected changeTab(routerLink: string) {
     this.router.navigate([ROUTE_ADMIN_PAGES, ROUTE_ADMIN_HOME, routerLink]);

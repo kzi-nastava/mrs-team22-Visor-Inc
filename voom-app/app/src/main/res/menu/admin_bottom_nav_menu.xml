@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/baseline_home_24"
+        android:title="Home"/>
+
+    <item
+        android:id="@+id/nav_tracking"
+        android:icon="@drawable/round_apps_24"
+        android:title="Tracking"/>
+
+    <item
+        android:id="@+id/nav_insights"
+        android:icon="@drawable/outline_bar_chart_24"
+        android:title="Insights"/>
+
+    <item
+        android:id="@+id/nav_activity"
+        android:icon="@drawable/round_assignment_24"
+        android:title="@string/nav_activity"/>
+
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/round_manage_accounts_24"
+        android:title="Profile"/>
+
+</menu>

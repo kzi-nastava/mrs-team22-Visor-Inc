@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center">
     <div class="font-medium text-3xl">Activity</div>
     <div class="flex items-center space-x-8">
-      <mat-icon class="scale-150 cursor-pointer">filter_list</mat-icon>
+      <app-dropdown [label]="'Sort by'" [options]="values" [selected]="'DATE_DESC'" (selectedChange)="onSortChange($event)" />
       <app-value-input-date label="From" [formControl]="fromDate"></app-value-input-date>
       <app-value-input-date label="To" [formControl]="toDate"></app-value-input-date>
     </div>

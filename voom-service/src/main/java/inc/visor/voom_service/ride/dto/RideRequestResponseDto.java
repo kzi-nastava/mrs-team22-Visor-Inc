@@ -3,7 +3,6 @@ package inc.visor.voom_service.ride.dto;
 import java.time.LocalDateTime;
 
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
-import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 
@@ -17,6 +16,9 @@ public class RideRequestResponseDto {
     private DriverSummaryDto driver;
     private double pickupLat;
     private double pickupLng;
+
+    public RideRequestResponseDto() {
+    }
 
     public RideRequestResponseDto(
             long requestId,

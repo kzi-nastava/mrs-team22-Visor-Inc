@@ -32,4 +32,44 @@ public class RoutePointDto {
             return RoutePoint.PointType.DROPOFF;
         }
     }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public RoutePointType getType() {
+        return type;
+    }
+
+    public void setType(RoutePointType type) {
+        this.type = type;
+    }
 }

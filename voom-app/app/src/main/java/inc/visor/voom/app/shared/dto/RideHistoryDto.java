@@ -1,13 +1,17 @@
 package inc.visor.voom.app.shared.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
+import inc.visor.voom.app.driver.dto.DriverSummaryDto;
+import inc.visor.voom.app.shared.dto.ride.ComplaintSummaryDto;
+import inc.visor.voom.app.shared.dto.ride.RatingSummaryDto;
 import inc.visor.voom.app.shared.model.RideRequest;
 import inc.visor.voom.app.shared.model.RideRoute;
 import inc.visor.voom.app.shared.model.User;
 import inc.visor.voom.app.shared.model.enums.RideStatus;
 
-public class RideHistoryDto {
+public class RideHistoryDto implements Serializable {
     public Long id;
     public RideStatus status;
     public RideRequest rideRequest;
@@ -16,6 +20,10 @@ public class RideHistoryDto {
     public String finishedAt;
     public List<User> passengers;
     public User cancelledBy;
+    public boolean isExpanded;
+    private DriverSummaryDto driver;
+    private List<ComplaintSummaryDto> complaints;
+    private List<RatingSummaryDto> ratings;
 
     public Long getId() {
         return id;
@@ -79,5 +87,37 @@ public class RideHistoryDto {
 
     public void setCancelledBy(User cancelledBy) {
         this.cancelledBy = cancelledBy;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public void setExpanded(boolean b) {
+        this.isExpanded = b;
+    }
+
+    public List<ComplaintSummaryDto> getComplaints() {
+        return complaints;
+    }
+
+    public void setComplaints(List<ComplaintSummaryDto> complaints) {
+        this.complaints = complaints;
+    }
+
+    public List<RatingSummaryDto> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<RatingSummaryDto> ratings) {
+        this.ratings = ratings;
+    }
+
+    public DriverSummaryDto getDriver() {
+        return driver;
+    }
+
+    public void setDriver(DriverSummaryDto driver) {
+        this.driver = driver;
     }
 }

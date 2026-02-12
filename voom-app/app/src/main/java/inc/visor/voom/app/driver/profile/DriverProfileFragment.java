@@ -19,7 +19,13 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import inc.visor.voom.app.R;
+import inc.visor.voom.app.admin.users.api.UserApi;
+import inc.visor.voom.app.admin.users.dto.BlockNoteDto;
 import inc.visor.voom.app.databinding.FragmentDriverProfileBinding;
+import inc.visor.voom.app.network.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.user.profile.ChangePasswordDialogFragment;
 
@@ -62,6 +68,7 @@ public class DriverProfileFragment extends Fragment {
 
         viewModel.loadProfile();
         viewModel.loadVehicle();
+        checkIfBlocked();
     }
 
     private void observeViewModel() {
@@ -190,6 +197,67 @@ public class DriverProfileFragment extends Fragment {
                 binding.etVehicleType.showDropDown()
         );
     }
+
+    private void checkIfBlocked() {
+
+        DataStoreManager.getInstance()
+                .getUserId()
+                .subscribe(userId -> {
+
+                    UserApi userApi = RetrofitClient.getInstance()
+                            .create(UserApi.class);
+
+                    userApi.getActiveBlock(userId)
+                            .enqueue(new Callback<BlockNoteDto>() {
+                                @Override
+                                public void onResponse(@NonNull Call<BlockNoteDto> call,
+                                                       @NonNull Response<BlockNoteDto> response) {
+
+                                    if (!response.isSuccessful() || response.body() == null) {
+                                        return;
+                                    }
+
+                                    if (response.body().active) {
+                                        disableAllInputs(response.body().reason);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<BlockNoteDto> call,
+                                                      @NonNull Throwable t) {
+                                }
+                            });
+                });
+    }
+
+    private void disableAllInputs(String reason) {
+
+        View root = binding.getRoot();
+
+        root.setEnabled(false);
+
+        binding.btnSavePersonalInfo.setEnabled(false);
+        binding.btnChangeVehicleInfo.setEnabled(false);
+        binding.btnChangePassword.setEnabled(false);
+
+        binding.etFirstName.setEnabled(false);
+        binding.etLastName.setEnabled(false);
+        binding.etAddress.setEnabled(false);
+        binding.etPhoneNumber.setEnabled(false);
+        binding.etVehicleModel.setEnabled(false);
+        binding.etVehicleType.setEnabled(false);
+        binding.etLicensePlate.setEnabled(false);
+        binding.etNumberOfSeats.setEnabled(false);
+        binding.cbBabyTransport.setEnabled(false);
+        binding.cbPetTransport.setEnabled(false);
+
+        Snackbar.make(
+                binding.getRoot(),
+                "Account suspended: " + reason,
+                Snackbar.LENGTH_LONG
+        ).show();
+    }
+
 
 
     @Override

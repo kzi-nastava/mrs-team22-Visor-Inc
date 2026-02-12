@@ -17,7 +17,7 @@ export interface UserBlockNoteDto {
   active: boolean;
 }
 
-export class UserApi extends Api {
+export class  UserApi extends Api {
   constructor(apiClient: ApiClient) {
     super(apiClient);
   }

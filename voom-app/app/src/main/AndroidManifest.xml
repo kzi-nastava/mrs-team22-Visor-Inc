@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-
     <application
         android:name=".VoomApplication"
         android:usesCleartextTraffic="true"
@@ -70,6 +69,13 @@
                 <data
                     android:scheme="voom"
                     android:host="activate" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="voom" android:host="ride-tracking"/>
             </intent-filter>
 
         </activity>

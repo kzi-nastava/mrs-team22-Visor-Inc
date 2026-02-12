@@ -40,7 +40,7 @@ export class RideApi extends Api {
     );
   }
 
-  getRides(dateFrom: string | null, dateTo: string | null, sort: 'ASC' | 'DESC' = 'DESC') {
+  getRides(dateFrom: string | null, dateTo: string | null, columnName: string, sort: 'ASC' | 'DESC' = 'DESC') {
     const queryParams: any = {
       sort: sort.toUpperCase()
     };
@@ -51,6 +51,8 @@ export class RideApi extends Api {
     if (dateTo) {
       queryParams.end = dateTo;
     }
+
+    queryParams.column = columnName;
     queryParams.sort = sort.toUpperCase();
 
     const config: RequestConfig = {
@@ -237,7 +239,7 @@ export class RideApi extends Api {
     );
   }
 
-  getUserRideHistory(userId: number, dateFrom: string | null, dateTo: string | null, sort: 'ASC' | 'DESC' = 'DESC') {
+  getUserRideHistory(userId: number, dateFrom: string | null, dateTo: string | null, column: string, sort: 'ASC' | 'DESC' = 'DESC') {
     const queryParams: any = {
       sort: sort.toUpperCase()
     };
@@ -248,6 +250,8 @@ export class RideApi extends Api {
     if (dateTo) {
       queryParams.end = dateTo;
     }
+
+    queryParams.column = column;
     queryParams.sort = sort;
 
     const config: RequestConfig = {

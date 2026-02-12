@@ -40,17 +40,15 @@
     </fragment>
 
     <fragment
-        android:id="@+id/driverRideHistoryFragment"
-        android:name="inc.visor.voom.app.driver.history.DriverRideHistoryFragment"
-        android:label="fragment_driver_ride_history" />
-    <fragment
         android:id="@+id/userProfileFragment"
         android:name="inc.visor.voom.app.user.profile.ProfileFragment"
         android:label="ProfileFragment" />
     <fragment
         android:id="@+id/userRideTrackingFragment"
         android:name="inc.visor.voom.app.user.tracking.UserRideTrackingFragment"
-        android:label="UserRideTrackingFragment" />
+        android:label="UserRideTrackingFragment">
+        <deepLink app:uri="voom://ride-tracking" />
+    </fragment>
     <fragment
         android:id="@+id/userHomeFragment"
         android:name="inc.visor.voom.app.user.home.UserHomeFragment"
@@ -60,5 +58,14 @@
         android:name="inc.visor.voom.app.user.statistics.UserStatisticsFragment"
         android:label="Statistics"
         tools:layout="@layout/fragment_user_statistics" />
+    <fragment
+        android:id="@+id/scheduledRidesFragment"
+        android:name="inc.visor.voom.app.shared.component.scheduled.ScheduledRidesFragment"
+        android:label="ScheduledRidesFragment" />
+    <fragment
+        android:id="@+id/rideHistoryFragment2"
+        android:name="inc.visor.voom.app.shared.component.history.RideHistoryFragment"
+        android:label="fragment_ride_history"
+        tools:layout="@layout/fragment_ride_history" />
 
 </navigation>
