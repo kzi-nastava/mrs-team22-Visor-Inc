@@ -61,7 +61,7 @@ public class RegistrationPersonalFragment extends Fragment {
 
         buttonLogin = view.findViewById(R.id.login);
 
-        buttonLogin.setOnClickListener(v -> viewModel.setRegistrationComplete(true));
+        buttonLogin.setOnClickListener(v -> viewModel.setRedirectToLogin());
 
     }
 

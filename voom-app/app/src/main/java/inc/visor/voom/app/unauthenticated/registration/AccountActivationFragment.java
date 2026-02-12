@@ -45,6 +45,7 @@ public class AccountActivationFragment extends Fragment {
         submit.setOnClickListener(v -> {
             assert getArguments() != null;
             final String token = getArguments().getString("token");
+            Log.d("VERIFICATION_TOKEN", token);
             authenticationApi.verifyUser(token).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
