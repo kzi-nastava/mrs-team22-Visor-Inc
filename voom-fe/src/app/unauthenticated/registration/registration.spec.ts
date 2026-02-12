@@ -8,6 +8,7 @@ import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {ROUTE_UNAUTHENTICATED_MAIN} from '../unauthenticated-main';
 import {ROUTE_LOGIN} from '../login/login';
+import {of} from 'rxjs';
 
 describe('Registration', () => {
   let component: Registration;
@@ -171,6 +172,17 @@ describe('Registration', () => {
       expect(password2?.hasError('required')).toBeTrue();
     });
 
+    it('should fail validation if passwords do not match', () => {
+      component.accountForm.patchValue({
+        email: 'test@test.com',
+        password1: 'Password123',
+        password2: 'Mismatching789'
+      });
+
+      expect(component.accountForm.hasError('passwordsMismatch')).toBeTrue();
+      expect(component.accountForm.valid).toBeFalse();
+    });
+
     it('should validate entire account form with valid data', () => {
       component.accountForm.patchValue({
         email: 'test@example.com',
@@ -246,8 +258,77 @@ describe('Registration', () => {
       });
   });
 
-    //register tests
+  describe('register tests', () => {
+    beforeEach(() => {
+      component.personalForm.patchValue({
+        firstName: 'Marko',
+        lastName: 'Pack',
+        birthDate: new Date('2000-05-15')
+      });
 
+      component.accountForm.patchValue({
+        email: 'marko@example.com',
+        password1: 'password123',
+        password2: 'password123'
+      });
+
+      component.contactForm.patchValue({
+        address: 'Knez Mihailova 10',
+        phoneNumber: '+381641234567'
+      });
+    });
+
+    it('should prepare correct registration data', () => {
+      const registerSpy = mockApiService.authenticationApi.register as jasmine.Spy;
+
+      const expectedData = {
+        email: 'marko@example.com',
+        password: 'password123',
+        firstName: 'Marko',
+        lastName: 'Pack',
+        phoneNumber: '+381641234567',
+        address: 'Knez Mihailova 10',
+        birthDate: new Date('2000-05-15').toISOString(),
+        userType: 'USER'
+      };
+
+      registerSpy.and.returnValue(
+        of({ data: { success: true } })
+      );
+
+      component.register();
+
+      expect(mockApiService.authenticationApi.register).toHaveBeenCalledWith(expectedData);
+      expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTE_UNAUTHENTICATED_MAIN,ROUTE_LOGIN]);
+    });
+
+    it('should send birthDate in ISO string format', () => {
+      const registerSpy = mockApiService.authenticationApi.register as jasmine.Spy;
+      const testDate = new Date('2000-05-15');
+      component.personalForm.patchValue({ birthDate: testDate });
+
+      registerSpy.and.returnValue(
+        of({ data: { success: true } })
+      );
+
+      component.register();
+
+      const calledData = registerSpy.calls.argsFor(0)[0];
+      expect(calledData.birthDate).toBe(testDate.toISOString());
+    });
+
+    it('should always send userType as USER', () => {
+      const registerSpy = mockApiService.authenticationApi.register as jasmine.Spy;
+      registerSpy.and.returnValue(
+        of({ data: { success: true } })
+      );
+
+      component.register();
+
+      const calledData = registerSpy.calls.argsFor(0)[0];
+      expect(calledData.userType).toBe('USER');
+    });
+  });
 
   //redirect to login tests
 
@@ -258,5 +339,43 @@ describe('Registration', () => {
       expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_LOGIN]);
     });
   });
+
+    describe('Form Integration', () => {
+      it('should have all three forms initially invalid', () => {
+        expect(component.personalForm.valid).toBeFalse();
+        expect(component.accountForm.valid).toBeFalse();
+        expect(component.contactForm.valid).toBeFalse();
+      });
+
+      it('should allow registration when all forms are valid', () => {
+        const registerSpy = mockApiService.authenticationApi.register as jasmine.Spy;
+        component.personalForm.patchValue({
+          firstName: 'Marko',
+          lastName: 'Pack',
+          birthDate: new Date('2000-05-15')
+        });
+
+        component.accountForm.patchValue({
+          email: 'marko@example.com',
+          password1: 'password123',
+          password2: 'password123'
+        });
+
+        component.contactForm.patchValue({
+          address: 'Knez Mihailova 10',
+          phoneNumber: '+381641234567'
+        });
+
+        expect(component.personalForm.valid).toBeTrue();
+        expect(component.accountForm.valid).toBeTrue();
+        expect(component.contactForm.valid).toBeTrue();
+
+        registerSpy.and.returnValue(
+          of({ data: { success: true } })
+        );
+
+        expect(() => component.register()).not.toThrow();
+      });
   });
+});
 });

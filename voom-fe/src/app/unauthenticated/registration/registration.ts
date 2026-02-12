@@ -10,6 +10,7 @@ import {ValueInputFile} from '../../shared/value-input/value-input-file/value-in
 import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {ROUTE_UNAUTHENTICATED_MAIN} from '../unauthenticated-main';
+import {passwordsMatchValidator} from '../../shared/dialog/change-password-dialog/change-password-dialog';
 
 export const ROUTE_REGISTRATION = 'registration';
 
@@ -45,7 +46,7 @@ export class Registration {
     email: new FormControl<string>('', [Validators.required, Validators.email, Validators.maxLength(255)]),
     password1: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
     password2: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]),
-  })
+  }, { validators: passwordsMatchValidator })
 
   contactForm = new FormGroup({
     address: new FormControl<string>('', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]),
