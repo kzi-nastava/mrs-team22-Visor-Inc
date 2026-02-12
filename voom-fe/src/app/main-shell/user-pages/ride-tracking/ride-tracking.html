@@ -36,7 +36,7 @@
         <div class="flex gap-1 text-4xl cursor-pointer">
           @for (star of stars; track $index) {
           <span (click)="setDriverRating($index + 1)"
-                class="transition"
+                class="transition driver-star"
                 [class.text-blue-600]="$index < driverRating()"
                 [class.text-blue-200]="$index >= driverRating()">
             ★
@@ -50,7 +50,7 @@
         <div class="flex gap-1 text-4xl cursor-pointer">
           @for (star of stars; track $index) {
           <span (click)="setCarRating($index + 1)"
-                class="transition"
+                class="transition car-star"
                 [class.text-blue-600]="$index < carRating()"
                 [class.text-blue-200]="$index >= carRating()">
             ★
@@ -67,6 +67,11 @@
                   (ngModelChange)="reviewComment.set($event)">
         </textarea>
       </div>
+
+      @if(driverRating() === 0 || carRating() === 0) { 
+        <p class="text-sm text-red-600 text-center"> Please provide ratings for both driver and vehicle before submitting your review. </p> 
+      }
+
 
       <button class="mt-4 rounded-full bg-blue-900 px-6 py-2 text-white text-sm font-medium hover:bg-blue-950 transition cursor-pointer"
               (click)="submitReview()">
