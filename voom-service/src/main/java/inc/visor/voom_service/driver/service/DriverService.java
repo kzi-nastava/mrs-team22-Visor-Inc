@@ -28,7 +28,6 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
-import inc.visor.voom_service.exception.DriverNotAvailableException;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
@@ -429,7 +428,7 @@ public class DriverService {
             return nearestDriver(finishingSoon, pickup, locMap);
         }
 
-        throw new DriverNotAvailableException();
+        return null;
     }
 
     private boolean finishesInNext10Minutes(Driver driver) {
