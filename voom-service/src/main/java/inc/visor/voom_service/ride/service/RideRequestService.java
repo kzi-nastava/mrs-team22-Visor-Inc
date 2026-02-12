@@ -3,7 +3,9 @@ package inc.visor.voom_service.ride.service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -85,6 +87,14 @@ public class RideRequestService {
         if (user.getUserStatus() == UserStatus.SUSPENDED) {
             throw new AccessDeniedException();
         }
+
+        Set<String> uniqueEmails = new HashSet<>(dto.linkedPassengers);
+
+        for (String email : uniqueEmails) {
+            uniqueEmails.add(email);
+        }
+
+        dto.linkedPassengers = new ArrayList<>(uniqueEmails);
 
         RideRequest rideRequest = RideRequestMapper.toEntity(
                 dto,
@@ -197,7 +207,7 @@ public class RideRequestService {
             return;
         }
 
-        if (points.stream().anyMatch(p -> p.orderIndex == null)) {
+        if (points.stream().anyMatch(p -> p.orderIndex == null) || points.size() < 2) {
             throw new InvalidRouteOrderException("All route points must have orderIndex defined.");
         }
 
