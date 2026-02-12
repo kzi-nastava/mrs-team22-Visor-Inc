@@ -41,6 +41,12 @@ public class RegistrationFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
 
+        viewModel.getRedirectToLogin().observe(getViewLifecycleOwner(), isComplete -> {
+            if (isComplete) {
+                Navigation.findNavController(view).navigate(R.id.action_registrationFragment_to_loginFragment);
+            }
+        });
+
         viewModel.getRegistrationComplete().observe(getViewLifecycleOwner(), isComplete -> {
             if (isComplete) {
 

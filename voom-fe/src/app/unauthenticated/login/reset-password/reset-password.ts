@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component} from '@angular/core';
 import {MatButton} from "@angular/material/button";
 import {ValueInputString} from "../../../shared/value-input/value-input-string/value-input-string";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -34,15 +34,17 @@ export class ResetPassword {
 
   submit() {
     const password = this.form.value.password1;
+    const confirmPassword = this.form.value.password2;
     const token = lookUpQueryParam("token");
 
-    if (!password || !token || this.form.value.password1 !== this.form.value.password2) {
+    if (!password || !token || !confirmPassword || password !== confirmPassword) {
       return;
     }
 
     this.apiService.authenticationApi.resetPassword({
       token: token,
       password: password,
+      confirmPassword: confirmPassword,
     }).pipe(
       map(result => result.data),
     ).subscribe(() => {

@@ -12,6 +12,11 @@ export interface TokenDto {
 export interface ResetPasswordDto {
   token: string;
   password: string;
+  confirmPassword: string;
+}
+
+export interface VerifyTokenDto {
+  token: string;
 }
 
 export interface RegistrationDto {

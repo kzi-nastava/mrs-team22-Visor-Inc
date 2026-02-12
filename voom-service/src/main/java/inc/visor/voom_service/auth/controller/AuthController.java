@@ -1,5 +1,6 @@
 package inc.visor.voom_service.auth.controller;
 
+import inc.visor.voom_service.auth.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,12 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import inc.visor.voom_service.auth.dto.ForgotPasswordDto;
-import inc.visor.voom_service.auth.dto.LoginDto;
-import inc.visor.voom_service.auth.dto.RegistrationDto;
-import inc.visor.voom_service.auth.dto.ResetPasswordDto;
-import inc.visor.voom_service.auth.dto.TokenDto;
-import inc.visor.voom_service.auth.dto.UserDto;
 import inc.visor.voom_service.auth.service.AuthService;
 import inc.visor.voom_service.auth.token.service.JwtService;
 import inc.visor.voom_service.auth.user.model.User;
@@ -53,8 +48,8 @@ public class AuthController {
     }
 
     @PostMapping("/verifyUser")
-    public ResponseEntity<Void> verifyUser(@NotBlank(message = "Token is required") @RequestBody String token) {
-        authService.verifyUser(token);
+    public ResponseEntity<Void> verifyUser(@RequestBody VerifyTokenDto token) {
+        authService.verifyUser(token.getToken());
         return ResponseEntity.noContent().build();
     }
 
