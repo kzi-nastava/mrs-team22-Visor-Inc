@@ -6,6 +6,7 @@ import inc.visor.voom.app.shared.dto.authentication.RegistrationDto;
 import inc.visor.voom.app.shared.dto.authentication.ResetPasswordDto;
 import inc.visor.voom.app.shared.dto.authentication.TokenDto;
 import inc.visor.voom.app.shared.dto.authentication.UserDto;
+import inc.visor.voom.app.shared.dto.authentication.VerifyTokenDto;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -22,7 +23,7 @@ public interface AuthenticationApi {
     Call<TokenDto> refreshToken(@Body String refreshToken);
 
     @POST("/api/auth/verifyUser")
-    Call<Void> verifyUser(@Body String token);
+    Call<Void> verifyUser(@Body VerifyTokenDto token);
 
     @POST("/api/auth/forgotPassword")
     Call<Void> forgotPassword(@Body ForgotPasswordDto dto);

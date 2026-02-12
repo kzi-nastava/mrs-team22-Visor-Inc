@@ -1,6 +1,6 @@
 import {Api} from '../api';
 import {ApiClient} from '../api-client';
-import {LoginDto, TokenDto, RegistrationDto, ResetPasswordDto, User} from './authentication.model';
+import {LoginDto, TokenDto, RegistrationDto, ResetPasswordDto, User, VerifyTokenDto} from './authentication.model';
 import {RequestConfig} from '../rest.model';
 
 export class AuthenticationApi extends Api {
@@ -51,7 +51,7 @@ export class AuthenticationApi extends Api {
       },
     };
 
-    return this.apiClient.post<string, void>(`/api/auth/verifyUser`, token, config);
+    return this.apiClient.post<VerifyTokenDto, void>(`/api/auth/verifyUser`, { token: token }, config);
   }
 
 

@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
 import inc.visor.voom.app.shared.api.AuthenticationApi;
+import inc.visor.voom.app.shared.dto.authentication.VerifyTokenDto;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,7 +47,9 @@ public class AccountActivationFragment extends Fragment {
             assert getArguments() != null;
             final String token = getArguments().getString("token");
             Log.d("VERIFICATION_TOKEN", token);
-            authenticationApi.verifyUser(token).enqueue(new Callback<Void>() {
+            VerifyTokenDto dto = new VerifyTokenDto();
+            dto.setToken(token);
+            authenticationApi.verifyUser(dto).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     Navigation.findNavController(view).navigate(R.id.action_accountActivationFragment_to_loginFragment);

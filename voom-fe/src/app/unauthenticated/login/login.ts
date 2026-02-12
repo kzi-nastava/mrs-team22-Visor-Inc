@@ -8,6 +8,7 @@ import ApiService from '../../shared/rest/api-service';
 import {map} from 'rxjs';
 import {AuthenticationService} from '../../shared/service/authentication-service';
 import {ROUTE_UNAUTHENTICATED_MAIN} from '../unauthenticated-main';
+import {ROUTE_REGISTRATION} from '../registration/registration';
 
 export const ROUTE_LOGIN = 'login';
 
@@ -59,6 +60,6 @@ export class Login {
   }
 
   registration() {
-    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, "register"]);
+    this.router.navigate([ROUTE_UNAUTHENTICATED_MAIN, ROUTE_REGISTRATION]);
   }
 }
