@@ -5,14 +5,14 @@ import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.RideRequest;
-import inc.visor.voom_service.ride.model.RideRoute;
-import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
+import inc.visor.voom_service.ride.model.*;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.service.RideEstimateService;
 import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.vehicle.model.VehicleType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -476,5 +476,291 @@ public class RideServiceStopRideTest {
         driver.setStatus(DriverStatus.BUSY);
 
         return driver;
+    }
+
+    @Test
+    @DisplayName("Should calculate total distance for route points")
+    void shouldCalculateTotalDistanceForRoutePoints() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,  // Pickup
+                45.2556, 19.8449   // Dropoff
+        );
+
+        // Act
+        double distance = rideEstimateService.calculateTotalDistance(points);
+
+        // Assert
+        assertTrue(distance > 0);
+        assertTrue(distance < 2.0); // Approx 1.5 km for these coordinates
+    }
+
+    @Test
+    @DisplayName("Should return zero distance for single point")
+    void shouldReturnZeroDistanceForSinglePoint() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = new ArrayList<>();
+        RideRequestCreateDto.RoutePointDto point = new RideRequestCreateDto.RoutePointDto();
+        point.lat = 45.2458;
+        point.lng = 19.8529;
+        points.add(point);
+
+        // Act
+        double distance = rideEstimateService.calculateTotalDistance(points);
+
+        // Assert
+        assertEquals(0.0, distance, 0.001);
+    }
+
+    @Test
+    @DisplayName("Should handle empty route points list")
+    void shouldHandleEmptyRoutePointsList() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = new ArrayList<>();
+
+        // Act
+        double distance = rideEstimateService.calculateTotalDistance(points);
+
+        // Assert
+        assertEquals(0.0, distance, 0.001);
+    }
+
+    @Test
+    @DisplayName("Should estimate ride price based on distance and vehicle type")
+    void shouldEstimateRidePriceBasedOnDistanceAndVehicleType() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,
+                45.2556, 19.8449
+        );
+
+        // Act
+        RideEstimationResult result = rideEstimateService.estimate(points, standardType);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.distanceKm() > 0);
+        assertTrue(result.price() > 0);
+    }
+
+    @Test
+    @DisplayName("Should calculate different prices for different vehicle types")
+    void shouldCalculateDifferentPricesForDifferentVehicleTypes() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        VehicleType luxuryType = createVehicleType("LUXURY", 250.0);
+        VehicleType vanType = createVehicleType("VAN", 200.0);
+
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,
+                45.2556, 19.8449
+        );
+
+        // Act
+        RideEstimationResult standardResult = rideEstimateService.estimate(points, standardType);
+        RideEstimationResult luxuryResult = rideEstimateService.estimate(points, luxuryType);
+        RideEstimationResult vanResult = rideEstimateService.estimate(points, vanType);
+
+        // Assert
+        assertNotNull(standardResult);
+        assertNotNull(luxuryResult);
+        assertNotNull(vanResult);
+
+        // Same distance for all
+        assertEquals(standardResult.distanceKm(), luxuryResult.distanceKm(), 0.01);
+        assertEquals(standardResult.distanceKm(), vanResult.distanceKm(), 0.01);
+
+        // Different prices
+        assertTrue(luxuryResult.price() > standardResult.price());
+        assertTrue(vanResult.price() > standardResult.price());
+        assertTrue(luxuryResult.price() > vanResult.price());
+    }
+
+    @Test
+    @DisplayName("Should calculate distance for multiple route points")
+    void shouldCalculateDistanceForMultipleRoutePoints() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = new ArrayList<>();
+
+        // Point 1: Novi Sad center
+        points.add(createRoutePoint(45.2458, 19.8529,0,  RoutePointType.PICKUP));
+
+        // Point 2: Intermediate
+        points.add(createRoutePoint(45.2500, 19.8450, 1,  RoutePointType.STOP));
+
+        // Point 3: Final destination
+        points.add(createRoutePoint(45.2556, 19.8449, 3, RoutePointType.DROPOFF));
+
+        // Act
+        double distance = rideEstimateService.calculateTotalDistance(points);
+
+        // Assert
+        assertTrue(distance > 0);
+        assertTrue(distance < 3.0); // Reasonable distance for these points
+    }
+
+    @Test
+    @DisplayName("Should estimate price correctly for long distance")
+    void shouldEstimatePriceCorrectlyForLongDistance() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,  // Novi Sad
+                44.8125, 20.4612   // Belgrade (approx 80km)
+        );
+
+        // Act
+        RideEstimationResult result = rideEstimateService.estimate(points, standardType);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.distanceKm() < 100); // Less than 100km
+    }
+
+    @Test
+    @DisplayName("Should handle zero distance gracefully")
+    void shouldHandleZeroDistanceGracefully() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,
+                45.2458, 19.8529  // Same point
+        );
+
+        // Act
+        RideEstimationResult result = rideEstimateService.estimate(points, standardType);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0.0, result.distanceKm(), 0.01);
+        assertEquals(150.0, result.price(), 0.01);
+    }
+
+    @Test
+    @DisplayName("Should calculate price proportional to distance")
+    void shouldCalculatePriceProportionalToDistance() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+
+        // Short distance
+        List<RideRequestCreateDto.RoutePointDto> shortPoints = createRoutePoints(
+                45.2458, 19.8529,
+                45.2468, 19.8539
+        );
+
+        // Long distance
+        List<RideRequestCreateDto.RoutePointDto> longPoints = createRoutePoints(
+                45.2458, 19.8529,
+                45.2656, 19.8749
+        );
+
+        // Act
+        RideEstimationResult shortResult = rideEstimateService.estimate(shortPoints, standardType);
+        RideEstimationResult longResult = rideEstimateService.estimate(longPoints, standardType);
+
+        // Assert
+        assertTrue(longResult.distanceKm() > shortResult.distanceKm());
+        assertTrue(longResult.price() > shortResult.price());
+    }
+
+    @Test
+    @DisplayName("Should handle route with same pickup and dropoff")
+    void shouldHandleRouteWithSamePickupAndDropoff() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,
+                45.2458, 19.8529
+        );
+
+        // Act
+        RideEstimationResult result = rideEstimateService.estimate(points, standardType);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0.0, result.distanceKm(), 0.001);
+        assertEquals(150.0, result.price(), 0.001);
+    }
+
+    @Test
+    @DisplayName("Should calculate correct distance using Haversine formula")
+    void shouldCalculateCorrectDistanceUsingHaversineFormula() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,  // Novi Sad
+                45.2556, 19.8449   // Nearby location
+        );
+
+        // Act
+        double distance = rideEstimateService.calculateTotalDistance(points);
+
+        // Assert
+        // Expected distance ~1.3 km
+        assertTrue(distance > 1.0);
+        assertTrue(distance < 2.0);
+    }
+
+    @Test
+    @DisplayName("Should handle null vehicle type gracefully")
+    void shouldHandleNullVehicleTypeGracefully() {
+        // Arrange
+        List<RideRequestCreateDto.RoutePointDto> points = createRoutePoints(
+                45.2458, 19.8529,
+                45.2556, 19.8449
+        );
+
+        // Act & Assert
+        assertThrows(Exception.class, () -> {
+            rideEstimateService.estimate(points, null);
+        });
+    }
+
+    @Test
+    @DisplayName("Should estimate for route with multiple stops correctly")
+    void shouldEstimateForRouteWithMultipleStopsCorrectly() {
+        // Arrange
+        VehicleType standardType = createVehicleType("STANDARD", 150.0);
+        List<RideRequestCreateDto.RoutePointDto> points = new ArrayList<>();
+
+        points.add(createRoutePoint(45.2458, 19.85291,0,  RoutePointType.PICKUP)); // Start
+        points.add(createRoutePoint(45.2478, 19.8549,1,  RoutePointType.STOP)); // Stop 1
+        points.add(createRoutePoint(45.2498, 19.8569,2,  RoutePointType.STOP)); // Stop 2
+        points.add(createRoutePoint(45.2518, 19.8589, 3, RoutePointType.DROPOFF)); // End
+
+        // Act
+        RideEstimationResult result = rideEstimateService.estimate(points, standardType);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.distanceKm() > 0);
+        assertTrue(result.price() > 0);
+    }
+
+    // Helper methods
+    private VehicleType createVehicleType(String name, Double price) {
+        VehicleType type = new VehicleType();
+        type.setId(1L);
+        type.setType(name);
+        type.setPrice(price);
+        return type;
+    }
+
+    private List<RideRequestCreateDto.RoutePointDto> createRoutePoints(
+            double lat1, double lng1, double lat2, double lng2) {
+        List<RideRequestCreateDto.RoutePointDto> points = new ArrayList<>();
+        points.add(createRoutePoint(lat1, lng1, 0, RoutePointType.PICKUP));
+        points.add(createRoutePoint(lat2, lng2, 1, RoutePointType.DROPOFF));
+        return points;
+    }
+
+    private RideRequestCreateDto.RoutePointDto createRoutePoint(double lat, double lng, int orderIndex, RoutePointType type) {
+        RideRequestCreateDto.RoutePointDto point = new RideRequestCreateDto.RoutePointDto();
+        point.lat = lat;
+        point.lng = lng;
+        point.address = "";
+        point.orderIndex = orderIndex;
+        point.type = type.toString();
+        return point;
     }
 }
