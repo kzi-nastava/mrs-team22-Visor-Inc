@@ -1,7 +1,9 @@
 package inc.visor.voom_service.ride.stop;
 
+import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.model.DriverStatus;
+import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
@@ -9,6 +11,7 @@ import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.service.RideEstimateService;
 import inc.visor.voom_service.ride.service.RideService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +39,14 @@ public class RideServiceStopRideTest {
     @Mock
     private RideRepository rideRepository;
 
-    @Mock
+    @InjectMocks
     private DriverService driverService;
+
+    @Mock
+    private DriverRepository driverRepository;
+
+    @InjectMocks
+    private RideEstimateService rideEstimateService;
 
     @Test
     @DisplayName("Should successfully retrieve ride by ID")
@@ -246,5 +255,226 @@ public class RideServiceStopRideTest {
         points.add(dropoff);
 
         return points;
+    }
+
+    @Test
+    @DisplayName("Should successfully get driver from user ID")
+    void shouldSuccessfullyGetDriverFromUserId() {
+        // Arrange
+        Long userId = 1L;
+        Driver expectedDriver = createMockDriver(10L, userId);
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(expectedDriver));
+
+        // Act
+        Optional<Driver> result = driverService.getDriverFromUser(userId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(10L, result.get().getId());
+        assertEquals(userId, result.get().getUser().getId());
+        assertEquals(DriverStatus.BUSY, result.get().getStatus());
+        verify(driverRepository, times(1)).findByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("Should return empty when driver not found for user")
+    void shouldReturnEmptyWhenDriverNotFoundForUser() {
+        // Arrange
+        Long userId = 999L;
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Driver> result = driverService.getDriverFromUser(userId);
+
+        // Assert
+        assertFalse(result.isPresent());
+        verify(driverRepository, times(1)).findByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("Should successfully save driver with updated status")
+    void shouldSuccessfullySaveDriverWithUpdatedStatus() {
+        // Arrange
+        Driver driver = createMockDriver(10L, 1L);
+        driver.setStatus(DriverStatus.AVAILABLE);
+
+        when(driverRepository.save(driver)).thenReturn(driver);
+
+        // Act
+        Driver result = driverService.save(driver);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(DriverStatus.AVAILABLE, result.getStatus());
+        verify(driverRepository, times(1)).save(driver);
+    }
+
+    @Test
+    @DisplayName("Should change driver status from BUSY to AVAILABLE")
+    void shouldChangeDriverStatusFromBusyToAvailable() {
+        // Arrange
+        Driver driver = createMockDriver(10L, 1L);
+        driver.setStatus(DriverStatus.BUSY);
+
+        // Change status
+        driver.setStatus(DriverStatus.AVAILABLE);
+
+        when(driverRepository.save(driver)).thenReturn(driver);
+
+        // Act
+        Driver result = driverService.save(driver);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(DriverStatus.AVAILABLE, result.getStatus());
+        verify(driverRepository, times(1)).save(driver);
+    }
+
+    @Test
+    @DisplayName("Should preserve driver data when updating status")
+    void shouldPreserveDriverDataWhenUpdatingStatus() {
+        // Arrange
+        Driver driver = createMockDriver(10L, 1L);
+        Long originalId = driver.getId();
+        User originalUser = driver.getUser();
+        DriverStatus originalStatus = driver.getStatus();
+
+        // Change only status
+        driver.setStatus(DriverStatus.AVAILABLE);
+
+        when(driverRepository.save(driver)).thenReturn(driver);
+
+        // Act
+        Driver result = driverService.save(driver);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(originalId, result.getId());
+        assertEquals(originalUser, result.getUser());
+        assertNotEquals(originalStatus, result.getStatus());
+        assertEquals(DriverStatus.AVAILABLE, result.getStatus());
+        verify(driverRepository, times(1)).save(driver);
+    }
+
+    @Test
+    @DisplayName("Should successfully retrieve driver by user ID")
+    void shouldSuccessfullyRetrieveDriverByUserId() {
+        // Arrange
+        Long userId = 5L;
+        Driver driver = createMockDriver(20L, userId);
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+
+        // Act
+        Optional<Driver> result = driverService.getDriverFromUser(userId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(20L, result.get().getId());
+        assertEquals(userId, result.get().getUser().getId());
+        verify(driverRepository, times(1)).findByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("Should return driver with BUSY status when ride is ongoing")
+    void shouldReturnDriverWithBusyStatusWhenRideIsOngoing() {
+        // Arrange
+        Long userId = 1L;
+        Driver driver = createMockDriver(10L, userId);
+        driver.setStatus(DriverStatus.BUSY);
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+
+        // Act
+        Optional<Driver> result = driverService.getDriverFromUser(userId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(DriverStatus.BUSY, result.get().getStatus());
+        verify(driverRepository, times(1)).findByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("Should update driver and return AVAILABLE status after ride stops")
+    void shouldUpdateDriverAndReturnAvailableStatusAfterRideStops() {
+        // Arrange
+        Driver driver = createMockDriver(10L, 1L);
+        driver.setStatus(DriverStatus.BUSY);
+
+        // Simulate stopping ride
+        driver.setStatus(DriverStatus.AVAILABLE);
+
+        when(driverRepository.save(driver)).thenReturn(driver);
+
+        // Act
+        Driver result = driverService.save(driver);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(DriverStatus.AVAILABLE, result.getStatus());
+        verify(driverRepository, times(1)).save(driver);
+    }
+
+    @Test
+    @DisplayName("Should find driver by user ID for multiple users")
+    void shouldFindDriverByUserIdForMultipleUsers() {
+        // Arrange
+        Long userId1 = 1L;
+        Long userId2 = 2L;
+
+        Driver driver1 = createMockDriver(10L, userId1);
+        Driver driver2 = createMockDriver(20L, userId2);
+
+        when(driverRepository.findByUserId(userId1)).thenReturn(Optional.of(driver1));
+        when(driverRepository.findByUserId(userId2)).thenReturn(Optional.of(driver2));
+
+        // Act
+        Optional<Driver> result1 = driverService.getDriverFromUser(userId1);
+        Optional<Driver> result2 = driverService.getDriverFromUser(userId2);
+
+        // Assert
+        assertTrue(result1.isPresent());
+        assertTrue(result2.isPresent());
+        assertEquals(10L, result1.get().getId());
+        assertEquals(20L, result2.get().getId());
+        assertNotEquals(result1.get().getId(), result2.get().getId());
+        verify(driverRepository, times(1)).findByUserId(userId1);
+        verify(driverRepository, times(1)).findByUserId(userId2);
+    }
+
+    @Test
+    @DisplayName("Should not change driver ID when updating status")
+    void shouldNotChangeDriverIdWhenUpdatingStatus() {
+        // Arrange
+        Long driverId = 10L;
+        Driver driver = createMockDriver(driverId, 1L);
+        driver.setStatus(DriverStatus.BUSY);
+
+        driver.setStatus(DriverStatus.AVAILABLE);
+
+        when(driverRepository.save(driver)).thenReturn(driver);
+
+        // Act
+        Driver result = driverService.save(driver);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(driverId, result.getId());
+        verify(driverRepository, times(1)).save(driver);
+    }
+
+    // Helper method
+    private Driver createMockDriver(Long driverId, Long userId) {
+        User user = new User();
+        user.setId(userId);
+        user.setEmail("driver" + userId + "@test.com");
+
+        Driver driver = new Driver();
+        driver.setId(driverId);
+        driver.setUser(user);
+        driver.setStatus(DriverStatus.BUSY);
+
+        return driver;
     }
 }
