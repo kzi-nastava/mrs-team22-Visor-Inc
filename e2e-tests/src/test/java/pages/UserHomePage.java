@@ -13,6 +13,17 @@ public class UserHomePage extends BasePage {
 
     private By pickupInput = By.cssSelector("[data-testid='pickup-input'] input");
     private By dropoffInput = By.cssSelector("[data-testid='dropoff-input'] input");
+    
+    protected By snackBar = By.cssSelector(".mat-mdc-snack-bar-container");
+    
+    private By vehicleDropdown = By.cssSelector("[data-testid='vehicle-dropdown']");
+    private By timeDropdown = By.cssSelector("[data-testid='time-dropdown']");
+    private By confirmBtn = By.cssSelector("[data-testid='confirm-ride-btn']");
+
+    private By optionStandard = By.xpath("//mat-option//span[contains(text(),'Standard')]");
+    private By optionNow = By.xpath("//mat-option//span[contains(text(),'Now')]");
+
+    private By driverMarkers = By.xpath("//img[@alt='Marker']");
 
     public UserHomePage(WebDriver driver) {
         super(driver);
@@ -56,4 +67,70 @@ public class UserHomePage extends BasePage {
             return value != null && !value.isEmpty();
         });
     }
+    
+    public boolean orderRideWithDefaults() {
+    	
+    	waitForDriversOnMap();
+
+        waitForVisible(openFavoritesBtn);
+
+        click(vehicleDropdown);
+        click(optionStandard);
+
+        click(timeDropdown);
+        click(optionNow);
+
+        scrollTo(confirmBtn);
+        click(confirmBtn);
+
+        String text = waitForSnackBarText();
+
+        return text.contains("Ride accepted") || text.contains("rejected");
+    }
+
+    
+    public boolean isFavoriteAddedSnackShown() {
+        String text = waitForSnackBarText();
+        return text.contains("Route added to favorites");
+    }
+
+    
+    public void openFavorites() {
+    	waitForSnackBarToDisappear();
+    	
+        scrollTo(openFavoritesBtn);
+        click(openFavoritesBtn);
+    }
+    
+    public void selectVehicleStandard() {
+        click(vehicleDropdown);
+        waitForVisible(optionStandard);
+        click(optionStandard);
+    }
+
+    public void selectTimeNow() {
+        click(timeDropdown);
+        waitForVisible(optionNow);
+        click(optionNow);
+    }
+    
+    public void confirmRide() {
+        scrollTo(confirmBtn);
+        click(confirmBtn);
+    }
+    
+    public boolean isRideAccepted() {
+        String text = waitForSnackBarText();
+        return text.contains("Ride accepted");
+    }
+
+    public boolean isRideRejected() {
+        String text = waitForSnackBarText();
+        return text.contains("rejected");
+    }
+    
+    public void waitForDriversOnMap() {
+        wait.until(d -> d.findElements(driverMarkers).size() >= 2);
+    }
+
 }

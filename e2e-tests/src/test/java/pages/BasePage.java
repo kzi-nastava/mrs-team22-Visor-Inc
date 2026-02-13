@@ -74,4 +74,27 @@ public abstract class BasePage {
     protected String getCurrentUrl() {
         return driver.getCurrentUrl();
     }
+    
+    public String waitForSnackBarText() {
+        WebElement snack = wait.until(driver -> {
+            WebElement el = driver.findElement(By.cssSelector(".mat-mdc-snack-bar-container"));
+            return el.isDisplayed() ? el : null;
+        });
+
+        return snack.getText();
+    }
+    
+    public void waitForSnackBarToDisappear() {
+        wait.until(driver -> {
+            try {
+                return driver.findElements(By.cssSelector(".mat-mdc-snack-bar-container"))
+                        .stream()
+                        .noneMatch(WebElement::isDisplayed);
+            } catch (Exception e) {
+                return true;
+            }
+        });
+    }
+
+
 }

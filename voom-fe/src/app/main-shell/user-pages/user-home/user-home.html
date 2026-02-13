@@ -39,6 +39,7 @@
             [options]="vehicleOptions"
             [(selected)]="selectedVehicle"
             [disabled]="isLocked"
+            data-testid="vehicle-dropdown"
           ></app-dropdown>
 
           <app-dropdown
@@ -47,6 +48,7 @@
             [options]="timeOptions"
             [(selected)]="selectedTime"
             [disabled]="isLocked"
+            data-testid="time-dropdown"
           ></app-dropdown>
         </div>
 
@@ -159,6 +161,7 @@
                 !rideForm.valid || (isLaterSelected && !isScheduledTimeValid()) || isLocked
               "
               (click)="confirmRide()"
+              data-testid="confirm-ride-btn"
             >
               Confirm Ride
             </button>

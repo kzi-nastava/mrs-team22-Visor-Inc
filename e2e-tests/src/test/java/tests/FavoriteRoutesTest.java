@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import base.BaseTest;
 import pages.FavoriteRouteDialog;
+import pages.FavoriteRoutesPage;
 import pages.HomePage;
 import pages.LoginPage;
 import pages.UserHomePage;
@@ -13,7 +14,7 @@ import pages.UserHomePage;
 public class FavoriteRoutesTest extends BaseTest {
 
 	@Test
-	void shouldAddRouteToFavorites() {
+	void shouldOrderRideFromFavoriteRoute() {
 
 	    HomePage homePage = new HomePage(driver);
 	    LoginPage loginPage = homePage.clickLogin();
@@ -22,15 +23,22 @@ public class FavoriteRoutesTest extends BaseTest {
 
 	    UserHomePage userHomePage = new UserHomePage(driver);
 
-	    assertTrue(userHomePage.isLoaded());
-
 	    userHomePage.selectRouteOnMap();
 
 	    FavoriteRouteDialog dialog = userHomePage.addToFavorites();
-
-	    assertTrue(dialog.isLoaded());
-
 	    dialog.saveRoute("test ruta");
+
+	    assertTrue(userHomePage.isFavoriteAddedSnackShown());
+
+	    userHomePage.openFavorites();
+
+	    FavoriteRoutesPage favoritesPage = new FavoriteRoutesPage(driver);
+	    assertTrue(favoritesPage.isLoaded());
+
+	    favoritesPage.pickFirstRoute();
+
+	    assertTrue(userHomePage.orderRideWithDefaults());
 	}
+
 
 }
