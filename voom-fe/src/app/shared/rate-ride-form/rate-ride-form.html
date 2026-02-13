@@ -3,7 +3,7 @@
         <p class="text-sm text-gray-700">Driver</p>
         <div class="flex gap-1 text-4xl cursor-pointer">
             @for (star of stars; track $index) {
-            <span (click)="setDriverRating($index + 1)" class="transition"
+            <span (click)="setDriverRating($index + 1)" class="transition driver-star"
                 [class.text-blue-600]="$index < driverRating()" [class.text-blue-200]="$index >= driverRating()">
                 ★
             </span>
@@ -15,7 +15,7 @@
         <p class="text-sm text-gray-700">Car</p>
         <div class="flex gap-1 text-4xl cursor-pointer">
             @for (star of stars; track $index) {
-            <span (click)="setCarRating($index + 1)" class="transition" [class.text-blue-600]="$index < carRating()"
+            <span (click)="setCarRating($index + 1)" class="transition car-star" [class.text-blue-600]="$index < carRating()"
                 [class.text-blue-200]="$index >= carRating()">
                 ★
             </span>
@@ -31,8 +31,12 @@
         </textarea>
     </div>
 
+    @if(driverRating() === 0 || carRating() === 0) { 
+        <p class="text-sm text-red-600 text-center mt-5"> Please provide ratings for both driver and vehicle before submitting your review. </p> 
+    }
+
     <button
-        class="mt-4 rounded-full bg-blue-900 px-6 py-2 text-white text-sm font-medium hover:bg-blue-950 transition cursor-pointer"
+        class="btn-submit mt-4 rounded-full bg-blue-900 px-6 py-2 text-white text-sm font-medium hover:bg-blue-950 transition cursor-pointer"
         (click)="submitReview()">
         Submit Review
     </button>

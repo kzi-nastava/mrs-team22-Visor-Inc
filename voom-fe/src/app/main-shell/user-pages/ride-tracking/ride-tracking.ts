@@ -165,6 +165,10 @@ export class RideTracking implements OnInit {
 
     if (!rideId) return;
 
+    if (this.driverRating() === 0 || this.carRating() === 0) {
+      return;
+    }
+
     this.api.rideApi.rateRide(rideId, {
       driverRating: this.driverRating(),
       vehicleRating: this.carRating(),

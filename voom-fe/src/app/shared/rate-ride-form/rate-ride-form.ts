@@ -49,6 +49,14 @@ export class RateRideForm {
 
     if (!rideId) return;
 
+    if (this.driverRating() === 0 || this.carRating() === 0) {
+      this.snackBar.open('Please provide ratings for both driver and vehicle before submitting your review.', 'Close', { 
+          duration: 2000,
+          panelClass: ['error-snackbar']
+        });
+      return;
+    }
+
     this.api.rideApi.rateRide(rideId, {
       driverRating: this.driverRating(),
       vehicleRating: this.carRating(),
