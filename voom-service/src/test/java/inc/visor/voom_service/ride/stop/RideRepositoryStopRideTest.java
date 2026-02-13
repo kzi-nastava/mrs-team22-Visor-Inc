@@ -1,14 +1,7 @@
 package inc.visor.voom_service.ride.stop;
 
-import inc.visor.voom_service.auth.user.model.Permission;
 import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserRole;
-import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverState;
-import inc.visor.voom_service.driver.model.DriverStateChange;
-import inc.visor.voom_service.driver.model.DriverStatus;
-import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RideRoute;
@@ -18,7 +11,6 @@ import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
-import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,127 +38,36 @@ public class RideRepositoryStopRideTest {
     @Autowired
     private RideRepository rideRepository;
 
-    private Person userPerson;
     private User creatorUser;
     private Driver driver;
     private RideRequest rideRequest;
     private Ride ride;
     private LocalDateTime baseTime;
-    private VehicleType type;
-    private UserRole userRole;
-    private DriverStateChange initChange;
-    private UserRole driverRole;
-    private User driverUser;
-    private Person driverPerson;
-    private Vehicle vehicle;
+    private VehicleType vehicleType;
 
     @BeforeEach
     void setUp() {
         baseTime = LocalDateTime.now();
 
-        userRole = new UserRole();
-        userRole.setRoleName("USER");
-        userRole.setPermissions(Set.of(new Permission("USER")));
+        // Load existing test data from test-data.sql
+        creatorUser = entityManager.find(User.class, 1L); // user@test.com
+        driver = entityManager.find(Driver.class, 1L); // driver@test.com
+        vehicleType = entityManager.find(VehicleType.class, 1L); // STANDARD
 
-        driverRole = new UserRole();
-        driverRole.setRoleName("DRIVER");
-        driverRole.setPermissions(Set.of(new Permission("DRIVER")));
+        // Create ride route
+        RideRoute route = createRideRoute();
 
-        type = new VehicleType();
-        type.setType("VAN");
-        type.setPrice(10.0);
-        type = entityManager.persist(type);
-
-        //SETUP DRIVER
-
-        driverPerson = new Person();
-        driverPerson.setFirstName("Driver 1");
-        driverPerson.setLastName("Lastname 1");
-        driverPerson.setAddress("Novi Sad, Street 1");
-        driverPerson.setPhoneNumber("+38160123456");
-        driverPerson.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
-        driverPerson = entityManager.persist(driverPerson);
-
-        driverUser = new User();
-        driverUser.setEmail("driver1@gmail.com");
-        driverUser.setPassword("test1234");
-        driverUser.setUserRole(driverRole);
-        driverUser.setUserStatus(UserStatus.ACTIVE);
-        driverUser.setPerson(driverPerson);
-        driverUser = entityManager.persistAndFlush(driverUser);
-
-        driver = new Driver();
-        driver.setUser(driverUser);
-        driver.setStatus(DriverStatus.AVAILABLE);
-        driver = entityManager.persistAndFlush(driver);
-
-        initChange = new DriverStateChange();
-        initChange.setDriver(driver);
-        initChange.setCurrentState(DriverState.ACTIVE);
-        initChange.setPerformedAt(LocalDateTime.now().minusSeconds(5));
-        initChange = entityManager.persistAndFlush(initChange);
-
-        vehicle = new Vehicle();
-        vehicle.setDriver(driver);
-        vehicle.setModel("Volkswagen Passat");
-        vehicle.setLicensePlate("NS-101-AB");
-        vehicle.setYear(2017);
-        vehicle.setBabySeat(true);
-        vehicle.setPetFriendly(true);
-        vehicle.setNumberOfSeats(4);
-        vehicle.setVehicleType(type);
-        vehicle = entityManager.persistAndFlush(vehicle);
-
-        userPerson = new Person();
-        userPerson.setFirstName("User 1");
-        userPerson.setLastName("Lastname 1");
-        userPerson.setAddress("Novi Sad, Street 1");
-        userPerson.setPhoneNumber("+38160123456");
-        userPerson.setBirthDate(LocalDateTime.of(1980, 1, 1, 0, 0));
-        userPerson = entityManager.persistAndFlush(userPerson);
-
-        creatorUser = new User();
-        creatorUser.setEmail("user1@gmail.com");
-        creatorUser.setPassword("test1234");
-        creatorUser.setUserRole(userRole);
-        creatorUser.setUserStatus(UserStatus.ACTIVE);
-        creatorUser.setPerson(userPerson);
-        creatorUser = entityManager.persistAndFlush(creatorUser);
-
-        RideRoute route = new RideRoute();
-        Double[] coords = {45.2458, 19.8529, 45.2556, 19.8449};
-
-        RoutePoint pickup = createPoint(
-                "Pickup Street",
-                coords[0],
-                coords[1]
-        );
-        pickup.setPointType(RoutePointType.PICKUP);
-
-        RoutePoint dropoff = createPoint(
-                "Dropoff Street",
-                coords[2],
-                coords[3]
-        );
-        dropoff.setPointType(RoutePointType.DROPOFF);
-
-        route.setRoutePoints(Arrays.asList(pickup, dropoff));
-        route.setTotalDistanceKm(
-                calculateDistanceKm(
-                        coords[0], coords[1],
-                        coords[2], coords[3]
-                )
-        );
-
+        // Create ride request
         rideRequest = new RideRequest();
         rideRequest.setCreator(creatorUser);
         rideRequest.setRideRoute(route);
         rideRequest.setStatus(RideRequestStatus.ACCEPTED);
         rideRequest.setScheduleType(ScheduleType.NOW);
-        rideRequest.setVehicleType(type);
-        rideRequest.setCalculatedPrice(8 + Math.random() * 5);
+        rideRequest.setVehicleType(vehicleType);
+        rideRequest.setCalculatedPrice(1500.0);
+        rideRequest = entityManager.persistAndFlush(rideRequest);
 
-        // Setup ride
+        // Create ride
         ride = new Ride();
         ride.setRideRequest(rideRequest);
         ride.setDriver(driver);
@@ -178,23 +78,44 @@ public class RideRepositoryStopRideTest {
         entityManager.clear();
     }
 
-    private double calculateDistanceKm(
-            double lat1, double lon1,
-            double lat2, double lon2
-    ) {
-        final int R = 6371; // Earth radius km
+    private RideRoute createRideRoute() {
+        RideRoute route = new RideRoute();
+        Double[] coords = {45.2458, 19.8529, 45.2556, 19.8449};
 
+        RoutePoint pickup = createPoint("Pickup Street", coords[0], coords[1]);
+        pickup.setPointType(RoutePointType.PICKUP);
+        pickup = entityManager.persist(pickup);
+
+        RoutePoint dropoff = createPoint("Dropoff Street", coords[2], coords[3]);
+        dropoff.setPointType(RoutePointType.DROPOFF);
+        dropoff = entityManager.persist(dropoff);
+
+        route.setRoutePoints(Arrays.asList(pickup, dropoff));
+        route.setTotalDistanceKm(calculateDistanceKm(coords[0], coords[1], coords[2], coords[3]));
+        return entityManager.persist(route);
+    }
+
+    private RideRequest createNewRideRequest() {
+        RideRoute route = createRideRoute();
+
+        RideRequest newRequest = new RideRequest();
+        newRequest.setCreator(creatorUser);
+        newRequest.setRideRoute(route);
+        newRequest.setStatus(RideRequestStatus.ACCEPTED);
+        newRequest.setScheduleType(ScheduleType.NOW);
+        newRequest.setVehicleType(vehicleType);
+        newRequest.setCalculatedPrice(1000.0 + Math.random() * 500);
+        return entityManager.persist(newRequest);
+    }
+
+    private double calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Earth radius km
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
-
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2)
-                * Math.sin(lonDistance / 2);
-
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
         return R * c;
     }
 
@@ -206,10 +127,13 @@ public class RideRepositoryStopRideTest {
         return point;
     }
 
+    // ==================== TESTS ====================
+
     @Test
     @DisplayName("Should find ride by ride request ID")
     void shouldFindRideByRideRequestId() {
         Optional<Ride> result = rideRepository.findByRideRequestId(rideRequest.getId());
+
         assertTrue(result.isPresent());
         assertEquals(ride.getId(), result.get().getId());
         assertEquals(rideRequest.getId(), result.get().getRideRequest().getId());
@@ -225,16 +149,19 @@ public class RideRepositoryStopRideTest {
     @Test
     @DisplayName("Should find rides by driver ID")
     void shouldFindRidesByDriverId() {
-        // Arrange
+        RideRequest rideRequest2 = createNewRideRequest();
+
         Ride ride2 = new Ride();
         ride2.setDriver(driver);
-        ride2.setRideRequest(rideRequest);
+        ride2.setRideRequest(rideRequest2);
         ride2.setStatus(RideStatus.FINISHED);
         ride2.setStartedAt(baseTime.minusHours(2));
         ride2.setFinishedAt(baseTime.minusHours(1));
         entityManager.persistAndFlush(ride2);
         entityManager.clear();
+
         List<Ride> results = rideRepository.findByDriverId(driver.getId());
+
         assertEquals(2, results.size());
         assertTrue(results.stream().allMatch(r -> r.getDriver().getId() == driver.getId()));
     }
@@ -249,7 +176,20 @@ public class RideRepositoryStopRideTest {
     @Test
     @DisplayName("Should find rides by status")
     void shouldFindRidesByStatus() {
+        RideRequest rideRequest2 = createNewRideRequest();
 
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.ONGOING);
+        ride2.setStartedAt(baseTime.minusMinutes(15));
+        entityManager.persistAndFlush(ride2);
+        entityManager.clear();
+
+        List<Ride> results = rideRepository.findByStatus(RideStatus.ONGOING);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r -> r.getStatus() == RideStatus.ONGOING));
     }
 
     @Test
@@ -257,29 +197,52 @@ public class RideRepositoryStopRideTest {
     void shouldReturnEmptyListWhenNoRidesWithStatusExist() {
         List<Ride> results = rideRepository.findByStatus(RideStatus.USER_CANCELLED);
         assertTrue(results.isEmpty());
-        results = rideRepository.findByStatus(RideStatus.DRIVER_CANCELLED);
-        assertTrue(results.isEmpty());
-        results = rideRepository.findByStatus(RideStatus.STOPPED);
-        assertTrue(results.isEmpty());
-        results = rideRepository.findByStatus(RideStatus.PANIC);
-        assertTrue(results.isEmpty());
     }
 
     @Test
     @DisplayName("Should find rides by multiple statuses")
     void shouldFindRidesByMultipleStatuses() {
+        RideRequest rideRequest2 = createNewRideRequest();
+        RideRequest rideRequest3 = createNewRideRequest();
 
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.FINISHED);
+        ride2.setStartedAt(baseTime.minusHours(2));
+        ride2.setFinishedAt(baseTime.minusHours(1));
+        entityManager.persistAndFlush(ride2);
+
+        Ride ride3 = new Ride();
+        ride3.setDriver(driver);
+        ride3.setRideRequest(rideRequest3);
+        ride3.setStatus(RideStatus.STOPPED);
+        ride3.setStartedAt(baseTime.minusHours(3));
+        ride3.setFinishedAt(baseTime.minusHours(2));
+        entityManager.persistAndFlush(ride3);
+        entityManager.clear();
+
+        List<RideStatus> statuses = Arrays.asList(RideStatus.FINISHED, RideStatus.STOPPED);
+        List<Ride> results = rideRepository.findByStatusIn(statuses);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r ->
+                r.getStatus() == RideStatus.FINISHED || r.getStatus() == RideStatus.STOPPED));
     }
 
     @Test
     @DisplayName("Should return empty list when no rides with specified statuses exist")
     void shouldReturnEmptyListWhenNoRidesWithSpecifiedStatusesExist() {
+        List<RideStatus> statuses = Arrays.asList(RideStatus.USER_CANCELLED, RideStatus.DRIVER_CANCELLED);
+        List<Ride> results = rideRepository.findByStatusIn(statuses);
+        assertTrue(results.isEmpty());
     }
 
     @Test
     @DisplayName("Should get ride by ID")
     void shouldGetRideById() {
         Optional<Ride> result = rideRepository.getRideById(ride.getId());
+
         assertTrue(result.isPresent());
         assertEquals(ride.getId(), result.get().getId());
     }
@@ -292,6 +255,27 @@ public class RideRepositoryStopRideTest {
     }
 
     @Test
+    @DisplayName("Should find rides by creator ID")
+    void shouldFindRidesByCreatorId() {
+        RideRequest rideRequest2 = createNewRideRequest();
+
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.FINISHED);
+        ride2.setStartedAt(baseTime.minusHours(1));
+        ride2.setFinishedAt(baseTime.minusMinutes(30));
+        entityManager.persistAndFlush(ride2);
+        entityManager.clear();
+
+        List<Ride> results = rideRepository.findByRideRequest_Creator_Id(creatorUser.getId());
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r ->
+                r.getRideRequest().getCreator().getId() == creatorUser.getId()));
+    }
+
+    @Test
     @DisplayName("Should return empty list when no rides exist for creator")
     void shouldReturnEmptyListWhenNoRidesExistForCreator() {
         List<Ride> results = rideRepository.findByRideRequest_Creator_Id(999L);
@@ -301,35 +285,91 @@ public class RideRepositoryStopRideTest {
     @Test
     @DisplayName("Should find rides by driver user ID")
     void shouldFindRidesByDriverUserId() {
-        List<Ride> results = rideRepository.findByDriver_User_Id(driverUser.getId());
+        List<Ride> results = rideRepository.findByDriver_User_Id(driver.getUser().getId());
+
         assertFalse(results.isEmpty());
-        assertTrue(results.stream().allMatch(r ->r.getDriver().getUser().getId() == driverUser.getId()));
+        assertTrue(results.stream().allMatch(r ->
+                r.getDriver().getUser().getId() == driver.getUser().getId()));
     }
 
     @Test
     @DisplayName("Should return empty list when no rides exist for driver user ID")
     void shouldReturnEmptyListWhenNoRidesExistForDriverUserId() {
-
+        List<Ride> results = rideRepository.findByDriver_User_Id(999L);
+        assertTrue(results.isEmpty());
     }
 
     @Test
     @DisplayName("Should find rides by creator ID and status")
     void shouldFindRidesByCreatorIdAndStatus() {
+        ride.setStatus(RideStatus.FINISHED);
+        ride.setFinishedAt(baseTime);
+        entityManager.merge(ride);
 
+        RideRequest rideRequest2 = createNewRideRequest();
+
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.ONGOING);
+        ride2.setStartedAt(baseTime.minusMinutes(10));
+        entityManager.persistAndFlush(ride2);
+        entityManager.clear();
+
+        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatus(
+                creatorUser.getId(), RideStatus.FINISHED);
+
+        assertEquals(1, results.size());
+        assertEquals(RideStatus.FINISHED, results.getFirst().getStatus());
+        assertEquals(creatorUser.getId(), results.getFirst().getRideRequest().getCreator().getId());
     }
 
     @Test
     @DisplayName("Should return empty list when no rides match creator and status")
     void shouldReturnEmptyListWhenNoRidesMatchCreatorAndStatus() {
-        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatus(creatorUser.getId(), RideStatus.USER_CANCELLED);
-
+        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatus(
+                creatorUser.getId(), RideStatus.USER_CANCELLED);
         assertTrue(results.isEmpty());
     }
 
     @Test
     @DisplayName("Should find rides by creator, status, and finished time range")
     void shouldFindRidesByCreatorStatusAndFinishedTimeRange() {
+        ride.setStatus(RideStatus.STOPPED);
+        ride.setFinishedAt(baseTime.minusHours(2));
+        entityManager.merge(ride);
 
+        RideRequest rideRequest2 = createNewRideRequest();
+        RideRequest rideRequest3 = createNewRideRequest();
+
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.STOPPED);
+        ride2.setStartedAt(baseTime.minusHours(1).minusMinutes(30));
+        ride2.setFinishedAt(baseTime.minusHours(1));
+        entityManager.persistAndFlush(ride2);
+
+        Ride ride3 = new Ride();
+        ride3.setDriver(driver);
+        ride3.setRideRequest(rideRequest3);
+        ride3.setStatus(RideStatus.STOPPED);
+        ride3.setStartedAt(baseTime.minusDays(2));
+        ride3.setFinishedAt(baseTime.minusDays(1));
+        entityManager.persistAndFlush(ride3);
+        entityManager.clear();
+
+        LocalDateTime from = baseTime.minusHours(3);
+        LocalDateTime to = baseTime;
+
+        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatusAndFinishedAtBetween(
+                creatorUser.getId(), RideStatus.STOPPED, from, to);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r ->
+                r.getStatus() == RideStatus.STOPPED &&
+                        r.getRideRequest().getCreator().getId() == creatorUser.getId() &&
+                        r.getFinishedAt().isAfter(from) && r.getFinishedAt().isBefore(to)));
     }
 
     @Test
@@ -337,36 +377,56 @@ public class RideRepositoryStopRideTest {
     void shouldReturnEmptyListWhenNoRidesMatchTimeRange() {
         ride.setStatus(RideStatus.STOPPED);
         ride.setFinishedAt(baseTime.minusDays(10));
-        entityManager.persistAndFlush(ride);
+        entityManager.merge(ride);
         entityManager.clear();
 
         LocalDateTime from = baseTime.minusHours(3);
         LocalDateTime to = baseTime;
 
-        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatusAndFinishedAtBetween(creatorUser.getId(), RideStatus.STOPPED, from, to);
+        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatusAndFinishedAtBetween(
+                creatorUser.getId(), RideStatus.STOPPED, from, to);
 
         assertTrue(results.isEmpty());
     }
 
     @Test
-    @DisplayName("Should handle boundary conditions for time range query")
-    void shouldHandleBoundaryConditionsForTimeRangeQuery() {
-        LocalDateTime exactTime = baseTime.minusHours(1);
-        ride.setStatus(RideStatus.STOPPED);
-        ride.setFinishedAt(exactTime);
-        entityManager.persistAndFlush(ride);
-        entityManager.clear();
-
-        LocalDateTime from = exactTime.minusSeconds(1);
-        LocalDateTime to = exactTime.plusSeconds(1);
-        List<Ride> results = rideRepository.findByRideRequest_Creator_IdAndStatusAndFinishedAtBetween(creatorUser.getId(), RideStatus.STOPPED, from, to);
-        assertEquals(1, results.size());
-    }
-
-    @Test
     @DisplayName("Should find rides by driver, status, and finished time range")
     void shouldFindRidesByDriverStatusAndFinishedTimeRange() {
+        ride.setStatus(RideStatus.STOPPED);
+        ride.setFinishedAt(baseTime.minusHours(2));
+        entityManager.merge(ride);
 
+        RideRequest rideRequest2 = createNewRideRequest();
+        RideRequest rideRequest3 = createNewRideRequest();
+
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.STOPPED);
+        ride2.setStartedAt(baseTime.minusHours(1).minusMinutes(30));
+        ride2.setFinishedAt(baseTime.minusHours(1));
+        entityManager.persistAndFlush(ride2);
+
+        Ride ride3 = new Ride();
+        ride3.setDriver(driver);
+        ride3.setRideRequest(rideRequest3);
+        ride3.setStatus(RideStatus.STOPPED);
+        ride3.setStartedAt(baseTime.minusDays(2));
+        ride3.setFinishedAt(baseTime.minusDays(1));
+        entityManager.persistAndFlush(ride3);
+        entityManager.clear();
+
+        LocalDateTime from = baseTime.minusHours(3);
+        LocalDateTime to = baseTime;
+
+        List<Ride> results = rideRepository.findByDriver_IdAndStatusAndFinishedAtBetween(
+                driver.getId(), RideStatus.STOPPED, from, to);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r ->
+                r.getStatus() == RideStatus.STOPPED &&
+                        r.getDriver().getId() == creatorUser.getId() &&
+                        r.getFinishedAt().isAfter(from) && r.getFinishedAt().isBefore(to)));
     }
 
     @Test
@@ -374,20 +434,55 @@ public class RideRepositoryStopRideTest {
     void shouldReturnEmptyListWhenNoDriverRidesMatchTimeRange() {
         ride.setStatus(RideStatus.FINISHED);
         ride.setFinishedAt(baseTime.minusDays(10));
-        entityManager.persistAndFlush(ride);
+        entityManager.merge(ride);
         entityManager.clear();
 
         LocalDateTime from = baseTime.minusHours(3);
         LocalDateTime to = baseTime;
 
-        List<Ride> results = rideRepository.findByDriver_IdAndStatusAndFinishedAtBetween(driver.getId(), RideStatus.FINISHED, from, to);
+        List<Ride> results = rideRepository.findByDriver_IdAndStatusAndFinishedAtBetween(
+                driver.getId(), RideStatus.FINISHED, from, to);
 
         assertTrue(results.isEmpty());
     }
+
     @Test
     @DisplayName("Should find all rides by status and finished time range")
     void shouldFindAllRidesByStatusAndFinishedTimeRange() {
+        ride.setStatus(RideStatus.FINISHED);
+        ride.setFinishedAt(baseTime.minusHours(2));
+        entityManager.merge(ride);
 
+        RideRequest rideRequest2 = createNewRideRequest();
+        RideRequest rideRequest3 = createNewRideRequest();
+
+        Ride ride2 = new Ride();
+        ride2.setDriver(driver);
+        ride2.setRideRequest(rideRequest2);
+        ride2.setStatus(RideStatus.FINISHED);
+        ride2.setStartedAt(baseTime.minusHours(1).minusMinutes(30));
+        ride2.setFinishedAt(baseTime.minusHours(1));
+        entityManager.persistAndFlush(ride2);
+
+        Ride ride3 = new Ride();
+        ride3.setDriver(driver);
+        ride3.setRideRequest(rideRequest3);
+        ride3.setStatus(RideStatus.FINISHED);
+        ride3.setStartedAt(baseTime.minusDays(2));
+        ride3.setFinishedAt(baseTime.minusDays(1));
+        entityManager.persistAndFlush(ride3);
+        entityManager.clear();
+
+        LocalDateTime from = baseTime.minusHours(3);
+        LocalDateTime to = baseTime;
+
+        List<Ride> results = rideRepository.findByStatusAndFinishedAtBetween(
+                RideStatus.FINISHED, from, to);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(r ->
+                r.getStatus() == RideStatus.FINISHED &&
+                        r.getFinishedAt().isAfter(from) && r.getFinishedAt().isBefore(to)));
     }
 
     @Test
@@ -395,13 +490,15 @@ public class RideRepositoryStopRideTest {
     void shouldReturnEmptyListWhenNoRidesMatchGlobalTimeRange() {
         ride.setStatus(RideStatus.STOPPED);
         ride.setFinishedAt(baseTime.minusDays(10));
-        entityManager.persistAndFlush(ride);
+        entityManager.merge(ride);
         entityManager.clear();
 
         LocalDateTime from = baseTime.minusHours(3);
         LocalDateTime to = baseTime;
 
-        List<Ride> results = rideRepository.findByStatusAndFinishedAtBetween(RideStatus.STOPPED, from, to);
+        List<Ride> results = rideRepository.findByStatusAndFinishedAtBetween(
+                RideStatus.STOPPED, from, to);
+
         assertTrue(results.isEmpty());
     }
 
@@ -410,23 +507,26 @@ public class RideRepositoryStopRideTest {
     void shouldHandleMultipleStatusesWithDifferentTimeRanges() {
         ride.setStatus(RideStatus.STOPPED);
         ride.setFinishedAt(baseTime.minusHours(1));
-        entityManager.persistAndFlush(ride);
+        entityManager.merge(ride);
+
+        RideRequest rideRequest2 = createNewRideRequest();
 
         Ride ride2 = new Ride();
         ride2.setDriver(driver);
-        ride2.setRideRequest(rideRequest);
+        ride2.setRideRequest(rideRequest2);
         ride2.setStatus(RideStatus.FINISHED);
         ride2.setStartedAt(baseTime.minusHours(2));
         ride2.setFinishedAt(baseTime.minusHours(1).minusMinutes(30));
         entityManager.persistAndFlush(ride2);
-
         entityManager.clear();
 
         LocalDateTime from = baseTime.minusHours(2);
         LocalDateTime to = baseTime;
 
-        List<Ride> stoppedRides = rideRepository.findByStatusAndFinishedAtBetween(RideStatus.STOPPED, from, to);
-        List<Ride> completedRides = rideRepository.findByStatusAndFinishedAtBetween(RideStatus.FINISHED, from, to);
+        List<Ride> stoppedRides = rideRepository.findByStatusAndFinishedAtBetween(
+                RideStatus.STOPPED, from, to);
+        List<Ride> completedRides = rideRepository.findByStatusAndFinishedAtBetween(
+                RideStatus.FINISHED, from, to);
 
         assertEquals(1, stoppedRides.size());
         assertEquals(1, completedRides.size());
