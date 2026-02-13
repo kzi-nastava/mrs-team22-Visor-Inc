@@ -74,4 +74,37 @@ public class FavoriteRoutesTest extends BaseTest {
 
         assertTrue(userHomePage.isFavoriteSaveFailedSnackShown());
     }
+    
+    @Test
+    @Order(3)
+    @DisplayName("3. Should create and delete favorite route")
+    void shouldCreateAndDeleteFavoriteRoute() {
+
+        HomePage homePage = new HomePage(driver);
+        LoginPage loginPage = homePage.clickLogin();
+
+        loginPage.login("user3@gmail.com", "test1234");
+
+        UserHomePage userHomePage = new UserHomePage(driver);
+
+        userHomePage.selectRouteOnMap();
+
+        FavoriteRouteDialog dialog = userHomePage.addToFavorites();
+        dialog.saveRoute("delete test ruta");
+
+        assertTrue(userHomePage.isFavoriteAddedSnackShown());
+
+        userHomePage.waitForSnackBarToDisappear();
+
+        userHomePage.openFavorites();
+
+        FavoriteRoutesPage favoritesPage = new FavoriteRoutesPage(driver);
+        assertTrue(favoritesPage.isLoaded());
+
+        favoritesPage.deleteFirstRoute();
+
+        assertTrue(favoritesPage.isRouteDeletedSnackShown());
+    }
+
+
 }
