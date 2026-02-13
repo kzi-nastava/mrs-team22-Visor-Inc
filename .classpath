@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="voom-app/app/build/generated/data_binding_base_class_source_out/debug/out"/>
+	<classpathentry kind="src" path="voom-app/app/src/androidTest/java"/>
+	<classpathentry kind="src" path="voom-app/app/src/main/java"/>
+	<classpathentry kind="src" path="voom-app/app/src/test/java"/>
+	<classpathentry kind="src" path="voom-service/src/main/java"/>
+	<classpathentry kind="src" path="voom-service/src/test/java"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/debug/processDebugResources/R.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/merged_java_res/debug/mergeDebugJavaResource/base.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_0.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_1.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_2.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_3.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_4.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_5.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_6.jar"/>
+	<classpathentry kind="lib" path="voom-app/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/ec96179d88e133d31d5baadc8e17d898b1244bef0f3933f845b1beb280a6931a_7.jar"/>
+	<classpathentry kind="lib" path="voom-app/gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="output" path="voom-app/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"/>
+</classpath>
