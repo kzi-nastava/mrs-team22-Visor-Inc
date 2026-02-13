@@ -525,6 +525,13 @@ class RideRequestServiceTest {
         );
 
         User creator = buildActiveUser(userId);
+
+        Person creatorPerson = new Person();
+        creatorPerson.setFirstName("Nikola");
+        creatorPerson.setLastName("Bjelica");
+
+        creator.setPerson(creatorPerson);
+
         VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
         Driver driver = buildAvailableDriver(10L);
 
@@ -676,6 +683,12 @@ class RideRequestServiceTest {
         dto.linkedPassengers = List.of("pera@mail.com", "pera@mail.com");
 
         User creator = buildActiveUser(userId);
+        Person creatorPerson = new Person();
+        creatorPerson.setFirstName("Nikola");
+        creatorPerson.setLastName("Bjelica");
+
+        creator.setPerson(creatorPerson);
+        
         VehicleType vehicleType = buildVehicleType(dto.vehicleTypeId);
         Driver driver = buildAvailableDriver(10L);
 
