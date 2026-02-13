@@ -2,16 +2,22 @@ package inc.visor.voom_service.ride.stop;
 
 import inc.visor.voom_service.auth.dto.LoginDto;
 import inc.visor.voom_service.auth.dto.TokenDto;
+import inc.visor.voom_service.driver.repository.DriverRepository;
+import inc.visor.voom_service.ride.repository.RideRepository;
+import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import inc.visor.voom_service.ride.service.RideEstimateService;
 import inc.visor.voom_service.ride.stop.data.DriverData;
 import inc.visor.voom_service.ride.stop.data.RideData;
 import inc.visor.voom_service.ride.stop.data.RideRequestData;
 import inc.visor.voom_service.ride.stop.data.RideRouteData;
+import inc.visor.voom_service.route.repository.RideRouteRepository;
+import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,23 +43,38 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("Stop Ride REST Controller Integration Tests")
 public class RideControllerStopRideTest {
 
-    protected MockMvc mockMvc;
+    @Autowired
     private TestRestTemplate restTemplatePlain;
+
+    @Autowired
     private DriverData driverData;
+
+    @Autowired
     private RideEstimateService rideEstimateService;
+
+    @Autowired
     private RideRouteData rideRouteData;
+
+    @Autowired
     private RideRequestData rideRequestData;
+
+    @Autowired
     private RideData rideServiceData;
 
-    public RideControllerStopRideTest(MockMvc mockMvc, TestRestTemplate restTemplatePlain, DriverData driverData, RideEstimateService rideEstimateService, RideRouteData rideRouteData, RideRequestData rideRequestData, RideData rideServiceData) {
-        this.mockMvc = mockMvc;
-        this.restTemplatePlain = restTemplatePlain;
-        this.driverData = driverData;
-        this.rideEstimateService = rideEstimateService;
-        this.rideRouteData = rideRouteData;
-        this.rideRequestData = rideRequestData;
-        this.rideServiceData = rideServiceData;
-    }
+    @Autowired
+    private DriverRepository driverRepository;
+
+    @Autowired
+    private RideRepository rideRepository;
+
+    @Autowired
+    private RideRequestRepository rideRequestRepository;
+
+    @Autowired
+    private RideRouteRepository rideRouteRepository;
+
+    @Autowired
+    private VehicleTypeRepository vehicleTypeRepository;
 
     @LocalServerPort
     private int port;
@@ -70,30 +91,28 @@ public class RideControllerStopRideTest {
     }
 
     private void loginAndPrepareRestTemplate() {
-        LoginDto login = new LoginDto();
+        final LoginDto login = new LoginDto();
         login.setEmail("user@test.com");
         login.setPassword("test1234");
 
-        ResponseEntity<TokenDto> loginResponse
-                = restTemplatePlain.postForEntity(
-                getBaseUrl() + "/auth/login",
-                login,
-                TokenDto.class
-        );
+        ResponseEntity<TokenDto> loginResponse = restTemplatePlain.postForEntity(getBaseUrl() + "/auth/login", login, TokenDto.class);
 
         assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
         assertNotNull(loginResponse.getBody());
 
         this.userJwt = loginResponse.getBody().getAccessToken();
 
-        RestTemplateBuilder builder = new RestTemplateBuilder(rt
-                    -> rt.getInterceptors().add((request, body, execution) -> {
+        final RestTemplateBuilder builder = new RestTemplateBuilder(template -> template.getInterceptors().add((request, body, execution) -> {
                 request.getHeaders().add("Authorization", "Bearer " + userJwt);
                 return execution.execute(request, body);
             })
         );
 
         this.restTemplate = new TestRestTemplate(builder);
+    }
+
+    private void initialize() {
+
     }
 
     @Test
