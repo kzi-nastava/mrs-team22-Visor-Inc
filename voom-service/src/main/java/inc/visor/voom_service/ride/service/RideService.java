@@ -386,8 +386,9 @@ public class RideService {
         return rideRepository.findById(rideId).orElseThrow();
     }
 
-    public void save(Ride ride) {
+    public Ride save(Ride ride) {
         rideRepository.save(ride);
+        return ride;
     }
 
     public List<Ride> getScheduledRides(RideStatus rideStatus) {
