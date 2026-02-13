@@ -6,16 +6,16 @@
         <h1 class="text-xl text-center text-primary">Sign in to continue</h1>
       </div>
       <div class="flex flex-col space-y-4" >
-        <app-value-input-string [label]="'Email'" [formControl]="form.controls.email"/>
-        <app-value-input-string [label]="'Password'" [formControl]="form.controls.password" [hide]="true"/>
+        <app-value-input-string [label]="'Email'" [formControl]="form.controls.email" data-testid="email-input"/>
+        <app-value-input-string [label]="'Password'" [formControl]="form.controls.password" [hide]="true" data-testid="password-input"/>
         <div class="pb-4 flex justify-center">
           <h1 class="text-sm text-secondary cursor-pointer" (click)="forgotPassword()">Forgot password?</h1>
         </div>
-        <button matButton="filled" [disabled]="form.invalid" (click)="login()">Sign in</button>
+        <button matButton="filled" [disabled]="form.invalid" (click)="login()" data-testid="login-btn">Sign in</button>
       </div>
       <div class="flex justify-center space-x-2">
         <h1 class="text-sm text-center text-primary">Don't have an account?</h1>
-        <h1 class="text-sm text-secondary cursor-pointer" (click)="registration()">Register</h1>
+        <h1 class="text-sm text-secondary cursor-pointer" (click)="registration()" data-testid="register-btn">Register</h1>
       </div>
     </div>
   </div>

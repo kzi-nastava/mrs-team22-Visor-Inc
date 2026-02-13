@@ -25,8 +25,8 @@
         </button>
       }
     } @else {
-      <button mat-button (click)="register()">Register</button>
-      <button mat-flat-button (click)="login()">Login</button>
+      <button mat-button (click)="register() " data-testid="register-btn">Register</button>
+      <button mat-flat-button (click)="login()" data-testid="login-btn">Login</button>
     }
   </div>
 </mat-toolbar>

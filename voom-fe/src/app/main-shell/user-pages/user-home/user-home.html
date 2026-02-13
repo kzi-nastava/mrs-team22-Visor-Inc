@@ -24,11 +24,13 @@
           <app-value-input-string
             label="Pickup Location"
             formControlName="pickup"
+            data-testid="pickup-input"
           ></app-value-input-string>
 
           <app-value-input-string
             label="Dropoff Location"
             formControlName="dropoff"
+            data-testid="dropoff-input"
           ></app-value-input-string>
 
           <app-dropdown
@@ -37,6 +39,7 @@
             [options]="vehicleOptions"
             [(selected)]="selectedVehicle"
             [disabled]="isLocked"
+            data-testid="vehicle-dropdown"
           ></app-dropdown>
 
           <app-dropdown
@@ -45,6 +48,7 @@
             [options]="timeOptions"
             [(selected)]="selectedTime"
             [disabled]="isLocked"
+            data-testid="time-dropdown"
           ></app-dropdown>
         </div>
 
@@ -157,6 +161,7 @@
                 !rideForm.valid || (isLaterSelected && !isScheduledTimeValid()) || isLocked
               "
               (click)="confirmRide()"
+              data-testid="confirm-ride-btn"
             >
               Confirm Ride
             </button>
@@ -168,6 +173,7 @@
                 class="flex-1 text-sm"
                 [disabled]="isLocked"
                 (click)="addRouteToFavorites()"
+                data-testid="add-favorites-btn"
               >
                 Add to favorites
               </button>
@@ -178,6 +184,7 @@
                 class="flex-1 text-sm"
                 [disabled]="isLocked"
                 (click)="openFavoriteRoutes()"
+                data-testid="open-favorites-btn"
               >
                 Choose from favorites
               </button>

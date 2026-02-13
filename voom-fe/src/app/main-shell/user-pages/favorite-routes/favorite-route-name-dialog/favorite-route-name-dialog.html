@@ -9,15 +9,17 @@
       placeholder="e.g. Home → Faculty"
       class="route-input"
       autofocus
+      data-testid="route-name-input"
     />
   </div>
 
   <div class="actions">
-    <button class="btn cancel" (click)="cancel()">Cancel</button>
+    <button class="btn cancel" (click)="cancel()" data-testid="cancel-route-name-btn">Cancel</button>
     <button
       class="btn save"
       [disabled]="nameControl.invalid"
       (click)="save()"
+      data-testid="save-route-name-btn"
     >
       Save
     </button>
