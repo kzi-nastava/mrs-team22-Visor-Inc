@@ -96,5 +96,4 @@ public abstract class BasePage {
         });
     }
 
-
 }

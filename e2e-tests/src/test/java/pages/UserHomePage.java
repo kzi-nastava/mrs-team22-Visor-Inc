@@ -133,4 +133,9 @@ public class UserHomePage extends BasePage {
         wait.until(d -> d.findElements(driverMarkers).size() >= 2);
     }
 
+    public boolean isFavoriteSaveFailedSnackShown() {
+        String text = waitForSnackBarText();
+        return text.contains("Failed to save route");
+    }
+
 }
