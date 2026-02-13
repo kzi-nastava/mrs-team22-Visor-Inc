@@ -22,9 +22,13 @@ public class UserHomePage extends BasePage {
         return isVisible(openFavoritesBtn);
     }
 
-    public void addToFavorites() {
+    public FavoriteRouteDialog addToFavorites() {
+        scrollTo(addFavoritesBtn);
         click(addFavoritesBtn);
+
+        return new FavoriteRouteDialog(driver);
     }
+
 
     public void clickOnMap(int xOffset, int yOffset) {
         WebElement mapElement = waitForVisible(map);

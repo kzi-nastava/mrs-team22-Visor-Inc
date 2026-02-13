@@ -1,35 +1,36 @@
 package tests;
 
-import base.BaseTest;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
+
+import base.BaseTest;
+import pages.FavoriteRouteDialog;
 import pages.HomePage;
 import pages.LoginPage;
 import pages.UserHomePage;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class FavoriteRoutesTest extends BaseTest {
 
-    @Test
-    void shouldOpenLoginAndLoginSuccessfully() {
+	@Test
+	void shouldAddRouteToFavorites() {
 
-        HomePage homePage = new HomePage(driver);
-        assertTrue(homePage.isLoaded());
+	    HomePage homePage = new HomePage(driver);
+	    LoginPage loginPage = homePage.clickLogin();
 
-        LoginPage loginPage = homePage.clickLogin();
-        assertTrue(loginPage.isLoaded());
+	    loginPage.login("user1@gmail.com", "test1234");
 
-        loginPage.login(
-                "user1@gmail.com",
-                "test1234"
-        );
+	    UserHomePage userHomePage = new UserHomePage(driver);
 
-        UserHomePage userHomePage = new UserHomePage(driver);
+	    assertTrue(userHomePage.isLoaded());
 
-        assertTrue(userHomePage.isLoaded());
-        
-        userHomePage.selectRouteOnMap();
-        
-        userHomePage.addToFavorites();
-    }
+	    userHomePage.selectRouteOnMap();
+
+	    FavoriteRouteDialog dialog = userHomePage.addToFavorites();
+
+	    assertTrue(dialog.isLoaded());
+
+	    dialog.saveRoute("test ruta");
+	}
+
 }
