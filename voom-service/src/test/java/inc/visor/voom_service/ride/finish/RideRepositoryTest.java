@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.repository;
+package inc.visor.voom_service.ride.finish;
 
 import inc.visor.voom_service.auth.user.model.*;
 import inc.visor.voom_service.driver.model.Driver;
@@ -10,6 +10,7 @@ import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
+import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

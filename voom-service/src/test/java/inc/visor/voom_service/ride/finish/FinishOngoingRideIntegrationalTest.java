@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.controller;
+package inc.visor.voom_service.ride.finish;
 
 public class FinishOngoingRideIntegrationalTest {
 }

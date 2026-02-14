@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.repository;
+package inc.visor.voom_service.ride.finish;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
