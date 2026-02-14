@@ -1,9 +1,11 @@
-package inc.visor.voom_service.ride.repository;
+package inc.visor.voom_service.ride.request.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import inc.visor.voom_service.ride.repository.RideRequestRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

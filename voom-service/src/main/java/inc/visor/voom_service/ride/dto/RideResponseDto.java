@@ -73,6 +73,7 @@ public class RideResponseDto {
 
     public RideResponseDto(Ride ride) {
         this.id = ride.getId();
+        this.driverId = ride.getDriver().getId();
         this.status = ride.getStatus();
         this.startedAt = ride.getStartedAt();
         this.finishedAt = ride.getFinishedAt();

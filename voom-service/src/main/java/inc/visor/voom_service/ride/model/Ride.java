@@ -55,7 +55,7 @@ public class Ride {
     @Column(name = "finished_at", nullable = true)
     private LocalDateTime finishedAt;
 
-    @Column(name = "reminer_sent", nullable = true)
+    @Column(name = "reminder_sent", nullable = true)
     private boolean reminderSent = false;
 
     @ManyToMany

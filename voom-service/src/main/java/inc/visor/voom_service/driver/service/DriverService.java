@@ -502,8 +502,9 @@ public class DriverService {
                 .orElse(null);
     }
 
-    public void save(Driver driver) {
+    public Driver save(Driver driver) {
         driverRepository.save(driver);
+        return driver;
     }
 
     public double calculateActiveHoursLast24h(Long driverId) {

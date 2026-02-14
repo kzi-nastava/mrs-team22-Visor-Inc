@@ -7,7 +7,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.ride.model.enums.Column;
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,8 +80,9 @@ public class RideController {
     private final RideRouteService rideRouteService;
     private final RideEstimateService rideEstimateService;
     private final RideWsService rideWsService;
+    private final OsrmService osrmService;
 
-    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, ComplaintService complaintService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService) {
+    public RideController(RideRequestService rideRequestService, FavoriteRouteService favoriteRouteService, ComplaintService complaintService, RideService rideService, UserProfileService userProfileService, Simulator simulatorService, Simulator simulator, DriverService driverService, UserService userService, RideRouteService rideRouteService, RideEstimateService rideEstimateService, RideWsService rideWsService, OsrmService osrmService) {
         this.rideRequestService = rideRequestService;
         this.favoriteRouteService = favoriteRouteService;
         this.complaintService = complaintService;
@@ -92,6 +95,7 @@ public class RideController {
         this.rideRouteService = rideRouteService;
         this.rideEstimateService = rideEstimateService;
         this.rideWsService = rideWsService;
+        this.osrmService = osrmService;
     }
 
     @PostMapping(
@@ -245,43 +249,68 @@ public class RideController {
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
         final RideRoute rideRoute = rideRequest.getRideRoute();
-        final LatLng point = dto.getPoint();
-
-        final List<RoutePoint> routePoints = rideRoute.getRoutePoints();
-
-        final RoutePoint matched = routePoints.stream()
-                .filter(rp
-                        -> Double.compare(Math.round(rp.getLatitude()), Math.round(point.lat())) == 0
-                && Double.compare(Math.round(rp.getLongitude()), Math.round(point.lng())) == 0
-                )
-                .findFirst()
-                .orElseThrow(NotFoundException::new);
-
-        int orderIndex = matched.getOrderIndex();
-
-        final List<RoutePoint> filteredRoutePoints = new ArrayList<>(routePoints.stream()
-                .filter(rp -> rp.getOrderIndex() <= orderIndex)
+        final LatLng stopPoint = dto.getPoint();
+        final List<RoutePoint> routePoints = rideRoute.getRoutePoints().stream()
                 .sorted(Comparator.comparingInt(RoutePoint::getOrderIndex))
-                .toList());
+                .toList();
+        final List<RoutePoint> updatedPath = new ArrayList<>();
+        boolean flag = false;
 
-        filteredRoutePoints.add(new RoutePoint(dto.getPoint()));
+        for (int i = 0; i < routePoints.size() - 1; i++) {
+            RoutePoint start = routePoints.get(i);
+            updatedPath.add(start);
+            RoutePoint end = routePoints.get(i + 1);
 
-        final List<RideRequestCreateDto.RoutePointDto> dtos = filteredRoutePoints.stream().map(RideRequestCreateDto.RoutePointDto::new).toList();
+            List<LatLng> segmentGeoPoints = osrmService.getRoute(
+                    new LatLng(start.getLatitude(), start.getLongitude()),
+                    new LatLng(end.getLatitude(), end.getLongitude())
+            );
 
-//        rideRoute.setRoutePoints(filteredRoutePoints);
+            Optional<LatLng> match = segmentGeoPoints.stream()
+                    .filter(gp -> Double.compare(Math.round(gp.lat()), Math.round(stopPoint.lat())) == 0
+                            && Double.compare(Math.round(gp.lng()), Math.round(stopPoint.lng())) == 0)
+                    .findFirst();
+
+            if (match.isPresent()) {
+                RoutePoint routePoint = new RoutePoint();
+                routePoint.setAddress("Stop");
+                routePoint.setLatitude(stopPoint.lat());
+                routePoint.setLongitude(stopPoint.lng());
+                routePoint.setOrderIndex(routePoints.size());
+                routePoint.setPointType(RoutePointType.STOPPED);
+                updatedPath.add(routePoint);
+                routePoint = new RoutePoint();
+                routePoint.setAddress("Stop");
+                routePoint.setLatitude(stopPoint.lat());
+                routePoint.setLongitude(stopPoint.lng());
+                routePoint.setOrderIndex(routePoints.size());
+                routePoint.setPointType(RoutePointType.DROPOFF);
+                updatedPath.add(routePoint);
+                flag = true;
+                break;
+            }
+        }
+
+        if (!flag) {
+            throw new NotFoundException();
+        }
+
+        final List<RideRequestCreateDto.RoutePointDto> dtos = updatedPath.stream().map(RideRequestCreateDto.RoutePointDto::new).toList();
+        rideRoute.setRoutePoints(updatedPath);
         rideRoute.setTotalDistanceKm(this.rideEstimateService.calculateTotalDistance(dtos));
-        rideRequest.setRideRoute(this.rideRouteService.update(rideRoute));
+        rideRequest.setRideRoute(rideRoute);
 
         final RideEstimationResult rideEstimationResult = this.rideEstimateService.estimate(dtos, ride.getRideRequest().getVehicleType());
         rideRequest.setCalculatedPrice(rideEstimationResult.price());
 
         ride.setFinishedAt(dto.getTimestamp());
         ride.setStatus(RideStatus.STOPPED);
-        ride.setRideRequest(this.rideRequestService.update(rideRequest));
+        ride.setRideRequest(rideRequest);
 
         simulator.setFinishedRide(ride.getDriver().getId());
 
-        RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
+        RideResponseDto rideResponse = new RideResponseDto(ride);
+//        RideResponseDto rideResponse = new RideResponseDto(ride);
         this.rideWsService.sendRideChanges(rideResponse);
         return ResponseEntity.ok(rideResponse);
     }

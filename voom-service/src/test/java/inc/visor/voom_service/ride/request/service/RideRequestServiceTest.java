@@ -1,4 +1,4 @@
-package inc.visor.voom_service.ride.service;
+package inc.visor.voom_service.ride.request.service;
 
 import java.time.Instant;
 import java.util.List;
@@ -8,6 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import inc.visor.voom_service.ride.service.RideEstimateService;
+import inc.visor.voom_service.ride.service.RideRequestService;
+import inc.visor.voom_service.ride.service.RideService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
