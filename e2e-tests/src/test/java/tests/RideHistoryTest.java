@@ -23,7 +23,7 @@ public class RideHistoryTest extends BaseTest {
 
   @Test
   @Order(2)
-  @DisplayName("3. Filter by start date")
+  @DisplayName("2. Filter by start date")
   public void rideHistoryFilterByStartDateTest() {
     final HomePage homePage = new HomePage(driver);
     final LoginPage loginPage = homePage.clickLogin();
