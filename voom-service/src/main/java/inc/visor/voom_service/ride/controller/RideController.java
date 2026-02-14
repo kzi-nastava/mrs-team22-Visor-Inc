@@ -403,6 +403,11 @@ public class RideController {
         driverService.save(driver);
 
         ActiveRideDto activeRideDto = driverService.getActiveRide(userId);
+
+        if (activeRideDto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         Ride ride = rideService.findById(activeRideDto.getRideId());
 
         rideService.finishRide(ride.getId());
