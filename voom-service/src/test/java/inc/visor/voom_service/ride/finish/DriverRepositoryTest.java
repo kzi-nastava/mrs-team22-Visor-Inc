@@ -29,10 +29,10 @@ public class DriverRepositoryTest {
 
     private User createAndPersistUser(String email) {
         Person person = new Person();
-        person.setFirstName("Vaksim");
-        person.setLastName("Masic");
+        person.setFirstName("Djordje");
+        person.setLastName("Vujanovic");
         person.setPhoneNumber("0655555555");
-        person.setAddress("Vase Stajica 30 i kusur");
+        person.setAddress("Vase Stajica 16");
         person.setBirthDate(LocalDateTime.of(1990, 1, 1, 0, 0));
         entityManager.persist(person);
 
