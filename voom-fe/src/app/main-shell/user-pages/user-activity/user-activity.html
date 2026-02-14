@@ -15,8 +15,8 @@
       <mat-expansion-panel-header>
         <mat-panel-title class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt)}} - {{ getParsedTime(ride.finishedAt) }}
-            </div>
+            <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt) }} - {{ getParsedTime(ride.finishedAt) }}</div>
+            <div class="text-lg font-normal">{{ getParsedDate(ride.startedAt) }}</div>
           </div>
           <div class="flex items-center space-x-4">
             @for (routePoint of ride.rideRoute.routePoints; track $index) {

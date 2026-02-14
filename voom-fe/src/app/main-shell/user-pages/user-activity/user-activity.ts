@@ -93,6 +93,21 @@ export class UserActivity {
     });
   }
 
+  protected getParsedDate(scheduledTime: string | undefined) {
+    if (!scheduledTime) {
+      return '';
+    }
+
+    const date = new Date(scheduledTime);
+
+    return date.toLocaleDateString('en-GB', {
+      timeZone: 'Europe/Belgrade',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
   protected openMap(ride: RideHistoryDto) {
     this.dialog.open(ActivityMap, { data: ride });
   }

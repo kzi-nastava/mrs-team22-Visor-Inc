@@ -25,6 +25,8 @@ public class UserHomePage extends BasePage {
 
     private By driverMarkers = By.xpath("//img[@alt='Marker']");
 
+    private By activityButton = By.xpath("//span[@class='mdc-button__label']");
+
     public UserHomePage(WebDriver driver) {
         super(driver);
     }
@@ -136,6 +138,10 @@ public class UserHomePage extends BasePage {
     public boolean isFavoriteSaveFailedSnackShown() {
         String text = waitForSnackBarText();
         return text.contains("Failed to save route");
+    }
+
+    public void navigateToActivity() {
+        click(activityButton);
     }
 
 }
