@@ -2,9 +2,12 @@ package tests;
 
 import base.BaseTest;
 import org.junit.jupiter.api.*;
+import pages.ActivityPage;
 import pages.HomePage;
 import pages.LoginPage;
 import pages.UserHomePage;
+
+import java.time.LocalDateTime;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("E2E - Ride history - sorting and filtering")
@@ -19,6 +22,7 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
   }
 
   @Test
@@ -30,6 +34,8 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.chooseFromDate(LocalDateTime.of(2026, 2, 7, 0, 0));
   }
 
   @Test
@@ -41,6 +47,8 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.chooseToDate(LocalDateTime.of(2026, 2, 12, 0, 0));
   }
 
   @Test
@@ -52,6 +60,9 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.chooseFromDate(LocalDateTime.of(2026, 2, 7, 0, 0));
+    activityPage.chooseToDate(LocalDateTime.of(2026, 2, 12, 0, 0));
   }
 
   @Test

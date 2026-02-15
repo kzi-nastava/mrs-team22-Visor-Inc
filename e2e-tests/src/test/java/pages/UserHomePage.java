@@ -25,7 +25,7 @@ public class UserHomePage extends BasePage {
 
     private By driverMarkers = By.xpath("//img[@alt='Marker']");
 
-    private By activityButton = By.xpath("//span[@class='mdc-button__label']");
+    private By activityButton = By.xpath("//span[contains(translate(text(), 'HISTORY', 'history'), 'history')]");
 
     public UserHomePage(WebDriver driver) {
         super(driver);
