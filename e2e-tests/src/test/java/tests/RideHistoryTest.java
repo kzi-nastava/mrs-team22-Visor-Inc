@@ -220,7 +220,7 @@ public class RideHistoryTest extends BaseTest {
     for (int i = 0; i < allRideDistances.size() - 1; i++) {
       Double currentDistance = allRideDistances.get(i);
       Double nextDistance = allRideDistances.get(i + 1);
-      assertFalse(currentDistance > nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be less than or equal to ride price at %f", i, currentDistance, nextDistance));
+      assertFalse(currentDistance > nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be less than or equal to distance at %f", i, currentDistance, nextDistance));
     }
   }
 
@@ -241,7 +241,7 @@ public class RideHistoryTest extends BaseTest {
     for (int i = 0; i < allRideDistances.size() - 1; i++) {
       Double currentDistance = allRideDistances.get(i);
       Double nextDistance = allRideDistances.get(i + 1);
-      assertFalse(currentDistance < nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be more than or equal to ride price at %f", i, currentDistance, nextDistance));
+      assertFalse(currentDistance < nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be more than or equal to distance at %f", i, currentDistance, nextDistance));
     }
   }
 
@@ -286,4 +286,221 @@ public class RideHistoryTest extends BaseTest {
       assertFalse(currentStatus.compareTo(nextStatus) < 0, String.format("Sorting failed at index %d! Ride status at %s should be before than or equal to ride status at %s", i, currentStatus, nextStatus));
     }
   }
+
+  @Test
+  @Order(15)
+  @DisplayName("15. Oldest first with start date filter")
+  public void newestFirstWithStartDateFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime startDate = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    activityPage.selectSortByOption("Oldest first");
+    activityPage.chooseFromDate(startDate);
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    assertTrue(filteredRideDates.size() > 1, "Not enough rides to verify sorting with filter.");
+
+    // Verify date filter
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(startDate), "Found a ride from " + date + " which is before start date " + startDate);
+    }
+
+    // Verify sort order
+    for (int i = 0; i < filteredRideDates.size() - 1; i++) {
+      LocalDateTime currentRide = filteredRideDates.get(i);
+      LocalDateTime nextRide = filteredRideDates.get(i + 1);
+      assertFalse(currentRide.isAfter(nextRide), String.format("Sorting failed at index %d! Ride at %s should be newer than or equal to ride at %s", i, currentRide, nextRide));
+    }
+  }
+
+  @Test
+  @Order(17)
+  @DisplayName("17. Price low to high with date range filter")
+  public void priceLowToHighWithDateRangeFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime startDate = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    LocalDateTime endDate = LocalDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    activityPage.selectSortByOption("Price: low → high");
+    activityPage.chooseFromDate(startDate);
+    activityPage.chooseToDate(endDate);
+    activityPage.clickOpenRideHeader();
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    List<Double> filteredRidePrices = activityPage.ridePrices();
+
+    assertTrue(filteredRidePrices.size() > 1, "Not enough rides to verify sorting with filter.");
+    assertEquals(filteredRideDates.size(), filteredRidePrices.size(), "Date and price list sizes should match");
+
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(startDate) || date.isAfter(endDate),
+              "Found a ride from " + date + " which is outside date range [" + startDate + " to " + endDate + "]");
+    }
+
+    for (int i = 0; i < filteredRidePrices.size() - 1; i++) {
+      Double currentPrice = filteredRidePrices.get(i);
+      Double nextPrice = filteredRidePrices.get(i + 1);
+      assertFalse(currentPrice > nextPrice,
+              String.format("Sorting failed at index %d! Price %.2f should be less than or equal to %.2f", i, currentPrice, nextPrice));
+    }
+  }
+
+  @Test
+  @Order(18)
+  @DisplayName("18. Price high to low with start date filter")
+  public void priceHighToLowWithStartDateFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime startDate = LocalDateTime.now().minusDays(2).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    activityPage.selectSortByOption("Price: high → low");
+    activityPage.chooseFromDate(startDate);
+    activityPage.clickOpenRideHeader();
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    List<Double> filteredRidePrices = activityPage.ridePrices();
+
+    assertTrue(filteredRidePrices.size() > 1, "Not enough rides to verify sorting with filter.");
+
+    // Verify date filter
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(startDate), "Found a ride from " + date + " which is before start date " + startDate);
+    }
+
+    // Verify sort order
+    for (int i = 0; i < filteredRidePrices.size() - 1; i++) {
+      Double currentPrice = filteredRidePrices.get(i);
+      Double nextPrice = filteredRidePrices.get(i + 1);
+      assertFalse(currentPrice < nextPrice,
+              String.format("Sorting failed at index %d! Price %.2f should be more than or equal to %.2f", i, currentPrice, nextPrice));
+    }
+  }
+
+  @Test
+  @Order(19)
+  @DisplayName("19. Shortest distance with date range filter")
+  public void shortestDistanceWithDateRangeFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime startDate = LocalDateTime.now().minusDays(4).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    LocalDateTime endDate = LocalDateTime.now().minusDays(2).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    activityPage.selectSortByOption("Shortest distance");
+    activityPage.chooseFromDate(startDate);
+    activityPage.chooseToDate(endDate);
+    activityPage.clickOpenRideHeader();
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    List<Double> filteredRideDistances = activityPage.rideDistances();
+
+    assertTrue(filteredRideDistances.size() > 1, "Not enough rides to verify sorting with filter.");
+
+    // Verify date filter
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(startDate) || date.isAfter(endDate),
+              "Found a ride from " + date + " which is outside date range [" + startDate + " to " + endDate + "]");
+    }
+
+    // Verify sort order
+    for (int i = 0; i < filteredRideDistances.size() - 1; i++) {
+      Double currentDistance = filteredRideDistances.get(i);
+      Double nextDistance = filteredRideDistances.get(i + 1);
+      assertFalse(currentDistance > nextDistance,
+              String.format("Sorting failed at index %d! Distance %.2f should be less than or equal to %.2f", i, currentDistance, nextDistance));
+    }
+  }
+
+  @Test
+  @Order(20)
+  @DisplayName("20. Longest distance with end date filter")
+  public void longestDistanceWithEndDateFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime endDate = LocalDateTime.now().minusDays(2).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    activityPage.selectSortByOption("Longest distance");
+    activityPage.chooseToDate(endDate);
+    activityPage.clickOpenRideHeader();
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    List<Double> filteredRideDistances = activityPage.rideDistances();
+
+    assertTrue(filteredRideDistances.size() > 1, "Not enough rides to verify sorting with filter.");
+
+    // Verify date filter
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isAfter(endDate), "Found a ride from " + date + " which is after end date " + endDate);
+    }
+
+    // Verify sort order
+    for (int i = 0; i < filteredRideDistances.size() - 1; i++) {
+      Double currentDistance = filteredRideDistances.get(i);
+      Double nextDistance = filteredRideDistances.get(i + 1);
+      assertFalse(currentDistance < nextDistance,
+              String.format("Sorting failed at index %d! Distance %.2f should be more than or equal to %.2f", i, currentDistance, nextDistance));
+    }
+  }
+
+  @Test
+  @Order(21)
+  @DisplayName("21. Status descending with start date filter")
+  public void statusDescendingWithStartDateFilterTest() {
+    final HomePage homePage = new HomePage(driver);
+    final LoginPage loginPage = homePage.clickLogin();
+    loginPage.login("user1@gmail.com", "test1234");
+    final UserHomePage userHomePage = new UserHomePage(driver);
+    userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+
+    LocalDateTime startDate = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    activityPage.selectSortByOption("Status descending");
+    activityPage.chooseFromDate(startDate);
+    activityPage.clickOpenRideHeader();
+
+    List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    List<String> filteredRideStatuses = activityPage.getAllRideStatuses();
+
+    assertTrue(filteredRideStatuses.size() > 1, "Not enough rides to verify sorting with filter.");
+
+    // Verify date filter
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(startDate), "Found a ride from " + date + " which is before start date " + startDate);
+    }
+
+    // Verify sort order
+    for (int i = 0; i < filteredRideStatuses.size() - 1; i++) {
+      String currentStatus = filteredRideStatuses.get(i);
+      String nextStatus = filteredRideStatuses.get(i + 1);
+      assertFalse(currentStatus.compareTo(nextStatus) < 0,
+              String.format("Sorting failed at index %d! Status '%s' should be alphabetically after or equal to '%s'", i, currentStatus, nextStatus));
+    }
+  }
+
 }
