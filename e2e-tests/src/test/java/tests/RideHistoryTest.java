@@ -8,6 +8,9 @@ import pages.LoginPage;
 import pages.UserHomePage;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("E2E - Ride history - sorting and filtering")
@@ -35,7 +38,15 @@ public class RideHistoryTest extends BaseTest {
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
     final ActivityPage activityPage = new ActivityPage(driver);
-    activityPage.chooseFromDate(LocalDateTime.of(2026, 2, 7, 0, 0));
+    LocalDateTime daysAgo = LocalDateTime.now().minusDays(2).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    List<LocalDateTime> allRideDates = activityPage.rideHeaderDateTimes();
+    final boolean hasOldRides = allRideDates.stream().anyMatch(date -> date.isBefore(daysAgo));
+    assertTrue(hasOldRides, "Test setup error: No rides older than 2 days found to filter out!");
+    activityPage.chooseFromDate(daysAgo);
+    final List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isBefore(daysAgo), "Filter failed! Found a ride from " + date + " which is older than " + daysAgo);
+    }
   }
 
   @Test
@@ -48,7 +59,15 @@ public class RideHistoryTest extends BaseTest {
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
     final ActivityPage activityPage = new ActivityPage(driver);
-    activityPage.chooseToDate(LocalDateTime.of(2026, 2, 12, 0, 0));
+    LocalDateTime daysAgo = LocalDateTime.now().minusDays(2).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    List<LocalDateTime> allRideDates = activityPage.rideHeaderDateTimes();
+    final boolean hasNewRides = allRideDates.stream().anyMatch(date -> date.isAfter(daysAgo));
+    assertTrue(hasNewRides, "Test setup error: No rides newer than 2 days found to filter out!");
+    activityPage.chooseToDate(daysAgo);
+    final List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isAfter(daysAgo), "Filter failed! Found a ride from " + date + " which is newer than " + daysAgo);
+    }
   }
 
   @Test
@@ -61,8 +80,17 @@ public class RideHistoryTest extends BaseTest {
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
     final ActivityPage activityPage = new ActivityPage(driver);
-    activityPage.chooseFromDate(LocalDateTime.of(2026, 2, 7, 0, 0));
-    activityPage.chooseToDate(LocalDateTime.of(2026, 2, 12, 0, 0));
+    LocalDateTime fromDaysAgo = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    LocalDateTime toDaysAgo = LocalDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    List<LocalDateTime> allRideDates = activityPage.rideHeaderDateTimes();
+    final boolean hasNewRides = allRideDates.stream().anyMatch(date -> date.isAfter(fromDaysAgo) && date.isBefore(toDaysAgo));
+    assertTrue(hasNewRides, "Test setup error: No rides newer than 2 days found to filter out!");
+    activityPage.chooseFromDate(fromDaysAgo);
+    activityPage.chooseToDate(toDaysAgo);
+    final List<LocalDateTime> filteredRideDates = activityPage.rideHeaderDateTimes();
+    for (LocalDateTime date : filteredRideDates) {
+      assertFalse(date.isAfter(toDaysAgo) || date.isBefore(fromDaysAgo), "Filter failed! Found a ride from " + date + " which is newer than " + toDaysAgo + "or older than" + fromDaysAgo);
+    }
   }
 
   @Test
@@ -74,6 +102,10 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.chooseFromDate(LocalDateTime.of(2026, 2, 12, 0, 0));
+    activityPage.chooseToDate(LocalDateTime.of(2026, 2, 7, 0, 0));
+    assertEquals("No activity found yet", activityPage.noRides());
   }
 
   @Test
@@ -82,9 +114,11 @@ public class RideHistoryTest extends BaseTest {
   public void noRideHistoryFoundTest() {
     final HomePage homePage = new HomePage(driver);
     final LoginPage loginPage = homePage.clickLogin();
-    loginPage.login("user1@gmail.com", "test1234");
+    loginPage.login("user4@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    assertEquals("No activity found yet", activityPage.noRides());
   }
 
   @Test
@@ -96,6 +130,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Newest first");
+    List<LocalDateTime> allRideDates = activityPage.rideHeaderDateTimes();
+    assertTrue(allRideDates.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRideDates.size() - 1; i++) {
+      LocalDateTime currentRide = allRideDates.get(i);
+      LocalDateTime nextRide = allRideDates.get(i + 1);
+      assertFalse(currentRide.isBefore(nextRide), String.format("Sorting failed at index %d! Ride at %s should be newer than or equal to ride at %s", i, currentRide, nextRide));
+    }
   }
 
   @Test
@@ -107,6 +150,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Oldest first");
+    List<LocalDateTime> allRideDates = activityPage.rideHeaderDateTimes();
+    assertTrue(allRideDates.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRideDates.size() - 1; i++) {
+      LocalDateTime currentRide = allRideDates.get(i);
+      LocalDateTime nextRide = allRideDates.get(i + 1);
+      assertFalse(currentRide.isAfter(nextRide), String.format("Sorting failed at index %d! Ride at %s should be older than or equal to ride at %s", i, currentRide, nextRide));
+    }
   }
 
   @Test
@@ -118,6 +170,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Price: low → high");
+    List<Double> allRidePrices = activityPage.ridePrices();
+    assertTrue(allRidePrices.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRidePrices.size() - 1; i++) {
+      Double currentPrice = allRidePrices.get(i);
+      Double nextPrice = allRidePrices.get(i + 1);
+      assertFalse(currentPrice > nextPrice, String.format("Sorting failed at index %d! Ride price at %f should be less than or equal to ride price at %f", i, currentPrice, nextPrice));
+    }
   }
 
   @Test
@@ -129,6 +190,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Price: high → low");
+    List<Double> allRidePrices = activityPage.ridePrices();
+    assertTrue(allRidePrices.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRidePrices.size() - 1; i++) {
+      Double currentPrice = allRidePrices.get(i);
+      Double nextPrice = allRidePrices.get(i + 1);
+      assertFalse(currentPrice < nextPrice, String.format("Sorting failed at index %d! Ride price at %f should be more than or equal to ride price at %f", i, currentPrice, nextPrice));
+    }
   }
 
   @Test
@@ -140,6 +210,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Shortest distance");
+    List<Double> allRideDistances = activityPage.ridePrices();
+    assertTrue(allRideDistances.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRideDistances.size() - 1; i++) {
+      Double currentDistance = allRideDistances.get(i);
+      Double nextDistance = allRideDistances.get(i + 1);
+      assertFalse(currentDistance > nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be less than or equal to ride price at %f", i, currentDistance, nextDistance));
+    }
   }
 
   @Test
@@ -151,6 +230,15 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Longest distance");
+    List<Double> allRideDistances = activityPage.ridePrices();
+    assertTrue(allRideDistances.size() > 1, "Not enough rides to verify sorting.");
+    for (int i = 0; i < allRideDistances.size() - 1; i++) {
+      Double currentDistance = allRideDistances.get(i);
+      Double nextDistance = allRideDistances.get(i + 1);
+      assertFalse(currentDistance < nextDistance, String.format("Sorting failed at index %d! Ride distance at %f should be more than or equal to ride price at %f", i, currentDistance, nextDistance));
+    }
   }
 
   @Test
@@ -162,6 +250,8 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Status ascending");
   }
 
   @Test
@@ -173,6 +263,7 @@ public class RideHistoryTest extends BaseTest {
     loginPage.login("user1@gmail.com", "test1234");
     final UserHomePage userHomePage = new UserHomePage(driver);
     userHomePage.navigateToActivity();
+    final ActivityPage activityPage = new ActivityPage(driver);
+    activityPage.selectSortByOption("Status descending");
   }
-
 }

@@ -11,11 +11,11 @@
   @if (history.length !== 0) {
   <div class="py-8 space-y-4">
     @for (ride of history; track ride.id) {
-    <mat-expansion-panel hideToggle>
-      <mat-expansion-panel-header data-testid="ride-header">
+    <mat-expansion-panel data-testid="ride-expansion-panel" hideToggle>
+      <mat-expansion-panel-header>
         <mat-panel-title class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <div class="text-lg font-normal">{{ getParsedTime(ride.startedAt) }} - {{ getParsedTime(ride.finishedAt) }}</div>
+            <div class="text-lg font-normal" data-testid="ride-time">{{ getParsedTime(ride.startedAt) }} - {{ getParsedTime(ride.finishedAt) }}</div>
             <div class="text-lg font-normal" data-testid="ride-date">{{ getParsedDate(ride.startedAt) }}</div>
           </div>
           <div class="flex items-center space-x-4">
@@ -84,7 +84,7 @@
   </div>
   } @else {
   <div class="py-8">
-    <div class="text-center text-xl">No activity found yet</div>
+    <div data-testid="no-rides" class="text-center text-xl">No activity found yet</div>
   </div>
   }
   }
