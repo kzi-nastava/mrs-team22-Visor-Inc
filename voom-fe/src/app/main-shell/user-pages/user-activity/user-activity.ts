@@ -60,7 +60,8 @@ export class UserActivity {
     this.authenticationService.activeUser$,
     this.fromDate.valueChanges.pipe(startWith(this.fromDate.value)),
     this.toDate.valueChanges.pipe(startWith(this.toDate.value)),
-    toObservable(this.sortDirection)
+    toObservable(this.sortDirection),
+    toObservable(this.selectedColumnName)
   ]).pipe(
     switchMap(([user, from, to, sort]) => {
       if (!user) return of([]);
