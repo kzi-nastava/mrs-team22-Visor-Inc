@@ -8,14 +8,6 @@ services:
     ports:
       - '5432:5432'
 
-  rabbitmq:
-    image: 'rabbitmq:latest'
-    environment:
-      - 'RABBITMQ_DEFAULT_PASS=secret'
-      - 'RABBITMQ_DEFAULT_USER=mq'
-    ports:
-      - '5672:5672'
-
   mailhog:
     image: mailhog/mailhog:latest
     ports:

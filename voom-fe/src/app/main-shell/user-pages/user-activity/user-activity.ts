@@ -60,7 +60,8 @@ export class UserActivity {
     this.authenticationService.activeUser$,
     this.fromDate.valueChanges.pipe(startWith(this.fromDate.value)),
     this.toDate.valueChanges.pipe(startWith(this.toDate.value)),
-    toObservable(this.sortDirection)
+    toObservable(this.sortDirection),
+    toObservable(this.selectedColumnName)
   ]).pipe(
     switchMap(([user, from, to, sort]) => {
       if (!user) return of([]);
@@ -90,6 +91,21 @@ export class UserActivity {
       timeZone: 'Europe/Belgrade',
       hour: '2-digit',
       minute: '2-digit',
+    });
+  }
+
+  protected getParsedDate(scheduledTime: string | undefined) {
+    if (!scheduledTime) {
+      return '';
+    }
+
+    const date = new Date(scheduledTime);
+
+    return date.toLocaleDateString('en-GB', {
+      timeZone: 'Europe/Belgrade',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
     });
   }
 

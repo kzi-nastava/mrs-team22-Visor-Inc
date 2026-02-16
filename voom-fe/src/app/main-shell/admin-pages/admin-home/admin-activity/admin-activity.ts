@@ -132,4 +132,19 @@ export class AdminActivity {
         break;
     }
   }
+
+  protected getParsedDate(scheduledTime: string | undefined) {
+    if (!scheduledTime) {
+      return '';
+    }
+
+    const date = new Date(scheduledTime);
+
+    return date.toLocaleDateString('en-GB', {
+      timeZone: 'Europe/Belgrade',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
 }

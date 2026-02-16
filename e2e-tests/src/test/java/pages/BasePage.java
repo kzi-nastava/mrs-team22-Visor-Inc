@@ -20,12 +20,20 @@ public abstract class BasePage {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
+    protected WebElement waitForAllVisible(By locator) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
     protected WebElement waitForClickable(By locator) {
         return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     protected boolean waitForInvisible(By locator) {
         return wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    }
+
+    public boolean waitForStaleness(By locator) {
+        return wait.until(ExpectedConditions.stalenessOf(driver.findElement(locator)));
     }
 
     protected boolean waitForText(By locator, String text) {
