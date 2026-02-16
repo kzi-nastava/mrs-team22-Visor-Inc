@@ -64,7 +64,7 @@ export class RateRideForm {
     }).subscribe(() => {
       this.reviewed.set(true);
       this.snackBar.open('Review submitted successfully!', 'Close', { 
-          duration: 2000,
+          duration: 100000,
           panelClass: ['success-snackbar']
         });
       this.dialogRef.close(true);
