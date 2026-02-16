@@ -29,6 +29,8 @@ public class ActivityPage extends BasePage {
   private final By rideStatus = By.xpath(".//div[@data-testid='ride-status']");
   private final By noRides = By.xpath("//div[@data-testid='no-rides']");
 
+  private final By rateRideButton = By.xpath(".//button[contains(text(), 'Rate ride')]");
+
   public ActivityPage(WebDriver driver) {
     super(driver);
   }
@@ -279,4 +281,102 @@ public class ActivityPage extends BasePage {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
     return date.format(formatter);
   }
+
+  public RateRideDialog clickRateRideOnFirstAvailable() {
+    waitForAllVisible(rideExpansionPanelHeader);
+    List<WebElement> headers = driver.findElements(rideExpansionPanelHeader);
+
+    for (WebElement header : headers) {
+      new Actions(driver).scrollToElement(header).perform();
+
+      wait.until(ExpectedConditions.elementToBeClickable(header)).click();
+
+      wait.until(ExpectedConditions.attributeContains(header, "class", "mat-expanded"));
+
+      WebElement panel = header.findElement(By.xpath("./.."));
+
+      try {
+        WebElement btn = new WebDriverWait(driver, Duration.ofSeconds(2))
+                .until(ExpectedConditions.elementToBeClickable(panel.findElement(rateRideButton)));
+
+        if (btn.isDisplayed()) {
+          btn.click();
+          return new RateRideDialog(driver);
+        }
+      } catch (TimeoutException | NoSuchElementException e) {
+        header.click();
+        wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(header, "class", "mat-expanded")));
+      }
+    }
+    throw new RuntimeException("No ratable rides found on the current page");
+  }
+
+  public boolean isRateRideButtonVisibleForAnyRide() {
+    waitForAllVisible(rideExpansionPanelHeader);
+    List<WebElement> headers = driver.findElements(rideExpansionPanelHeader);
+
+    Actions actions = new Actions(driver);
+
+    for (WebElement header : headers) {
+      try {
+        actions.scrollToElement(header).perform();
+
+        wait.until(ExpectedConditions.elementToBeClickable(header)).click();
+
+        wait.until(ExpectedConditions.attributeContains(header, "class", "mat-expanded"));
+
+        WebElement panel = header.findElement(By.xpath("./.."));
+
+        List<WebElement> buttons = panel.findElements(rateRideButton);
+        if (!buttons.isEmpty() && buttons.get(0).isDisplayed()) {
+          return true;
+        }
+
+        header.click();
+        wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(header, "class", "mat-expanded")));
+
+      } catch (Exception e) {
+        System.out.println("Could not check header: " + e.getMessage());
+      }
+    }
+    return false;
+  }
+
+  public boolean isAnyRideVisible() {
+    try {
+      return !driver.findElements(rideExpansionPanel).isEmpty();
+    } catch (NoSuchElementException e) {
+      return false;
+    }
+  }
+
+  public boolean isRateButtonVisibleForRideAtIndex(int index) {
+    waitForAllVisible(rideExpansionPanel);
+    List<WebElement> panels = driver.findElements(rideExpansionPanel);
+
+    if (index >= panels.size()) {
+      throw new IndexOutOfBoundsException("Ride index " + index + " not found. Total rides: " + panels.size());
+    }
+
+    WebElement panel = panels.get(index);
+    WebElement header = panel.findElement(rideExpansionPanelHeader);
+
+    new Actions(driver).scrollToElement(header).perform();
+
+    wait.until(ExpectedConditions.elementToBeClickable(header)).click();
+
+    try {
+      wait.until(ExpectedConditions.attributeContains(header, "class", "mat-expanded"));
+
+      return wait.until(driver -> {
+        List<WebElement> buttons = panel.findElements(By.xpath(".//button[contains(text(), 'Rate ride')]"));
+        return !buttons.isEmpty() && buttons.get(0).isDisplayed();
+      });
+
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+
 }

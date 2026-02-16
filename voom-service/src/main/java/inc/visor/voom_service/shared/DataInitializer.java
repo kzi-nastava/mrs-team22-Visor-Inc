@@ -131,6 +131,7 @@ public class DataInitializer implements ApplicationRunner {
         userRepository.save(user);
 
         seedTestRides();
+        seedUser3NonRatableRides();
     }
 
     private void createUserRole(String name, Permission permission) {
@@ -276,6 +277,30 @@ public class DataInitializer implements ApplicationRunner {
         System.out.println("Seeded enhanced test rides for reports.");
     }
 
+    private void seedUser3NonRatableRides() {
+        User user3 = userRepository.findByEmail("user3@gmail.com").orElseThrow();
+        Driver driver = driverRepository.findAll().getLast();
+        VehicleType vehicleType = vehicleTypeRepository.findByType("STANDARD").orElseThrow();
+
+        for (int i = 0; i < 2; i++) {
+            LocalDateTime oldStart = LocalDateTime.now().minusDays(5).plusHours(i);
+            LocalDateTime oldFinish = oldStart.plusMinutes(30);
+
+            Ride oldRide = createRide(user3, driver, vehicleType, oldStart, oldFinish, 100 + i);
+            oldRide.setStatus(RideStatus.FINISHED);
+            rideRepository.save(oldRide);
+        }
+
+        LocalDateTime recentStart = LocalDateTime.now().minusHours(2);
+        LocalDateTime recentFinish = recentStart.plusMinutes(15);
+
+        Ride canceledRide = createRide(user3, driver, vehicleType, recentStart, recentFinish, 200);
+        canceledRide.setStatus(RideStatus.USER_CANCELLED);
+        rideRepository.save(canceledRide);
+
+        System.out.println("Seeded non-ratable rides for user3 (Old rides and Canceled rides).");
+    }
+
     private RoutePoint createPoint(String address, double lat, double lng) {
         RoutePoint point = new RoutePoint();
         point.setAddress(address);
@@ -284,7 +309,7 @@ public class DataInitializer implements ApplicationRunner {
         return point;
     }
 
-    private void createRide(
+    private Ride createRide(
             User user,
             Driver driver,
             VehicleType vehicleType,
@@ -337,7 +362,11 @@ public class DataInitializer implements ApplicationRunner {
         ride.setFinishedAt(finish);
 
         rideRepository.save(ride);
+
+        return ride;
     }
+
+
 
     private static final double[][] ROUTES = {
         {45.2458, 19.8529, 45.2556, 19.8449}, // Liman → Centar
