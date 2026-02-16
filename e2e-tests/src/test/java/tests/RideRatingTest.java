@@ -1,18 +1,18 @@
 package tests;
 
 import base.BaseTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import pages.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RideRatingTest extends BaseTest {
 
     private ActivityPage activityPage;
 
     @Test
+    @Order(1)
     public void testRateRideHappyPath() {
 
         final HomePage homePage = new HomePage(driver);
@@ -82,6 +82,7 @@ public class RideRatingTest extends BaseTest {
     }
 
     @Test
+    @Order(0)
     public void testRateButtonDisappearsImmediatelyAfterSubmission() {
         final HomePage homePage = new HomePage(driver);
         final LoginPage loginPage = homePage.clickLogin();
