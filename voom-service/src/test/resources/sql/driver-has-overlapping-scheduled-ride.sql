@@ -4,7 +4,7 @@ INSERT INTO ride_route (
 )
 VALUES (
     100,
-    100.0 -- velika distanca da traje dugo
+    100.0
 );
 
 INSERT INTO route_point (
@@ -68,7 +68,7 @@ INSERT INTO ride (
     status,
     started_at,
     finished_at,
-    reminer_sent
+    reminder_sent   
 )
 VALUES (
     100,
@@ -79,3 +79,4 @@ VALUES (
     TIMESTAMP '2026-01-01 12:00:00',
     FALSE
 );
+
