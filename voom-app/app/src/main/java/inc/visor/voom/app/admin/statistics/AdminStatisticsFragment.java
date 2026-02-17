@@ -83,13 +83,14 @@ public class AdminStatisticsFragment extends Fragment {
         if (u == null) {
             tv.setText("System Overview");
             iconRes = R.drawable.ic_system;
-        } else if (u.getUserRoleName().equals("DRIVER")) {
+        } else if ("DRIVER".equals(u.getUserRoleName())) {
             tv.setText(u.firstName + " " + u.lastName);
             iconRes = R.drawable.ic_car;
         } else {
             tv.setText(u.firstName + " " + u.lastName);
             iconRes = R.drawable.ic_driver;
         }
+
 
         Drawable icon = ContextCompat.getDrawable(requireContext(), iconRes);
         tv.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
@@ -109,7 +110,7 @@ public class AdminStatisticsFragment extends Fragment {
         Long driverId = null;
 
         if (selectedUser != null) {
-            if (selectedUser.getUserRoleName().equals("DRIVER")) {
+            if ("DRIVER".equals(selectedUser.getUserRoleName())) {
                 driverId = selectedUser.id;
             } else {
                 userId = selectedUser.id;
