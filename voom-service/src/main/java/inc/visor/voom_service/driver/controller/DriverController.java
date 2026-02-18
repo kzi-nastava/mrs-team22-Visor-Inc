@@ -46,7 +46,7 @@ public class DriverController {
     }
 
     @PostMapping
-    public ResponseEntity<DriverSummaryDto> createDriver(@RequestBody CreateDriverDto request) {
+    public ResponseEntity<DriverSummaryDto> createDriver(@Valid @RequestBody CreateDriverDto request) {
         System.out.println("RAW BODY:");
         System.out.println("EMAIL: " + request.getEmail());
         System.out.println("BIRTHDATE: " + request.getBirthDate());
@@ -120,14 +120,11 @@ public class DriverController {
     @PutMapping("/me")
     public ResponseEntity<Void> requestVehicleUpdate(
             @AuthenticationPrincipal VoomUserDetails userDetails,
-            @RequestBody VehicleSummaryDto request
+            @Valid @RequestBody VehicleSummaryDto request
     ) {
-        System.out.println("USER DETAILS: " + userDetails);
-
         String username = userDetails != null ? userDetails.getUsername() : null;
         User user = userService.getUser(username).orElseThrow(NotFoundException::new);
 
-        System.out.println("Received vehicle update request: " + request);
         driverService.createVehicleChangeRequest(user.getId(), request);
 
         return ResponseEntity.ok().build();
