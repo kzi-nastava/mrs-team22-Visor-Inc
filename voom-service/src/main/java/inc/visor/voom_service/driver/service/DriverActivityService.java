@@ -1,12 +1,11 @@
 package inc.visor.voom_service.driver.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.driver.model.DriverStateChange;
 import inc.visor.voom_service.driver.repository.DriverActivityRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DriverActivityService {

@@ -1,10 +1,5 @@
 package inc.visor.voom_service.ride.mapper;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Comparator;
-import java.util.List;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.RideRequest;
@@ -15,16 +10,22 @@ import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Comparator;
+import java.util.List;
+
 public class RideRequestMapper {
 
-    private RideRequestMapper() {}
+    private RideRequestMapper() {
+    }
 
     public static RideRequest toEntity(
-        RideRequestCreateDto dto,
-        User creator,
-        VehicleType vehicleType,
-        double calculatedPrice,
-        double totalDistanceKm
+            RideRequestCreateDto dto,
+            User creator,
+            VehicleType vehicleType,
+            double calculatedPrice,
+            double totalDistanceKm
     ) {
         RideRequest request = new RideRequest();
 
@@ -39,7 +40,7 @@ public class RideRequestMapper {
 
         if (request.getScheduleType() == ScheduleType.LATER) {
             request.setScheduledTime(
-                LocalDateTime.ofInstant(dto.schedule.startAt, ZoneOffset.UTC)
+                    LocalDateTime.ofInstant(dto.schedule.startAt, ZoneOffset.UTC)
             );
         }
 
@@ -50,24 +51,24 @@ public class RideRequestMapper {
     }
 
     private static RideRoute mapRoute(
-        RideRequestCreateDto.RouteDto routeDto,
-        double totalDistanceKm
+            RideRequestCreateDto.RouteDto routeDto,
+            double totalDistanceKm
     ) {
         RideRoute route = new RideRoute();
         route.setTotalDistanceKm(totalDistanceKm);
 
         List<RoutePoint> points =
-            routeDto.points.stream()
-                .sorted(Comparator.comparingInt(p -> p.orderIndex))
-                .map(RideRequestMapper::mapRoutePoint)
-                .toList();
+                routeDto.points.stream()
+                        .sorted(Comparator.comparingInt(p -> p.orderIndex))
+                        .map(RideRequestMapper::mapRoutePoint)
+                        .toList();
 
         route.setRoutePoints(points);
         return route;
     }
 
     private static RoutePoint mapRoutePoint(
-        RideRequestCreateDto.RoutePointDto dto
+            RideRequestCreateDto.RoutePointDto dto
     ) {
         RoutePoint point = new RoutePoint();
         point.setLatitude(dto.lat);

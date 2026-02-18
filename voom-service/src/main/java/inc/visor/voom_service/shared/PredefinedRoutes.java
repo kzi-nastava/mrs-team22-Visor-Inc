@@ -6,8 +6,6 @@ import java.util.List;
 
 public class PredefinedRoutes {
 
-    public record Route(LatLng start, LatLng end) {}
-
     public static final List<Route> PREDEFINED_ROUTES = List.of(
 
             // 1. Liman I → Centar
@@ -130,5 +128,8 @@ public class PredefinedRoutes {
                     new LatLng(45.2469, 19.8721)
             )
     );
+
+    public record Route(LatLng start, LatLng end) {
+    }
 }
 

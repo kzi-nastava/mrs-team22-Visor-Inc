@@ -1,18 +1,9 @@
 package inc.visor.voom_service.ride.model;
 
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "favorite_route")
@@ -37,7 +28,8 @@ public class FavoriteRoute {
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
 
-    public FavoriteRoute() {}
+    public FavoriteRoute() {
+    }
 
     // getters / setters
     public long getId() {

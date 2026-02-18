@@ -1,20 +1,11 @@
 package inc.visor.voom_service.ride.model;
 
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Setter
 @Getter
@@ -35,7 +26,8 @@ public class RideRoute {
     @OrderBy("orderIndex ASC")
     private List<RoutePoint> routePoints;
 
-    public RideRoute() {}
+    public RideRoute() {
+    }
 
     public RoutePoint getPickupPoint() {
         return routePoints.stream()
@@ -50,5 +42,5 @@ public class RideRoute {
                 .findFirst()
                 .orElse(null);
     }
-    
+
 }

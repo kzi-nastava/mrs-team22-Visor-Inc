@@ -1,11 +1,5 @@
 package inc.visor.voom_service.driver.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.driver.dto.DriverVehicleChangeRequestDto;
 import inc.visor.voom_service.driver.dto.VehicleChangeRequestStatus;
 import inc.visor.voom_service.driver.model.Driver;
@@ -16,6 +10,11 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

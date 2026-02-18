@@ -1,10 +1,10 @@
 package inc.visor.voom_service.ride.dto;
 
-import java.time.LocalDateTime;
-
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
+
+import java.time.LocalDateTime;
 
 public class RideRequestResponseDto {
 

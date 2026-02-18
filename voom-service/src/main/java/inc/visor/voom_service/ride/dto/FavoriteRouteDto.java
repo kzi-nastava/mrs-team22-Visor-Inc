@@ -1,8 +1,8 @@
 package inc.visor.voom_service.ride.dto;
 
-import java.util.List;
-
 import inc.visor.voom_service.shared.RoutePointDto;
+
+import java.util.List;
 
 public class FavoriteRouteDto {
 
@@ -11,7 +11,8 @@ public class FavoriteRouteDto {
     private double totalDistanceKm;
     private List<RoutePointDto> points;
 
-    public FavoriteRouteDto() {  }
+    public FavoriteRouteDto() {
+    }
 
     public long getId() {
         return id;

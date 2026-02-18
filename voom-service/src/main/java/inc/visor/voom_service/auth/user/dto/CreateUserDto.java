@@ -13,39 +13,39 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CreateUserDto {
-  @NotBlank(message = "First name is required")
-  @Size(min = 2, max = 255, message = "First name must be between 2 and 255 characters")
-  private String firstName;
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 255, message = "First name must be between 2 and 255 characters")
+    private String firstName;
 
-  @NotBlank(message = "Last name is required")
-  @Size(min = 2, max = 255, message = "Last name must be between 2 and 255 characters")
-  private String lastName;
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 255, message = "Last name must be between 2 and 255 characters")
+    private String lastName;
 
-  @NotBlank(message = "Phone number is required")
-  @Size(min = 2, max = 55, message = "Phone number must be between 2 and 55 characters")
-  private String phoneNumber;
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 2, max = 55, message = "Phone number must be between 2 and 55 characters")
+    private String phoneNumber;
 
-  @NotBlank(message = "Address is required")
-  @Size(min = 2, max = 255, message = "Address must be between 2 and 255 characters")
-  private String address;
+    @NotBlank(message = "Address is required")
+    @Size(min = 2, max = 255, message = "Address must be between 2 and 255 characters")
+    private String address;
 
-  @NotNull(message = "Birth date is required")
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-  private LocalDateTime birthDate;
+    @NotNull(message = "Birth date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private LocalDateTime birthDate;
 
-  @NotBlank(message = "Email is required")
-  @Email(message = "Invalid email format")
-  @Size(max = 255, message = "Email must be at most 255 characters")
-  private String email;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Size(max = 255, message = "Email must be at most 255 characters")
+    private String email;
 
-  @NotBlank(message = "User status is required")
-  private String userStatus;
+    @NotBlank(message = "User status is required")
+    private String userStatus;
 
-  @NotNull(message = "User role id is required")
-  private int userRoleId;
+    @NotNull(message = "User role id is required")
+    private int userRoleId;
 
-  private String password;
+    private String password;
 
-  public CreateUserDto() {
-  }
+    public CreateUserDto() {
+    }
 }

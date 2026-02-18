@@ -1,16 +1,15 @@
 package inc.visor.voom_service.osrm.controller;
 
-import java.util.List;
-
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
-
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.dto.RouteRequestDto;
 import inc.visor.voom_service.osrm.dto.RouteResponseDto;
 import inc.visor.voom_service.osrm.service.OsrmQueueService;
 import inc.visor.voom_service.osrm.service.OsrmService;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 public class RouteWsController {

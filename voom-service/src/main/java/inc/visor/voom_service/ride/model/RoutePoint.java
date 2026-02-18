@@ -3,21 +3,14 @@ package inc.visor.voom_service.ride.model;
 import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.shared.RoutePointDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "route_point")
 public class RoutePoint {
-    
+
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "route_point_id", nullable = false)
     private long id;
 
@@ -37,7 +30,8 @@ public class RoutePoint {
     @Column(name = "point_type", nullable = true)
     private RoutePointType pointType;
 
-    public RoutePoint() {}
+    public RoutePoint() {
+    }
 
     public RoutePoint(LatLng point) {
         this.latitude = point.lat();
@@ -61,7 +55,7 @@ public class RoutePoint {
         this.orderIndex = orderIndex;
     }
 
-    
+
     public double getLatitude() {
         return latitude;
     }

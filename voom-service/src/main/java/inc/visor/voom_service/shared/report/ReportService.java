@@ -1,19 +1,17 @@
 package inc.visor.voom_service.shared.report;
 
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.service.RideService;
+import inc.visor.voom_service.shared.report.dto.ReportDailyStatsDto;
+import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.service.RideRequestService;
-import inc.visor.voom_service.ride.service.RideService;
-import inc.visor.voom_service.shared.report.dto.ReportDailyStatsDto;
-import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
 
 @Service
 public class ReportService {
@@ -60,7 +58,7 @@ public class ReportService {
                             totalMoney
                     );
                 })
-                .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
+                .sorted(Comparator.comparing(ReportDailyStatsDto::date))
                 .toList();
 
         return buildResponse(dailyStats);
@@ -107,16 +105,16 @@ public class ReportService {
                             totalMoney
                     );
                 })
-                .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
+                .sorted(Comparator.comparing(ReportDailyStatsDto::date))
                 .toList();
 
         return buildResponse(dailyStats);
     }
 
     public ReportResponseDto getSystemReport(
-        LocalDateTime from,
-        LocalDateTime to
-        ) {
+            LocalDateTime from,
+            LocalDateTime to
+    ) {
 
         List<Ride> rides =
                 rideService.getFinishedRidesInTimeRange(from, to);
@@ -131,51 +129,51 @@ public class ReportService {
                         .stream()
                         .map(entry -> {
 
-                                LocalDate date = entry.getKey();
-                                List<Ride> dailyRides = entry.getValue();
+                            LocalDate date = entry.getKey();
+                            List<Ride> dailyRides = entry.getValue();
 
-                                long rideCount = dailyRides.size();
+                            long rideCount = dailyRides.size();
 
-                                double totalKm = dailyRides.stream()
-                                        .mapToDouble(ride ->
-                                                ride.getRideRequest()
-                                                        .getRideRoute()
-                                                        .getTotalDistanceKm()
-                                        )
-                                        .sum();
+                            double totalKm = dailyRides.stream()
+                                    .mapToDouble(ride ->
+                                            ride.getRideRequest()
+                                                    .getRideRoute()
+                                                    .getTotalDistanceKm()
+                                    )
+                                    .sum();
 
-                                double totalMoney = dailyRides.stream()
-                                        .mapToDouble(ride ->
-                                                ride.getRideRequest()
-                                                        .getCalculatedPrice()
-                                        )
-                                        .sum();
+                            double totalMoney = dailyRides.stream()
+                                    .mapToDouble(ride ->
+                                            ride.getRideRequest()
+                                                    .getCalculatedPrice()
+                                    )
+                                    .sum();
 
-                                return new ReportDailyStatsDto(
-                                        date,
-                                        rideCount,
-                                        totalKm,
-                                        totalMoney
-                                );
+                            return new ReportDailyStatsDto(
+                                    date,
+                                    rideCount,
+                                    totalKm,
+                                    totalMoney
+                            );
                         })
-                        .sorted(Comparator.comparing(ReportDailyStatsDto::getDate))
+                        .sorted(Comparator.comparing(ReportDailyStatsDto::date))
                         .toList();
 
-                return buildResponse(dailyStats);
-        }
+        return buildResponse(dailyStats);
+    }
 
     private ReportResponseDto buildResponse(List<ReportDailyStatsDto> dailyStats) {
 
         long totalRides = dailyStats.stream()
-                .mapToLong(ReportDailyStatsDto::getRideCount)
+                .mapToLong(ReportDailyStatsDto::rideCount)
                 .sum();
 
         double totalMoney = dailyStats.stream()
-                .mapToDouble(ReportDailyStatsDto::getTotalMoney)
+                .mapToDouble(ReportDailyStatsDto::totalMoney)
                 .sum();
 
         double totalKm = dailyStats.stream()
-                .mapToDouble(ReportDailyStatsDto::getTotalKm)
+                .mapToDouble(ReportDailyStatsDto::totalKm)
                 .sum();
 
         double avgMoneyPerDay

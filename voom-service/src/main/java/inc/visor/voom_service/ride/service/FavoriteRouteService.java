@@ -1,12 +1,5 @@
 package inc.visor.voom_service.ride.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.ride.dto.CreateFavoriteRouteRequest;
 import inc.visor.voom_service.ride.dto.FavoriteRouteDto;
 import inc.visor.voom_service.ride.exception.DuplicateFavoriteRouteException;
@@ -14,6 +7,12 @@ import inc.visor.voom_service.ride.model.FavoriteRoute;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.repository.FavoriteRouteRepository;
 import inc.visor.voom_service.shared.RoutePointDto;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FavoriteRouteService {

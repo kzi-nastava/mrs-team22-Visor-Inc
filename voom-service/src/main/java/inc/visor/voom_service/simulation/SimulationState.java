@@ -1,22 +1,21 @@
 package inc.visor.voom_service.simulation;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
+import inc.visor.voom_service.osrm.dto.LatLng;
+import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.shared.PredefinedRoutes;
 import org.springframework.stereotype.Component;
 
-import inc.visor.voom_service.osrm.dto.LatLng;
-import inc.visor.voom_service.osrm.service.OsrmService;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class SimulationState {
 
     private final List<SimulatedDriver> drivers = new CopyOnWriteArrayList<>();
+    private final Set<Long> pendingDrivers = ConcurrentHashMap.newKeySet();
 
     public void add(SimulatedDriver driver) {
         drivers.add(driver);
@@ -25,9 +24,6 @@ public class SimulationState {
     public List<SimulatedDriver> getAll() {
         return drivers;
     }
-
-    private final Set<Long> pendingDrivers = ConcurrentHashMap.newKeySet();
-
 
     public void replaceRoute(long driverId, LatLng newEnd, OsrmService osrm) {
         SimulatedDriver existing = drivers.stream()

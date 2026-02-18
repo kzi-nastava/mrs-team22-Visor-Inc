@@ -12,7 +12,7 @@ public class PasswordMatchValidator
             ConstraintValidatorContext context
     ) {
         if (dto.getPassword() == null || dto.getConfirmPassword() == null) {
-            return true; 
+            return true;
         }
 
         return dto.getPassword().equals(dto.getConfirmPassword());

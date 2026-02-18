@@ -1,14 +1,13 @@
 package inc.visor.voom_service.mail;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.activation.model.ActivationToken;
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
@@ -25,21 +24,21 @@ public class EmailService {
     }
 
     public void send(String to, String subject, String body) {
-    try {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(body, true); 
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, true);
 
-        mailSender.send(mimeMessage);
+            mailSender.send(mimeMessage);
 
-    } catch (Exception e) {
-        throw new RuntimeException("Error sending email", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error sending email", e);
+        }
     }
-}
 
 
     public void sendTestMail(String to) {
@@ -55,13 +54,13 @@ public class EmailService {
                 to,
                 "Activate your Voom account",
                 """
-      Your account has been created.
-
-      Please activate your account by setting your password using the link below.
-      This link is valid for 24 hours.
-
-      %s
-      """.formatted(activationLink)
+                        Your account has been created.
+                        
+                        Please activate your account by setting your password using the link below.
+                        This link is valid for 24 hours.
+                        
+                        %s
+                        """.formatted(activationLink)
         );
     }
 
@@ -76,13 +75,13 @@ public class EmailService {
                 user.getEmail(),
                 "Activate your Voom account",
                 """
-      Your account has been created.
-
-      Please activate your account by setting your password using the link below.
-      This link is valid for 24 hours.
-
-      %s
-      """.formatted(activationLink)
+                        Your account has been created.
+                        
+                        Please activate your account by setting your password using the link below.
+                        This link is valid for 24 hours.
+                        
+                        %s
+                        """.formatted(activationLink)
         );
     }
 
@@ -93,33 +92,33 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             String htmlContent = """
-            <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; text-align: center; color: #1a1a1a;">
-                
-                <div style="padding: 40px 0 20px 0;">
-                    <h1 style="color: #001C55; margin: 0; font-size: 36px; font-style: italic; font-weight: bold;">Voom</h1>
-                </div>
-
-                <div style="padding: 20px 40px;">
-                    <h2 style="font-weight: 500; font-size: 24px;">You have been added to the ride!</h2>
+                    <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; text-align: center; color: #1a1a1a;">
                     
-                    <p style="margin: 25px 0; font-size: 18px;">
-                        📍 %s
-                    </p>
+                        <div style="padding: 40px 0 20px 0;">
+                            <h1 style="color: #001C55; margin: 0; font-size: 36px; font-style: italic; font-weight: bold;">Voom</h1>
+                        </div>
                     
-                    <p style="color: #4a4a4a; font-size: 16px;">You can follow the ride on the link below</p>
+                        <div style="padding: 20px 40px;">
+                            <h2 style="font-weight: 500; font-size: 24px;">You have been added to the ride!</h2>
                     
-                    <p style="margin: 30px 0;">
-                        <a href="%s" style="color: #0047AB; text-decoration: underline; word-break: break-all; font-size: 16px;">
-                            %s
-                        </a>
-                    </p>
-                </div>
-
-                <div style="background-color: #121F4B; color: #ffffff; padding: 25px; margin-top: 40px; font-size: 14px;">
-                    Copyright © 2025 Visor Inc
-                </div>
-            </div>
-            """.formatted(addressInfo, trackingUrl, trackingUrl);
+                            <p style="margin: 25px 0; font-size: 18px;">
+                                📍 %s
+                            </p>
+                    
+                            <p style="color: #4a4a4a; font-size: 16px;">You can follow the ride on the link below</p>
+                    
+                            <p style="margin: 30px 0;">
+                                <a href="%s" style="color: #0047AB; text-decoration: underline; word-break: break-all; font-size: 16px;">
+                                    %s
+                                </a>
+                            </p>
+                        </div>
+                    
+                        <div style="background-color: #121F4B; color: #ffffff; padding: 25px; margin-top: 40px; font-size: 14px;">
+                            Copyright © 2025 Visor Inc
+                        </div>
+                    </div>
+                    """.formatted(addressInfo, trackingUrl, trackingUrl);
 
             helper.setFrom(from);
             helper.setTo(to);
@@ -140,30 +139,30 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             String htmlContent = """
-        <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; text-align: center; color: #1a1a1a;">
-            
-            <div style="padding: 40px 0 20px 0;">
-                <h1 style="color: #001C55; margin: 0; font-size: 36px; font-style: italic; font-weight: bold;">Voom</h1>
-            </div>
-
-            <div style="padding: 20px 40px;">
-                <h2 style="font-weight: 500; font-size: 24px;">Your ride has been completed!</h2>
-                
-                <p style="margin: 25px 0; font-size: 18px;">
-                    📍 %s
-                </p>
-                
-                <div style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-top: 30px;">
-                    <p>Thank you for using our services.</p>
-                    <p>Looking forward to another drive.</p>
-                </div>
-            </div>
-
-            <div style="background-color: #121F4B; color: #ffffff; padding: 25px; margin-top: 40px; font-size: 14px;">
-                Copyright © 2025 Visor Inc
-            </div>
-        </div>
-        """.formatted(addressInfo);
+                    <div style="background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; text-align: center; color: #1a1a1a;">
+                    
+                        <div style="padding: 40px 0 20px 0;">
+                            <h1 style="color: #001C55; margin: 0; font-size: 36px; font-style: italic; font-weight: bold;">Voom</h1>
+                        </div>
+                    
+                        <div style="padding: 20px 40px;">
+                            <h2 style="font-weight: 500; font-size: 24px;">Your ride has been completed!</h2>
+                    
+                            <p style="margin: 25px 0; font-size: 18px;">
+                                📍 %s
+                            </p>
+                    
+                            <div style="color: #4a4a4a; font-size: 16px; line-height: 1.5; margin-top: 30px;">
+                                <p>Thank you for using our services.</p>
+                                <p>Looking forward to another drive.</p>
+                            </div>
+                        </div>
+                    
+                        <div style="background-color: #121F4B; color: #ffffff; padding: 25px; margin-top: 40px; font-size: 14px;">
+                            Copyright © 2025 Visor Inc
+                        </div>
+                    </div>
+                    """.formatted(addressInfo);
 
             helper.setFrom(from);
             helper.setTo(to);

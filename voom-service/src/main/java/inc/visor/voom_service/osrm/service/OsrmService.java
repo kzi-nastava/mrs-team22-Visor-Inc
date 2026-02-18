@@ -1,12 +1,11 @@
 package inc.visor.voom_service.osrm.service;
 
-import java.util.List;
-import java.util.Map;
-
+import inc.visor.voom_service.osrm.dto.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import inc.visor.voom_service.osrm.dto.LatLng;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class OsrmService {

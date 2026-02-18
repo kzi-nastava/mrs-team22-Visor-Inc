@@ -13,16 +13,16 @@ public class RoutePointDto {
 
     private Integer orderIndex;
 
-    @NotNull(message="Latitude is required")
+    @NotNull(message = "Latitude is required")
     private Double lat;
 
-    @NotNull(message="Longitude is required")
+    @NotNull(message = "Longitude is required")
     private Double lng;
 
-    @NotBlank(message="Address is required")
+    @NotBlank(message = "Address is required")
     private String address;
 
-    @NotNull(message="Type is required")
+    @NotNull(message = "Type is required")
     private RoutePointType type;
 
     public RoutePointDto() {
