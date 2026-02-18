@@ -2,18 +2,22 @@ package inc.visor.voom_service.chat.controller;
 
 import inc.visor.voom_service.auth.dto.UserDto;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.chat.dto.ChatMessageDto;
 import inc.visor.voom_service.chat.dto.UserChatDto;
 import inc.visor.voom_service.chat.model.ChatMessage;
 import inc.visor.voom_service.chat.repository.ChatMessageRepository;
 import inc.visor.voom_service.chat.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +37,7 @@ public class ChatController {
     private final UserRepository userRepository;
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatMessage chatMessage) {
+    public void sendMessage(@Payload @Valid ChatMessage chatMessage) {
         chatMessage.setTimestamp(LocalDateTime.now());
         ChatMessage saved = repository.save(chatMessage);
 
@@ -74,7 +78,22 @@ public class ChatController {
     @GetMapping("/api/chat/history/{userEmail}/{partnerEmail}")
     public ResponseEntity<List<ChatMessageDto>> getChatHistory(
             @PathVariable String userEmail,
-            @PathVariable String partnerEmail) {
+            @PathVariable String partnerEmail,
+            @AuthenticationPrincipal VoomUserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User loggedInUser = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!loggedInUser.getUserRole().getRoleName().equals("ADMIN") && !loggedInUser.getEmail().equals(userEmail)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         return ResponseEntity.ok(repository.findConversationHistory(userEmail, partnerEmail).stream().map(cm -> {
             User sender = userRepository.findByEmail(cm.getSenderEmail()).orElse(null);
