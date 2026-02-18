@@ -3,7 +3,6 @@ package inc.visor.voom_service.vehicle.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -16,8 +15,6 @@ public class VehicleSummaryDto {
     @NotBlank(message = "Vehicle type is required")
     private String vehicleType;
 
-    @Min(value = 1900, message = "Year must be >= 1900")
-    @Max(value = 2100, message = "Year must be valid")
     private int year;
 
     @NotBlank(message = "Model is required")
@@ -35,7 +32,6 @@ public class VehicleSummaryDto {
     @Max(value = 20, message = "Too many seats")
     private int numberOfSeats;
 
-    @NotNull(message = "Driver id is required")
     private Long driverId;
 
     @PositiveOrZero(message = "Active hours must be >= 0")
