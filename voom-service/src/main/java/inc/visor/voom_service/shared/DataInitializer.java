@@ -137,7 +137,7 @@ public class DataInitializer implements ApplicationRunner {
         userRepository.save(user);
 
         seedTestRides();
-        seedUser3NonRatableRides();
+//        seedUser3NonRatableRides();
     }
 
     private void createUserRole(String name, Permission permission) {
