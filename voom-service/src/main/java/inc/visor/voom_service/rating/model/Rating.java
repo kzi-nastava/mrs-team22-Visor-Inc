@@ -2,6 +2,7 @@ package inc.visor.voom_service.rating.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.rating.validations.ValidRatingTime;
 import inc.visor.voom_service.ride.model.Ride;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
         }
 )
 @Data
+@ValidRatingTime
 public class Rating {
 
     @Id

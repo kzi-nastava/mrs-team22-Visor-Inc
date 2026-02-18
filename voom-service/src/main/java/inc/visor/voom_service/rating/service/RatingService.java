@@ -8,8 +8,11 @@ import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,6 +28,22 @@ public class RatingService {
 
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found"));
+
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+
+        if (ride.getFinishedAt() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ride is ratable only after it was finished"
+            );
+        }
+
+        if (ride.getFinishedAt().isBefore(threeDaysAgo)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Rating window expired. Rides can only be rated within 3 days"
+            );
+        }
 
         Rating rating = new Rating();
         rating.setRide(ride);
