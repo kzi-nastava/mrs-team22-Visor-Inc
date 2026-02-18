@@ -1,15 +1,14 @@
 package inc.visor.voom_service.ride.service;
 
-import java.util.Comparator;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.ride.dto.RideRequestCreateDto;
 import inc.visor.voom_service.ride.model.RideEstimationResult;
 import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.utils.GeoUtil;
 import inc.visor.voom_service.vehicle.model.VehicleType;
+import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class RideEstimateService {
@@ -29,9 +28,9 @@ public class RideEstimateService {
 
     public double calculateTotalDistance(List<RideRequestCreateDto.RoutePointDto> dto) {
         List<RideRequestCreateDto.RoutePointDto> points =
-            dto.stream()
-                .sorted(Comparator.comparingInt(p -> p.orderIndex))
-                .toList();
+                dto.stream()
+                        .sorted(Comparator.comparingInt(p -> p.orderIndex))
+                        .toList();
 
         double total = 0.0;
 
@@ -53,11 +52,11 @@ public class RideEstimateService {
     ) {
         List<RoutePointDto> points
                 = dto.stream()
-                        .sorted(Comparator.comparing(
-                                RoutePointDto::getOrderIndex,
-                                Comparator.nullsLast(Integer::compareTo)
-                        ))
-                        .toList();
+                .sorted(Comparator.comparing(
+                        RoutePointDto::getOrderIndex,
+                        Comparator.nullsLast(Integer::compareTo)
+                ))
+                .toList();
 
         double total = 0.0;
 

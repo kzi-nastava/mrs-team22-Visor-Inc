@@ -1,14 +1,14 @@
 package inc.visor.voom_service.osrm.dto;
 
+import inc.visor.voom_service.shared.RoutePointDto;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
-import inc.visor.voom_service.shared.RoutePointDto;
 
 public class ScheduledRideDto {
 
     public Long rideId;
-    
+
     public Long rideRequestId;
 
     public Long driverId;
@@ -21,7 +21,8 @@ public class ScheduledRideDto {
 
     public long creatorId;
 
-    public ScheduledRideDto() {}
+    public ScheduledRideDto() {
+    }
 
     public ScheduledRideDto(
             Long rideId,

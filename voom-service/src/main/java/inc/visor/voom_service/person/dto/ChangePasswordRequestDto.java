@@ -7,20 +7,21 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @PasswordMatch(message = "New password and confirm password do not match")
-public class ChangePasswordRequestDto implements  PasswordConfirmable{
+public class ChangePasswordRequestDto implements PasswordConfirmable {
 
     @NotBlank(message = "New password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(
-        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
-        message = "Password must contain uppercase, lowercase letter and number"
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
+            message = "Password must contain uppercase, lowercase letter and number"
     )
     private String newPassword;
 
     @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
 
-    public ChangePasswordRequestDto() {}
+    public ChangePasswordRequestDto() {
+    }
 
     @Override
     public String getPassword() {

@@ -3,20 +3,18 @@ package inc.visor.voom_service.vehicle.controller;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
 import inc.visor.voom_service.exception.NotFoundException;
+import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.vehicle.dto.CreateVehicleDto;
 import inc.visor.voom_service.vehicle.dto.VehicleDto;
 import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleService;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
-
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import inc.visor.voom_service.mail.EmailService;
 
 @RestController
 @RequestMapping("api/vehicles")

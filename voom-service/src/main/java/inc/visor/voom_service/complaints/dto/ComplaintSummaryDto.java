@@ -1,7 +1,6 @@
 package inc.visor.voom_service.complaints.dto;
 
 import inc.visor.voom_service.auth.user.dto.UserProfileDto;
-import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.complaints.model.Complaint;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,16 +1,5 @@
 package inc.visor.voom_service.driver.service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.activation.model.ActivationToken;
 import inc.visor.voom_service.activation.service.ActivationTokenService;
 import inc.visor.voom_service.auth.user.model.User;
@@ -21,11 +10,7 @@ import inc.visor.voom_service.auth.user.repository.UserRoleRepository;
 import inc.visor.voom_service.driver.dto.CreateDriverDto;
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.dto.VehicleChangeRequestStatus;
-import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.model.DriverState;
-import inc.visor.voom_service.driver.model.DriverStateChange;
-import inc.visor.voom_service.driver.model.DriverStatus;
-import inc.visor.voom_service.driver.model.DriverVehicleChangeRequest;
+import inc.visor.voom_service.driver.model.*;
 import inc.visor.voom_service.driver.repository.DriverRepository;
 import inc.visor.voom_service.driver.repository.DriverVehicleChangeRequestRepository;
 import inc.visor.voom_service.mail.EmailService;
@@ -47,6 +32,12 @@ import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class DriverService {
@@ -87,11 +78,9 @@ public class DriverService {
         // 2. call external api to get route and waypoints between these two
         // 3. update position for each waypoint that api returns
         // 4. broadcast update
-        return;
     }
 
     public void reportDriver(Long driverId, Long userId, String comment) {
-        return;
     }
 
     public Driver create(Driver driver) {
@@ -132,7 +121,7 @@ public class DriverService {
 
         VehicleType vehicleType
                 = vehicleTypeRepository.findByType(request.getVehicleType())
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle type"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid vehicle type"));
 
         vehicle.setModel(request.getModel());
         vehicle.setLicensePlate(request.getLicensePlate());
@@ -164,9 +153,9 @@ public class DriverService {
 
         Optional<DriverVehicleChangeRequest> existing
                 = changeRequestRepository.findByDriverIdAndStatus(
-                        driver.getId(),
-                        VehicleChangeRequestStatus.PENDING
-                );
+                driver.getId(),
+                VehicleChangeRequestStatus.PENDING
+        );
 
         if (existing.isPresent()) {
             throw new IllegalStateException("You already have a pending vehicle update request.");
@@ -198,29 +187,29 @@ public class DriverService {
         String androidLink = "voom://vehicle-requests/" + changeRequest.getId();
 
         String body = """
-        <div style="font-family: Arial, sans-serif;">
-            <h2>Vehicle Change Request</h2>
-
-            <p><strong>Driver:</strong> %s</p>
-            <p><strong>Model:</strong> %s</p>
-            <p><strong>License Plate:</strong> %s</p>
-            <p><strong>Seats:</strong> %d</p>
-            <p><strong>Baby Seat:</strong> %s</p>
-            <p><strong>Pet Friendly:</strong> %s</p>
-
-            <br>
-
-            <p>
-                🌐 Open in Web:
-                <a href="%s">%s</a>
-            </p>
-
-            <p>
-                📱 Open in Android App:
-                <a href="%s">%s</a>
-            </p>
-        </div>
-        """.formatted(
+                <div style="font-family: Arial, sans-serif;">
+                    <h2>Vehicle Change Request</h2>
+                
+                    <p><strong>Driver:</strong> %s</p>
+                    <p><strong>Model:</strong> %s</p>
+                    <p><strong>License Plate:</strong> %s</p>
+                    <p><strong>Seats:</strong> %d</p>
+                    <p><strong>Baby Seat:</strong> %s</p>
+                    <p><strong>Pet Friendly:</strong> %s</p>
+                
+                    <br>
+                
+                    <p>
+                        🌐 Open in Web:
+                        <a href="%s">%s</a>
+                    </p>
+                
+                    <p>
+                        📱 Open in Android App:
+                        <a href="%s">%s</a>
+                    </p>
+                </div>
+                """.formatted(
                 fullName,
                 request.getModel(),
                 request.getLicensePlate(),
@@ -299,47 +288,47 @@ public class DriverService {
         String subject = "Activate your Voom Driver Account";
 
         String body = """
-<div style="font-family: Arial, sans-serif; padding: 16px;">
-    <h2>Welcome to Voom 🚗</h2>
-
-    <p>Your driver account has been successfully created.</p>
-
-    <p>Please activate your account using one of the options below:</p>
-
-    <div style="margin-top: 20px; margin-bottom: 20px;">
-        <p><strong>🌐 Activate via Web:</strong></p>
-        <a href="%s"
-           style="display:inline-block;
-                  padding:10px 16px;
-                  background-color:#1976d2;
-                  color:white;
-                  text-decoration:none;
-                  border-radius:6px;">
-            Activate on Web
-        </a>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <p><strong>📱 Activate via Mobile App:</strong></p>
-        <a href="%s"
-           style="display:inline-block;
-                  padding:10px 16px;
-                  background-color:#2e7d32;
-                  color:white;
-                  text-decoration:none;
-                  border-radius:6px;">
-            Open in Voom App
-        </a>
-    </div>
-
-    <br/>
-
-    <p>If the buttons do not work, you can copy the links below:</p>
-
-    <p>Web: %s</p>
-    <p>Mobile: %s</p>
-</div>
-""".formatted(
+                <div style="font-family: Arial, sans-serif; padding: 16px;">
+                    <h2>Welcome to Voom 🚗</h2>
+                
+                    <p>Your driver account has been successfully created.</p>
+                
+                    <p>Please activate your account using one of the options below:</p>
+                
+                    <div style="margin-top: 20px; margin-bottom: 20px;">
+                        <p><strong>🌐 Activate via Web:</strong></p>
+                        <a href="%s"
+                           style="display:inline-block;
+                                  padding:10px 16px;
+                                  background-color:#1976d2;
+                                  color:white;
+                                  text-decoration:none;
+                                  border-radius:6px;">
+                            Activate on Web
+                        </a>
+                    </div>
+                
+                    <div style="margin-top: 20px;">
+                        <p><strong>📱 Activate via Mobile App:</strong></p>
+                        <a href="%s"
+                           style="display:inline-block;
+                                  padding:10px 16px;
+                                  background-color:#2e7d32;
+                                  color:white;
+                                  text-decoration:none;
+                                  border-radius:6px;">
+                            Open in Voom App
+                        </a>
+                    </div>
+                
+                    <br/>
+                
+                    <p>If the buttons do not work, you can copy the links below:</p>
+                
+                    <p>Web: %s</p>
+                    <p>Mobile: %s</p>
+                </div>
+                """.formatted(
                 webLink,
                 mobileLink,
                 webLink,
@@ -435,9 +424,9 @@ public class DriverService {
         return rideService.findActiveRides(driver.getId())
                 .stream()
                 .anyMatch(r -> Duration.between(
-                LocalDateTime.now(),
-                rideService.estimateRideEndTime(r)
-        ).toMinutes() <= 10);
+                        LocalDateTime.now(),
+                        rideService.estimateRideEndTime(r)
+                ).toMinutes() <= 10);
     }
 
     private boolean isDriverOverWorked(Driver driver) {
@@ -461,11 +450,7 @@ public class DriverService {
             return false;
         }
 
-        if (vehicle.getNumberOfSeats() < req.getLinkedPassengerEmails().size() + 1) {
-            return false;
-        }
-
-        return true;
+        return vehicle.getNumberOfSeats() >= req.getLinkedPassengerEmails().size() + 1;
     }
 
     public ActiveRideDto getActiveRide(Long userId) {

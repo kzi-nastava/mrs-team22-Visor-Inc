@@ -1,9 +1,9 @@
 package inc.visor.voom_service.osrm.dto;
 
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.shared.RoutePointDto;
+
+import java.util.List;
 
 public class DriverAssignedDto {
 

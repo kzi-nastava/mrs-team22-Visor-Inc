@@ -12,10 +12,10 @@ import java.util.List;
 @Setter
 public class RouteEstimateRequestDto {
 
-  @NotNull(message = "Route points are required")
-  @Size(min = 2, max = 10, message = "There must be between 2 and 10 points")
-  private List<RoutePointDto> routePoints;
+    @NotNull(message = "Route points are required")
+    @Size(min = 2, max = 10, message = "There must be between 2 and 10 points")
+    private List<RoutePointDto> routePoints;
 
-  public RouteEstimateRequestDto() {
-  }
+    public RouteEstimateRequestDto() {
+    }
 }

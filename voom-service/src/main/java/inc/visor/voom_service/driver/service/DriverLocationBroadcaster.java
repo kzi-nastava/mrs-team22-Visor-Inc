@@ -5,9 +5,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class DriverLocationBroadcaster {
 
@@ -32,7 +29,6 @@ public class DriverLocationBroadcaster {
         DriverLocationDto dto = new DriverLocationDto();
         messagingTemplate.convertAndSend("/topic/drivers/locations", dto);
     }
-
 
 
 }

@@ -1,15 +1,5 @@
 package inc.visor.voom_service.ride.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import inc.visor.voom_service.ride.model.enums.Column;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.driver.model.Driver;
@@ -17,10 +7,10 @@ import inc.visor.voom_service.driver.model.DriverStatus;
 import inc.visor.voom_service.mail.EmailService;
 import inc.visor.voom_service.ride.dto.ActiveRideDto;
 import inc.visor.voom_service.ride.dto.RideLocationDto;
-import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.RideRequest;
 import inc.visor.voom_service.ride.model.RoutePoint;
+import inc.visor.voom_service.ride.model.enums.Column;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.model.enums.Sorting;
@@ -29,6 +19,16 @@ import inc.visor.voom_service.route.service.RideRouteService;
 import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
 import inc.visor.voom_service.shared.notification.service.NotificationService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static inc.visor.voom_service.ride.helpers.RideHistoryFormatter.formatAddress;
 
 @Service
 public class RideService {
@@ -49,12 +49,10 @@ public class RideService {
 
     public void updateRidePosition(RideLocationDto dto) {
         // get and set position
-        return;
     }
 
     public void finishRide(Ride ride) {
         // set status
-        return;
     }
 
     public Optional<Ride> getRide(long rideId) {
@@ -118,7 +116,7 @@ public class RideService {
                     final boolean matchesStart = (start == null) || !started.isBefore(start);
                     final boolean matchesEnd = (end == null) || !started.isAfter(end);
                     return matchesStart && matchesEnd;
-                }).sorted(applySorting(getComparator(column),sort)).collect(Collectors.toList());
+                }).sorted(applySorting(getComparator(column), sort)).collect(Collectors.toList());
     }
 
     private Comparator<Ride> getComparator(Column column) {
@@ -204,8 +202,8 @@ public class RideService {
 
         long durationMinutes
                 = routeService.estimateDurationInMinutes(
-                        ride.getRideRequest().getRideRoute().getTotalDistanceKm()
-                );
+                ride.getRideRequest().getRideRoute().getTotalDistanceKm()
+        );
 
         return start.plusMinutes(durationMinutes);
     }
@@ -332,10 +330,10 @@ public class RideService {
         }
 
         User creator = ride.getRideRequest().getCreator();
-        notificationService.createAndSendNotification(creator, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
+        notificationService.createAndSendNotification(creator, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete.", rideId);
 
         for (User passenger : ride.getPassengers()) {
-            notificationService.createAndSendNotification(passenger, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete." ,rideId);
+            notificationService.createAndSendNotification(passenger, NotificationType.RIDE_FINISHED, "Ride finished", "Your ride has been marked as complete.", rideId);
         }
     }
 

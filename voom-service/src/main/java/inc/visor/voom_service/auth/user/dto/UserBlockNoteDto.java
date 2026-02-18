@@ -1,12 +1,11 @@
 package inc.visor.voom_service.auth.user.dto;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import inc.visor.voom_service.auth.user.model.UserBlockNote;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,7 +22,8 @@ public class UserBlockNoteDto {
 
     private boolean active;
 
-    public UserBlockNoteDto() {}
+    public UserBlockNoteDto() {
+    }
 
     public UserBlockNoteDto(UserBlockNote note) {
         this.id = note.getId();

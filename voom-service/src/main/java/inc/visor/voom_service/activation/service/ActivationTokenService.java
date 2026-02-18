@@ -1,15 +1,14 @@
 package inc.visor.voom_service.activation.service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.activation.model.ActivationToken;
 import inc.visor.voom_service.activation.repository.ActivationTokenRepository;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.service.UserService;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class ActivationTokenService {

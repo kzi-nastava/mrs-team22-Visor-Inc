@@ -7,12 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateDriverResponseDto {
-    
+
     private Long id;
     private String email;
     private DriverAccountStatus status;
 
-    public CreateDriverResponseDto() {};
+    public CreateDriverResponseDto() {
+    }
 
     public CreateDriverResponseDto(Long id, String email, DriverAccountStatus status) {
         this.id = id;

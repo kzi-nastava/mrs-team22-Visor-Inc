@@ -1,8 +1,6 @@
 package inc.visor.voom_service.driver.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.driver.model.DriverState;
 import inc.visor.voom_service.driver.model.DriverStateChange;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

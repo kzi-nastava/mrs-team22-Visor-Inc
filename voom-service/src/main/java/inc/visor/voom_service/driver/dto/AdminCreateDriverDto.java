@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AdminCreateDriverDto {
-  @NotNull(message = "User id cannot be null")
-  private long userId;
+    @NotNull(message = "User id cannot be null")
+    private long userId;
 
-  public AdminCreateDriverDto() {
-  }
+    public AdminCreateDriverDto() {
+    }
 }

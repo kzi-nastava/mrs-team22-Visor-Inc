@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test/mail")
 public class MailTestController {
 
-  private final EmailService emailService;
+    private final EmailService emailService;
 
-  public MailTestController(EmailService emailService) {
-    this.emailService = emailService;
-  }
+    public MailTestController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
-  @PostMapping
-  public ResponseEntity<Void> send(@RequestParam String to) {
-    emailService.sendTestMail(to);
-    return ResponseEntity.ok().build();
-  }
+    @PostMapping
+    public ResponseEntity<Void> send(@RequestParam String to) {
+        emailService.sendTestMail(to);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -2,7 +2,6 @@ package inc.visor.voom_service.ride.service;
 
 import inc.visor.voom_service.ride.dto.RideLocationDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -21,5 +21,6 @@ public class CreateDriverDto {
 
     private CreateVehicleDto vehicle;
 
-    public CreateDriverDto() {}
+    public CreateDriverDto() {
+    }
 }

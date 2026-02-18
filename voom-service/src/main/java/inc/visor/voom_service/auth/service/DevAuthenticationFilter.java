@@ -1,7 +1,11 @@
 package inc.visor.voom_service.auth.service;
 
-import java.util.Set;
-
+import inc.visor.voom_service.auth.user.model.*;
+import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,16 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import inc.visor.voom_service.auth.user.model.Permission;
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.UserRole;
-import inc.visor.voom_service.auth.user.model.UserStatus;
-import inc.visor.voom_service.auth.user.model.VoomUserDetails;
-import io.jsonwebtoken.io.IOException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 @Component
 @Order(1)
@@ -43,10 +38,10 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken auth
                         = new UsernamePasswordAuthenticationToken(
-                                fakeUserDetails,
-                                null,
-                                fakeUserDetails.getAuthorities()
-                        );
+                        fakeUserDetails,
+                        null,
+                        fakeUserDetails.getAuthorities()
+                );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

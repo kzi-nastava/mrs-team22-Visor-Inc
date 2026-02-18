@@ -1,14 +1,13 @@
 package inc.visor.voom_service.osrm.service;
 
-import java.util.List;
-
+import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
+import inc.visor.voom_service.osrm.dto.ScheduledRideDto;
 import inc.visor.voom_service.ride.dto.RideResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import inc.visor.voom_service.osrm.dto.DriverAssignedDto;
-import inc.visor.voom_service.osrm.dto.ScheduledRideDto;
+import java.util.List;
 
 @Slf4j
 @Service

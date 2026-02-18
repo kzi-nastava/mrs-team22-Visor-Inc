@@ -1,12 +1,5 @@
 package inc.visor.voom_service.job.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.osrm.dto.ScheduledRideDto;
 import inc.visor.voom_service.osrm.service.RideWsService;
 import inc.visor.voom_service.ride.model.Ride;
@@ -18,6 +11,12 @@ import inc.visor.voom_service.shared.RoutePointDto;
 import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
 import inc.visor.voom_service.shared.notification.service.NotificationService;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ScheduledRideJob {

@@ -1,10 +1,9 @@
 package inc.visor.voom_service.ride.repository;
 
-import java.util.List;
-
+import inc.visor.voom_service.ride.model.FavoriteRoute;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import inc.visor.voom_service.ride.model.FavoriteRoute;
+import java.util.List;
 
 public interface FavoriteRouteRepository extends JpaRepository<FavoriteRoute, Long> {
 

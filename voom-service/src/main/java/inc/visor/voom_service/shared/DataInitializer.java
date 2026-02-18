@@ -1,17 +1,5 @@
 package inc.visor.voom_service.shared;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Set;
-
-import inc.visor.voom_service.ride.model.enums.RoutePointType;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
 import inc.visor.voom_service.auth.user.model.Permission;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserRole;
@@ -33,6 +21,7 @@ import inc.visor.voom_service.ride.model.RideRoute;
 import inc.visor.voom_service.ride.model.RoutePoint;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
+import inc.visor.voom_service.ride.model.enums.RoutePointType;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.ride.repository.RideRepository;
 import inc.visor.voom_service.ride.repository.RideRequestRepository;
@@ -41,12 +30,29 @@ import inc.visor.voom_service.vehicle.model.Vehicle;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.repository.VehicleRepository;
 import inc.visor.voom_service.vehicle.repository.VehicleTypeRepository;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Set;
 
 @Order(1)
 @Component
 @Profile({"dev", "local"})
 public class DataInitializer implements ApplicationRunner {
 
+    private static final double[][] ROUTES = {
+            {45.2458, 19.8529, 45.2556, 19.8449}, // Liman → Centar
+            {45.2429, 19.8434, 45.2472, 19.8372}, // Liman → Spens
+            {45.2384, 19.8049, 45.2441, 19.8586}, // Telep → Liman
+            {45.2701, 19.8617, 45.2549, 19.8463}, // Podbara → Centar
+            {45.2813, 19.8418, 45.2471, 19.8733}, // Klisa → Petrovaradin
+    };
     private final UserRoleRepository userRoleRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
     private final UserRepository userRepository;
@@ -228,16 +234,11 @@ public class DataInitializer implements ApplicationRunner {
 
     private String getVehicleModel(int i) {
         return switch (i % 5) {
-            case 0 ->
-                "Toyota Corolla";
-            case 1 ->
-                "Volkswagen Passat";
-            case 2 ->
-                "Skoda Octavia";
-            case 3 ->
-                "BMW 320d";
-            default ->
-                "Mercedes C200";
+            case 0 -> "Toyota Corolla";
+            case 1 -> "Volkswagen Passat";
+            case 2 -> "Skoda Octavia";
+            case 3 -> "BMW 320d";
+            default -> "Mercedes C200";
         };
     }
 
@@ -365,16 +366,6 @@ public class DataInitializer implements ApplicationRunner {
 
         return ride;
     }
-
-
-
-    private static final double[][] ROUTES = {
-        {45.2458, 19.8529, 45.2556, 19.8449}, // Liman → Centar
-        {45.2429, 19.8434, 45.2472, 19.8372}, // Liman → Spens
-        {45.2384, 19.8049, 45.2441, 19.8586}, // Telep → Liman
-        {45.2701, 19.8617, 45.2549, 19.8463}, // Podbara → Centar
-        {45.2813, 19.8418, 45.2471, 19.8733}, // Klisa → Petrovaradin
-    };
 
     private double calculateDistanceKm(
             double lat1, double lon1,
