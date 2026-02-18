@@ -1,14 +1,5 @@
 package inc.visor.voom_service.ride.service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.service.UserService;
@@ -38,6 +29,14 @@ import inc.visor.voom_service.shared.notification.service.NotificationService;
 import inc.visor.voom_service.simulation.Simulator;
 import inc.visor.voom_service.vehicle.model.VehicleType;
 import inc.visor.voom_service.vehicle.service.VehicleTypeService;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class RideRequestService {
@@ -129,8 +128,8 @@ public class RideRequestService {
         ride.setRideRequest(rideRequest);
         ride.setStatus(
                 rideRequest.getScheduleType() == ScheduleType.LATER
-                ? RideStatus.SCHEDULED
-                : RideStatus.ONGOING
+                        ? RideStatus.SCHEDULED
+                        : RideStatus.ONGOING
         );
         ride.setDriver(driver);
 

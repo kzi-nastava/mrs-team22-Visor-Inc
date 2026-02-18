@@ -1,10 +1,9 @@
 package inc.visor.voom_service.shared.notification.repository;
 
-import java.util.List;
-
+import inc.visor.voom_service.shared.notification.model.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import inc.visor.voom_service.shared.notification.model.Notification;
+import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 

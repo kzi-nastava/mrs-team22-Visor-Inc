@@ -1,14 +1,11 @@
 package inc.visor.voom_service.simulation;
 
+import inc.visor.voom_service.osrm.dto.LatLng;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import inc.visor.voom_service.osrm.dto.LatLng;
-
 @Component
 public class SimulationPublisher {
-
-    private record LocationDto(long driverId, double lat, double lng, boolean finished, int eta) {}
 
     private final SimpMessagingTemplate messaging;
 
@@ -21,6 +18,9 @@ public class SimulationPublisher {
                 "/topic/drivers-positions",
                 new LocationDto(driverId, pos.lat(), pos.lng(), finished, eta)
         );
+    }
+
+    private record LocationDto(long driverId, double lat, double lng, boolean finished, int eta) {
     }
 }
 

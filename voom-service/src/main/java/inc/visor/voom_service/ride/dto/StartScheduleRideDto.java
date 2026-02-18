@@ -6,7 +6,8 @@ public class StartScheduleRideDto {
     private Double lat;
     private Double lng;
 
-    public StartScheduleRideDto() {  }
+    public StartScheduleRideDto() {
+    }
 
     public Long getDriverId() {
         return driverId;
@@ -31,5 +32,5 @@ public class StartScheduleRideDto {
     public void setLng(Double lng) {
         this.lng = lng;
     }
-    
+
 }

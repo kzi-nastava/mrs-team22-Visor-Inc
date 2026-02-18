@@ -17,16 +17,16 @@ public class Permission implements GrantedAuthority {
     @Column(name = "permission_name", unique = true, nullable = false)
     private String permissionName;
 
-    @Override
-    public String getAuthority() {
-        return permissionName;
-    }
-
     public Permission() {
     }
 
     public Permission(String permissionName) {
         this.permissionName = permissionName;
+    }
+
+    @Override
+    public String getAuthority() {
+        return permissionName;
     }
 
     public long getId() {

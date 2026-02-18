@@ -1,12 +1,12 @@
 package inc.visor.voom_service.ride.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -44,12 +44,12 @@ public class RideResponseDto {
     }
 
     public RideResponseDto(
-        Long id,
-        RideStatus status,
-        LocalDateTime startedAt,
-        LocalDateTime finishedAt,
-        String driverName,
-        String passengerName
+            Long id,
+            RideStatus status,
+            LocalDateTime startedAt,
+            LocalDateTime finishedAt,
+            String driverName,
+            String passengerName
     ) {
         this.id = id;
         this.status = status;

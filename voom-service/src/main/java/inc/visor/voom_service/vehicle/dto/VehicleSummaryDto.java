@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VehicleSummaryDto {
-    
+
     private String vehicleType;
     private int year;
     private String model;
@@ -40,6 +40,7 @@ public class VehicleSummaryDto {
         this.driverId = driverId;
     }
 
-    public VehicleSummaryDto() {}
+    public VehicleSummaryDto() {
+    }
 
 }

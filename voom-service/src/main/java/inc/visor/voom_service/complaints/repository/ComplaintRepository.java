@@ -9,6 +9,7 @@ public interface ComplaintRepository
         extends JpaRepository<Complaint, Long> {
 
     List<Complaint> findByRideId(Long rideId);
+
     List<Complaint> findByRide_Driver_Id(Long driverId);
 }
 

@@ -1,6 +1,5 @@
 package inc.visor.voom_service.chat.controller;
 
-import inc.visor.voom_service.auth.dto.UserDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.chat.dto.ChatMessageDto;
@@ -8,7 +7,6 @@ import inc.visor.voom_service.chat.dto.UserChatDto;
 import inc.visor.voom_service.chat.model.ChatMessage;
 import inc.visor.voom_service.chat.repository.ChatMessageRepository;
 import inc.visor.voom_service.chat.service.ChatService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -42,8 +40,7 @@ public class ChatController {
         ChatMessageDto dto;
         if (sender != null) {
             dto = new ChatMessageDto(saved, sender.getPerson().getFirstName(), sender.getPerson().getLastName());
-        }
-        else {
+        } else {
             dto = new ChatMessageDto(saved, "Unknown", "Unknown");
         }
 
@@ -63,8 +60,7 @@ public class ChatController {
             ChatMessageDto dto;
             if (sender != null) {
                 dto = new ChatMessageDto(cm, sender.getPerson().getFirstName(), sender.getPerson().getLastName());
-            }
-            else {
+            } else {
                 dto = new ChatMessageDto(cm, "Unknown", "Unknown");
             }
             return dto;
@@ -81,8 +77,7 @@ public class ChatController {
             ChatMessageDto dto;
             if (sender != null) {
                 dto = new ChatMessageDto(cm, sender.getPerson().getFirstName(), sender.getPerson().getLastName());
-            }
-            else {
+            } else {
                 dto = new ChatMessageDto(cm, "Unknown", "Unknown");
             }
             return dto;

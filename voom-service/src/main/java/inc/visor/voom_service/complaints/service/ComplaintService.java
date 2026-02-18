@@ -2,10 +2,10 @@ package inc.visor.voom_service.complaints.service;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.service.UserService;
-import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.complaints.model.Complaint;
 import inc.visor.voom_service.complaints.repository.ComplaintRepository;
+import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.ride.model.Ride;
 import inc.visor.voom_service.ride.service.RideService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

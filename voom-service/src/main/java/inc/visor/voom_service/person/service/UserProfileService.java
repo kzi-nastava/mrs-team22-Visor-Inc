@@ -1,8 +1,5 @@
 package inc.visor.voom_service.person.service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import inc.visor.voom_service.person.dto.ChangePasswordRequestDto;
@@ -11,6 +8,8 @@ import inc.visor.voom_service.person.dto.UserProfileResponseDto;
 import inc.visor.voom_service.person.model.Person;
 import inc.visor.voom_service.person.repository.PersonRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserProfileService {
@@ -27,7 +26,7 @@ public class UserProfileService {
 
     public UserProfileResponseDto getProfile(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(() -> new IllegalStateException("User not found"));
 
         Person person = user.getPerson();
 
@@ -43,14 +42,14 @@ public class UserProfileService {
 
     @Transactional
     public UserProfileResponseDto updateProfile(
-        User user,
-        UpdateUserProfileRequestDto request
+            User user,
+            UpdateUserProfileRequestDto request
     ) {
         UserProfileResponseDto response = new UserProfileResponseDto(
-            request.getFirstName(),
-            request.getLastName(),
-            request.getPhoneNumber(),
-            request.getAddress()
+                request.getFirstName(),
+                request.getLastName(),
+                request.getPhoneNumber(),
+                request.getAddress()
         );
 
         Person person = user.getPerson();
@@ -67,14 +66,14 @@ public class UserProfileService {
 
     @Transactional
     public void changePassword(
-        Long userId,
-        ChangePasswordRequestDto request
+            Long userId,
+            ChangePasswordRequestDto request
     ) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(() -> new IllegalStateException("User not found"));
 
         user.setPassword(
-            passwordEncoder.encode(request.getPassword())
+                passwordEncoder.encode(request.getPassword())
         );
 
         userRepository.save(user);

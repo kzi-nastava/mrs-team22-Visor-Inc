@@ -1,14 +1,13 @@
 package inc.visor.voom_service.ride.repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
+import inc.visor.voom_service.ride.model.Ride;
+import inc.visor.voom_service.ride.model.enums.RideStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import inc.visor.voom_service.ride.model.Ride;
-import inc.visor.voom_service.ride.model.enums.RideStatus;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RideRepository extends JpaRepository<Ride, Long> {

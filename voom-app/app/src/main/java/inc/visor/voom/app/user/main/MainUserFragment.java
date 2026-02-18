@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -80,17 +81,36 @@ public class MainUserFragment extends Fragment {
             }
 
             if (id == R.id.nav_services) {
-                NavOptions navOptions = new NavOptions.Builder()
-                        .setPopUpTo(R.id.userRideTrackingFragment, true)
-                        .build();
-
-                navController.navigate(R.id.userRideTrackingFragment, null, navOptions);
+                showInsightsSheet(navController);
                 return true;
             }
 
             return false;
         });
 
+    }
+
+    private void showInsightsSheet(NavController navController) {
+
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View sheetView = getLayoutInflater()
+                .inflate(R.layout.bottom_sheet_rides, null);
+
+        dialog.setContentView(sheetView);
+
+        sheetView.findViewById(R.id.btn_live)
+                .setOnClickListener(v -> {
+                    dialog.dismiss();
+                    navController.navigate(R.id.userRideTrackingFragment);
+                });
+
+        sheetView.findViewById(R.id.btn_scheduled)
+                .setOnClickListener(v -> {
+                    dialog.dismiss();
+                    navController.navigate(R.id.scheduledRidesFragment);
+                });
+
+        dialog.show();
     }
 
 

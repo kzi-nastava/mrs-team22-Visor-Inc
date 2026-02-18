@@ -1,9 +1,8 @@
 package inc.visor.voom_service.route.service;
 
 import inc.visor.voom_service.ride.model.RideRoute;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.route.repository.RideRouteRepository;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RideRouteService {

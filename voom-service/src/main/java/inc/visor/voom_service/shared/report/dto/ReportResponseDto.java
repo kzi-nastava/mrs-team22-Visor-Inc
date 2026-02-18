@@ -16,11 +16,11 @@ public class ReportResponseDto {
     }
 
     public ReportResponseDto(
-        List<ReportDailyStatsDto> dailyStats,
-        long totalRides,
-        double totalMoney,
-        double totalKm,
-        double averageMoneyPerDay
+            List<ReportDailyStatsDto> dailyStats,
+            long totalRides,
+            double totalMoney,
+            double totalKm,
+            double averageMoneyPerDay
     ) {
         this.dailyStats = dailyStats;
         this.totalMoney = totalMoney;
@@ -29,12 +29,12 @@ public class ReportResponseDto {
         this.averageMoneyPerDay = averageMoneyPerDay;
     }
 
-    public void setDailyStats(List<ReportDailyStatsDto> dailyStats) {
-        this.dailyStats = dailyStats;
-    }
-
     public List<ReportDailyStatsDto> getDailyStats() {
         return dailyStats;
+    }
+
+    public void setDailyStats(List<ReportDailyStatsDto> dailyStats) {
+        this.dailyStats = dailyStats;
     }
 
     public double getTotalMoney() {

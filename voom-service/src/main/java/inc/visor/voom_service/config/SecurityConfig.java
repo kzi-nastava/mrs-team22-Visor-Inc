@@ -1,5 +1,6 @@
 package inc.visor.voom_service.config;
 
+import inc.visor.voom_service.auth.service.DevAuthenticationFilter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
-
-import inc.visor.voom_service.auth.service.DevAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -36,29 +35,32 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsFilter corsFilter) throws Exception {
 
         http.addFilter(corsFilter)
-            .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable);
 
         DevAuthenticationFilter devFilter = devFilterProvider.getIfAvailable();
         JwtFilter jwtFilter = jwtFilterProvider.getIfAvailable();
 
         if (devFilter != null) {
             http.addFilterBefore(devFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
             return http.build();
         }
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/error").permitAll()
-                .anyRequest().authenticated()
-        )
-        .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        )
-        .authenticationProvider(authenticationProvider);
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationProvider(authenticationProvider);
 
         if (jwtFilter != null) {
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
