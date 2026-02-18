@@ -7,8 +7,9 @@ public class UserProfileResponseDto {
     private String lastName;
     private String phoneNumber;
     private String address;
-    
-    public UserProfileResponseDto() {};
+
+    public UserProfileResponseDto() {
+    }
 
     public UserProfileResponseDto(String email, String firstName, String lastName, String phoneNumber, String address) {
         this.email = email;

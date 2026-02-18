@@ -1,27 +1,14 @@
 package inc.visor.voom_service.ride.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.ride.model.enums.RideRequestStatus;
 import inc.visor.voom_service.ride.model.enums.ScheduleType;
 import inc.visor.voom_service.vehicle.model.VehicleType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ride_request")
@@ -67,8 +54,8 @@ public class RideRequest {
 
     @ElementCollection
     @CollectionTable(
-        name = "ride_request_linked_passengers",
-        joinColumns = @JoinColumn(name = "ride_request_id")
+            name = "ride_request_linked_passengers",
+            joinColumns = @JoinColumn(name = "ride_request_id")
     )
     @Column(name = "email", nullable = false)
     private List<String> linkedPassengerEmails;
@@ -80,6 +67,7 @@ public class RideRequest {
     @Column(name = "cancellation_reason", nullable = true)
     private String reason;
 
-    public RideRequest() {}
+    public RideRequest() {
+    }
 
 }

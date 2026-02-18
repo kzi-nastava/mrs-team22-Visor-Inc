@@ -1,3 +1,4 @@
 package inc.visor.voom_service.exception;
 
-public class RideScheduleTooLateException extends RuntimeException {}
+public class RideScheduleTooLateException extends RuntimeException {
+}

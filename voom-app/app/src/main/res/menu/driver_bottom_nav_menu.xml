@@ -6,9 +6,9 @@
         android:title="@string/nav_home"/>
 
     <item
-        android:id="@+id/nav_services"
-        android:icon="@drawable/browse_activity"
-        android:title="@string/nav_tracking"/>
+        android:id="@+id/nav_scheduled"
+        android:icon="@drawable/schedule_clock"
+        android:title="@string/nav_scheduled"/>
 
     <item
         android:id="@+id/nav_statistics"

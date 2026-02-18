@@ -7,11 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RideCancellationDto {
-  @NotNull(message = "User id cannot be null")
-  private long userId;
-  private String message;
+    @NotNull(message = "User id cannot be null")
+    private long userId;
+    private String message;
 
-  RideCancellationDto() {}
+    RideCancellationDto() {
+    }
 
 
 }

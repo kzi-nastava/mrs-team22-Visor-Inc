@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 
 import inc.visor.voom.app.R;
 import inc.visor.voom.app.network.RetrofitClient;
+import inc.visor.voom.app.shared.DataStoreManager;
 import inc.visor.voom.app.shared.api.RideApi;
 import inc.visor.voom.app.shared.dto.OsrmResponse;
 import inc.visor.voom.app.shared.dto.RideHistoryDto;
@@ -73,6 +75,7 @@ public class RideHistoryDialog extends DialogFragment {
     private RouteRepository routeRepository;
     private MapView mapView;
     private MapRendererService mapRenderer;
+    private LinearLayout scheduleLayout;
 
     public static RideHistoryDialog newInstance(RideHistoryDto ride) {
         RideHistoryDialog fragment = new RideHistoryDialog();
@@ -129,6 +132,12 @@ public class RideHistoryDialog extends DialogFragment {
         etScheduledTime = view.findViewById(R.id.et_scheduled_time);
         btnScheduleRide = view.findViewById(R.id.btnScheduleRide);
         mapView = view.findViewById(R.id.map);
+
+        scheduleLayout = view.findViewById(R.id.scheduleLinearLayout);
+
+        if (DataStoreManager.getInstance().getUserRole().blockingGet().equals("ADMIN")) {
+            scheduleLayout.setVisibility(View.GONE);
+        }
 
         mapView.getController().setZoom(14.0);
         mapView.getController().setCenter(new GeoPoint(45.2396, 19.8227));

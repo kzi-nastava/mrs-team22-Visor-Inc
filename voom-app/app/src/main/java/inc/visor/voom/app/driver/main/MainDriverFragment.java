@@ -53,7 +53,7 @@ public class MainDriverFragment extends Fragment {
                 return true;
             }
 
-            if (id == R.id.nav_services) {
+            if (id == R.id.nav_scheduled) {
                 navController.navigate(R.id.driverScheduledRidesFragment);
                 return true;
             }

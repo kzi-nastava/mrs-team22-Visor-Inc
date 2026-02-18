@@ -1,9 +1,9 @@
 package inc.visor.voom_service.osrm.service;
 
+import org.springframework.stereotype.Service;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.springframework.stereotype.Service;
 
 
 @Service

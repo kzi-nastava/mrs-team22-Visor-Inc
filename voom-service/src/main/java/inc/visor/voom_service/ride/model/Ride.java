@@ -1,31 +1,16 @@
 package inc.visor.voom_service.ride.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.complaints.model.Complaint;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.rating.model.Rating;
 import inc.visor.voom_service.ride.model.enums.RideStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ride")
@@ -74,14 +59,14 @@ public class Ride {
     @JsonManagedReference
     private List<Rating> ratings;
 
+    public Ride() {
+    }
+
     public String getPickupAddress() {
         return rideRequest.getRideRoute().getPickupPoint().getAddress();
     }
 
     public String getDropoffAddress() {
         return rideRequest.getRideRoute().getDropoffPoint().getAddress();
-    }
-
-    public Ride() {
     }
 }

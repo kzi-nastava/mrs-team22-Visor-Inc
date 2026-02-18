@@ -1,9 +1,13 @@
 package inc.visor.voom_service.shared.report;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
+import inc.visor.voom_service.auth.user.model.User;
+import inc.visor.voom_service.auth.user.model.VoomUserDetails;
+import inc.visor.voom_service.driver.model.Driver;
+import inc.visor.voom_service.driver.service.DriverService;
+import inc.visor.voom_service.person.service.UserProfileService;
+import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import inc.visor.voom_service.auth.user.model.User;
-import inc.visor.voom_service.auth.user.model.VoomUserDetails;
-import inc.visor.voom_service.driver.model.Driver;
-import inc.visor.voom_service.driver.service.DriverService;
-import inc.visor.voom_service.person.service.UserProfileService;
-import inc.visor.voom_service.shared.report.dto.AdminReportResponseDto;
-import inc.visor.voom_service.shared.report.dto.ReportResponseDto;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Slf4j
 @RestController
@@ -32,7 +30,7 @@ public class ReportController {
     private final ReportService reportService;
     private final UserProfileService userProfileService;
     private final DriverService driverService;
-    
+
     @GetMapping
     public ResponseEntity<ReportResponseDto> getReport(
             @AuthenticationPrincipal VoomUserDetails userDetails,
@@ -68,21 +66,21 @@ public class ReportController {
             response = reportService.getDriverReport(driver.getId(), fromDateTime, toDateTime);
             return ResponseEntity.ok(response);
         } else if (user.getUserRole().getId() == 1) {
-                    if (driverId != null) {
-                    return ResponseEntity.ok(
-                        reportService.getDriverReport(driverId, fromDateTime, toDateTime)
-                    );
-                }
-
-                if (userId != null) {
-                    return ResponseEntity.ok(
-                        reportService.getUserReport(userId, fromDateTime, toDateTime)
-                    );
-                }
-
+            if (driverId != null) {
                 return ResponseEntity.ok(
-                    reportService.getSystemReport(fromDateTime, toDateTime)
+                        reportService.getDriverReport(driverId, fromDateTime, toDateTime)
                 );
+            }
+
+            if (userId != null) {
+                return ResponseEntity.ok(
+                        reportService.getUserReport(userId, fromDateTime, toDateTime)
+                );
+            }
+
+            return ResponseEntity.ok(
+                    reportService.getSystemReport(fromDateTime, toDateTime)
+            );
         } else {
             response = reportService.getUserReport(user.getId(), fromDateTime, toDateTime);
             System.out.println("USER REPORT" + response);

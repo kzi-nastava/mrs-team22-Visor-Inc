@@ -1,14 +1,5 @@
 package inc.visor.voom_service.simulation;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.driver.dto.DriverSummaryDto;
 import inc.visor.voom_service.driver.model.Driver;
 import inc.visor.voom_service.driver.service.DriverService;
@@ -16,6 +7,14 @@ import inc.visor.voom_service.osrm.dto.LatLng;
 import inc.visor.voom_service.osrm.service.OsrmService;
 import inc.visor.voom_service.shared.PredefinedRoutes;
 import inc.visor.voom_service.shared.PredefinedRoutes.Route;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Order(2)
 @Service

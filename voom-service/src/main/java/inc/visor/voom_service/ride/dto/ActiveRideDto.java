@@ -1,10 +1,10 @@
 package inc.visor.voom_service.ride.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.enums.RideStatus;
 import inc.visor.voom_service.shared.RoutePointDto;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActiveRideDto {
     private Long rideId;
@@ -16,7 +16,8 @@ public class ActiveRideDto {
     private List<String> passengerNames = new ArrayList<String>();
     private String startedAt;
 
-    public ActiveRideDto() {  }
+    public ActiveRideDto() {
+    }
 
     public Long getRideId() {
         return rideId;
@@ -41,9 +42,11 @@ public class ActiveRideDto {
     public void setRoutePoints(List<RoutePointDto> routePoints) {
         this.routePoints = routePoints;
     }
+
     public Long getDriverId() {
         return driverId;
     }
+
     public void setDriverId(Long driverId) {
         this.driverId = driverId;
     }
@@ -51,6 +54,7 @@ public class ActiveRideDto {
     public String getDriverName() {
         return driverName;
     }
+
     public void setDriverName(String driverName) {
         this.driverName = driverName;
     }

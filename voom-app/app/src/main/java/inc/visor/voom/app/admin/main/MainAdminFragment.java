@@ -89,11 +89,6 @@ public class MainAdminFragment extends Fragment {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                navController.navigate(R.id.editPricingFragment);
-                return true;
-            }
-
-            if (id == R.id.nav_tracking) {
                 navController.navigate(R.id.adminTrackingFragment);
                 return true;
             }
@@ -103,7 +98,7 @@ public class MainAdminFragment extends Fragment {
                 return false;
             }
 
-            if (id == R.id.nav_activity) {
+            if (id == R.id.nav_chat) {
                 navController.navigate(R.id.chatListFragment);
                 return true;
             }
@@ -113,10 +108,10 @@ public class MainAdminFragment extends Fragment {
                 return true;
             }
 
-//            if (id == R.id.nav_activity) {
-//                navController.navigate(R.id.rideHistoryFragment);
-//                return false;
-//            }
+            if (id == R.id.nav_activity) {
+                navController.navigate(R.id.rideHistoryFragment);
+                return false;
+            }
 
             return false;
         });
@@ -141,6 +136,12 @@ public class MainAdminFragment extends Fragment {
                 .setOnClickListener(v -> {
                     dialog.dismiss();
                     navController.navigate(R.id.adminStatisticsFragment);
+                });
+
+        sheetView.findViewById(R.id.btn_pricing)
+                .setOnClickListener(v -> {
+                    dialog.dismiss();
+                    navController.navigate(R.id.editPricingFragment);
                 });
 
         dialog.show();

@@ -1,16 +1,11 @@
 package inc.visor.voom_service.vehicle.model;
 
-import java.util.Objects;
-
 import inc.visor.voom_service.vehicle.dto.CreateVehicleTypeDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "vehicle_type")

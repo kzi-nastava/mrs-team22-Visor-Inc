@@ -37,7 +37,8 @@ public class Person {
     @Column(name = "birth_date", nullable = false)
     private LocalDateTime birthDate;
 
-    public Person() {}
+    public Person() {
+    }
 
     public Person(RegistrationDto dto) {
         this.firstName = dto.getFirstName();

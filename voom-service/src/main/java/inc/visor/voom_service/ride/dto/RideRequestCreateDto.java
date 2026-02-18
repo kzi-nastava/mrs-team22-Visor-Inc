@@ -1,8 +1,5 @@
 package inc.visor.voom_service.ride.dto;
 
-import java.time.Instant;
-import java.util.List;
-
 import inc.visor.voom_service.ride.model.RoutePoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -62,7 +62,7 @@ public class RideRequestCreateDto {
 
     public static class ScheduleDto {
         @NotBlank
-        public String type; 
+        public String type;
         public Instant startAt;
     }
 
@@ -75,7 +75,7 @@ public class RideRequestCreateDto {
         public Long driverId;
         public double lat;
         public double lng;
-        
+
     }
 
 }

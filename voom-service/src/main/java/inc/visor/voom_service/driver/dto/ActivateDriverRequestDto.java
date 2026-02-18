@@ -11,22 +11,23 @@ import lombok.Setter;
 @Getter
 @Setter
 @PasswordMatch(message = "Password and confirm password do not match")
-public class ActivateDriverRequestDto implements  PasswordConfirmable{
+public class ActivateDriverRequestDto implements PasswordConfirmable {
 
-    @NotBlank(message="Activation token is required")
+    @NotBlank(message = "Activation token is required")
     private String token;
 
-    @NotBlank(message="Password is required")
+    @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(
-        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
-        message = "Password must contain uppercase, lowercase letter and number"
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$",
+            message = "Password must contain uppercase, lowercase letter and number"
     )
     private String password;
 
-    @NotBlank(message="Confirm password is required")
-   
+    @NotBlank(message = "Confirm password is required")
+
     private String confirmPassword;
 
-    public ActivateDriverRequestDto() {}
+    public ActivateDriverRequestDto() {
+    }
 }

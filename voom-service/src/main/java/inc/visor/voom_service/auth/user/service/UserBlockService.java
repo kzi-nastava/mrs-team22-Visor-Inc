@@ -1,10 +1,5 @@
 package inc.visor.voom_service.auth.user.service;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import inc.visor.voom_service.auth.user.dto.BlockUserRequestDto;
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.UserBlockNote;
@@ -12,6 +7,10 @@ import inc.visor.voom_service.auth.user.model.UserStatus;
 import inc.visor.voom_service.auth.user.repository.UserBlockNoteRepository;
 import inc.visor.voom_service.auth.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

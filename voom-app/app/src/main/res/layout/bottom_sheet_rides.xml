@@ -6,28 +6,19 @@
     android:padding="20dp">
 
     <TextView
-        android:id="@+id/btn_users"
+        android:id="@+id/btn_live"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Users"
+        android:text="Live Ride"
         android:textSize="18sp"
         android:padding="16dp"
         android:background="?attr/selectableItemBackground" />
 
     <TextView
-        android:id="@+id/btn_statistics"
+        android:id="@+id/btn_scheduled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Statistics"
-        android:textSize="18sp"
-        android:padding="16dp"
-        android:background="?attr/selectableItemBackground" />
-
-    <TextView
-        android:id="@+id/btn_pricing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pricing"
+        android:text="Scheduled Rides"
         android:textSize="18sp"
         android:padding="16dp"
         android:background="?attr/selectableItemBackground" />

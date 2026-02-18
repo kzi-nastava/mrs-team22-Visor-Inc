@@ -1,12 +1,12 @@
 package inc.visor.voom_service.ride.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.validation.constraints.NotEmpty;
-
 public class CreateRideFromFavoriteRouteDto {
-    
+
     @NotEmpty(message = "Passenger emails are required")
     private List<String> passengerEmails;
 

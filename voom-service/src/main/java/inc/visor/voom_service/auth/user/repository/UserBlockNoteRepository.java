@@ -1,10 +1,9 @@
 package inc.visor.voom_service.auth.user.repository;
 
-import java.util.Optional;
-
+import inc.visor.voom_service.auth.user.model.UserBlockNote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import inc.visor.voom_service.auth.user.model.UserBlockNote;
+import java.util.Optional;
 
 public interface UserBlockNoteRepository extends JpaRepository<UserBlockNote, Long> {
 

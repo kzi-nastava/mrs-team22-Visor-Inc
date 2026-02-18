@@ -2,7 +2,6 @@ package inc.visor.voom_service.rating.controller;
 
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.auth.user.model.VoomUserDetails;
-import inc.visor.voom_service.auth.user.service.UserService;
 import inc.visor.voom_service.person.service.UserProfileService;
 import inc.visor.voom_service.rating.dto.RatingRequestDto;
 import inc.visor.voom_service.rating.dto.RatingSummaryDto;

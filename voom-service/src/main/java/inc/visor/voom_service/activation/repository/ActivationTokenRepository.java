@@ -1,10 +1,9 @@
 package inc.visor.voom_service.activation.repository;
 
-import java.util.Optional;
-
+import inc.visor.voom_service.activation.model.ActivationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import inc.visor.voom_service.activation.model.ActivationToken;
+import java.util.Optional;
 
 public interface ActivationTokenRepository
         extends JpaRepository<ActivationToken, Long> {

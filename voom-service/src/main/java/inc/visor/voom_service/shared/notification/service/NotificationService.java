@@ -1,16 +1,15 @@
 package inc.visor.voom_service.shared.notification.service;
 
-import java.util.List;
-
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-
 import inc.visor.voom_service.auth.user.model.User;
 import inc.visor.voom_service.shared.notification.model.Notification;
 import inc.visor.voom_service.shared.notification.model.enums.NotificationType;
 import inc.visor.voom_service.shared.notification.repository.NotificationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
