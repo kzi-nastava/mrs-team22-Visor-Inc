@@ -205,13 +205,12 @@ public class RideController {
 
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RideResponseDto> cancelRide(@PathVariable Long id, @Valid @RequestBody RideCancellationDto dto) {
-        final User user = this.userService.getUser(dto.getUserId()).orElseThrow(RuntimeException::new);
-        final Driver driver = this.driverService.getDriverFromUser(id).orElseThrow(RuntimeException::new);
+        final Driver driver = this.driverService.getDriverFromUser(dto.getUserId()).orElseThrow(RuntimeException::new);
         driver.setStatus(DriverStatus.AVAILABLE);
         this.driverService.updateDriver(driver);
         final Ride ride = this.rideService.getRide(id).orElseThrow(NotFoundException::new);
         final RideRequest rideRequest = ride.getRideRequest();
-        rideRequest.setCancelledBy(user);
+        rideRequest.setCancelledBy(driver.getUser());
         rideRequest.setReason(dto.getMessage());
         this.rideRequestService.update(rideRequest);
         ride.setStatus(RideStatus.DRIVER_CANCELLED);
@@ -290,8 +289,7 @@ public class RideController {
 
         simulator.setFinishedRide(ride.getDriver().getId());
 
-        RideResponseDto rideResponse = new RideResponseDto(ride);
-//        RideResponseDto rideResponse = new RideResponseDto(ride);
+        RideResponseDto rideResponse = new RideResponseDto(this.rideService.update(ride));
         this.rideWsService.sendRideChanges(rideResponse);
         return ResponseEntity.ok(rideResponse);
     }
