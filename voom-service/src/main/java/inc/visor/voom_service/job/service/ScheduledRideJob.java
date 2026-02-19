@@ -45,7 +45,7 @@ public class ScheduledRideJob {
         System.out.println("Processing scheduled rides...");
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threshold = now.plusMinutes(20);
+        LocalDateTime threshold = now.plusMinutes(15);
 
         List<RideRequest> upcomingRequests
                 = rideRequestRepository.findUpcomingScheduled(now, threshold);
