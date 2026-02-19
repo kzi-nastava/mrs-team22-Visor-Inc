@@ -81,7 +81,7 @@ public class RideRequestService {
         VehicleType vehicleType = this.vehicleTypeService.getVehicleType(dto.vehicleTypeId).orElseThrow(NotFoundException::new);
         RideEstimationResult estimate = rideEstimationService.estimate(dto.route.points, vehicleType);
 
-        validateRouteOrder(dto.route.points);
+        // validateRouteOrder(dto.route.points);
 
         if (user.getUserStatus() == UserStatus.SUSPENDED) {
             throw new AccessDeniedException();
